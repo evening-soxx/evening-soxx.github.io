@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark" data-color-mode="kr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111722" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="어쩐지저녁의 SOXX" />
+  <meta name="description" content="어쩐지저녁의 SOXX — SOXX · RAM(DRAM) 반도체 ETF와 핵심 보유 종목 20선, 전쟁·유가·채권·환율 실시간 시황 & 라이브 차트" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="어쩐지저녁의 SOXX | 반도체 · 매크로 라이브 데스크" />
+  <meta property="og:description" content="SOXX · RAM 2배 레버리지 집중 분석, 실시간 분봉/일봉 차트, 전쟁·유가·채권 레이더, 글로벌 속보" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="manifest" href="./manifest.json" />
+  <title>어쩐지저녁의 SOXX — 반도체 &amp; 매크로 라이브 데스크</title>
+
+  <!-- 웹폰트: 본문 Pretendard, 헤드라인 Noto Serif KR -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 상단 고정 앱 헤더 & 원터치 실시간 티커 스트립 -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="#sec-live" class="brand-group" aria-label="어쩐지저녁의 SOXX 홈으로">
+        <div class="brand-crest" aria-hidden="true">夕</div>
+        <div class="brand-titles">
+          <h1>어쩐지저녁의 SOXX</h1>
+          <p class="brand-subtitle">SOXX · RAM 반도체 &amp; 매크로 라이브</p>
+        </div>
+      </a>
+
+      <div class="header-controls">
+        <span class="update-pill" id="lastUpdatedBadge" title="최근 데이터 동기화 시각">수집 시각 확인 중...</span>
+        <button type="button" class="ctrl-btn ctrl-refresh" id="btnLiveRefresh" title="실시간 시세 즉시 새로고침">
+          <span class="refresh-icon" id="refreshIcon">↻</span>
+          <span class="btn-label">시세갱신</span>
+        </button>
+        <button type="button" class="ctrl-btn" id="btnColorMode" title="한국식(상승 빨강) / 미국식(상승 초록) 색상 전환">
+          <span id="colorModeText">🇰🇷 적/청</span>
+        </button>
+        <button type="button" class="ctrl-btn" id="btnThemeToggle" title="어쩐지저녁(다크) / 화이트페이퍼(라이트) 전환">
+          <span id="themeToggleText">☀️ 낮모드</span>
+        </button>
+        <div class="font-size-group" role="group" aria-label="글자 크기 조절">
+          <button type="button" class="ctrl-btn font-btn" id="btnFontDown" title="글자 작게">가-</button>
+          <button type="button" class="ctrl-btn font-btn" id="btnFontUp" title="글자 크게">가+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 상단 실시간 핵심 지표 스트립 (누르면 해당 종목 차트로 즉시 전환) -->
+    <div class="macro-ticker-bar">
+      <div class="ticker-track" id="topTickerStrip">
+        <!-- JS에서 실시간 렌더링 -->
+      </div>
+    </div>
+  </header>
+
+  <!-- 데스크톱·태블릿용 상단 섹션 네비게이션 -->
+  <nav class="section-nav" aria-label="주요 섹션 이동">
+    <div class="section-nav-inner">
+      <a href="#sec-live" class="nav-pill active" data-nav="sec-live">I. 실시간 차트 · SOXX &amp; RAM</a>
+      <a href="#sec-brief" class="nav-pill" data-nav="sec-brief">II. 저녁 시황 · 자금 유입</a>
+      <a href="#sec-macro" class="nav-pill" data-nav="sec-macro">III. 전쟁 · 유가 · 채권 레이더</a>
+      <a href="#sec-holdings" class="nav-pill" data-nav="sec-holdings">IV. 핵심 보유 종목 20선</a>
+      <a href="#sec-news" class="nav-pill" data-nav="sec-news">V. 글로벌 실시간 뉴스</a>
+    </div>
+  </nav>
+
+  <!-- 메인 컨테이너 -->
+  <main class="app-main">
+
+    <!-- [섹션 1] 실시간 라이브 차트 & SOXX · RAM 3대장 (모바일 첫 화면 즉시 노출) -->
+    <section class="study-section" id="sec-live">
+      <!-- 한 줄 이브닝 시황 배너 (모바일에서도 첫눈에 시장 온도 파악) -->
+      <div class="evening-pulse-banner" id="eveningPulseBanner">
+        <div class="epb-left">
+          <span class="regime-badge" id="regimeBadge">시황 판독 중</span>
+          <p class="epb-headline" id="briefHeadline">SOXX · RAM 실시간 데이터를 불러오고 있습니다...</p>
+        </div>
+        <a href="#sec-brief" class="epb-more-btn">시황 노트 ▾</a>
+      </div>
+
+      <!-- SOXX / RAM(2X) / DRAM 3대장 원터치 비교 카드 (모바일 가로 스와이프 & 탭 전환) -->
+      <div class="etf-trio-grid" id="etfTrioGrid">
+        <!-- SOXX, RAM, DRAM 3종 카드 -->
+      </div>
+
+      <!-- 실시간 전 종목 검색 바 & 가로 스와이프 빠른 종목 칩 -->
+      <div class="live-search-bar">
+        <div class="search-input-wrap">
+          <input
+            type="search"
+            id="liveSearchInput"
+            class="live-search-input"
+            placeholder="🔍 종목·티커 검색 (삼성전자, 하이닉스, 한미반도체, SOXL, TSLA, NVDA)"
+            autocomplete="off"
+            enterkeyhint="search"
+          />
+          <button type="button" class="live-search-btn" id="liveSearchBtn">실시간 조회</button>
+          <div class="search-dropdown" id="searchDropdown" hidden></div>
+        </div>
+
+        <div class="quick-tickers-scroll">
+          <div class="quick-tickers" id="quickTickers">
+            <span class="quick-ticker-label">빠른 전환</span>
+            <button type="button" class="qt-btn active" data-qt="SOXX">SOXX</button>
+            <button type="button" class="qt-btn" data-qt="RAM">RAM(2X)</button>
+            <button type="button" class="qt-btn" data-qt="DRAM">DRAM</button>
+            <button type="button" class="qt-btn" data-qt="SOXL">SOXL(3X)</button>
+            <button type="button" class="qt-btn" data-qt="SMH">SMH</button>
+            <button type="button" class="qt-btn" data-qt="005930.KS">삼성전자</button>
+            <button type="button" class="qt-btn" data-qt="000660.KS">SK하이닉스</button>
+            <button type="button" class="qt-btn" data-qt="042700.KS">한미반도체</button>
+            <button type="button" class="qt-btn" data-qt="MU">마이크론</button>
+            <button type="button" class="qt-btn" data-qt="NVDA">엔비디아</button>
+            <button type="button" class="qt-btn" data-qt="AVGO">브로드컴</button>
+            <button type="button" class="qt-btn" data-qt="TSM">TSMC</button>
+            <button type="button" class="qt-btn" data-qt="TSLA">테슬라</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 인터랙티브 라이브 차트 패널 -->
+      <div class="panel-card chart-panel">
+        <div class="panel-header chart-panel-header">
+          <div class="chart-title-wrap">
+            <h2 class="panel-title" id="mainChartTitle">SOXX 최근 추세</h2>
+          </div>
+          <button type="button" class="live-pulse-badge" id="btnLiveToggle" title="10초마다 실시간 시세와 캔들을 자동 갱신합니다">
+            <span class="pulse-dot"></span>
+            <span id="liveStatusText">LIVE 실시간 추적</span>
+          </button>
+        </div>
+
+        <div class="chart-controls-row">
+          <div class="interval-tabs" id="intervalTabs" role="tablist" aria-label="차트 주기 선택">
+            <button type="button" class="iv-btn" data-iv="1M">1분봉</button>
+            <button type="button" class="iv-btn" data-iv="5M">5분봉</button>
+            <button type="button" class="iv-btn" data-iv="15M">15분봉</button>
+            <button type="button" class="iv-btn active" data-iv="1D">일봉(90일)</button>
+          </div>
+          <div class="chart-legend">
+            <span><i class="legend-dot" style="background:#D9A74A;"></i>20선</span>
+            <span><i class="legend-dot" style="background:#38B28B;"></i>50선</span>
+            <span><i class="legend-dot" style="background:rgba(217,167,74,0.6);"></i>지지/저항</span>
+          </div>
+        </div>
+
+        <!-- 손가락/마우스 이동 시 따라 움직이는 실시간 캔들 수치 바 -->
+        <div class="chart-crosshair-hud num" id="chartHud">
+          <div class="hud-items" id="chartHudItems">
+            <span>👆 차트 위를 손가락이나 마우스로 좌우로 쓸어보시면 캔들별 상세 수치가 따라 움직입니다.</span>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="mainChartCanvas"></canvas>
+        </div>
+        <div class="chart-summary-strip" id="mainChartStrip"></div>
+      </div>
+    </section>
+
+    <!-- [섹션 2] 어쩐지저녁의 시황 노트 & RAM 모펀드(DRAM) 월가 자금 유입 -->
+    <section class="study-section" id="sec-brief">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">EVENING MARKET NOTE &amp; FUND FLOW</span>
+          <h2 class="section-title">오늘의 어쩐지저녁 시황 노트 &amp; 월가 자금 유입</h2>
+          <p class="section-desc">SOXX(AI·시스템반도체)와 RAM(메모리 2배 레버리지)의 추세 판독 및 기초자산 DRAM ETF 기관 자금 흐름입니다.</p>
+        </div>
+      </div>
+
+      <div class="brief-and-flow-grid">
+        <!-- 좌측: 오늘의 어쩐지저녁 시황 브리핑 카드 -->
+        <div class="brief-card">
+          <div class="brief-card-top">
+            <span class="brief-tag">오늘의 인텔리전스 요약</span>
+            <button type="button" class="brief-toggle-btn" id="btnToggleBriefPoints" aria-expanded="true">접기 ▴</button>
+          </div>
+          <ul class="brief-points" id="briefPointsList">
+            <!-- JS에서 핵심 요약 포인트 렌더링 -->
+          </ul>
+          <div class="brief-Quick-stats" id="briefQuickStats">
+            <!-- JS에서 SOXX / RAM / 10Y / WTI 4대 요약 표시 -->
+          </div>
+        </div>
+
+        <!-- 우측: Roundhill DRAM ETF (RAM 모펀드) 월가 자금유입 & 포트폴리오 -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3 class="panel-title">RAM 모펀드(DRAM ETF) 월가 자금 유입 &amp; 비중</h3>
+          </div>
+          <div id="dramFlowContent"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- [섹션 3] 전쟁 · 유가 · 채권 · 환율 8대 매크로 레이더 (모바일 2x4 한눈에 보기) -->
+    <section class="study-section" id="sec-macro">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">GEOPOLITICS · OIL · BONDS · FX</span>
+          <h2 class="section-title">전쟁 · 유가 · 채권 · 환율 8대 매크로 레이더</h2>
+          <p class="section-desc">반도체 밸류에이션과 2배 레버리지(RAM) 변동성에 직결되는 8대 지표입니다. 카드를 터치하면 상세 차트가 열립니다.</p>
+        </div>
+      </div>
+
+      <div class="macro-grid" id="macroGrid">
+        <!-- 8대 매크로 타일 (모바일 2열 그리드로 한 화면에 노출) -->
+      </div>
+    </section>
+
+    <!-- [섹션 4] SOXX & RAM 핵심 보유 종목 20선 -->
+    <section class="study-section" id="sec-holdings">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">CORE 20 HOLDINGS &amp; RELATIVE STRENGTH</span>
+          <h2 class="section-title">SOXX &amp; RAM 핵심 보유 종목 20선</h2>
+          <p class="section-desc">메모리 3대장(삼성전자·SK하이닉스·마이크론)과 SOXX 핵심 AI·장비주의 상대강도(RS), 미너비니 추세(MTT), 52주 위치를 비교합니다.</p>
+        </div>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="chip-scroll-wrap">
+          <div class="chip-group" id="holdingFilterGroup">
+            <button type="button" class="filter-chip active" data-holding-filter="ALL">전체 20선</button>
+            <button type="button" class="filter-chip" data-holding-filter="RAM">RAM·DRAM 메모리</button>
+            <button type="button" class="filter-chip" data-holding-filter="SOXX_AI">SOXX AI·팹리스</button>
+            <button type="button" class="filter-chip" data-holding-filter="SOXX_EQUIP">파운드리·장비</button>
+            <button type="button" class="filter-chip" data-holding-filter="MTT">★ 정배열(MTT) 통과</button>
+          </div>
+        </div>
+
+        <div class="sort-box">
+          <select id="holdingSortSelect" class="sort-select" aria-label="종목 정렬 기준">
+            <option value="default">기본 편입 비중순</option>
+            <option value="rs_desc">RS 상대강도 높은순</option>
+            <option value="chg_desc">오늘 상승률 높은순</option>
+            <option value="chg_asc">오늘 하락률순 (눌림목)</option>
+            <option value="high52_desc">52주 신고가 근접순</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 20종목 미니 히트맵 (접기/펼치기 지원으로 모바일 공간 절약) -->
+      <details class="heatmap-accordion" open>
+        <summary class="heatmap-summary">
+          <span>📊 20종목 등락 · RS 한눈에 히트맵</span>
+          <span class="heatmap-hint">터치하여 상세 보기 · 접기/펼치기</span>
+        </summary>
+        <div class="heatmap-grid" id="holdingsHeatmap"></div>
+      </details>
+
+      <!-- 종목 카드 리스트 -->
+      <div class="holdings-card-grid" id="holdingsCardGrid">
+        <!-- JS에서 렌더링 -->
+      </div>
+    </section>
+
+    <!-- [섹션 5] 실시간 글로벌 소식 & 지정학 뉴스룸 -->
+    <section class="study-section" id="sec-news">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">GLOBAL NEWSROOM &amp; RISK STREAM</span>
+          <h2 class="section-title">실시간 글로벌 소식 &amp; 지정학 뉴스룸</h2>
+          <p class="section-desc">메모리(HBM·DRAM), SOXX AI 반도체, 중동·대만 지정학, 국제유가, 미 국채 금리 관련 최신 뉴스를 분류해 모았습니다.</p>
+        </div>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="chip-scroll-wrap">
+          <div class="chip-group" id="newsFilterGroup">
+            <button type="button" class="filter-chip active" data-news-filter="ALL">전체 소식</button>
+            <button type="button" class="filter-chip" data-news-filter="SOXX · AI반도체">SOXX · AI반도체</button>
+            <button type="button" class="filter-chip" data-news-filter="메모리 · RAM">RAM · 메모리(HBM)</button>
+            <button type="button" class="filter-chip" data-news-filter="전쟁 · 지정학">전쟁 · 지정학</button>
+            <button type="button" class="filter-chip" data-news-filter="유가 · 에너지">유가 · 에너지</button>
+            <button type="button" class="filter-chip" data-news-filter="채권 · 금리">채권 · 금리 · 연준</button>
+            <button type="button" class="filter-chip" data-news-filter="월가 영문속보">월가 영문속보</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="news-grid" id="newsGrid">
+        <!-- JS에서 뉴스 카드 렌더링 -->
+      </div>
+    </section>
+  </main>
+
+  <!-- 종목/매크로 상세 바텀시트 모달 (모바일에서는 하단 슬라이드업 시트로 작동) -->
+  <div class="modal-backdrop" id="detailModal" hidden>
+    <div class="modal-window" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-drag-bar" aria-hidden="true"></div>
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker" id="modalKicker">종목 상세 분석</span>
+          <h3 class="modal-title" id="modalTitle">종목명</h3>
+        </div>
+        <button type="button" class="modal-close" id="btnCloseModal" aria-label="닫기">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-price-banner" id="modalPriceBanner"></div>
+        <div class="canvas-wrap modal-canvas-wrap">
+          <canvas id="modalChartCanvas"></canvas>
+        </div>
+        <div class="modal-metrics-grid" id="modalMetricsGrid"></div>
+        <p class="modal-note" id="modalNote"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <p class="footer-brand"><strong>어쩐지저녁의 SOXX</strong> · Semiconductor &amp; Macro Live Desk</p>
+      <p class="footer-disclaimer">
+        본 페이지의 모든 시세·지표·뉴스 데이터는 SOXX 및 RAM(DRAM) ETF와 글로벌 거시경제 흐름을 파악하기 위한 정보 제공 목적이며, 직접적인 투자 권유가 아닙니다.
+      </p>
+    </div>
+  </footer>
+
+  <!-- 스마트폰 전용 하단 고정 5탭 앱 네비게이션 바 -->
+  <nav class="mobile-bottom-nav" aria-label="모바일 빠른 이동">
+    <a href="#sec-live" class="m-nav-item active" data-mnav="sec-live">
+      <span class="m-icon">📈</span>
+      <span>차트·검색</span>
+    </a>
+    <a href="#sec-brief" class="m-nav-item" data-mnav="sec-brief">
+      <span class="m-icon">🌙</span>
+      <span>저녁시황</span>
+    </a>
+    <a href="#sec-macro" class="m-nav-item" data-mnav="sec-macro">
+      <span class="m-icon">🌍</span>
+      <span>채권·유가</span>
+    </a>
+    <a href="#sec-holdings" class="m-nav-item" data-mnav="sec-holdings">
+      <span class="m-icon">💎</span>
+      <span>종목20선</span>
+    </a>
+    <a href="#sec-news" class="m-nav-item" data-mnav="sec-news">
+      <span class="m-icon">📰</span>
+      <span>실시간뉴스</span>
+    </a>
+  </nav>
+
+  <!-- 초기 스냅샷 데이터 및 실시간 인터랙티브 앱 스크립트 -->
+  <script src="intelligence_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

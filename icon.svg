@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#131B26"/>
+      <stop offset="55%" stop-color="#1C2636"/>
+      <stop offset="100%" stop-color="#2A212B"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F5D58A"/>
+      <stop offset="100%" stop-color="#C9933B"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+  <rect x="10" y="10" width="236" height="236" rx="48" fill="none" stroke="url(#gold)" stroke-width="2.5" stroke-opacity="0.45"/>
+  <!-- 저녁 초승달 & 노을 곡선 -->
+  <path d="M58 64 A22 22 0 1 0 86 92 A17 17 0 1 1 58 64 Z" fill="url(#gold)" opacity="0.9"/>
+  <!-- 상승 캔들 차트 바 -->
+  <line x1="68" y1="142" x2="68" y2="196" stroke="#7A8B9E" stroke-width="4" stroke-linecap="round"/>
+  <rect x="58" y="154" width="20" height="28" rx="4" fill="#4A90E2"/>
+  <line x1="112" y1="118" x2="112" y2="184" stroke="#E2B45A" stroke-width="4" stroke-linecap="round"/>
+  <rect x="102" y="130" width="20" height="38" rx="4" fill="url(#gold)"/>
+  <line x1="156" y1="96" x2="156" y2="168" stroke="#E05A5A" stroke-width="4" stroke-linecap="round"/>
+  <rect x="146" y="108" width="20" height="42" rx="4" fill="#E05A5A"/>
+  <line x1="200" y1="62" x2="200" y2="148" stroke="#F5D58A" stroke-width="4" stroke-linecap="round"/>
+  <rect x="190" y="74" width="20" height="54" rx="4" fill="url(#gold)"/>
+  <!-- 이평선 곡선 -->
+  <path d="M46 184 Q105 168 148 128 T216 72" fill="none" stroke="#F5D58A" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="216" cy="72" r="6" fill="#F5D58A"/>
+  <!-- 하단 SOXX 타이포 -->
+  <text x="128" y="226" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-weight="800" font-size="24" fill="#F5D58A" letter-spacing="4">SOXX · RAM</text>
+</svg>
