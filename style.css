@@ -470,13 +470,19 @@ a {
 }
 
 /* ==========================================================================
-   4. SOXX · RAM(2X) · DRAM 3대장 카드 (모바일 스와이프 & 데스크톱 3단)
+   4. SOXX · SOXL(3X) · RAM(2X) · DRAM 4대장 카드 (모바일 스와이프 & 데스크톱 4단)
    ========================================================================== */
 .etf-trio-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 14px;
+}
+
+@media (max-width: 1150px) and (min-width: 769px) {
+  .etf-trio-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .etf-card {

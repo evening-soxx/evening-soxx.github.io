@@ -388,6 +388,18 @@ def main():
             "description": "엔비디아·브로드컴·AMD·마이크론·어플라이드·램리서치 등 미국 상장 핵심 반도체 30개 종목에 투자하는 대표 벤치마크 ETF입니다.",
         },
         {
+            "symbol": "SOXL",
+            "cnbc_symbol": "SOXL",
+            "display_ticker": "SOXL",
+            "name_kr": "Direxion 반도체 3배 레버리지 ETF",
+            "name_en": "Direxion Daily Semiconductor Bull 3X Shares",
+            "role": "미국 반도체 지수(SOXX 계열) 일간 3배 레버리지",
+            "currency": "USD",
+            "leverage": "3X 레버리지",
+            "expense_ratio": "0.76%",
+            "description": "NYSE 반도체 지수(ICESEMI)의 일간 수익률 300%를 추종하는 3배 레버리지 ETF입니다. SOXX 구성 종목과 거의 동일한 포트폴리오를 3배 탄력으로 추종합니다.",
+        },
+        {
             "symbol": "RAM",
             "cnbc_symbol": "RAM",
             "display_ticker": "RAM",
@@ -594,6 +606,7 @@ def main():
         print(f"  ✓ 뉴스 수집 완료: [{cat}] {len(items)}건")
 
     soxx_item = next((x for x in etfs if x["symbol"] == "SOXX"), None)
+    soxl_item = next((x for x in etfs if x["symbol"] == "SOXL"), None)
     ram_item = next((x for x in etfs if x["symbol"] == "RAM"), None)
     dram_item = next((x for x in etfs if x["symbol"] == "DRAM"), None)
     us10y = next((x for x in macros if x["id"] == "us10y"), None)
@@ -639,6 +652,8 @@ def main():
     dram_aum_b = (dram_flow["current_aum"] / 1e9) if dram_flow else 19.19
     soxx_p = soxx_item["price"] if soxx_item else 0.0
     soxx_c = soxx_item["change_pct"] if soxx_item else 0.0
+    soxl_p = soxl_item["price"] if soxl_item else 0.0
+    soxl_c = soxl_item["change_pct"] if soxl_item else 0.0
     dram_p = dram_item["price"] if dram_item else 0.0
     dram_c = dram_item["change_pct"] if dram_item else 0.0
     ram_p = ram_item["price"] if ram_item else 0.0
@@ -648,7 +663,7 @@ def main():
     vix_p = vix["price"] if vix else 0.0
 
     briefing = {
-        "headline": f"메모리(DRAM·RAM) 강세 속 미 10년물 금리({us10y_p}%)·WTI 유가(${wti_p}) 임계선 점검",
+        "headline": f"SOXX({soxx_c:+.2f}%)·SOXL({soxl_c:+.2f}%)·RAM({ram_c:+.2f}%) 반등 속 미 10년물 금리({us10y_p}%)·WTI 유가(${wti_p}) 점검",
         "score": score,
         "signal_label": signal_label,
         "signal_color": signal_color,
@@ -659,11 +674,12 @@ def main():
         "total_holdings": len(holdings),
         "pillars": [
             {
-                "title": "1. SOXX & RAM(DRAM) 양대 ETF 흐름 판독",
+                "title": "1. SOXX · SOXL(3X) & RAM(2X) · DRAM 4대 ETF 흐름 판독",
                 "body": (
                     f"비메모리·장비 본진인 SOXX는 ${soxx_p} ({soxx_c:+.2f}%), "
+                    f"반도체 3배 레버리지인 SOXL은 ${soxl_p} ({soxl_c:+.2f}%), "
                     f"메모리 원지수인 DRAM ETF는 ${dram_p} ({dram_c:+.2f}%), "
-                    f"2배 레버리지인 RAM은 ${ram_p} ({ram_c:+.2f}%)을 기록하고 있습니다. "
+                    f"메모리 2배 레버리지인 RAM은 ${ram_p} ({ram_c:+.2f}%)을 기록하고 있습니다. "
                     f"핵심 감시 {len(holdings)}개 종목 중 {above50_count}개 종목이 50일 이동평균선 위에서 추세를 유지 중이며, "
                     f"미너비니 정배열(MTT)을 충족한 종목은 {mtt_count}개입니다."
                 ),

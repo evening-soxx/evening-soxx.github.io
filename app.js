@@ -333,7 +333,7 @@
     if (!track) return;
 
     const items = [];
-    ["SOXX", "RAM", "DRAM"].forEach((k) => {
+    ["SOXX", "SOXL", "RAM", "DRAM"].forEach((k) => {
       const e = d.etfs && d.etfs[k];
       if (e) {
         items.push({
@@ -432,13 +432,17 @@
     const statsEl = document.getElementById("briefQuickStats");
     if (statsEl) {
       const soxx = d.etfs?.SOXX || {};
+      const soxl = d.etfs?.SOXL || {};
       const ram = d.etfs?.RAM || {};
+      const dram = d.etfs?.DRAM || {};
       const us10y = (d.macros || []).find((m) => m.key === "US10Y") || {};
       const wti = (d.macros || []).find((m) => m.key === "WTI") || {};
 
       const cards = [
         { label: "SOXX (1X 본진)", val: fmtPrice(soxx.price, "USD"), pct: soxx.change_pct },
+        { label: "SOXL (반도체 3X)", val: fmtPrice(soxl.price, "USD"), pct: soxl.change_pct },
         { label: "RAM (DRAM 2X)", val: fmtPrice(ram.price, "USD"), pct: ram.change_pct },
+        { label: "DRAM (메모리 1X)", val: fmtPrice(dram.price, "USD"), pct: dram.change_pct },
         { label: "미 국채 10년물", val: fmtPrice(us10y.price, null, "%"), pct: us10y.change_pct },
         { label: "WTI 국제유가", val: fmtPrice(wti.price, "USD"), pct: wti.change_pct },
       ];
@@ -468,7 +472,7 @@
     const grid = document.getElementById("etfTrioGrid");
     if (!grid) return;
 
-    const order = ["SOXX", "RAM", "DRAM"];
+    const order = ["SOXX", "SOXL", "RAM", "DRAM"];
     grid.innerHTML = order
       .map((key) => {
         const e = d.etfs[key];
@@ -604,7 +608,7 @@
     state.chartCurrency = currency || (symbol.endsWith(".KS") ? "KRW" : "USD");
     state.chartHoverIdx = -1;
 
-    if (["SOXX", "RAM", "DRAM"].includes(symbol)) {
+    if (["SOXX", "SOXL", "RAM", "DRAM"].includes(symbol)) {
       state.selectedEtf = symbol;
       renderEtfTrio();
     } else {
@@ -1630,6 +1634,7 @@
     try {
       const symbolMap = {
         SOXX: { type: "etf", key: "SOXX" },
+        SOXL: { type: "etf", key: "SOXL" },
         RAM: { type: "etf", key: "RAM" },
         DRAM: { type: "etf", key: "DRAM" },
         US10Y: { type: "macro", key: "US10Y" },
