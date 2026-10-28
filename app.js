@@ -41,10 +41,11 @@
     const df = raw.dram_flow || {};
     const dram_etf_flow = {
       latest_aum: df.current_aum,
+      latest_aum_krw_trillion: df.current_aum_krw_trillion,
       inflow_5d_usd: df.inflow_5d_usd,
       inflow_20d_usd: df.inflow_20d_usd,
       top_holdings: (df.holdings || [])
-        .filter((h) => !h.is_money_market && Number(h.weight) > 0)
+        .filter((h) => Number(h.weight) > 0)
         .map((h) => ({
           ticker: h.ticker,
           name: h.name,
@@ -108,7 +109,7 @@
     holdingFilter: "ALL",
     holdingSort: "default",
     newsFilter: "ALL",
-    theme: localStorage.getItem("evening_soxx_theme") || "dark",
+    theme: localStorage.getItem("evening_soxx_theme_v2") || "light",
     colorMode: localStorage.getItem("evening_soxx_color") || "kr",
     fontScale: parseFloat(localStorage.getItem("evening_soxx_font") || "1"),
 
@@ -273,7 +274,7 @@
     if (btnTheme) {
       btnTheme.addEventListener("click", () => {
         state.theme = state.theme === "dark" ? "light" : "dark";
-        localStorage.setItem("evening_soxx_theme", state.theme);
+        localStorage.setItem("evening_soxx_theme_v2", state.theme);
         applyPreferences();
         redrawMainChartFromState();
         renderMacroGrid();
@@ -553,27 +554,30 @@
     const flow = d.dram_etf_flow || {};
     const holdings = flow.top_holdings || [];
     const aumB = flow.latest_aum ? (flow.latest_aum / 1e9).toFixed(2) : "-";
-    const f5 = flow.inflow_5d_usd ? (flow.inflow_5d_usd / 1e6).toFixed(1) : "0.0";
-    const f20 = flow.inflow_20d_usd ? (flow.inflow_20d_usd / 1e6).toFixed(1) : "0.0";
+    const krwT = flow.latest_aum_krw_trillion || (flow.latest_aum ? ((flow.latest_aum * 1335) / 1e12).toFixed(1) : "25.6");
+    const f5Num = flow.inflow_5d_usd ? flow.inflow_5d_usd / 1e6 : 0;
+    const f20Num = flow.inflow_20d_usd ? flow.inflow_20d_usd / 1e6 : 0;
+    const f5Str = f5Num.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const f20Str = f20Num.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
     box.innerHTML = `
       <div class="etf-metrics-grid num" style="margin-top:0;">
         <div class="metric-cell">
-          <small>DRAM ETF 순자산</small>
-          <strong>$${aumB}B</strong>
+          <small>DRAM ETF 순자산(AUM)</small>
+          <strong>$${aumB}B (약 ${krwT}조원)</strong>
         </div>
         <div class="metric-cell">
-          <small>최근 5거래일 자금</small>
-          <strong class="${dirClass(Number(f5))}">${Number(f5) >= 0 ? "+" : ""}$${f5}M</strong>
+          <small>최근 5거래일 자금 유입</small>
+          <strong class="${dirClass(f5Num)}">$${f5Num > 0 ? "+" : ""}${f5Str}M</strong>
         </div>
         <div class="metric-cell">
-          <small>최근 20거래일 자금</small>
-          <strong class="${dirClass(Number(f20))}">${Number(f20) >= 0 ? "+" : ""}$${f20}M</strong>
+          <small>최근 20거래일 자금 유입</small>
+          <strong class="${dirClass(f20Num)}">$${f20Num > 0 ? "+" : ""}${f20Str}M</strong>
         </div>
       </div>
 
-      <p style="font-size:0.75rem; color:var(--ink-secondary); margin-top:10px; line-height:1.48;">
-        💡 <strong>RAM(2배 레버리지)</strong>은 <strong>Roundhill DRAM ETF</strong>를 기초자산으로 삼으며, 삼성전자·SK하이닉스·마이크론 비중이 절대적입니다.
+      <p style="font-size:0.78rem; color:var(--ink-secondary); margin-top:12px; line-height:1.54;">
+        💡 <strong>RAM(2배 레버리지)</strong>은 <strong>Roundhill DRAM ETF</strong>를 기초자산으로 삼습니다. DRAM ETF의 발행주식수와 순자산이 늘어나면 월가 기관 자금이 삼성전자·SK하이닉스·마이크론으로 실제 유입되고 있음을 뜻합니다.
       </p>
 
       <div class="dram-holdings-list num">
@@ -588,7 +592,7 @@
                   <strong>${w.toFixed(2)}%</strong>
                 </div>
                 <div class="dram-bar-track">
-                  <div class="dram-bar-fill" style="width:${Math.min(100, w * 3.8)}%;"></div>
+                  <div class="dram-bar-fill" style="width:${Math.min(100, w * 3.5)}%;"></div>
                 </div>
               </div>
             `;
