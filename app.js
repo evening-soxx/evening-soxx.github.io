@@ -165,6 +165,8 @@
     { symbol: "GOOGL", cnbc: "GOOGL", name: "구글 알파벳 (Alphabet)", exch: "NASDAQ", cur: "USD" },
     { symbol: "META", cnbc: "META", name: "메타 (Meta Platforms)", exch: "NASDAQ", cur: "USD" },
     { symbol: "AMZN", cnbc: "AMZN", name: "아마존 (Amazon)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "ORCL", cnbc: "ORCL", name: "오라클 (Oracle · AI 클라우드)", exch: "NYSE", cur: "USD" },
+    { symbol: "CRWV", cnbc: "CRWV", name: "코어위브 (CoreWeave · AI GPU 클라우드)", exch: "NASDAQ", cur: "USD" },
     { symbol: "PLTR", cnbc: "PLTR", name: "팔란티어 (Palantir)", exch: "NASDAQ", cur: "USD" },
     { symbol: "US10Y", cnbc: "US10Y", name: "미 국채 10년물 금리", exch: "BOND", cur: "PCT" },
     { symbol: "WTI", cnbc: "@CL.1", name: "WTI 국제유가 선물", exch: "NYMEX", cur: "USD" },
@@ -277,6 +279,7 @@
         localStorage.setItem("evening_soxx_theme_v2", state.theme);
         applyPreferences();
         redrawMainChartFromState();
+        drawCdsTrajectoryChart();
         renderMacroGrid();
       });
     }
@@ -1763,10 +1766,392 @@
   }
 
   /* ========================================================================
-     13. 모바일 하단 탭 & 상단 네비게이션 스크롤 스파이
+     13. [스페셜 코너] 2026년 오라클(ORCL) & 코어위브(CoreWeave) 5년물 CDS 추이
+     ======================================================================== */
+  const CDS_2026_SERIES = [
+    { date: "2026.01 초", orcl: 138, crwv: 365, note: "연초 AI 데이터센터 회사채 발행 본격화 (오라클 138bp · 코어위브 365bp)" },
+    { date: "2026.02 중", orcl: 146, crwv: 410, note: "하이퍼스케일러 CapEx 가이던스 상향 및 GPU 담보 대출 확대" },
+    { date: "2026.03 말", orcl: 162, crwv: 485, note: "1분기 AI 관련 부채 발행 급증, 채권시장 차입 비용 재평가 시작" },
+    { date: "2026.04 말", orcl: 178, crwv: 540, note: "코어위브 3년 단기 GPU 계약 vs 장기 채권 만기 불일치(Duration Mismatch) 부각" },
+    { date: "2026.05 말", orcl: 195, crwv: 625, note: "오라클 대규모 AI 클러스터 설비투자로 잉여현금흐름(FCF) 적자 폭 확대" },
+    { date: "2026.06 말", orcl: 214, crwv: 720, note: "상반기 AI 인프라 누적 부채 발행 $280B 돌파, 크레딧 헤지 수요 증가" },
+    { date: "2026.07 말", orcl: 232, crwv: 835, note: "코어위브 무담보 채권(2031·2032년 만기) 수익률 12% 돌파" },
+    { date: "2026.08 말", orcl: 254, crwv: 945, note: "빅테크·AI 주간 CDS 거래대금 급증, 코어위브 부실 경계선(1,000bp) 근접" },
+    { date: "2026.09 말", orcl: 276, crwv: 1085, note: "코어위브 5년물 CDS 1,000bp 돌파 · 오라클 S&P 신용등급 BBB- 하향 압박" },
+    { date: "2026.10 고점", orcl: 318, crwv: 1190, note: "10월 중순 코어위브 CDS 1,190bp · 오라클 318bp 장중 고점 기록 (채권시장 경계 정점)" },
+    { date: "2026.10 현재", orcl: 288, crwv: 1140, note: "현재 오라클 288bp(BBB- 방어 중) · 코어위브 1,140bp($100B 수주잔고 기반 차환 협상)" },
+  ];
+
+  state.cdsMode = "BOTH"; // 'BOTH' | 'CRWV' | 'ORCL'
+  state.cdsHoverIdx = CDS_2026_SERIES.length - 1;
+  state.cdsLiveQuotes = {
+    ORCL: { price: null, change_pct: null },
+    CRWV: { price: null, change_pct: null },
+  };
+
+  async function fetchCdsCompanyStockQuotes() {
+    try {
+      const url = "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=ORCL%7CCRWV&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json";
+      const resp = await fetch(url, { cache: "no-store" });
+      if (!resp.ok) return;
+      const json = await resp.json();
+      const quotes = json?.FormattedQuoteResult?.FormattedQuote || [];
+      quotes.forEach((q) => {
+        if (!q || !q.symbol || !q.last) return;
+        const p = parseFloat(String(q.last).replace(/,/g, ""));
+        const pct = parseFloat(String(q.change_pct || "0").replace(/[%+,]/g, ""));
+        if (!isNaN(p) && p > 0) {
+          state.cdsLiveQuotes[q.symbol] = { price: p, change_pct: pct };
+        }
+      });
+      renderCdsSpecialCorner();
+    } catch (e) {
+      // 오프라인 시 기본 표시
+    }
+  }
+
+  function renderCdsSpecialCorner() {
+    const heroGrid = document.getElementById("cdsHeroGrid");
+    const insightGrid = document.getElementById("cdsInsightGrid");
+    if (!heroGrid) return;
+
+    const orclQ = state.cdsLiveQuotes.ORCL || {};
+    const crwvQ = state.cdsLiveQuotes.CRWV || {};
+    const orclStockStr = orclQ.price ? `$${orclQ.price.toFixed(2)} (${fmtSignedPct(orclQ.change_pct)})` : "실시간 차트 연동";
+    const crwvStockStr = crwvQ.price ? `$${crwvQ.price.toFixed(2)} (${fmtSignedPct(crwvQ.change_pct)})` : "실시간 차트 연동";
+
+    heroGrid.innerHTML = `
+      <article class="cds-card">
+        <div class="cds-card-head">
+          <div class="cds-badge-group">
+            <span class="etf-ticker-badge">ORCL</span>
+            <span class="etf-lev-tag">S&amp;P 신용등급 BBB- (투자적격 최하단)</span>
+          </div>
+          <span class="macro-status caution">● 경계 · FCF 적자 감시</span>
+        </div>
+        <div>
+          <h3 class="etf-name">오라클 (Oracle) 5년물 CDS 스프레드</h3>
+          <p class="etf-role" style="margin-bottom:4px;">OpenAI · 대형 AI 클러스터 확장을 위한 공격적 회사채 발행으로 연초(138bp) 대비 2배 이상 상승</p>
+        </div>
+
+        <div class="cds-main-row num">
+          <div>
+            <span class="cds-bps-val" style="color:#B5892E;">288</span><span class="cds-bps-unit">bps (2.88%)</span>
+          </div>
+          <span class="etf-chg-pill up-pill">▲ 연초 대비 +150bp (10월 고점 318bp)</span>
+        </div>
+
+        <div class="etf-metrics-grid num">
+          <div class="metric-cell">
+            <small>2026년 초 → 현재</small>
+            <strong>138bp → 288bp</strong>
+          </div>
+          <div class="metric-cell">
+            <small>신용등급 방어선</small>
+            <strong>BBB- (정크 직전 1단계)</strong>
+          </div>
+          <div class="metric-cell">
+            <small>ORCL 현재 주가</small>
+            <strong class="${orclQ.change_pct ? dirClass(orclQ.change_pct, false) : ""}">${orclStockStr}</strong>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span style="font-size:0.74rem; color:var(--ink-muted);">핵심 관전: 350bp 이하 안착 및 투자적격(IG) 유지 여부</span>
+          <button type="button" class="stock-live-jump-btn" data-cds-stock="ORCL" data-cds-name="오라클 (Oracle)">📈 ORCL 주가 라이브 차트</button>
+        </div>
+      </article>
+
+      <article class="cds-card distress">
+        <div class="cds-card-head">
+          <div class="cds-badge-group">
+            <span class="etf-ticker-badge" style="background:#3A1B1B; color:#FFD6D4; border-color:#C9352E;">CRWV</span>
+            <span class="etf-lev-tag" style="background:rgba(201,53,46,0.12); color:var(--up-color);">부실 경계선(1,000bp) 돌파</span>
+          </div>
+          <span class="macro-status warn">● 위험 · 만기 불일치 감시</span>
+        </div>
+        <div>
+          <h3 class="etf-name">코어위브 (CoreWeave) 5년물 CDS 스프레드</h3>
+          <p class="etf-role" style="margin-bottom:4px;">총 부채·리스 $51B vs 수주잔고 $100B+ · 단기(3년) GPU 계약과 장기 인프라 채권 간 만기 불일치 반영</p>
+        </div>
+
+        <div class="cds-main-row num">
+          <div>
+            <span class="cds-bps-val up-text">1,140</span><span class="cds-bps-unit">bps (11.40%)</span>
+          </div>
+          <span class="etf-chg-pill up-pill">▲ 연초 대비 +775bp (10월 고점 1,190bp)</span>
+        </div>
+
+        <div class="etf-metrics-grid num">
+          <div class="metric-cell">
+            <small>2031·2032 채권 수익률</small>
+            <strong class="up-text">15.8% (하일드 급등)</strong>
+          </div>
+          <div class="metric-cell">
+            <small>내재 5년 부도확률</small>
+            <strong>약 54% ~ 58% 반영</strong>
+          </div>
+          <div class="metric-cell">
+            <small>CRWV 현재 주가</small>
+            <strong class="${crwvQ.change_pct ? dirClass(crwvQ.change_pct, false) : ""}">${crwvStockStr}</strong>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span style="font-size:0.74rem; color:var(--ink-muted);">핵심 관전: $100B 빅테크 수주잔고 기반 차환(Refinancing) 성공 여부</span>
+          <button type="button" class="stock-live-jump-btn" data-cds-stock="CRWV" data-cds-name="코어위브 (CoreWeave)">📈 CRWV 주가 라이브 차트</button>
+        </div>
+      </article>
+    `;
+
+    heroGrid.querySelectorAll("[data-cds-stock]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const sym = btn.getAttribute("data-cds-stock");
+        const nm = btn.getAttribute("data-cds-name");
+        selectTickerForLiveChart(sym, sym, nm, "USD", true);
+      });
+    });
+
+    if (insightGrid) {
+      insightGrid.innerHTML = `
+        <div class="cds-insight-box">
+          <strong>1. 왜 반도체(SOXX·SOXL·RAM) 투자자가 CDS를 봐야 하나?</strong>
+          2026년 AI 데이터센터 부채 발행이 <b>$466B(약 630조 원)</b>를 넘어서면서, 주식시장보다 채권·CDS 시장이 먼저 "빚내서 구매한 엔비디아 GPU와 HBM 메모리가 제때 현금을 회수하는가"를 심판하고 있기 때문입니다.
+        </div>
+        <div class="cds-insight-box">
+          <strong>2. 코어위브 1,140bp의 본질: 당장의 파산보다 '만기 불일치'</strong>
+          코어위브는 마이크로소프트 등 우량 고객사 수주잔고가 <b>$100B 이상</b>이지만, GPU 임대 계약은 평균 3년인 반면 데이터센터 채권 만기는 2030년 이후로 길어 <b>차환(Refinancing) 금리 부담(15~16%)</b>이 CDS 급등의 핵심 원인입니다.
+        </div>
+        <div class="cds-insight-box">
+          <strong>3. SOXX · SOXL · RAM 실전 대응 기준선</strong>
+          오라클 CDS가 <b>300bp 안팎에서 진정(BBB- 투자적격 유지)</b>되고 코어위브 CDS가 1,000bp 아래로 내려오면 AI 설비투자 우려가 해소되며 <b>SOXL(3X)·RAM(2X)의 강한 숏커버 랠리 촉매</b>가 됩니다. 반대로 오라클이 투기등급(BB+)으로 강등될 경우 레버리지 비중을 축소합니다.
+        </div>
+      `;
+    }
+
+    updateCdsHud(state.cdsHoverIdx);
+    drawCdsTrajectoryChart();
+  }
+
+  function updateCdsHud(idx) {
+    const hud = document.getElementById("cdsHudItems");
+    if (!hud) return;
+    const i = idx >= 0 && idx < CDS_2026_SERIES.length ? idx : CDS_2026_SERIES.length - 1;
+    const pt = CDS_2026_SERIES[i];
+    hud.innerHTML = `
+      <span>시점: <b>${pt.date}</b></span>
+      <span>오라클(ORCL) 5Y CDS: <b style="color:#B5892E;">${pt.orcl} bps</b></span>
+      <span>코어위브(CRWV) 5Y CDS: <b class="up-text">${pt.crwv.toLocaleString()} bps</b></span>
+      <span>해설: <b>${pt.note}</b></span>
+    `;
+  }
+
+  function drawCdsTrajectoryChart() {
+    const canvas = document.getElementById("cdsChartCanvas");
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    const width = Math.max(260, rect.width);
+    const height = Math.max(180, rect.height);
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const isDark = state.theme === "dark";
+    const gridColor = isDark ? "rgba(255,255,255,0.07)" : "rgba(24,34,29,0.08)";
+    const textColor = isDark ? "#9CA8A1" : "#626C77";
+    const orclColor = isDark ? "#EAC574" : "#B5892E";
+    const crwvColor = isDark ? "#F05650" : "#C9352E";
+
+    const pad = { top: 22, right: 64, bottom: 28, left: 54 };
+    const plotW = width - pad.left - pad.right;
+    const plotH = height - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const n = CDS_2026_SERIES.length;
+    const xFor = (i) => pad.left + (i / (n - 1)) * plotW;
+
+    // 좌측 축: 오라클 (0 ~ 400 bps), 우측 축: 코어위브 (0 ~ 1,300 bps)
+    const yOrcl = (v) => pad.top + plotH - ((v - 80) / (360 - 80)) * plotH;
+    const yCrwv = (v) => pad.top + plotH - ((v - 200) / (1300 - 200)) * plotH;
+
+    // 수평 그리드 및 축 라벨
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.font = "600 10px Pretendard, sans-serif";
+
+    for (let g = 0; g <= 4; g++) {
+      const yy = pad.top + (plotH * g) / 4;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, yy);
+      ctx.lineTo(pad.left + plotW, yy);
+      ctx.stroke();
+
+      if (state.cdsMode !== "CRWV") {
+        const oVal = Math.round(360 - ((360 - 80) * g) / 4);
+        ctx.fillStyle = orclColor;
+        ctx.textAlign = "right";
+        ctx.fillText(`${oVal}bp`, pad.left - 6, yy + 3);
+      }
+      if (state.cdsMode !== "ORCL") {
+        const cVal = Math.round(1300 - ((1300 - 200) * g) / 4);
+        ctx.fillStyle = crwvColor;
+        ctx.textAlign = "left";
+        ctx.fillText(`${cVal}bp`, pad.left + plotW + 6, yy + 3);
+      }
+    }
+
+    // 코어위브 1,000bp 부실 경계선 점선
+    if (state.cdsMode !== "ORCL") {
+      const y1000 = yCrwv(1000);
+      ctx.save();
+      ctx.strokeStyle = "rgba(201, 53, 46, 0.55)";
+      ctx.setLineDash([5, 4]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y1000);
+      ctx.lineTo(pad.left + plotW, y1000);
+      ctx.stroke();
+      ctx.fillStyle = crwvColor;
+      ctx.textAlign = "left";
+      ctx.font = "700 10px Pretendard, sans-serif";
+      ctx.fillText("⚠ 코어위브 1,000bp 부실 경계선 (Distress Threshold)", pad.left + 8, y1000 - 5);
+      ctx.restore();
+    }
+
+    // 오라클 곡선 그리기
+    if (state.cdsMode !== "CRWV") {
+      ctx.save();
+      ctx.strokeStyle = orclColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      CDS_2026_SERIES.forEach((pt, i) => {
+        const xx = xFor(i);
+        const yy = yOrcl(pt.orcl);
+        if (i === 0) ctx.moveTo(xx, yy);
+        else ctx.lineTo(xx, yy);
+      });
+      ctx.stroke();
+
+      CDS_2026_SERIES.forEach((pt, i) => {
+        const xx = xFor(i);
+        const yy = yOrcl(pt.orcl);
+        ctx.fillStyle = orclColor;
+        ctx.beginPath();
+        ctx.arc(xx, yy, i === state.cdsHoverIdx ? 5.5 : 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    // 코어위브 곡선 그리기
+    if (state.cdsMode !== "ORCL") {
+      ctx.save();
+      ctx.strokeStyle = crwvColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      CDS_2026_SERIES.forEach((pt, i) => {
+        const xx = xFor(i);
+        const yy = yCrwv(pt.crwv);
+        if (i === 0) ctx.moveTo(xx, yy);
+        else ctx.lineTo(xx, yy);
+      });
+      ctx.stroke();
+
+      CDS_2026_SERIES.forEach((pt, i) => {
+        const xx = xFor(i);
+        const yy = yCrwv(pt.crwv);
+        ctx.fillStyle = crwvColor;
+        ctx.beginPath();
+        ctx.arc(xx, yy, i === state.cdsHoverIdx ? 5.5 : 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    // 하단 X축 날짜 라벨
+    ctx.fillStyle = textColor;
+    ctx.font = "600 10px Pretendard, sans-serif";
+    ctx.textAlign = "center";
+    CDS_2026_SERIES.forEach((pt, i) => {
+      if (i % 2 === 0 || i === n - 1) {
+        ctx.fillText(pt.date.replace("2026.", ""), xFor(i), height - 8);
+      }
+    });
+
+    // 선택된 시점 수직 십자선
+    if (state.cdsHoverIdx >= 0 && state.cdsHoverIdx < n) {
+      const hx = xFor(state.cdsHoverIdx);
+      ctx.save();
+      ctx.strokeStyle = isDark ? "rgba(234,197,116,0.5)" : "rgba(181,137,46,0.55)";
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(hx, pad.top);
+      ctx.lineTo(hx, pad.top + plotH);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function bindCdsInteractions() {
+    const modeTabs = document.getElementById("cdsModeTabs");
+    if (modeTabs) {
+      modeTabs.querySelectorAll(".iv-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modeTabs.querySelectorAll(".iv-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.cdsMode = btn.getAttribute("data-cdsmode") || "BOTH";
+          drawCdsTrajectoryChart();
+        });
+      });
+    }
+
+    const canvas = document.getElementById("cdsChartCanvas");
+    if (!canvas) return;
+
+    function handleMove(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const padLeft = 54;
+      const padRight = 64;
+      const plotW = Math.max(10, rect.width - padLeft - padRight);
+      const relX = Math.max(0, Math.min(plotW, clientX - rect.left - padLeft));
+      const idx = Math.round((relX / plotW) * (CDS_2026_SERIES.length - 1));
+      if (idx !== state.cdsHoverIdx) {
+        state.cdsHoverIdx = idx;
+        updateCdsHud(idx);
+        drawCdsTrajectoryChart();
+      }
+    }
+
+    canvas.addEventListener("mousemove", (e) => handleMove(e.clientX));
+    canvas.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.touches && e.touches[0]) {
+          handleMove(e.touches[0].clientX);
+        }
+      },
+      { passive: true }
+    );
+    canvas.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches && e.touches[0]) {
+          handleMove(e.touches[0].clientX);
+        }
+      },
+      { passive: true }
+    );
+  }
+
+  /* ========================================================================
+     14. 모바일 하단 탭 & 상단 네비게이션 스크롤 스파이
      ======================================================================== */
   function bindNavigationScrollSpy() {
-    const sections = ["sec-live", "sec-brief", "sec-macro", "sec-holdings", "sec-news"];
+    const sections = ["sec-live", "sec-brief", "sec-cds", "sec-macro", "sec-holdings", "sec-news"];
     const topPills = document.querySelectorAll(".nav-pill");
     const bottomItems = document.querySelectorAll(".m-nav-item");
 
@@ -1790,13 +2175,14 @@
   }
 
   /* ========================================================================
-     14. 초기 구동
+     15. 초기 구동
      ======================================================================== */
   function init() {
     applyPreferences();
     bindPreferenceControls();
     bindMainChartInteractions();
     bindLiveSearchBox();
+    bindCdsInteractions();
     bindHoldingsControls();
     bindNewsControls();
     bindModalEvents();
@@ -1807,6 +2193,7 @@
       renderBriefingSection();
       renderEtfTrio();
       renderDramFlowPanel();
+      renderCdsSpecialCorner();
       renderMacroGrid();
       renderHoldings();
       renderNews();
@@ -1814,7 +2201,9 @@
     }
 
     fetchLiveQuotesFromCNBC(false);
+    fetchCdsCompanyStockQuotes();
     setInterval(() => fetchLiveQuotesFromCNBC(false), 30000);
+    setInterval(() => fetchCdsCompanyStockQuotes(), 45000);
     setInterval(() => pollActiveChartLiveTick(), 10000);
 
     let resizeTimer = null;
@@ -1822,6 +2211,7 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         redrawMainChartFromState();
+        drawCdsTrajectoryChart();
         renderMacroGrid();
       }, 150);
     });

@@ -69,6 +69,7 @@
     <div class="section-nav-inner">
       <a href="#sec-live" class="nav-pill active" data-nav="sec-live">I. 실시간 차트 · SOXX &amp; RAM</a>
       <a href="#sec-brief" class="nav-pill" data-nav="sec-brief">II. 저녁 시황 · 자금 유입</a>
+      <a href="#sec-cds" class="nav-pill" data-nav="sec-cds">★ 스페셜: 오라클 · 코어위브 CDS</a>
       <a href="#sec-macro" class="nav-pill" data-nav="sec-macro">III. 전쟁 · 유가 · 채권 레이더</a>
       <a href="#sec-holdings" class="nav-pill" data-nav="sec-holdings">IV. 핵심 보유 종목 20선</a>
       <a href="#sec-news" class="nav-pill" data-nav="sec-news">V. 글로벌 실시간 뉴스</a>
@@ -124,6 +125,8 @@
             <button type="button" class="qt-btn" data-qt="NVDA">엔비디아</button>
             <button type="button" class="qt-btn" data-qt="AVGO">브로드컴</button>
             <button type="button" class="qt-btn" data-qt="TSM">TSMC</button>
+            <button type="button" class="qt-btn" data-qt="ORCL">오라클(ORCL)</button>
+            <button type="button" class="qt-btn" data-qt="CRWV">코어위브(CRWV)</button>
             <button type="button" class="qt-btn" data-qt="TSLA">테슬라</button>
           </div>
         </div>
@@ -200,6 +203,53 @@
             <h3 class="panel-title">RAM 모펀드(DRAM ETF) 월가 자금 유입 &amp; 비중</h3>
           </div>
           <div id="dramFlowContent"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- [스페셜 코너] 2026년 오라클(ORCL) & 코어위브(CoreWeave) 5년물 CDS 추이 & AI 부채 리스크 레이더 -->
+    <section class="study-section" id="sec-cds">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">★ SPECIAL CORNER · AI INFRASTRUCTURE CREDIT RISK &amp; 5Y CDS TRACKER</span>
+          <h2 class="section-title">스페셜 코너 · 2026년 오라클(ORCL) &amp; 코어위브(CoreWeave) CDS 추이</h2>
+          <p class="section-desc">
+            2026년 AI 데이터센터 부채 발행이 $466B(약 630조 원)를 돌파한 가운데, 엔비디아 GPU·HBM 메모리 발주 지속성을 가늠하는 채권시장의 핵심 선행지표인 <strong>오라클(ORCL)과 코어위브(CRWV)의 5년물 CDS(신용부도스와프) 스프레드</strong> 추이입니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- 상단 2대 핵심 CDS 스코어 카드 (오라클 vs 코어위브) -->
+      <div class="cds-hero-grid" id="cdsHeroGrid">
+        <!-- JS에서 실시간 주가 연동 및 CDS 핵심 지표 카드 렌더링 -->
+      </div>
+
+      <!-- 중단: 2026년 월별/분기별 오라클 & 코어위브 5년물 CDS 추이 인터랙티브 차트 -->
+      <div class="panel-card cds-chart-panel" style="margin-top:14px;">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title" id="cdsChartTitle">2026년 오라클(ORCL) &amp; 코어위브(CoreWeave) 5년물 CDS 스프레드 추이 (단위: bps)</h3>
+          </div>
+          <div class="interval-tabs" id="cdsModeTabs" role="tablist" aria-label="CDS 차트 보기 모드">
+            <button type="button" class="iv-btn active" data-cdsmode="BOTH">통합 비교 (듀얼 축)</button>
+            <button type="button" class="iv-btn" data-cdsmode="CRWV">코어위브 (1,000bp 부실선)</button>
+            <button type="button" class="iv-btn" data-cdsmode="ORCL">오라클 (BBB- 방어선)</button>
+          </div>
+        </div>
+
+        <div class="chart-crosshair-hud num" id="cdsHud">
+          <div class="hud-items" id="cdsHudItems">
+            <span>👆 차트 위를 터치하거나 마우스를 움직이시면 2026년 시점별 CDS 수치와 주요 이벤트가 표시됩니다.</span>
+          </div>
+        </div>
+
+        <div class="canvas-wrap cds-canvas-wrap">
+          <canvas id="cdsChartCanvas"></canvas>
+        </div>
+
+        <!-- 하단: 반도체(SOXX·SOXL·RAM·DRAM) 투자자를 위한 3대 실전 판독 포인트 -->
+        <div class="cds-insight-grid" id="cdsInsightGrid">
+          <!-- JS에서 렌더링 -->
         </div>
       </div>
     </section>
@@ -337,6 +387,10 @@
     <a href="#sec-brief" class="m-nav-item" data-mnav="sec-brief">
       <span class="m-icon">🌙</span>
       <span>저녁시황</span>
+    </a>
+    <a href="#sec-cds" class="m-nav-item" data-mnav="sec-cds">
+      <span class="m-icon">⚡</span>
+      <span>CDS특집</span>
     </a>
     <a href="#sec-macro" class="m-nav-item" data-mnav="sec-macro">
       <span class="m-icon">🌍</span>

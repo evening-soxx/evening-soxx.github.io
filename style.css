@@ -1061,6 +1061,106 @@ a {
 }
 
 /* ==========================================================================
+   6-1. [스페셜 코너] 2026년 오라클(ORCL) & 코어위브(CoreWeave) 5년물 CDS 추이
+   ========================================================================== */
+.cds-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.cds-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-line);
+  border-top: 4px solid var(--gold-main);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cds-card.distress {
+  border-top-color: #C9352E;
+}
+
+.cds-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cds-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cds-main-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-top: 1px dashed var(--border-line);
+  border-bottom: 1px dashed var(--border-line);
+}
+
+.cds-bps-val {
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--ink-primary);
+}
+.cds-bps-unit {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink-secondary);
+  margin-left: 3px;
+}
+
+.cds-canvas-wrap {
+  height: 290px;
+}
+
+.cds-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cds-insight-box {
+  background: var(--bg-box);
+  border: 1px solid var(--border-line);
+  border-left: 3.5px solid var(--gold-main);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  line-height: 1.52;
+  color: var(--ink-secondary);
+}
+.cds-insight-box strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 0.86rem;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+}
+
+@media (max-width: 900px) {
+  .cds-hero-grid,
+  .cds-insight-grid {
+    grid-template-columns: 1fr;
+  }
+  .cds-canvas-wrap {
+    height: 245px;
+  }
+}
+
+/* ==========================================================================
    7. 전쟁 · 유가 · 채권 · 환율 8대 매크로 레이더 (모바일 2열 한눈에 보기)
    ========================================================================== */
 .macro-grid {
