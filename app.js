@@ -498,6 +498,15 @@
             <span class="etf-price">${fmtPrice(e.price, "USD")}</span>
             <span class="etf-chg-pill ${dirClass(e.change_pct, true)}">${fmtSignedChange(e.change, e.change_pct)}</span>
           </div>
+          ${
+            e.ext_price
+              ? `<div class="num" style="font-size:0.78rem; color:var(--ink-secondary); margin-top:-2px; margin-bottom:4px;">
+                  <span style="color:var(--gold-main); font-weight:700;">● ${e.ext_label || "시간외"} 실시간:</span>
+                  <b>${fmtPrice(e.ext_price, "USD")}</b>
+                  <span class="${dirClass(e.ext_change_pct, false)}" style="font-weight:700;">(${fmtSignedPct(e.ext_change_pct)})</span>
+                </div>`
+              : ""
+          }
 
           <div class="etf-metrics-grid num">
             <div class="metric-cell">
@@ -652,12 +661,180 @@
     return `${y}${m}${d}000000`;
   }
 
-  async function loadLiveChart(symbol, cnbcSym, displayName, interval, currency) {
-    const titleEl = document.getElementById("mainChartTitle");
-    const ivLabel = interval === "1M" ? "실시간 1분봉" : interval === "5M" ? "실시간 5분봉" : interval === "15M" ? "실시간 15분봉" : "일봉(90일)";
-    if (titleEl) {
-      titleEl.innerHTML = `${displayName} <span style="color:var(--gold-main); font-size:0.86rem;">(${symbol})</span> · <span style="font-size:0.84rem; color:var(--ink-muted);">${ivLabel}</span>`;
+  function extractLiveQuoteInfo(qItem, displayName) {
+    if (!qItem || !qItem.last) return null;
+    const regPrice = parseFloat(String(qItem.last).replace(/,/g, ""));
+    const regChg = parseFloat(String(qItem.change || "0").replace(/,/g, ""));
+    const regPct = parseFloat(String(qItem.change_pct || "0").replace(/[%+,]/g, ""));
+    if (isNaN(regPrice) || regPrice <= 0) return null;
+
+    const mktStatus = String(qItem.curmktstatus || "REG_MKT");
+    const extObj = qItem.ExtendedMktQuote || null;
+    let extPrice = null;
+    let extChg = null;
+    let extPct = null;
+    let extLabel = "";
+
+    if ((mktStatus === "PRE_MKT" || mktStatus === "POST_MKT") && extObj && extObj.last) {
+      const ep = parseFloat(String(extObj.last).replace(/,/g, ""));
+      const ec = parseFloat(String(extObj.change || "0").replace(/,/g, ""));
+      const epct = parseFloat(String(extObj.change_pct || "0").replace(/[%+,]/g, ""));
+      if (!isNaN(ep) && ep > 0) {
+        extPrice = ep;
+        extChg = isNaN(ec) ? 0 : ec;
+        extPct = isNaN(epct) ? 0 : epct;
+        extLabel = mktStatus === "PRE_MKT" ? "프리" : "애프터";
+      }
     }
+
+    return {
+      price: regPrice,
+      change: isNaN(regChg) ? 0 : regChg,
+      change_pct: isNaN(regPct) ? 0 : regPct,
+      extPrice,
+      extChange: extChg,
+      extPct,
+      extLabel,
+      mktStatus,
+      activeIntradayPrice: extPrice !== null ? extPrice : regPrice,
+      activeIntradayPct: extPct !== null ? extPct : isNaN(regPct) ? 0 : regPct,
+      name: qItem.shortName || displayName,
+    };
+  }
+
+  function renderMainChartTitleHTML(displayName, symbol, currency, interval, quoteInfo) {
+    const titleEl = document.getElementById("mainChartTitle");
+    if (!titleEl) return;
+    const ivLabel =
+      interval === "1M" ? "실시간 1분봉" : interval === "5M" ? "실시간 5분봉" : interval === "15M" ? "실시간 15분봉" : "일봉(90일)";
+
+    if (!quoteInfo) {
+      titleEl.innerHTML = `${displayName} <span style="color:var(--gold-main); font-size:0.86rem;">(${symbol})</span> · <span style="font-size:0.84rem; color:var(--ink-muted);">${ivLabel}</span>`;
+      return;
+    }
+
+    const isIntraday = interval !== "1D";
+    if (isIntraday && quoteInfo.extPrice !== null) {
+      const extPStr = fmtPrice(quoteInfo.extPrice, currency);
+      const extPctStr = fmtSignedPct(quoteInfo.extPct);
+      const extCls = dirClass(quoteInfo.extPct, false);
+      const regPStr = fmtPrice(quoteInfo.price, currency);
+      const regPctStr = fmtSignedPct(quoteInfo.change_pct);
+      titleEl.innerHTML = `${displayName} <span style="color:var(--gold-main); font-size:0.84rem;">(${symbol})</span> · <span class="num ${extCls}">${extPStr} (${quoteInfo.extLabel} ${extPctStr})</span> <span class="num" style="font-size:0.78rem; color:var(--ink-muted);">· 정규 ${regPStr} (${regPctStr})</span> · <span style="font-size:0.8rem; color:var(--ink-muted);">${ivLabel}</span>`;
+    } else {
+      const pStr = fmtPrice(quoteInfo.price, currency);
+      const pctStr = fmtSignedPct(quoteInfo.change_pct);
+      const cls = dirClass(quoteInfo.change_pct, false);
+      const extSuffix =
+        quoteInfo.extPrice !== null
+          ? ` <span class="num ${dirClass(quoteInfo.extPct, false)}" style="font-size:0.78rem;">· ${quoteInfo.extLabel} ${fmtPrice(quoteInfo.extPrice, currency)} (${fmtSignedPct(quoteInfo.extPct)})</span>`
+          : "";
+      titleEl.innerHTML = `${displayName} <span style="color:var(--gold-main); font-size:0.84rem;">(${symbol})</span> · <span class="num ${cls}">${pStr} (${pctStr})</span>${extSuffix} · <span style="font-size:0.8rem; color:var(--ink-muted);">${ivLabel}</span>`;
+    }
+  }
+
+  function parseCnbcPriceBars(rawBars, interval) {
+    if (!Array.isArray(rawBars)) return [];
+    const parsed = [];
+    for (let i = 0; i < rawBars.length; i++) {
+      const b = rawBars[i];
+      const o = parseFloat(b.open);
+      const h = parseFloat(b.high);
+      const l = parseFloat(b.low);
+      const c = parseFloat(b.close);
+      const vol = parseInt(b.volume || "0", 10) || 0;
+      if (isNaN(c) || c <= 0) continue;
+
+      // 분봉에서 거래량 0이고 시고저종이 완전히 동일한 장외 더미 틱은 활성 캔들이 충분할 때 제외
+      if (interval !== "1D" && rawBars.length > 30 && vol === 0 && o === h && h === l && l === c) {
+        continue;
+      }
+
+      let label = String(b.tradeTime || "");
+      const ms = Number(b.tradeTimeinMills);
+      if (interval !== "1D" && !isNaN(ms) && ms > 1000000000000) {
+        // UTC 밀리초를 한국시간(KST, UTC+9)으로 변환하여 직관적 표시
+        const kstDt = new Date(ms + 9 * 3600 * 1000);
+        const mm = String(kstDt.getUTCMonth() + 1).padStart(2, "0");
+        const dd = String(kstDt.getUTCDate()).padStart(2, "0");
+        const hh = String(kstDt.getUTCHours()).padStart(2, "0");
+        const mi = String(kstDt.getUTCMinutes()).padStart(2, "0");
+        label = `${mm}.${dd} ${hh}:${mi}`;
+      } else if (label.length >= 12) {
+        const mm = label.slice(4, 6);
+        const dd = label.slice(6, 8);
+        const hh = label.slice(8, 10);
+        const mi = label.slice(10, 12);
+        label = interval === "1D" ? `${mm}.${dd}` : `${mm}.${dd} ${hh}:${mi}`;
+      }
+
+      const openVal = isNaN(o) || o <= 0 ? c : o;
+      let highVal = isNaN(h) || h <= 0 ? Math.max(openVal, c) : Math.max(h, openVal, c);
+      let lowVal = isNaN(l) || l <= 0 ? Math.min(openVal, c) : Math.min(l, openVal, c);
+
+      // 분봉 단일 배드틱(비정상 장외 꼬리 스파이크) 방어: 몸통 대비 꼬리만 4% 이상 튄 소량 체결 보정
+      if (interval !== "1D") {
+        const bodyMax = Math.max(openVal, c);
+        const bodyMin = Math.min(openVal, c);
+        if ((bodyMin - lowVal) / bodyMin > 0.035 && vol < 2500) {
+          lowVal = bodyMin;
+        }
+        if ((highVal - bodyMax) / bodyMax > 0.035 && vol < 2500) {
+          highVal = bodyMax;
+        }
+      }
+
+      parsed.push({
+        date: label,
+        open: openVal,
+        high: highVal,
+        low: lowVal,
+        close: c,
+        volume: vol,
+      });
+    }
+    return parsed;
+  }
+
+  function applyLiveTickToLastCandle(candles, interval, quoteInfo) {
+    if (!Array.isArray(candles) || candles.length === 0 || !quoteInfo) return;
+    const lastIdx = candles.length - 1;
+    const lastBar = candles[lastIdx];
+
+    if (interval === "1D") {
+      // 일봉은 정규장 진행 중일 때만 정규장 가격을 마지막 캔들에 반영
+      if (quoteInfo.mktStatus === "REG_MKT") {
+        const p = quoteInfo.price;
+        if (Math.abs(p - lastBar.close) / lastBar.close < 0.15) {
+          lastBar.close = p;
+          if (p > lastBar.high) lastBar.high = p;
+          if (p < lastBar.low) lastBar.low = p;
+        }
+      }
+      return;
+    }
+
+    // 분봉(1M / 5M / 15M): 반드시 현재 세션과 일치하는 실시간 체결가(프리/애프터 포함)만 사용!
+    // 정규장 종가(q.last)가 시간외 분봉 캔들에 덮어씌워져 가짜 장대음봉/장대양봉을 만드는 현상 원천 차단
+    if (quoteInfo.mktStatus === "CLOSED") return;
+    if ((quoteInfo.mktStatus === "PRE_MKT" || quoteInfo.mktStatus === "POST_MKT") && quoteInfo.extPrice === null) {
+      return;
+    }
+
+    const livePrice = quoteInfo.activeIntradayPrice;
+    if (!livePrice || isNaN(livePrice) || livePrice <= 0) return;
+
+    // 직전 캔들 종가 대비 2% 이내의 정상 실시간 틱일 때만 현재 캔들 종가/고가/저가 갱신
+    const driftRatio = Math.abs(livePrice - lastBar.close) / lastBar.close;
+    if (driftRatio <= 0.02) {
+      lastBar.close = livePrice;
+      if (livePrice > lastBar.high) lastBar.high = livePrice;
+      if (livePrice < lastBar.low) lastBar.low = livePrice;
+    }
+  }
+
+  async function loadLiveChart(symbol, cnbcSym, displayName, interval, currency) {
+    renderMainChartTitleHTML(displayName, symbol, currency, interval, null);
 
     let localRef = null;
     if (state.data) {
@@ -690,63 +867,28 @@
         fetch(quoteUrl, { cache: "no-store" }).catch(() => null),
       ]);
 
+      let quoteInfo = null;
       if (quoteResp && quoteResp.ok) {
         const qJson = await quoteResp.json();
         const qItem = qJson?.FormattedQuoteResult?.FormattedQuote?.[0];
-        if (qItem && qItem.last) {
-          const lastVal = parseFloat(String(qItem.last).replace(/,/g, ""));
-          const chgVal = parseFloat(String(qItem.change || "0").replace(/,/g, ""));
-          const pctVal = parseFloat(String(qItem.change_pct || "0").replace(/[%+,]/g, ""));
-          if (!isNaN(lastVal)) {
-            state.liveQuote = { price: lastVal, change: chgVal, change_pct: pctVal, name: qItem.shortName || displayName };
-            if (titleEl) {
-              const pStr = fmtPrice(lastVal, currency);
-              const pctStr = fmtSignedPct(pctVal);
-              const cls = dirClass(pctVal, false);
-              titleEl.innerHTML = `${displayName} <span style="color:var(--gold-main); font-size:0.84rem;">(${symbol})</span> · <span class="num ${cls}">${pStr} (${pctStr})</span> · <span style="font-size:0.8rem; color:var(--ink-muted);">${ivLabel}</span>`;
-            }
-          }
+        quoteInfo = extractLiveQuoteInfo(qItem, displayName);
+        if (quoteInfo) {
+          state.liveQuote = quoteInfo;
+          renderMainChartTitleHTML(displayName, symbol, currency, interval, quoteInfo);
         }
       }
 
       if (barResp.ok) {
         const barJson = await barResp.json();
         const rawBars = barJson?.barData?.priceBars || [];
-        const parsed = [];
-        for (let i = 0; i < rawBars.length; i++) {
-          const b = rawBars[i];
-          const o = parseFloat(b.open);
-          const h = parseFloat(b.high);
-          const l = parseFloat(b.low);
-          const c = parseFloat(b.close);
-          const vol = parseInt(b.volume || "0", 10) || 0;
-          if (isNaN(c) || c <= 0) continue;
-          // 분봉에서 거래량 0이고 시고저종이 완전히 동일한 장외 더미 틱은 활성 캔들이 충분할 때 제외
-          if (interval !== "1D" && rawBars.length > 30 && vol === 0 && o === h && h === l && l === c) {
-            continue;
-          }
-          const ts = String(b.tradeTime || "");
-          let label = ts;
-          if (ts.length >= 12) {
-            const mm = ts.slice(4, 6);
-            const dd = ts.slice(6, 8);
-            const hh = ts.slice(8, 10);
-            const mi = ts.slice(10, 12);
-            label = interval === "1D" ? `${mm}.${dd}` : `${mm}.${dd} ${hh}:${mi}`;
-          }
-          parsed.push({
-            date: label,
-            open: isNaN(o) ? c : o,
-            high: isNaN(h) ? c : h,
-            low: isNaN(l) ? c : l,
-            close: c,
-            volume: vol,
-          });
-        }
+        const parsed = parseCnbcPriceBars(rawBars, interval);
 
         if (parsed.length > 5) {
           const maxBars = interval === "1D" ? 90 : 96;
           state.chartCandles = parsed.slice(-maxBars);
+          if (quoteInfo) {
+            applyLiveTickToLastCandle(state.chartCandles, interval, quoteInfo);
+          }
           const recent20 = state.chartCandles.slice(-20);
           state.chartSupport20 = Math.min(...recent20.map((x) => x.low));
           state.chartResistance20 = Math.max(...recent20.map((x) => x.high));
@@ -1688,30 +1830,34 @@
         const target = symbolMap[sym];
         if (!target || !q.last) return;
 
-        const price = parseFloat(String(q.last).replace(/,/g, ""));
-        const chg = parseFloat(String(q.change || "0").replace(/,/g, ""));
-        const chgPct = parseFloat(String(q.change_pct || "0").replace(/[%+,]/g, ""));
-        if (isNaN(price) || price <= 0) return;
+        const qInfo = extractLiveQuoteInfo(q, sym);
+        if (!qInfo) return;
 
         if (target.type === "etf" && d.etfs?.[target.key]) {
-          d.etfs[target.key].price = price;
-          d.etfs[target.key].change = chg;
-          d.etfs[target.key].change_pct = chgPct;
+          d.etfs[target.key].price = qInfo.price;
+          d.etfs[target.key].change = qInfo.change;
+          d.etfs[target.key].change_pct = qInfo.change_pct;
+          d.etfs[target.key].ext_price = qInfo.extPrice;
+          d.etfs[target.key].ext_change_pct = qInfo.extPct;
+          d.etfs[target.key].ext_label = qInfo.extLabel;
           updatedCount++;
         } else if (target.type === "macro") {
           const m = (d.macros || []).find((x) => x.key === target.key);
           if (m) {
-            m.price = price;
-            m.change = chg;
-            m.change_pct = chgPct;
+            m.price = qInfo.price;
+            m.change = qInfo.change;
+            m.change_pct = qInfo.change_pct;
             updatedCount++;
           }
         } else if (target.type === "holding") {
           const h = (d.holdings || []).find((x) => x.ticker === target.key);
           if (h) {
-            h.price = price;
-            h.change = chg;
-            h.change_pct = chgPct;
+            h.price = qInfo.price;
+            h.change = qInfo.change;
+            h.change_pct = qInfo.change_pct;
+            h.ext_price = qInfo.extPrice;
+            h.ext_change_pct = qInfo.extPct;
+            h.ext_label = qInfo.extLabel;
             updatedCount++;
           }
         }
@@ -1742,38 +1888,56 @@
   async function pollActiveChartLiveTick() {
     if (!state.liveTracking || !state.chartCnbcSymbol) return;
     try {
+      const interval = state.chartInterval;
       const enc = encodeURIComponent(state.chartCnbcSymbol);
-      const url = `https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=${enc}&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json`;
-      const resp = await fetch(url, { cache: "no-store" });
-      if (!resp.ok) return;
-      const json = await resp.json();
-      const q = json?.FormattedQuoteResult?.FormattedQuote?.[0];
-      if (!q || !q.last) return;
+      const quoteUrl = `https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=${enc}&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json`;
 
-      const price = parseFloat(String(q.last).replace(/,/g, ""));
-      const pct = parseFloat(String(q.change_pct || "0").replace(/[%+,]/g, ""));
-      if (isNaN(price) || price <= 0) return;
+      let barPromise = Promise.resolve(null);
+      if (interval !== "1D") {
+        const now = new Date();
+        const lookbackDays = interval === "1M" ? 4 : interval === "5M" ? 7 : 14;
+        const startDt = new Date(now.getTime() - lookbackDays * 86400 * 1000);
+        const endDt = new Date(now.getTime() + 2 * 86400 * 1000);
+        const barUrl = `https://ts-api.cnbc.com/harmony/app/bars/${enc}/${interval}/${formatCnbcTs(startDt)}/${formatCnbcTs(endDt)}/adjusted/EST5EDT.json`;
+        barPromise = fetch(barUrl, { cache: "no-store" }).catch(() => null);
+      }
 
-      const titleEl = document.getElementById("mainChartTitle");
-      const ivLabel = state.chartInterval === "1M" ? "실시간 1분봉" : state.chartInterval === "5M" ? "실시간 5분봉" : state.chartInterval === "15M" ? "실시간 15분봉" : "일봉(90일)";
-      if (titleEl) {
-        const prevPrice = state.liveQuote?.price;
-        state.liveQuote = { price, change_pct: pct };
-        const pStr = fmtPrice(price, state.chartCurrency);
-        const pctStr = fmtSignedPct(pct);
-        const cls = dirClass(pct, false);
-        titleEl.innerHTML = `${state.chartName} <span style="color:var(--gold-main); font-size:0.84rem;">(${state.chartSymbol})</span> · <span class="num ${cls} ${prevPrice && prevPrice !== price ? "price-flashed" : ""}">${pStr} (${pctStr})</span> · <span style="font-size:0.8rem; color:var(--ink-muted);">${ivLabel}</span>`;
+      const [quoteResp, barResp] = await Promise.all([
+        fetch(quoteUrl, { cache: "no-store" }).catch(() => null),
+        barPromise,
+      ]);
+
+      let quoteInfo = null;
+      if (quoteResp && quoteResp.ok) {
+        const json = await quoteResp.json();
+        const q = json?.FormattedQuoteResult?.FormattedQuote?.[0];
+        quoteInfo = extractLiveQuoteInfo(q, state.chartName);
+        if (quoteInfo) {
+          state.liveQuote = quoteInfo;
+          renderMainChartTitleHTML(state.chartName, state.chartSymbol, state.chartCurrency, interval, quoteInfo);
+        }
+      }
+
+      if (barResp && barResp.ok) {
+        const barJson = await barResp.json();
+        const rawBars = barJson?.barData?.priceBars || [];
+        const parsed = parseCnbcPriceBars(rawBars, interval);
+        if (parsed.length > 5) {
+          const maxBars = interval === "1D" ? 90 : 96;
+          state.chartCandles = parsed.slice(-maxBars);
+        }
       }
 
       if (state.chartCandles.length > 0) {
-        const lastIdx = state.chartCandles.length - 1;
-        const lastBar = state.chartCandles[lastIdx];
-        lastBar.close = price;
-        if (price > lastBar.high) lastBar.high = price;
-        if (price < lastBar.low) lastBar.low = price;
+        if (quoteInfo) {
+          applyLiveTickToLastCandle(state.chartCandles, interval, quoteInfo);
+        }
+        const recent20 = state.chartCandles.slice(-20);
+        state.chartSupport20 = Math.min(...recent20.map((x) => x.low));
+        state.chartResistance20 = Math.max(...recent20.map((x) => x.high));
         redrawMainChartFromState();
         if (state.chartHoverIdx === -1) {
-          updateCrosshairHud(lastIdx);
+          updateCrosshairHud(state.chartCandles.length - 1);
         }
       }
     } catch (e) {
