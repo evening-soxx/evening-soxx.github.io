@@ -117,7 +117,7 @@
     chartCnbcSymbol: "SOXX",
     chartName: "iShares 미국 반도체 ETF",
     chartCurrency: "USD",
-    chartInterval: "1D", // '1M' | '5M' | '15M' | '1D'
+    chartInterval: "1M", // 기본 디폴트: 1분봉 ('1M' | '5M' | '15M' | '1D')
     chartCandles: [],
     chartSupport20: null,
     chartResistance20: null,
@@ -608,12 +608,23 @@
   /* ========================================================================
      5. 실시간 전 종목 검색 & 분봉/일봉 라이브 차트 + 터치 십자선
      ======================================================================== */
-  function selectTickerForLiveChart(symbol, cnbcSym, displayName, currency, shouldScroll) {
+  function setChartIntervalTabUI(iv) {
+    state.chartInterval = iv;
+    document.querySelectorAll("#intervalTabs .iv-btn").forEach((b) => {
+      b.classList.toggle("active", b.getAttribute("data-iv") === iv);
+    });
+  }
+
+  function selectTickerForLiveChart(symbol, cnbcSym, displayName, currency, shouldScroll, defaultToMinute = true) {
     state.chartSymbol = symbol;
     state.chartCnbcSymbol = cnbcSym || symbol;
     state.chartName = displayName || symbol;
     state.chartCurrency = currency || (symbol.endsWith(".KS") ? "KRW" : "USD");
     state.chartHoverIdx = -1;
+
+    if (defaultToMinute) {
+      setChartIntervalTabUI("1M");
+    }
 
     if (["SOXX", "SOXL", "RAM", "DRAM"].includes(symbol)) {
       state.selectedEtf = symbol;
@@ -655,8 +666,8 @@
       else if (state.data.macros) localRef = state.data.macros.find((m) => m.key === symbol);
     }
 
-    // 1D 일봉이고 로컬 스냅샷이 있으면 즉시 1차 표시 후 실시간 갱신
-    if (interval === "1D" && localRef && Array.isArray(localRef.candles) && localRef.candles.length > 10) {
+    // 1D 일봉이거나 첫 로딩 시 캔버스가 비어 있으면 즉시 스냅샷 1차 표시 후 실시간 분봉으로 교체
+    if ((interval === "1D" || state.chartCandles.length === 0) && localRef && Array.isArray(localRef.candles) && localRef.candles.length > 10) {
       state.chartCandles = localRef.candles.slice(-90);
       state.chartSupport20 = localRef.support_20d;
       state.chartResistance20 = localRef.resistance_20d;
@@ -708,7 +719,12 @@
           const h = parseFloat(b.high);
           const l = parseFloat(b.low);
           const c = parseFloat(b.close);
+          const vol = parseInt(b.volume || "0", 10) || 0;
           if (isNaN(c) || c <= 0) continue;
+          // 분봉에서 거래량 0이고 시고저종이 완전히 동일한 장외 더미 틱은 활성 캔들이 충분할 때 제외
+          if (interval !== "1D" && rawBars.length > 30 && vol === 0 && o === h && h === l && l === c) {
+            continue;
+          }
           const ts = String(b.tradeTime || "");
           let label = ts;
           if (ts.length >= 12) {
@@ -724,7 +740,7 @@
             high: isNaN(h) ? c : h,
             low: isNaN(l) ? c : l,
             close: c,
-            volume: parseInt(b.volume || "0", 10) || 0,
+            volume: vol,
           });
         }
 
@@ -2172,6 +2188,16 @@
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
+
+    // 상단·하단 네비게이션에서 '실시간 차트' 탭 클릭 시에도 디폴트 1분봉(1M)으로 즉시 전환
+    document.querySelectorAll('[data-nav="sec-live"], [data-mnav="sec-live"]').forEach((navEl) => {
+      navEl.addEventListener("click", () => {
+        if (state.chartInterval !== "1M") {
+          setChartIntervalTabUI("1M");
+          loadLiveChart(state.chartSymbol, state.chartCnbcSymbol, state.chartName, "1M", state.chartCurrency);
+        }
+      });
+    });
   }
 
   /* ========================================================================
@@ -2197,7 +2223,7 @@
       renderMacroGrid();
       renderHoldings();
       renderNews();
-      loadLiveChart("SOXX", "SOXX", "iShares 미국 반도체 ETF", "1D", "USD");
+      loadLiveChart("SOXX", "SOXX", "iShares 미국 반도체 ETF", "1M", "USD");
     }
 
     fetchLiveQuotesFromCNBC(false);
