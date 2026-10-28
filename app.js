@@ -124,6 +124,8 @@
     chartHoverIdx: -1,
     liveTracking: true,
     liveQuote: null,
+    newsRefreshMinutes: parseInt(localStorage.getItem("evening_soxx_news_iv") || "5", 10) || 5,
+    newsRefreshTimer: null,
   };
 
   // 주요 한국·미국 반도체 및 인기 ETF 한글 검색 사전
@@ -317,6 +319,7 @@
     if (btnRefresh) {
       btnRefresh.addEventListener("click", () => {
         fetchLiveQuotesFromCNBC(true);
+        refreshNewsAndIntelligence(true);
         loadLiveChart(state.chartSymbol, state.chartCnbcSymbol, state.chartName, state.chartInterval, state.chartCurrency);
       });
     }
@@ -417,7 +420,43 @@
     });
   }
 
+  function syncDynamicBriefingText() {
+    const d = state.data;
+    if (!d || !d.briefing) return;
+    const soxx = d.etfs?.SOXX;
+    const soxl = d.etfs?.SOXL;
+    const ram = d.etfs?.RAM;
+    const dram = d.etfs?.DRAM;
+    const us10y = (d.macros || []).find((m) => m.key === "US10Y");
+    const wti = (d.macros || []).find((m) => m.key === "WTI");
+    const vix = (d.macros || []).find((m) => m.key === "VIX");
+    if (!soxx || !soxl || !ram || !dram) return;
+
+    const fmtS = (v) => (Number(v) >= 0 ? `+${Number(v).toFixed(2)}%` : `${Number(v).toFixed(2)}%`);
+    const extNote = soxl.ext_price
+      ? ` [시간외 SOXX $${soxx.ext_price?.toFixed(2) || soxx.price} · SOXL $${soxl.ext_price.toFixed(2)}(${fmtS(soxl.ext_change_pct)}) · RAM $${(ram.ext_price || ram.price).toFixed(2)}]`
+      : "";
+
+    d.briefing.headline = `SOXX(${fmtS(soxx.change_pct)})·SOXL(${fmtS(soxl.change_pct)})·RAM(${fmtS(ram.change_pct)}) 흐름 속 미 10년물 금리(${us10y?.price ?? "-"}%)·WTI 유가($${wti?.price ?? "-"}) 실시간 점검`;
+
+    const holdings = d.holdings || [];
+    const mttCount = holdings.filter((h) => h.mtt?.mtt_pass).length;
+    const top3 = [...holdings]
+      .sort((a, b) => (b.change_pct || 0) - (a.change_pct || 0))
+      .slice(0, 3)
+      .map((x) => `${x.name_kr}(${fmtS(x.change_pct)})`)
+      .join(", ");
+    const aumB = d.dram_etf_flow?.latest_aum ? (d.dram_etf_flow.latest_aum / 1e9).toFixed(2) : "19.19";
+
+    d.briefing.points = [
+      `<strong>1. SOXX · SOXL(3X) &amp; RAM(2X) · DRAM 4대 ETF 실시간 판독</strong> — 비메모리·장비 본진인 SOXX는 $${soxx.price.toFixed(2)} (${fmtS(soxx.change_pct)}), 반도체 3배 레버리지 SOXL은 $${soxl.price.toFixed(2)} (${fmtS(soxl.change_pct)}), 메모리 원지수 DRAM ETF는 $${dram.price.toFixed(2)} (${fmtS(dram.change_pct)}), 메모리 2배 레버리지 RAM은 $${ram.price.toFixed(2)} (${fmtS(ram.change_pct)})을 기록 중입니다.${extNote} 핵심 감시 ${holdings.length}개 종목 중 미너비니 정배열(MTT) 충족 종목은 ${mttCount}개입니다.`,
+      `<strong>2. 메모리 3대장 (삼성전자 · SK하이닉스 · 마이크론) &amp; 자금 유입</strong> — RAM의 기초자산인 Roundhill DRAM ETF(순자산 약 $${aumB}B)는 삼성전자(18.7%), SK하이닉스(15.0%), 마이크론 스왑(약 25.2%)을 핵심 축으로 운용됩니다. 현재 주가 탄력 상위 종목은 ${top3} 순입니다.`,
+      `<strong>3. 채권 금리 · 국제 유가 · 전쟁 지정학 리스크</strong> — 미국 10년물 국채금리는 ${us10y?.price ?? "-"}%, WTI 원유는 배럴당 $${wti?.price ?? "-"}, VIX 변동성 지수는 ${vix?.price ?? "-"}pt 수준에서 움직이고 있습니다.`,
+    ];
+  }
+
   function renderBriefingSection() {
+    syncDynamicBriefingText();
     const d = state.data;
     if (!d || !d.briefing) return;
     const b = d.briefing;
@@ -1565,23 +1604,22 @@
         return `
         <article class="stock-card" data-ticker="${h.ticker}">
           <div class="stock-card-head">
-            <div>
-              <div class="stock-title-group">
-                <h3 class="stock-name">${h.name_kr}</h3>
-                <span class="stock-ticker num">${h.ticker}</span>
-                <span class="stock-group-badge">${h.etf_group || ""}</span>
-                ${h.mtt?.mtt_pass ? '<span class="mtt-badge">★ MTT 정배열</span>' : ""}
-              </div>
-              <div class="stock-subsector">
-                <span>${h.subsector || ""} ${h.foreign_ratio ? `· 외국인 ${h.foreign_ratio}%` : ""}</span>
-                <button type="button" class="stock-live-jump-btn" data-jump-ticker="${h.ticker}" data-jump-name="${h.name_kr}" data-jump-cur="${h.currency || "USD"}">📈 실시간 차트</button>
-              </div>
+            <div class="stock-title-group">
+              <h3 class="stock-name">${h.name_kr}</h3>
+              <span class="stock-ticker num">${h.ticker}</span>
+              <span class="stock-group-badge">${h.etf_group || ""}</span>
+              ${h.mtt?.mtt_pass ? '<span class="mtt-badge">★ MTT 정배열</span>' : ""}
             </div>
 
             <div class="stock-price-box num">
               <span class="stock-price">${fmtPrice(h.price, h.currency)}</span>
               <span class="stock-chg ${dirClass(h.change_pct, false)}">${fmtSignedChange(h.change, h.change_pct)}</span>
             </div>
+          </div>
+
+          <div class="stock-subsector">
+            <span class="stock-subsector-text">${h.subsector || ""} ${h.foreign_ratio ? `· 외국인 ${h.foreign_ratio}%` : ""}</span>
+            <button type="button" class="stock-live-jump-btn" data-jump-ticker="${h.ticker}" data-jump-name="${h.name_kr}" data-jump-cur="${h.currency || "USD"}">📈 실시간 차트</button>
           </div>
 
           <div class="stock-metrics-row num">
@@ -1606,7 +1644,7 @@
           <div class="pos52-bar-wrap num">
             <div class="pos52-labels">
               <span>52주 저가 ${fmtPrice(h.low_52w, h.currency)}</span>
-              <span>현재 위치 ${pos52.toFixed(0)}% (고가 대비 ${fmtSignedPct(h.pct_from_high)})</span>
+              <span>위치 ${pos52.toFixed(0)}% (${fmtSignedPct(h.pct_from_high)})</span>
               <span>52주 고가 ${fmtPrice(h.high_52w, h.currency)}</span>
             </div>
             <div class="pos52-track">
@@ -1694,6 +1732,193 @@
       .join("");
   }
 
+  function formatKstDateStrFromEpochSec(epochSec) {
+    if (!epochSec || isNaN(epochSec)) return "";
+    const kst = new Date((epochSec + 9 * 3600) * 1000);
+    const mm = String(kst.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(kst.getUTCDate()).padStart(2, "0");
+    const hh = String(kst.getUTCHours()).padStart(2, "0");
+    const mi = String(kst.getUTCMinutes()).padStart(2, "0");
+    return `${mm}.${dd} ${hh}:${mi}`;
+  }
+
+  function parseJinaRssMarkdown(mdText, category, lang, limit) {
+    if (!mdText || typeof mdText !== "string") return [];
+    const blocks = mdText.split("### [").slice(1);
+    const items = [];
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i];
+      const mHead = b.match(/^([^\]]+)\]\((https?:\/\/[^\)]+)\)/);
+      const mDate = b.match(/([A-Z][a-z]{2},\s+\d{1,2}\s+[A-Za-z]{3}\s+\d{4}\s+\d{2}:\d{2}:\d{2}\s+GMT)/);
+      if (!mHead || !mDate) continue;
+      let rawTitle = mHead[1].trim();
+      const link = mHead[2].trim();
+      const pubStr = mDate[1];
+      const dtMs = Date.parse(pubStr);
+      if (isNaN(dtMs)) continue;
+      const ts = Math.floor(dtMs / 1000);
+      let source = "Google 뉴스";
+      const dashIdx = rawTitle.lastIndexOf(" - ");
+      if (dashIdx > 0 && rawTitle.length - dashIdx < 28) {
+        source = rawTitle.slice(dashIdx + 3).trim();
+        rawTitle = rawTitle.slice(0, dashIdx).trim();
+      }
+      items.push({
+        title: rawTitle,
+        link,
+        source,
+        date: formatKstDateStrFromEpochSec(ts),
+        pub_date: formatKstDateStrFromEpochSec(ts),
+        timestamp: ts,
+        category,
+        lang,
+      });
+    }
+    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    return items.slice(0, limit || 8);
+  }
+
+  async function fetchLiveGoogleNewsViaJina(query, category, lang, limit) {
+    try {
+      const qWithTime = query.includes("when:") ? query : `${query} when:2d`;
+      const enc = encodeURIComponent(qWithTime);
+      const rssUrl =
+        lang === "ko"
+          ? `https://news.google.com/rss/search?q=${enc}&hl=ko&gl=KR&ceid=KR:ko`
+          : `https://news.google.com/rss/search?q=${enc}&hl=en-US&gl=US&ceid=US:en`;
+      const resp = await fetch(`https://r.jina.ai/${rssUrl}`, { cache: "no-store" });
+      if (!resp.ok) return [];
+      const txt = await resp.text();
+      return parseJinaRssMarkdown(txt, category, lang, limit);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async function fetchCnbcLiveBreakingNews(limit = 8) {
+    try {
+      const url = `https://api.queryly.com/cnbc/json.aspx?queryly_key=31a35d40a9a64ab3&query=${encodeURIComponent(
+        "semiconductor OR Micron OR NVIDIA OR HBM OR TSMC OR Broadcom"
+      )}&endindex=0&batchsize=${limit}&sort=date`;
+      const resp = await fetch(url, { cache: "no-store" });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      const results = json?.results || [];
+      const items = [];
+      results.forEach((r) => {
+        const title = (r["cn:title"] || r.title || "").trim();
+        const link = r.url || r["cn:liveURL"] || "#";
+        const pubIso = r.datePublished || r["cn:lastPubDate"] || "";
+        const dtMs = Date.parse(pubIso);
+        if (!title || isNaN(dtMs)) return;
+        const ts = Math.floor(dtMs / 1000);
+        items.push({
+          title,
+          link,
+          source: "CNBC Live",
+          date: formatKstDateStrFromEpochSec(ts),
+          pub_date: formatKstDateStrFromEpochSec(ts),
+          timestamp: ts,
+          category: "월가 영문속보",
+          lang: "en",
+        });
+      });
+      return items;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async function refreshNewsAndIntelligence(isManual) {
+    const d = state.data;
+    if (!d) return;
+
+    const spinIcon = document.getElementById("newsRefreshSpinIcon");
+    const statusTxt = document.getElementById("newsLastRefreshedText");
+    if (spinIcon) spinIcon.classList.add("spinning");
+    if (statusTxt && isManual) statusTxt.textContent = "실시간 뉴스·지표 수집 중...";
+
+    try {
+      const tsParam = Date.now();
+      const [remoteSnapResp, koMem, koAi, koGeo, koOil, koBond, enCnbc] = await Promise.all([
+        fetch(`./intelligence_data.json?t=${tsParam}`, { cache: "no-store" }).catch(() => null),
+        fetchLiveGoogleNewsViaJina("(삼성전자 OR SK하이닉스 OR 마이크론) (HBM OR DRAM OR 반도체)", "메모리 · RAM", "ko", 8),
+        fetchLiveGoogleNewsViaJina("(엔비디아 OR TSMC OR 브로드컴 OR 필라델피아반도체) AI 반도체", "SOXX · AI반도체", "ko", 8),
+        fetchLiveGoogleNewsViaJina("(중동 전쟁 OR 대만 해협 OR 미중 반도체 수출통제 관세)", "전쟁 · 지정학", "ko", 6),
+        fetchLiveGoogleNewsViaJina("(국제유가 OR WTI OR 브렌트유 OR 호르무즈 원유)", "유가 · 에너지", "ko", 6),
+        fetchLiveGoogleNewsViaJina("(미국 국채 금리 10년물 OR 연준 FOMC OR 기준금리)", "채권 · 금리", "ko", 6),
+        fetchCnbcLiveBreakingNews(6),
+      ]);
+
+      let snapNews = [];
+      if (remoteSnapResp && remoteSnapResp.ok) {
+        try {
+          const rawJson = await remoteSnapResp.json();
+          const norm = normalizeRawData(rawJson);
+          if (norm) {
+            if (norm.dram_etf_flow && norm.dram_etf_flow.latest_aum) {
+              d.dram_etf_flow = norm.dram_etf_flow;
+              renderDramFlowPanel();
+            }
+            if (Array.isArray(norm.news)) {
+              snapNews = norm.news;
+            }
+          }
+        } catch (e) {
+          // 스냅샷 파싱 실패 시 무시
+        }
+      }
+
+      const combined = [...koMem, ...koAi, ...koGeo, ...koOil, ...koBond, ...enCnbc, ...snapNews, ...(d.news || [])];
+      const seen = new Set();
+      const deduped = [];
+      for (let i = 0; i < combined.length; i++) {
+        const it = combined[i];
+        if (!it || !it.title) continue;
+        const normKey = String(it.title).replace(/\s+/g, "").slice(0, 28);
+        if (seen.has(normKey)) continue;
+        seen.add(normKey);
+        deduped.push({
+          ...it,
+          pub_date: it.pub_date || it.date || "",
+          timestamp: it.timestamp || 0,
+        });
+      }
+
+      deduped.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      if (deduped.length > 0) {
+        d.news = deduped.slice(0, 48);
+        renderNews();
+      }
+
+      renderBriefingSection();
+
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      if (statusTxt) {
+        statusTxt.textContent = `${state.newsRefreshMinutes}분 자동 · 최근 ${hh}:${mm}:${ss} 갱신`;
+      }
+    } catch (e) {
+      // 오프라인 시 기존 뉴스 유지
+    } finally {
+      if (spinIcon) {
+        setTimeout(() => spinIcon.classList.remove("spinning"), 400);
+      }
+    }
+  }
+
+  function scheduleNewsAutoRefresh() {
+    if (state.newsRefreshTimer) {
+      clearInterval(state.newsRefreshTimer);
+    }
+    const ms = Math.max(1, state.newsRefreshMinutes) * 60 * 1000;
+    state.newsRefreshTimer = setInterval(() => {
+      refreshNewsAndIntelligence(false);
+    }, ms);
+  }
+
   function bindNewsControls() {
     document.querySelectorAll("[data-news-filter]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -1702,6 +1927,31 @@
         renderNews();
       });
     });
+
+    const ivTabs = document.getElementById("newsRefreshIntervalTabs");
+    if (ivTabs) {
+      ivTabs.querySelectorAll("[data-news-iv]").forEach((btn) => {
+        const ivVal = parseInt(btn.getAttribute("data-news-iv") || "5", 10);
+        btn.classList.toggle("active", ivVal === state.newsRefreshMinutes);
+        btn.addEventListener("click", () => {
+          state.newsRefreshMinutes = ivVal;
+          localStorage.setItem("evening_soxx_news_iv", String(ivVal));
+          ivTabs.querySelectorAll("[data-news-iv]").forEach((b) => b.classList.toggle("active", b === btn));
+          scheduleNewsAutoRefresh();
+          const statusTxt = document.getElementById("newsLastRefreshedText");
+          if (statusTxt) {
+            statusTxt.textContent = `${ivVal}분 간격 자동 새로고침 적용됨`;
+          }
+        });
+      });
+    }
+
+    const btnNow = document.getElementById("btnRefreshNewsNow");
+    if (btnNow) {
+      btnNow.addEventListener("click", () => {
+        refreshNewsAndIntelligence(true);
+      });
+    }
   }
 
   /* ========================================================================
@@ -2011,7 +2261,7 @@
         </div>
         <div>
           <h3 class="etf-name">오라클 (Oracle) 5년물 CDS 스프레드</h3>
-          <p class="etf-role" style="margin-bottom:4px;">OpenAI · 대형 AI 클러스터 확장을 위한 공격적 회사채 발행으로 연초(138bp) 대비 2배 이상 상승</p>
+          <p class="etf-role" style="margin-bottom:4px; white-space:normal;">OpenAI · 대형 AI 클러스터 확장을 위한 공격적 회사채 발행으로 연초(138bp) 대비 2배 이상 상승</p>
         </div>
 
         <div class="cds-main-row num">
@@ -2028,7 +2278,7 @@
           </div>
           <div class="metric-cell">
             <small>신용등급 방어선</small>
-            <strong>BBB- (정크 직전 1단계)</strong>
+            <strong>BBB- (정크 직전)</strong>
           </div>
           <div class="metric-cell">
             <small>ORCL 현재 주가</small>
@@ -2036,7 +2286,7 @@
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:4px;">
           <span style="font-size:0.74rem; color:var(--ink-muted);">핵심 관전: 350bp 이하 안착 및 투자적격(IG) 유지 여부</span>
           <button type="button" class="stock-live-jump-btn" data-cds-stock="ORCL" data-cds-name="오라클 (Oracle)">📈 ORCL 주가 라이브 차트</button>
         </div>
@@ -2052,7 +2302,7 @@
         </div>
         <div>
           <h3 class="etf-name">코어위브 (CoreWeave) 5년물 CDS 스프레드</h3>
-          <p class="etf-role" style="margin-bottom:4px;">총 부채·리스 $51B vs 수주잔고 $100B+ · 단기(3년) GPU 계약과 장기 인프라 채권 간 만기 불일치 반영</p>
+          <p class="etf-role" style="margin-bottom:4px; white-space:normal;">총 부채·리스 $51B vs 수주잔고 $100B+ · 단기(3년) GPU 계약과 장기 인프라 채권 간 만기 불일치 반영</p>
         </div>
 
         <div class="cds-main-row num">
@@ -2064,12 +2314,12 @@
 
         <div class="etf-metrics-grid num">
           <div class="metric-cell">
-            <small>2031·2032 채권 수익률</small>
-            <strong class="up-text">15.8% (하일드 급등)</strong>
+            <small>2031·2032 채권 금리</small>
+            <strong class="up-text">15.8% (하일드)</strong>
           </div>
           <div class="metric-cell">
             <small>내재 5년 부도확률</small>
-            <strong>약 54% ~ 58% 반영</strong>
+            <strong>약 54% ~ 58%</strong>
           </div>
           <div class="metric-cell">
             <small>CRWV 현재 주가</small>
@@ -2077,7 +2327,7 @@
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:4px;">
           <span style="font-size:0.74rem; color:var(--ink-muted);">핵심 관전: $100B 빅테크 수주잔고 기반 차환(Refinancing) 성공 여부</span>
           <button type="button" class="stock-live-jump-btn" data-cds-stock="CRWV" data-cds-name="코어위브 (CoreWeave)">📈 CRWV 주가 라이브 차트</button>
         </div>
@@ -2392,6 +2642,8 @@
 
     fetchLiveQuotesFromCNBC(false);
     fetchCdsCompanyStockQuotes();
+    scheduleNewsAutoRefresh();
+    setTimeout(() => refreshNewsAndIntelligence(false), 2000);
     setInterval(() => fetchLiveQuotesFromCNBC(false), 30000);
     setInterval(() => fetchCdsCompanyStockQuotes(), 45000);
     setInterval(() => pollActiveChartLiveTick(), 10000);

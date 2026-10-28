@@ -84,7 +84,10 @@ def fetch_cnbc_bars(cnbc_sym):
             if last_val < candles[-1]["low"]:
                 candles[-1]["low"] = round(last_val, 4)
             if prev_str and len(candles) >= 2:
-                candles[-2]["close"] = round(float(prev_str), 4)
+                prev_val = float(prev_str)
+                # PRE_MKT(정규장 개장 전)에는 previous_day_closing이 전일 종가(last_val)와 동일하게 내려오므로 덮어쓰지 않음
+                if abs(prev_val - last_val) > 1e-4:
+                    candles[-2]["close"] = round(prev_val, 4)
     except Exception:
         pass
 
@@ -323,7 +326,8 @@ def fetch_dram_etf_flow():
 
 
 def fetch_google_rss(query, category, lang="ko", limit=8):
-    encoded = urllib.parse.quote(query)
+    q_with_time = f"{query} when:3d" if "when:" not in query else query
+    encoded = urllib.parse.quote(q_with_time)
     if lang == "ko":
         url = f"https://news.google.com/rss/search?q={encoded}&hl=ko&gl=KR&ceid=KR:ko"
     else:
@@ -333,7 +337,7 @@ def fetch_google_rss(query, category, lang="ko", limit=8):
     try:
         xml_text = http_get(url, timeout=8)
         root = ET.fromstring(xml_text)
-        for item in root.findall(".//item")[:limit]:
+        for item in root.findall(".//item"):
             title = item.findtext("title", "").strip()
             link = item.findtext("link", "").strip()
             pub_date = item.findtext("pubDate", "").strip()
@@ -366,6 +370,8 @@ def fetch_google_rss(query, category, lang="ko", limit=8):
                 "category": category,
                 "lang": lang,
             })
+        items.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+        items = items[:limit]
     except Exception as e:
         print(f"RSS Error [{category}]: {e}")
     return items
@@ -604,6 +610,8 @@ def main():
                 seen_titles.add(norm)
                 all_news.append(it)
         print(f"  ✓ 뉴스 수집 완료: [{cat}] {len(items)}건")
+
+    all_news.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
 
     soxx_item = next((x for x in etfs if x["symbol"] == "SOXX"), None)
     soxl_item = next((x for x in etfs if x["symbol"] == "SOXL"), None)

@@ -117,6 +117,9 @@ html {
   font-size: calc(16px * var(--base-scale));
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -126,6 +129,8 @@ body {
   line-height: 1.55;
   letter-spacing: -0.015em;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   transition: background-color 0.2s ease, color 0.2s ease;
   overflow-x: hidden;
 }
@@ -379,19 +384,27 @@ a {
    ========================================================================== */
 .app-main {
   max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 18px 16px 96px;
   display: flex;
   flex-direction: column;
   gap: 32px;
+  min-width: 0;
 }
 
 .study-section {
   scroll-margin-top: 132px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .section-head {
   margin-bottom: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .section-kicker {
   display: block;
@@ -407,11 +420,13 @@ a {
   font-weight: 800;
   color: var(--ink-primary);
   letter-spacing: -0.02em;
+  word-break: keep-all;
 }
 .section-desc {
   font-size: 0.82rem;
   color: var(--ink-secondary);
   margin-top: 3px;
+  word-break: keep-all;
 }
 
 /* 최상단 한 줄 이브닝 시황 배너 (초기 버전 다크 포레스트-차콜 & 앤틱 골드 배색) */
@@ -427,6 +442,9 @@ a {
   justify-content: space-between;
   gap: 10px;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .epb-left {
@@ -476,14 +494,17 @@ a {
    ========================================================================== */
 .etf-trio-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 1150px) and (min-width: 769px) {
   .etf-trio-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -496,6 +517,9 @@ a {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   cursor: pointer;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .etf-card:hover,
 .etf-card.selected {
@@ -521,6 +545,7 @@ a {
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 .etf-ticker-badge {
   font-family: var(--font-serif);
@@ -563,6 +588,7 @@ a {
   padding: 9px 0;
   border-top: 1px dashed var(--border-line);
   border-bottom: 1px dashed var(--border-line);
+  flex-wrap: wrap;
 }
 .etf-price {
   font-size: 1.48rem;
@@ -578,26 +604,36 @@ a {
 
 .etf-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   margin-top: 10px;
+  width: 100%;
+  min-width: 0;
 }
 .metric-cell {
   background: var(--bg-box);
-  padding: 7px 9px;
+  padding: 7px 8px;
   border-radius: 7px;
   border: 1px solid var(--border-line);
+  min-width: 0;
+  overflow: hidden;
 }
 .metric-cell small {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .metric-cell strong {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   margin-top: 1px;
   color: var(--ink-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .etf-returns-bar {
@@ -726,8 +762,11 @@ a {
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  margin: 0 -2px;
-  padding: 2px;
+  margin: 0;
+  padding: 2px 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .quick-tickers-scroll::-webkit-scrollbar {
   display: none;
@@ -769,6 +808,9 @@ a {
   border-radius: var(--radius-md);
   padding: 16px;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .panel-header {
@@ -778,6 +820,8 @@ a {
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
 .panel-title {
@@ -785,6 +829,7 @@ a {
   font-size: 1.04rem;
   font-weight: 800;
   line-height: 1.35;
+  word-break: keep-all;
 }
 
 .chart-controls-row {
@@ -794,6 +839,8 @@ a {
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .interval-tabs {
@@ -803,6 +850,8 @@ a {
   border-radius: 9px;
   padding: 3px;
   gap: 2px;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 .iv-btn {
   padding: 6px 12px;
@@ -811,6 +860,7 @@ a {
   font-weight: 800;
   color: var(--ink-muted);
   transition: all 0.15s;
+  white-space: nowrap;
 }
 .iv-btn.active {
   background: var(--gold-main);
@@ -874,11 +924,16 @@ a {
   min-height: 34px;
   display: flex;
   align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .hud-items {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 12px;
+  gap: 6px 10px;
+  width: 100%;
+  min-width: 0;
 }
 .hud-items span b {
   margin-left: 3px;
@@ -886,6 +941,7 @@ a {
 
 .canvas-wrap {
   width: 100%;
+  max-width: 100%;
   height: 295px;
   position: relative;
   background: var(--bg-page);
@@ -893,6 +949,7 @@ a {
   border-radius: var(--radius-sm);
   padding: 8px;
   touch-action: pan-y;
+  overflow: hidden;
 }
 .canvas-wrap canvas {
   width: 100%;
@@ -902,9 +959,11 @@ a {
 
 .chart-summary-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin-top: 10px;
+  width: 100%;
+  min-width: 0;
 }
 .strip-item {
   background: var(--bg-page);
@@ -912,14 +971,23 @@ a {
   border-radius: 8px;
   padding: 7px 10px;
   font-size: 0.76rem;
+  min-width: 0;
+  overflow: hidden;
 }
 .strip-item span {
   display: block;
   color: var(--ink-muted);
   font-size: 0.66rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .strip-item strong {
   font-size: 0.86rem;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @keyframes flashPrice {
@@ -935,8 +1003,11 @@ a {
    ========================================================================== */
 .brief-and-flow-grid {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .brief-card {
@@ -951,6 +1022,9 @@ a {
   flex-direction: column;
   justify-content: space-between;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .brief-card-top {
@@ -1003,10 +1077,12 @@ a {
 
 .brief-Quick-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding-top: 10px;
   border-top: 1px dashed rgba(255, 255, 255, 0.14);
+  width: 100%;
+  min-width: 0;
 }
 
 .mini-stat-box {
@@ -1014,19 +1090,23 @@ a {
   border: 1px solid rgba(200, 157, 66, 0.25);
   border-radius: 8px;
   padding: 8px 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 .mini-stat-label {
   font-size: 0.68rem;
   color: #A9B5AE;
 }
 .mini-stat-val {
-  font-size: 0.94rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: #FFFFFF;
   margin-top: 2px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .dram-holdings-list {
@@ -1065,8 +1145,11 @@ a {
    ========================================================================== */
 .cds-hero-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .cds-card {
@@ -1079,6 +1162,9 @@ a {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .cds-card.distress {
   border-top-color: #C9352E;
@@ -1095,7 +1181,8 @@ a {
 .cds-badge-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .cds-main-row {
@@ -1127,9 +1214,11 @@ a {
 
 .cds-insight-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-top: 12px;
+  width: 100%;
+  min-width: 0;
 }
 
 .cds-insight-box {
@@ -1141,6 +1230,8 @@ a {
   font-size: 0.78rem;
   line-height: 1.52;
   color: var(--ink-secondary);
+  min-width: 0;
+  word-break: keep-all;
 }
 .cds-insight-box strong {
   display: block;
@@ -1153,7 +1244,7 @@ a {
 @media (max-width: 900px) {
   .cds-hero-grid,
   .cds-insight-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .cds-canvas-wrap {
     height: 245px;
@@ -1165,8 +1256,11 @@ a {
    ========================================================================== */
 .macro-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .macro-card {
@@ -1180,6 +1274,10 @@ a {
   justify-content: space-between;
   cursor: pointer;
   transition: border-color 0.16s, transform 0.16s;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 .macro-card:hover,
 .macro-card:active {
@@ -1271,13 +1369,18 @@ a {
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .chip-scroll-wrap {
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
 }
 .chip-scroll-wrap::-webkit-scrollbar {
   display: none;
@@ -1305,6 +1408,11 @@ a {
   border-color: var(--gold-main);
 }
 
+.sort-box {
+  width: auto;
+  max-width: 100%;
+}
+
 .sort-select {
   padding: 7px 11px;
   border-radius: 8px;
@@ -1314,6 +1422,7 @@ a {
   font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
+  max-width: 100%;
 }
 
 /* 접이식 히트맵 아코디언 */
@@ -1323,12 +1432,18 @@ a {
   border-radius: var(--radius-md);
   padding: 10px 12px;
   margin-bottom: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 .heatmap-summary {
   list-style: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
   cursor: pointer;
   font-size: 0.82rem;
   font-weight: 800;
@@ -1345,9 +1460,12 @@ a {
 
 .heatmap-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
   margin-top: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .heat-cell {
   padding: 8px 9px;
@@ -1359,17 +1477,24 @@ a {
   flex-direction: column;
   justify-content: space-between;
   min-height: 68px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .heat-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 3px;
+  min-width: 0;
 }
 .heat-ticker {
   font-size: 0.66rem;
   font-weight: 700;
   color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .heat-rs {
   font-size: 0.62rem;
@@ -1378,6 +1503,8 @@ a {
   border-radius: 4px;
   background: var(--gold-soft);
   color: var(--gold-main);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .heat-name {
   font-family: var(--font-serif);
@@ -1392,15 +1519,25 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  gap: 3px;
   font-size: 0.75rem;
   font-weight: 800;
+  min-width: 0;
+}
+.heat-bottom span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 종목 카드 그리드 */
 .holdings-card-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .stock-card {
@@ -1411,6 +1548,10 @@ a {
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: border-color 0.16s;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 .stock-card:hover,
 .stock-card:active {
@@ -1422,12 +1563,15 @@ a {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
 }
 .stock-title-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
 }
 .stock-name {
   font-family: var(--font-serif);
@@ -1477,10 +1621,19 @@ a {
 .stock-subsector {
   font-size: 0.72rem;
   color: var(--ink-muted);
-  margin-top: 2px;
+  margin-top: 6px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.stock-subsector-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stock-live-jump-btn {
@@ -1489,35 +1642,54 @@ a {
   color: var(--gold-main);
   background: var(--gold-soft);
   border: 1px solid var(--gold-border);
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .stock-metrics-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px dashed var(--border-line);
   font-size: 0.72rem;
+  width: 100%;
+  min-width: 0;
+}
+.sm-item {
+  min-width: 0;
+  overflow: hidden;
 }
 .sm-item span {
   display: block;
   color: var(--ink-muted);
   font-size: 0.64rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .sm-item strong {
   font-weight: 700;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pos52-bar-wrap {
   margin-top: 8px;
+  width: 100%;
+  min-width: 0;
 }
 .pos52-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.66rem;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 0.65rem;
   color: var(--ink-muted);
   margin-bottom: 3px;
 }
@@ -1547,10 +1719,19 @@ a {
 /* ==========================================================================
    9. 실시간 글로벌 소식 & 지정학 뉴스룸
    ========================================================================== */
+#btnRefreshNewsNow {
+  color: var(--ink-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+}
+
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .news-card {
@@ -1562,6 +1743,10 @@ a {
   flex-direction: column;
   justify-content: space-between;
   gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 .news-card:hover,
 .news-card:active {
@@ -1574,6 +1759,7 @@ a {
   justify-content: space-between;
   gap: 8px;
   font-size: 0.68rem;
+  flex-wrap: wrap;
 }
 .news-cat-tag {
   font-weight: 800;
@@ -1677,7 +1863,7 @@ a {
 }
 .modal-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 .modal-note {
@@ -1751,11 +1937,11 @@ a {
 }
 
 /* ==========================================================================
-   11. 스마트폰 모바일 특화 반응형 (<= 768px)
+   11. 스마트폰 모바일 특화 반응형 (<= 768px) — 전 섹션 가로폭 100% 칼정렬
    ========================================================================== */
 @media (max-width: 1024px) {
   .brief-and-flow-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1804,38 +1990,45 @@ a {
   .app-main {
     padding: 12px 12px 92px;
     gap: 24px;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .study-section {
     scroll-margin-top: 84px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .section-title {
+    font-size: 1.14rem;
   }
 
   .evening-pulse-banner {
     padding: 9px 11px;
     margin-bottom: 10px;
+    width: 100%;
   }
   .epb-headline {
     font-size: 0.78rem;
   }
 
-  /* 모바일에서 SOXX · RAM · DRAM 3대장 카드를 가로 스냅 슬라이더로 배치하여 첫 화면에 차트와 함께 노출 */
+  /* 모바일에서 4대 ETF 카드도 다른 모든 카드들과 가로폭 100% 완전 통일 */
   .etf-trio-grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
-    padding: 10px 2px 4px;
-    margin-bottom: 10px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .etf-trio-grid::-webkit-scrollbar {
-    display: none;
+    padding: 0;
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 100%;
   }
   .etf-card {
-    flex: 0 0 84%;
-    scroll-snap-align: center;
-    padding: 12px 14px;
+    width: 100%;
+    max-width: 100%;
+    padding: 13px 14px;
   }
   .etf-role {
     margin-bottom: 6px;
@@ -1845,25 +2038,50 @@ a {
   }
   .etf-metrics-grid {
     margin-top: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  /* 라이브 차트 모바일 높이 최적화 */
-  .panel-card {
-    padding: 12px;
+  /* 라이브 차트 및 CDS 차트 모바일 가로폭·높이 최적화 */
+  .panel-card,
+  .brief-card,
+  .cds-card,
+  .stock-card,
+  .news-card,
+  .heatmap-accordion,
+  .live-search-bar {
+    padding: 12px 13px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
+
+  #cdsModeTabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+  #cdsModeTabs .iv-btn {
+    padding: 6px 4px;
+    font-size: 0.68rem;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .canvas-wrap {
     height: 240px;
     padding: 6px;
   }
   .chart-summary-strip {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
 
-  /* 8대 매크로 레이더: 모바일에서도 2열(2x4)로 한눈에 비교 */
+  /* 8대 매크로 레이더: 모바일 2열(2x4) 칼정렬 */
   .macro-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+    width: 100%;
   }
   .macro-card {
     padding: 11px;
@@ -1872,7 +2090,7 @@ a {
     font-size: 0.84rem;
   }
   .macro-price {
-    font-size: 1.06rem;
+    font-size: 1.04rem;
   }
   .macro-spark-wrap {
     height: 28px;
@@ -1885,31 +2103,33 @@ a {
     overflow: hidden;
   }
 
-  /* 히트맵 모바일 4열 */
+  /* 히트맵 모바일 2열 배치 (4열 시 '1,457,000원 +6.04%' 텍스트가 우측으로 삐져나오던 문제 완벽 해결) */
   .heatmap-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
   }
   .heat-cell {
-    padding: 6px;
+    padding: 8px 10px;
     min-height: 58px;
   }
   .heat-name {
-    font-size: 0.74rem;
+    font-size: 0.8rem;
   }
   .heat-bottom {
-    font-size: 0.68rem;
+    font-size: 0.74rem;
   }
 
-  /* 보유 종목 카드 & 뉴스 1열 */
+  /* 보유 종목 카드 & 뉴스 1열 (가로폭 100% 일치) */
   .holdings-card-grid,
   .news-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
+    width: 100%;
   }
 
   .stock-metrics-row {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   /* 모바일 바텀시트 모달 */
@@ -1928,7 +2148,7 @@ a {
     display: block;
   }
   .modal-metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
