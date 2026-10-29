@@ -146,6 +146,7 @@
     { symbol: "005380.KS", cnbc: "005380.KS", name: "현대자동차", exch: "KOSPI", cur: "KRW" },
     { symbol: "035420.KS", cnbc: "035420.KS", name: "NAVER (네이버)", exch: "KOSPI", cur: "KRW" },
     { symbol: "MU", cnbc: "MU", name: "마이크론 테크놀로지 (Micron)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "SNDK", cnbc: "SNDK", name: "샌디스크 (SanDisk · NAND/eSSD)", exch: "NASDAQ", cur: "USD" },
     { symbol: "NVDA", cnbc: "NVDA", name: "엔비디아 (NVIDIA)", exch: "NASDAQ", cur: "USD" },
     { symbol: "AVGO", cnbc: "AVGO", name: "브로드컴 (Broadcom)", exch: "NASDAQ", cur: "USD" },
     { symbol: "AMD", cnbc: "AMD", name: "AMD (어드밴스드 마이크로 디바이시스)", exch: "NASDAQ", cur: "USD" },
@@ -378,7 +379,7 @@
       }
     });
 
-    ["005930.KS", "000660.KS", "MU", "NVDA"].forEach((tk) => {
+    ["005930.KS", "000660.KS", "MU", "SNDK", "NVDA"].forEach((tk) => {
       const h = (d.holdings || []).find((x) => x.ticker === tk);
       if (h) {
         items.push({
@@ -633,7 +634,13 @@
 
       <div class="dram-holdings-list num">
         ${holdings
-          .slice(0, 6)
+          .filter(
+            (h) =>
+              !String(h.name || "").includes("Treasury Bill") &&
+              !String(h.name || "").includes("Government Obligations") &&
+              !String(h.name || "").includes("Cash")
+          )
+          .slice(0, 8)
           .map((h) => {
             const w = Math.min(100, Math.max(2, Number(h.weight_pct || 0)));
             return `
@@ -911,10 +918,27 @@
         const qJson = await quoteResp.json();
         const qItem = qJson?.FormattedQuoteResult?.FormattedQuote?.[0];
         quoteInfo = extractLiveQuoteInfo(qItem, displayName);
-        if (quoteInfo) {
-          state.liveQuote = quoteInfo;
-          renderMainChartTitleHTML(displayName, symbol, currency, interval, quoteInfo);
-        }
+      }
+
+      // 한국 종목(.KS) 등 CNBC restQuote 응답이 없는 경우 로컬 실시간 데이터로 타이틀 표시
+      if (!quoteInfo && localRef && localRef.price) {
+        quoteInfo = {
+          price: Number(localRef.price),
+          change: Number(localRef.change || 0),
+          change_pct: Number(localRef.change_pct || 0),
+          extPrice: localRef.ext_price !== undefined ? localRef.ext_price : null,
+          extPct: localRef.ext_change_pct !== undefined ? localRef.ext_change_pct : null,
+          extLabel: localRef.ext_label || "",
+          mktStatus: "REG_MKT",
+          activeIntradayPrice: localRef.ext_price || Number(localRef.price),
+          activeIntradayPct: localRef.ext_change_pct || Number(localRef.change_pct || 0),
+          name: displayName,
+        };
+      }
+
+      if (quoteInfo) {
+        state.liveQuote = quoteInfo;
+        renderMainChartTitleHTML(displayName, symbol, currency, interval, quoteInfo);
       }
 
       if (barResp.ok) {
@@ -2037,8 +2061,111 @@
   }
 
   /* ========================================================================
-     12. 백그라운드 실시간 시세 자동 갱신 (10초 틱 & 30초 전체 시세)
+     12. 백그라운드 실시간 시세 자동 갱신 (10초 틱 & 30초 전체 시세 + 한국 삼닉 실시간 연동)
      ======================================================================== */
+  async function fetchKoreanLiveQuotes(d) {
+    if (!d || !Array.isArray(d.holdings)) return 0;
+    const krHoldings = d.holdings.filter((h) => String(h.ticker || "").endsWith(".KS"));
+    if (krHoldings.length === 0) return 0;
+
+    let krUpdated = 0;
+    const codes = krHoldings.map((h) => h.ticker.replace(".KS", "")).join(",");
+
+    // 1차: 네이버 금융 실시간 폴링 API (Jina CORS JSON 래퍼 경유)
+    try {
+      const naverUrl = `https://r.jina.ai/https://polling.finance.naver.com/api/realtime/domestic/stock/${codes}`;
+      const resp = await fetch(naverUrl, {
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+      });
+      if (resp.ok) {
+        const wrapper = await resp.json();
+        const innerStr = wrapper?.data?.content || "";
+        if (innerStr) {
+          const parsed = JSON.parse(innerStr);
+          const datas = parsed?.datas || [];
+          datas.forEach((item) => {
+            const code = item.itemCode;
+            const tk = `${code}.KS`;
+            const target = d.holdings.find((x) => x.ticker === tk);
+            if (!target) return;
+
+            const closeVal = parseFloat(String(item.closePrice || "").replace(/,/g, ""));
+            const rawChg = parseFloat(String(item.compareToPreviousClosePrice || "0").replace(/,/g, ""));
+            const rawPct = parseFloat(String(item.fluctuationsRatio || "0").replace(/[%+,]/g, ""));
+            const isFalling = String(item.compareToPreviousPrice?.code || "") === "5" || String(item.compareToPreviousPrice?.name || "") === "FALLING";
+
+            if (!isNaN(closeVal) && closeVal > 0) {
+              const signedChg = isFalling && rawChg > 0 ? -rawChg : rawChg;
+              const signedPct = isFalling && rawPct > 0 ? -rawPct : rawPct;
+              target.price = closeVal;
+              target.change = signedChg;
+              target.change_pct = signedPct;
+
+              // NXT 애프터마켓/프리마켓 시세가 있으면 함께 반영
+              const over = item.overMarketPriceInfo;
+              if (over && over.overPrice) {
+                const ovPrice = parseFloat(String(over.overPrice).replace(/,/g, ""));
+                const ovPct = parseFloat(String(over.fluctuationsRatio || "0").replace(/[%+,]/g, ""));
+                const ovFall = String(over.compareToPreviousPrice?.code || "") === "5" || String(over.compareToPreviousPrice?.name || "") === "FALLING";
+                if (!isNaN(ovPrice) && ovPrice > 0) {
+                  target.ext_price = ovPrice;
+                  target.ext_change_pct = ovFall && ovPct > 0 ? -ovPct : ovPct;
+                  target.ext_label = over.tradingSessionType === "PRE_MARKET" ? "프리" : "NXT시간외";
+                }
+              }
+
+              // 일봉 캔들 마지막 날도 최신 가격으로 동기화
+              if (Array.isArray(target.candles) && target.candles.length > 0) {
+                const lastC = target.candles[target.candles.length - 1];
+                lastC.close = closeVal;
+                if (closeVal > lastC.high) lastC.high = closeVal;
+                if (closeVal < lastC.low) lastC.low = closeVal;
+              }
+              krUpdated++;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      // 1차 실패 시 2차 CNBC Harmony 일봉 API 폴백으로 진행
+    }
+
+    if (krUpdated > 0) return krUpdated;
+
+    // 2차 폴백: CNBC Harmony 1D 바 API (CORS: * 기본 지원)
+    try {
+      const now = new Date();
+      const startDt = new Date(now.getTime() - 14 * 86400 * 1000);
+      const endDt = new Date(now.getTime() + 2 * 86400 * 1000);
+      await Promise.all(
+        krHoldings.map(async (h) => {
+          const enc = encodeURIComponent(h.ticker);
+          const barUrl = `https://ts-api.cnbc.com/harmony/app/bars/${enc}/1D/${formatCnbcTs(startDt)}/${formatCnbcTs(endDt)}/adjusted/EST5EDT.json`;
+          const r = await fetch(barUrl, { cache: "no-store" });
+          if (!r.ok) return;
+          const bj = await r.json();
+          const bars = bj?.barData?.priceBars || [];
+          if (bars.length >= 2) {
+            const lastB = bars[bars.length - 1];
+            const prevB = bars[bars.length - 2];
+            const c = parseFloat(lastB.close);
+            const p = parseFloat(prevB.close);
+            if (!isNaN(c) && c > 0 && !isNaN(p) && p > 0) {
+              h.price = c;
+              h.change = c - p;
+              h.change_pct = Number((((c - p) / p) * 100).toFixed(2));
+              krUpdated++;
+            }
+          }
+        })
+      );
+    } catch (e) {
+      // 무시
+    }
+    return krUpdated;
+  }
+
   async function fetchLiveQuotesFromCNBC(isManual) {
     const d = state.data;
     if (!d) return;
@@ -2069,49 +2196,54 @@
       const allSyms = Object.keys(symbolMap).join("|");
       const url = `https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=${encodeURIComponent(allSyms)}&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json`;
 
-      const resp = await fetch(url, { cache: "no-store" });
-      if (!resp.ok) throw new Error("CNBC HTTP " + resp.status);
-      const json = await resp.json();
-      const quotes = json?.FormattedQuoteResult?.FormattedQuote || [];
+      const [resp, krCount] = await Promise.all([
+        fetch(url, { cache: "no-store" }).catch(() => null),
+        fetchKoreanLiveQuotes(d),
+      ]);
 
-      let updatedCount = 0;
-      quotes.forEach((q) => {
-        const sym = q.symbol;
-        const target = symbolMap[sym];
-        if (!target || !q.last) return;
+      let updatedCount = krCount || 0;
+      if (resp && resp.ok) {
+        const json = await resp.json();
+        const quotes = json?.FormattedQuoteResult?.FormattedQuote || [];
 
-        const qInfo = extractLiveQuoteInfo(q, sym);
-        if (!qInfo) return;
+        quotes.forEach((q) => {
+          const sym = q.symbol;
+          const target = symbolMap[sym];
+          if (!target || !q.last) return;
 
-        if (target.type === "etf" && d.etfs?.[target.key]) {
-          d.etfs[target.key].price = qInfo.price;
-          d.etfs[target.key].change = qInfo.change;
-          d.etfs[target.key].change_pct = qInfo.change_pct;
-          d.etfs[target.key].ext_price = qInfo.extPrice;
-          d.etfs[target.key].ext_change_pct = qInfo.extPct;
-          d.etfs[target.key].ext_label = qInfo.extLabel;
-          updatedCount++;
-        } else if (target.type === "macro") {
-          const m = (d.macros || []).find((x) => x.key === target.key);
-          if (m) {
-            m.price = qInfo.price;
-            m.change = qInfo.change;
-            m.change_pct = qInfo.change_pct;
+          const qInfo = extractLiveQuoteInfo(q, sym);
+          if (!qInfo) return;
+
+          if (target.type === "etf" && d.etfs?.[target.key]) {
+            d.etfs[target.key].price = qInfo.price;
+            d.etfs[target.key].change = qInfo.change;
+            d.etfs[target.key].change_pct = qInfo.change_pct;
+            d.etfs[target.key].ext_price = qInfo.extPrice;
+            d.etfs[target.key].ext_change_pct = qInfo.extPct;
+            d.etfs[target.key].ext_label = qInfo.extLabel;
             updatedCount++;
+          } else if (target.type === "macro") {
+            const m = (d.macros || []).find((x) => x.key === target.key);
+            if (m) {
+              m.price = qInfo.price;
+              m.change = qInfo.change;
+              m.change_pct = qInfo.change_pct;
+              updatedCount++;
+            }
+          } else if (target.type === "holding") {
+            const h = (d.holdings || []).find((x) => x.ticker === target.key);
+            if (h) {
+              h.price = qInfo.price;
+              h.change = qInfo.change;
+              h.change_pct = qInfo.change_pct;
+              h.ext_price = qInfo.extPrice;
+              h.ext_change_pct = qInfo.extPct;
+              h.ext_label = qInfo.extLabel;
+              updatedCount++;
+            }
           }
-        } else if (target.type === "holding") {
-          const h = (d.holdings || []).find((x) => x.ticker === target.key);
-          if (h) {
-            h.price = qInfo.price;
-            h.change = qInfo.change;
-            h.change_pct = qInfo.change_pct;
-            h.ext_price = qInfo.extPrice;
-            h.ext_change_pct = qInfo.extPct;
-            h.ext_label = qInfo.extLabel;
-            updatedCount++;
-          }
-        }
-      });
+        });
+      }
 
       if (updatedCount > 0) {
         const now = new Date();

@@ -124,6 +124,29 @@ def fetch_naver_domestic_bars(code):
             "close": round(c, 2),
             "volume": v,
         })
+
+    # 네이버 실시간 폴링 API로 KRX 정규장 공식 종가 및 전일대비 등락 보정 (NXT 시간외 혼선 방지)
+    try:
+        rt_url = f"https://polling.finance.naver.com/api/realtime/domestic/stock/{code}"
+        rt_data = json.loads(http_get(rt_url, timeout=6))
+        d = (rt_data.get("datas") or [{}])[0]
+        close_str = str(d.get("closePrice", "")).replace(",", "").strip()
+        diff_str = str(d.get("compareToPreviousClosePrice", "")).replace(",", "").strip()
+        if close_str and candles:
+            close_val = float(close_str)
+            candles[-1]["close"] = round(close_val, 2)
+            if close_val > candles[-1]["high"]:
+                candles[-1]["high"] = round(close_val, 2)
+            if close_val < candles[-1]["low"]:
+                candles[-1]["low"] = round(close_val, 2)
+            if diff_str and len(candles) >= 2:
+                diff_val = float(diff_str)
+                prev_krx = close_val - diff_val
+                if prev_krx > 0:
+                    candles[-2]["close"] = round(prev_krx, 2)
+    except Exception:
+        pass
+
     return candles, foreign_rate
 
 
@@ -297,12 +320,17 @@ def fetch_dram_etf_flow():
 
         clean_holdings = []
         for h in holdings:
+            nm = str(h.get("name", ""))
+            tk = str(h.get("ticker", ""))
+            is_mm = bool(h.get("is_money_market", False))
+            if is_mm or "Treasury Bill" in nm or "Government Obligations" in nm or "Cash" in nm or tk in ("KRW", "CNY", "TWD"):
+                continue
             clean_holdings.append({
-                "ticker": h.get("ticker", ""),
-                "name": h.get("name", ""),
+                "ticker": tk,
+                "name": nm,
                 "weight": round(float(h.get("weight", 0.0)), 2),
                 "market_value": round(float(h.get("market_value", 0.0)), 0),
-                "is_money_market": bool(h.get("is_money_market", False)),
+                "is_money_market": False,
             })
 
         return {
@@ -440,11 +468,13 @@ def main():
             print(f"  ✗ ETF 수집 실패: {ed['symbol']} -> {e}")
 
     holding_defs = [
-        {"symbol": "005930.KS", "display_ticker": "005930", "name_kr": "삼성전자", "name_en": "Samsung Electronics", "etf_group": "RAM·DRAM 핵심", "sub_sector": "HBM · DRAM · 파운드리", "currency": "KRW", "dram_weight": 18.68, "soxx_weight": 0.0, "note": "DRAM ETF 보유 1위(18.7%). HBM3E/HBM4 및 범용 DRAM·낸드 글로벌 최대 생산능력 보유"},
-        {"symbol": "000660.KS", "display_ticker": "000660", "name_kr": "SK하이닉스", "name_en": "SK hynix", "etf_group": "RAM·DRAM 핵심", "sub_sector": "HBM · 고대역폭 메모리 1위", "currency": "KRW", "dram_weight": 15.04, "soxx_weight": 0.0, "note": "DRAM ETF 보유 2위(15.0%). 엔비디아향 HBM 핵심 공급사로 메모리 영업이익률 선도"},
-        {"symbol": "MU", "cnbc_symbol": "MU", "display_ticker": "MU", "name_kr": "마이크론 테크놀로지", "name_en": "Micron Technology", "etf_group": "SOXX + RAM 교집합", "sub_sector": "미국 유일 HBM · DRAM · NAND", "currency": "USD", "dram_weight": 25.20, "soxx_weight": 5.45, "note": "SOXX와 RAM(DRAM 스왑 합산 약 25.2%) 양쪽 모두의 핵심 축. 미국 장중 RAM 가격을 움직이는 1순위 동력"},
-        {"symbol": "WDC", "cnbc_symbol": "WDC", "display_ticker": "WDC", "name_kr": "웨스턴디지털", "name_en": "Western Digital", "etf_group": "RAM·DRAM 핵심", "sub_sector": "NAND 플래시 · 데이터센터 저장장치", "currency": "USD", "dram_weight": 4.80, "soxx_weight": 0.0, "note": "AI 서버용 엔터프라이즈 SSD 및 낸드 플래시 메모리 사이클 동행 종목"},
-        {"symbol": "STX", "cnbc_symbol": "STX", "display_ticker": "STX", "name_kr": "씨게이트", "name_en": "Seagate Technology", "etf_group": "RAM·DRAM 연관", "sub_sector": "AI 데이터센터 대용량 스토리지", "currency": "USD", "dram_weight": 3.10, "soxx_weight": 0.0, "note": "클라우드·AI 데이터센터 니어라인 스토리지 과점 공급사"},
+        {"symbol": "005930.KS", "display_ticker": "005930", "name_kr": "삼성전자", "name_en": "Samsung Electronics", "etf_group": "RAM·DRAM 핵심", "sub_sector": "HBM · DRAM · 파운드리", "currency": "KRW", "dram_weight": 25.82, "soxx_weight": 0.0, "note": "DRAM ETF 보유 최상위(현물+스왑 약 25.8%). HBM3E/HBM4 및 범용 DRAM·낸드 글로벌 최대 생산능력 보유"},
+        {"symbol": "000660.KS", "display_ticker": "000660", "name_kr": "SK하이닉스", "name_en": "SK hynix", "etf_group": "RAM·DRAM 핵심", "sub_sector": "HBM · 고대역폭 메모리 1위", "currency": "KRW", "dram_weight": 21.82, "soxx_weight": 0.0, "note": "DRAM ETF 핵심 축(현물+스왑 약 21.8%). 엔비디아향 HBM 핵심 공급사로 메모리 영업이익률 선도"},
+        {"symbol": "MU", "cnbc_symbol": "MU", "display_ticker": "MU", "name_kr": "마이크론 테크놀로지", "name_en": "Micron Technology", "etf_group": "SOXX + RAM 교집합", "sub_sector": "미국 유일 HBM · DRAM · NAND", "currency": "USD", "dram_weight": 27.87, "soxx_weight": 5.45, "note": "SOXX와 RAM(DRAM 현물+스왑 합산 약 27.9%) 양쪽 모두의 핵심 축. 미국 장중 RAM 가격을 움직이는 1순위 동력"},
+        {"symbol": "SNDK", "cnbc_symbol": "SNDK", "display_ticker": "SNDK", "name_kr": "샌디스크", "name_en": "SanDisk Corporation", "etf_group": "RAM·DRAM 핵심", "sub_sector": "NAND 플래시 · AI 데이터센터 eSSD", "currency": "USD", "dram_weight": 4.36, "soxx_weight": 0.0, "note": "DRAM ETF 핵심 편입(4.36%). 웨스턴디지털에서 분사한 순수 NAND 플래시 및 AI 서버용 엔터프라이즈 SSD 전문 기업"},
+        {"symbol": "WDC", "cnbc_symbol": "WDC", "display_ticker": "WDC", "name_kr": "웨스턴디지털", "name_en": "Western Digital", "etf_group": "RAM·DRAM 핵심", "sub_sector": "데이터센터 대용량 HDD · 스토리지", "currency": "USD", "dram_weight": 3.62, "soxx_weight": 0.0, "note": "샌디스크(NAND) 분사 이후 AI 클라우드·하이퍼스케일 데이터센터용 초고용량 스토리지에 집중"},
+        {"symbol": "STX", "cnbc_symbol": "STX", "display_ticker": "STX", "name_kr": "씨게이트", "name_en": "Seagate Technology", "etf_group": "RAM·DRAM 연관", "sub_sector": "AI 데이터센터 대용량 스토리지", "currency": "USD", "dram_weight": 4.11, "soxx_weight": 0.0, "note": "DRAM ETF 편입(4.11%). 클라우드·AI 데이터센터 니어라인(HAMR) 스토리지 과점 공급사"},
+        {"symbol": "042700.KS", "display_ticker": "042700", "name_kr": "한미반도체", "name_en": "HANMI Semiconductor", "etf_group": "RAM·DRAM 연관", "sub_sector": "HBM TC본더 후공정 장비 1위", "currency": "KRW", "dram_weight": 0.0, "soxx_weight": 0.0, "note": "SK하이닉스·마이크론향 HBM3E/HBM4 적층용 듀얼 TC본더 글로벌 독점적 공급사"},
         {"symbol": "NVDA", "cnbc_symbol": "NVDA", "display_ticker": "NVDA", "name_kr": "엔비디아", "name_en": "NVIDIA", "etf_group": "SOXX 핵심", "sub_sector": "AI GPU 가속기 · 데이터센터", "currency": "USD", "dram_weight": 0.0, "soxx_weight": 9.15, "note": "SOXX 최상위 비중. HBM 메모리의 최대 수요처이자 글로벌 AI 투자 사이클의 나침반"},
         {"symbol": "AVGO", "cnbc_symbol": "AVGO", "display_ticker": "AVGO", "name_kr": "브로드컴", "name_en": "Broadcom", "etf_group": "SOXX 핵심", "sub_sector": "AI 맞춤형 칩(ASIC) · 네트워킹", "currency": "USD", "dram_weight": 0.0, "soxx_weight": 8.85, "note": "구글·메타·빅테크 맞춤형 AI 가속기(XPU) 및 데이터센터 초고속 네트워킹 1위"},
         {"symbol": "AMD", "cnbc_symbol": "AMD", "display_ticker": "AMD", "name_kr": "AMD", "name_en": "Advanced Micro Devices", "etf_group": "SOXX 핵심", "sub_sector": "AI 가속기(MI시리즈) · 서버 CPU", "currency": "USD", "dram_weight": 0.0, "soxx_weight": 7.40, "note": "엔비디아 대항마 MI 시리즈 AI GPU 및 EPYC 데이터센터 CPU 점유율 확대"},

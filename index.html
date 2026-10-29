@@ -102,7 +102,7 @@
             type="search"
             id="liveSearchInput"
             class="live-search-input"
-            placeholder="🔍 종목·티커 검색 (삼성전자, 하이닉스, 한미반도체, SOXL, TSLA, NVDA)"
+            placeholder="🔍 종목·티커 검색 (삼성전자, 하이닉스, 샌디스크, 한미반도체, SOXL, NVDA)"
             autocomplete="off"
             enterkeyhint="search"
           />
@@ -122,6 +122,7 @@
             <button type="button" class="qt-btn" data-qt="000660.KS">SK하이닉스</button>
             <button type="button" class="qt-btn" data-qt="042700.KS">한미반도체</button>
             <button type="button" class="qt-btn" data-qt="MU">마이크론</button>
+            <button type="button" class="qt-btn" data-qt="SNDK">샌디스크(SNDK)</button>
             <button type="button" class="qt-btn" data-qt="NVDA">엔비디아</button>
             <button type="button" class="qt-btn" data-qt="AVGO">브로드컴</button>
             <button type="button" class="qt-btn" data-qt="TSM">TSMC</button>
@@ -269,20 +270,20 @@
       </div>
     </section>
 
-    <!-- [섹션 4] SOXX & RAM 핵심 보유 종목 20선 -->
+    <!-- [섹션 4] SOXX & RAM 핵심 보유 종목 22선 -->
     <section class="study-section" id="sec-holdings">
       <div class="section-head">
         <div>
-          <span class="section-kicker">CORE 20 HOLDINGS &amp; RELATIVE STRENGTH</span>
-          <h2 class="section-title">SOXX &amp; RAM 핵심 보유 종목 20선</h2>
-          <p class="section-desc">메모리 3대장(삼성전자·SK하이닉스·마이크론)과 SOXX 핵심 AI·장비주의 상대강도(RS), 미너비니 추세(MTT), 52주 위치를 비교합니다.</p>
+          <span class="section-kicker">CORE 22 HOLDINGS &amp; RELATIVE STRENGTH</span>
+          <h2 class="section-title">SOXX &amp; RAM 핵심 보유 종목 22선</h2>
+          <p class="section-desc">메모리 핵심(삼성전자·SK하이닉스·마이크론·샌디스크)과 SOXX AI·장비주의 상대강도(RS), 미너비니 추세(MTT), 52주 위치를 비교합니다.</p>
         </div>
       </div>
 
       <div class="filter-toolbar">
         <div class="chip-scroll-wrap">
           <div class="chip-group" id="holdingFilterGroup">
-            <button type="button" class="filter-chip active" data-holding-filter="ALL">전체 20선</button>
+            <button type="button" class="filter-chip active" data-holding-filter="ALL">전체 22선</button>
             <button type="button" class="filter-chip" data-holding-filter="RAM">RAM·DRAM 메모리</button>
             <button type="button" class="filter-chip" data-holding-filter="SOXX_AI">SOXX AI·팹리스</button>
             <button type="button" class="filter-chip" data-holding-filter="SOXX_EQUIP">파운드리·장비</button>
@@ -301,10 +302,10 @@
         </div>
       </div>
 
-      <!-- 20종목 미니 히트맵 (접기/펼치기 지원으로 모바일 공간 절약) -->
+      <!-- 22종목 미니 히트맵 (접기/펼치기 지원으로 모바일 공간 절약) -->
       <details class="heatmap-accordion" open>
         <summary class="heatmap-summary">
-          <span>📊 20종목 등락 · RS 한눈에 히트맵</span>
+          <span>📊 22종목 등락 · RS 한눈에 히트맵</span>
           <span class="heatmap-hint">터치하여 상세 보기 · 접기/펼치기</span>
         </summary>
         <div class="heatmap-grid" id="holdingsHeatmap"></div>
@@ -411,7 +412,7 @@
     </a>
     <a href="#sec-holdings" class="m-nav-item" data-mnav="sec-holdings">
       <span class="m-icon">💎</span>
-      <span>종목20선</span>
+      <span>핵심종목</span>
     </a>
     <a href="#sec-news" class="m-nav-item" data-mnav="sec-news">
       <span class="m-icon">📰</span>
@@ -420,7 +421,7 @@
   </nav>
 
   <!-- 초기 스냅샷 데이터 및 실시간 인터랙티브 앱 스크립트 -->
-  <script src="intelligence_data.js?v=20261028_4"></script>
-  <script src="app.js?v=20261028_4"></script>
+  <script src="intelligence_data.js?v=20261029_1"></script>
+  <script src="app.js?v=20261029_1"></script>
 </body>
 </html>
