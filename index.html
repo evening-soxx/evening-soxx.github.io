@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="style.css?v=20261028_4" />
+  <link rel="stylesheet" href="style.css?v=20261029_2" />
 </head>
 <body>
   <!-- 상단 고정 앱 헤더 & 원터치 실시간 티커 스트립 -->
@@ -170,6 +170,28 @@
           <canvas id="mainChartCanvas"></canvas>
         </div>
         <div class="chart-summary-strip" id="mainChartStrip"></div>
+      </div>
+
+      <!-- SOXX (SOXL) & RAM 실제 비중 비례 실시간 트리맵 히트맵 -->
+      <div class="panel-card soxx-treemap-panel" id="soxxTreemapPanel">
+        <div class="panel-header chart-panel-header">
+          <div>
+            <span class="section-kicker" style="margin-bottom:2px;">PROPORTIONAL ETF WEIGHT TREEMAP</span>
+            <h2 class="panel-title" id="treemapPanelTitle">📊 SOXX (SOXL) 구성종목 실제 비중 히트맵</h2>
+          </div>
+          <div class="interval-tabs" id="treemapModeTabs" role="tablist" aria-label="히트맵 비중 기준 선택">
+            <button type="button" class="iv-btn active" data-tm-mode="SOXX">SOXX·SOXL 비중(24종)</button>
+            <button type="button" class="iv-btn" data-tm-mode="RAM">RAM·DRAM 메모리 비중</button>
+          </div>
+        </div>
+
+        <div class="treemap-summary-bar num" id="treemapSummaryBar">
+          <span>실시간 비중 히트맵 로딩 중...</span>
+        </div>
+
+        <div class="soxx-treemap-wrap" id="soxxTreemapContainer" aria-label="SOXX 비중 비례 히트맵">
+          <!-- JS에서 Squarified Treemap 알고리즘으로 실제 비중에 비례해 렌더링 -->
+        </div>
       </div>
     </section>
 
@@ -421,7 +443,7 @@
   </nav>
 
   <!-- 초기 스냅샷 데이터 및 실시간 인터랙티브 앱 스크립트 -->
-  <script src="intelligence_data.js?v=20261029_1"></script>
-  <script src="app.js?v=20261029_1"></script>
+  <script src="intelligence_data.js?v=20261029_2"></script>
+  <script src="app.js?v=20261029_2"></script>
 </body>
 </html>

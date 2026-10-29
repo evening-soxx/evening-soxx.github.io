@@ -159,6 +159,17 @@
     { symbol: "TXN", cnbc: "TXN", name: "텍사스 인스트루먼트", exch: "NASDAQ", cur: "USD" },
     { symbol: "MRVL", cnbc: "MRVL", name: "마벨 테크놀로지 (Marvell)", exch: "NASDAQ", cur: "USD" },
     { symbol: "INTC", cnbc: "INTC", name: "인텔 (Intel)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "ADI", cnbc: "ADI", name: "아날로그 디바이스 (Analog Devices)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "NXPI", cnbc: "NXPI", name: "NXP 세미컨덕터", exch: "NASDAQ", cur: "USD" },
+    { symbol: "MPWR", cnbc: "MPWR", name: "모놀리식 파워 시스템즈", exch: "NASDAQ", cur: "USD" },
+    { symbol: "TER", cnbc: "TER", name: "테라다인 (Teradyne · 테스트 장비)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "MCHP", cnbc: "MCHP", name: "마이크로칩 테크놀로지", exch: "NASDAQ", cur: "USD" },
+    { symbol: "ON", cnbc: "ON", name: "온세미컨덕터 (ON Semi)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "ALAB", cnbc: "ALAB", name: "아스테라 랩스 (Astera Labs)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "CRDO", cnbc: "CRDO", name: "크레도 테크놀로지 (Credo)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "ENTG", cnbc: "ENTG", name: "인테그리스 (Entegris · 소재)", exch: "NASDAQ", cur: "USD" },
+    { symbol: "ONTO", cnbc: "ONTO", name: "온토 이노베이션 (Onto · 패키징계측)", exch: "NYSE", cur: "USD" },
+    { symbol: "SWKS", cnbc: "SWKS", name: "스카이웍스 솔루션즈", exch: "NASDAQ", cur: "USD" },
     { symbol: "ARM", cnbc: "ARM", name: "ARM 홀딩스", exch: "NASDAQ", cur: "USD" },
     { symbol: "WDC", cnbc: "WDC", name: "웨스턴디지털 (Western Digital)", exch: "NASDAQ", cur: "USD" },
     { symbol: "STX", cnbc: "STX", name: "씨게이트 (Seagate)", exch: "NASDAQ", cur: "USD" },
@@ -294,6 +305,7 @@
         localStorage.setItem("evening_soxx_color", state.colorMode);
         applyPreferences();
         redrawMainChartFromState();
+        renderSoxxTreemap();
         renderMacroGrid();
         renderHoldings();
       });
@@ -2193,6 +2205,12 @@
         symbolMap[h.ticker] = { type: "holding", key: h.ticker };
       });
 
+      SOXX_TREEMAP_CONSTITUENTS.forEach((sc) => {
+        if (!symbolMap[sc.symbol]) {
+          symbolMap[sc.symbol] = { type: "soxx_only", key: sc.symbol };
+        }
+      });
+
       const allSyms = Object.keys(symbolMap).join("|");
       const url = `https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=${encodeURIComponent(allSyms)}&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json`;
 
@@ -2213,6 +2231,14 @@
 
           const qInfo = extractLiveQuoteInfo(q, sym);
           if (!qInfo) return;
+
+          state.soxxLiveMap[sym] = {
+            price: qInfo.price,
+            change: qInfo.change,
+            change_pct: qInfo.change_pct,
+            ext_price: qInfo.extPrice,
+            ext_change_pct: qInfo.extPct,
+          };
 
           if (target.type === "etf" && d.etfs?.[target.key]) {
             d.etfs[target.key].price = qInfo.price;
@@ -2241,6 +2267,8 @@
               h.ext_label = qInfo.extLabel;
               updatedCount++;
             }
+          } else if (target.type === "soxx_only") {
+            updatedCount++;
           }
         });
       }
@@ -2255,6 +2283,7 @@
         renderTopTickerStrip();
         renderBriefingSection();
         renderEtfTrio();
+        renderSoxxTreemap();
         renderMacroGrid();
         renderHoldings();
       }
@@ -2710,6 +2739,278 @@
   }
 
   /* ========================================================================
+     13-B. SOXX (SOXL) & RAM 실제 비중 비례 트리맵 히트맵 (Squarified Treemap)
+     ======================================================================== */
+  const SOXX_TREEMAP_CONSTITUENTS = [
+    { symbol: "AMD", name: "AMD", weight: 9.32, defaultPrice: 566.07, defaultPct: -2.14, cur: "USD" },
+    { symbol: "INTC", name: "인텔", weight: 8.34, defaultPrice: 92.42, defaultPct: -3.25, cur: "USD" },
+    { symbol: "MU", name: "마이크론", weight: 7.92, defaultPrice: 947.14, defaultPct: -3.67, cur: "USD" },
+    { symbol: "NVDA", name: "엔비디아", weight: 7.64, defaultPrice: 212.77, defaultPct: -1.21, cur: "USD" },
+    { symbol: "AVGO", name: "브로드컴", weight: 7.42, defaultPrice: 341.30, defaultPct: -2.99, cur: "USD" },
+    { symbol: "AMAT", name: "어플라이드", weight: 5.46, defaultPrice: 415.93, defaultPct: -0.02, cur: "USD" },
+    { symbol: "MRVL", name: "마벨", weight: 5.04, defaultPrice: 218.12, defaultPct: -13.32, cur: "USD" },
+    { symbol: "KLAC", name: "KLA", weight: 4.92, defaultPrice: 169.51, defaultPct: 6.76, cur: "USD" },
+    { symbol: "TXN", name: "텍사스인스트", weight: 4.71, defaultPrice: 307.43, defaultPct: -0.77, cur: "USD" },
+    { symbol: "ADI", name: "아날로그디바이스", weight: 4.67, defaultPrice: 424.80, defaultPct: -0.81, cur: "USD" },
+    { symbol: "LRCX", name: "램리서치", weight: 4.54, defaultPrice: 256.40, defaultPct: 1.02, cur: "USD" },
+    { symbol: "QCOM", name: "퀄컴", weight: 4.29, defaultPrice: 180.30, defaultPct: -1.46, cur: "USD" },
+    { symbol: "TSM", name: "TSMC", weight: 4.12, defaultPrice: 433.18, defaultPct: -1.44, cur: "USD" },
+    { symbol: "NXPI", name: "NXP", weight: 3.51, defaultPrice: 251.61, defaultPct: -0.03, cur: "USD" },
+    { symbol: "MPWR", name: "모놀리식파워", weight: 3.16, defaultPrice: 1176.88, defaultPct: -2.84, cur: "USD" },
+    { symbol: "TER", name: "테라다인", weight: 2.76, defaultPrice: 294.90, defaultPct: -5.86, cur: "USD" },
+    { symbol: "MCHP", name: "마이크로칩", weight: 2.35, defaultPrice: 79.06, defaultPct: -0.72, cur: "USD" },
+    { symbol: "ASML", name: "ASML", weight: 2.14, defaultPrice: 1664.67, defaultPct: 0.11, cur: "USD" },
+    { symbol: "ON", name: "온세미", weight: 1.92, defaultPrice: 74.47, defaultPct: -1.53, cur: "USD" },
+    { symbol: "ALAB", name: "아스테라랩스", weight: 1.54, defaultPrice: 286.14, defaultPct: -3.72, cur: "USD" },
+    { symbol: "CRDO", name: "크레도", weight: 1.32, defaultPrice: 167.76, defaultPct: -3.41, cur: "USD" },
+    { symbol: "ENTG", name: "인테그리스", weight: 1.18, defaultPrice: 162.55, defaultPct: 2.03, cur: "USD" },
+    { symbol: "ONTO", name: "온토이노", weight: 1.02, defaultPrice: 221.70, defaultPct: -0.89, cur: "USD" },
+    { symbol: "SWKS", name: "스카이웍스", weight: 0.70, defaultPrice: 85.82, defaultPct: -1.62, cur: "USD" },
+  ];
+
+  const RAM_TREEMAP_CONSTITUENTS = [
+    { symbol: "MU", name: "마이크론 (현물+스왑)", weight: 27.87, defaultPrice: 947.14, defaultPct: -3.67, cur: "USD" },
+    { symbol: "005930.KS", name: "삼성전자 (현물+스왑)", weight: 25.82, defaultPrice: 230500, defaultPct: -4.75, cur: "KRW" },
+    { symbol: "000660.KS", name: "SK하이닉스 (현물+스왑)", weight: 21.82, defaultPrice: 1516000, defaultPct: 1.95, cur: "KRW" },
+    { symbol: "SNDK", name: "샌디스크 (NAND/eSSD)", weight: 8.40, defaultPrice: 1370.92, defaultPct: -2.41, cur: "USD" },
+    { symbol: "STX", name: "씨게이트 (HDD 스토리지)", weight: 6.20, defaultPrice: 690.60, defaultPct: -1.06, cur: "USD" },
+    { symbol: "WDC", name: "웨스턴디지털", weight: 5.50, defaultPrice: 395.98, defaultPct: -0.11, cur: "USD" },
+    { symbol: "042700.KS", name: "한미반도체 (HBM TC본더)", weight: 4.39, defaultPrice: 194600, defaultPct: -4.37, cur: "KRW" },
+  ];
+
+  state.treemapMode = "SOXX"; // 'SOXX' | 'RAM'
+  state.soxxLiveMap = {};
+
+  function computeSquarifiedTreemap(items, width, height) {
+    const valid = items.filter((it) => it.weight > 0).sort((a, b) => b.weight - a.weight);
+    const totalWeight = valid.reduce((acc, it) => acc + it.weight, 0);
+    if (!totalWeight || width <= 0 || height <= 0) return [];
+
+    const totalArea = width * height;
+    const nodes = valid.map((it) => ({
+      ...it,
+      area: (it.weight / totalWeight) * totalArea,
+    }));
+
+    const rects = [];
+    let rx = 0,
+      ry = 0,
+      rw = width,
+      rh = height;
+
+    function worstAspectRatio(row, sideLen) {
+      if (!row.length || sideLen <= 0) return Infinity;
+      let sum = 0,
+        maxA = 0,
+        minA = Infinity;
+      for (let i = 0; i < row.length; i++) {
+        const a = row[i].area;
+        sum += a;
+        if (a > maxA) maxA = a;
+        if (a < minA) minA = a;
+      }
+      const s2 = sum * sum;
+      const w2 = sideLen * sideLen;
+      return Math.max((w2 * maxA) / s2, s2 / (w2 * minA));
+    }
+
+    function layoutRow(row) {
+      const sumArea = row.reduce((acc, n) => acc + n.area, 0);
+      const horizontal = rw >= rh; // 짧은 변(rh)을 따라 세로 열로 쌓기 vs 가로 행으로 쌓기
+      if (horizontal) {
+        const colW = sumArea / Math.max(1, rh);
+        let curY = ry;
+        row.forEach((n) => {
+          const cellH = n.area / Math.max(1, colW);
+          rects.push({ ...n, x: rx, y: curY, w: colW, h: cellH });
+          curY += cellH;
+        });
+        rx += colW;
+        rw -= colW;
+      } else {
+        const rowH = sumArea / Math.max(1, rw);
+        let curX = rx;
+        row.forEach((n) => {
+          const cellW = n.area / Math.max(1, rowH);
+          rects.push({ ...n, x: curX, y: ry, w: cellW, h: rowH });
+          curX += cellW;
+        });
+        ry += rowH;
+        rh -= rowH;
+      }
+    }
+
+    let currentRow = [];
+    for (let i = 0; i < nodes.length; i++) {
+      const child = nodes[i];
+      const shortSide = Math.max(1, Math.min(rw, rh));
+      if (currentRow.length === 0) {
+        currentRow.push(child);
+      } else {
+        const curWorst = worstAspectRatio(currentRow, shortSide);
+        const nextWorst = worstAspectRatio([...currentRow, child], shortSide);
+        if (nextWorst <= curWorst) {
+          currentRow.push(child);
+        } else {
+          layoutRow(currentRow);
+          currentRow = [child];
+        }
+      }
+    }
+    if (currentRow.length > 0) {
+      layoutRow(currentRow);
+    }
+
+    return rects.map((r) => ({
+      ...r,
+      leftPct: (r.x / width) * 100,
+      topPct: (r.y / height) * 100,
+      widthPct: (r.w / width) * 100,
+      heightPct: (r.h / height) * 100,
+    }));
+  }
+
+  function getTreemapTileBgColor(pctVal) {
+    const pct = Number(pctVal || 0);
+    const isKr = state.colorMode === "kr";
+    const absP = Math.min(6.0, Math.abs(pct));
+    const intensity = absP / 6.0; // 0.0 ~ 1.0
+
+    if (Math.abs(pct) < 0.05) {
+      return "#3A4440";
+    }
+
+    const isPositive = pct > 0;
+    // 한국형(kr): 상승=크림슨 레드, 하락=로열 블루 / 미국형(us): 상승=에메랄드 그린, 하락=크림슨 레드
+    const useRed = (isKr && isPositive) || (!isKr && !isPositive);
+    const useBlue = isKr && !isPositive;
+
+    if (useRed) {
+      const r = Math.round(135 + 78 * intensity);
+      const g = Math.round(52 - 18 * intensity);
+      const b = Math.round(48 - 16 * intensity);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    if (useBlue) {
+      const r = Math.round(44 - 16 * intensity);
+      const g = Math.round(88 + 18 * intensity);
+      const b = Math.round(142 + 65 * intensity);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    // 에메랄드 그린 (미국형 상승)
+    const r = Math.round(36 - 12 * intensity);
+    const g = Math.round(115 + 58 * intensity);
+    const b = Math.round(82 + 22 * intensity);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function renderSoxxTreemap() {
+    const container = document.getElementById("soxxTreemapContainer");
+    const summaryEl = document.getElementById("treemapSummaryBar");
+    const titleEl = document.getElementById("treemapPanelTitle");
+    if (!container) return;
+
+    const d = state.data;
+    const isRam = state.treemapMode === "RAM";
+    const baseList = isRam ? RAM_TREEMAP_CONSTITUENTS : SOXX_TREEMAP_CONSTITUENTS;
+
+    if (titleEl) {
+      titleEl.textContent = isRam
+        ? "📊 RAM · DRAM 메모리 포트폴리오 실제 비중 히트맵"
+        : "📊 SOXX (SOXL) 24대 구성종목 실제 비중 히트맵";
+    }
+
+    const enriched = baseList.map((item) => {
+      const holdMatch = (d?.holdings || []).find((h) => h.ticker === item.symbol);
+      const liveMatch = state.soxxLiveMap[item.symbol];
+      const price = liveMatch?.price ?? holdMatch?.price ?? item.defaultPrice;
+      const pct = liveMatch?.change_pct ?? holdMatch?.change_pct ?? item.defaultPct;
+      return {
+        ...item,
+        price,
+        change_pct: Number(pct || 0),
+      };
+    });
+
+    const upCount = enriched.filter((x) => x.change_pct > 0).length;
+    const downCount = enriched.filter((x) => x.change_pct < 0).length;
+    const best = [...enriched].sort((a, b) => b.change_pct - a.change_pct)[0];
+    const worst = [...enriched].sort((a, b) => a.change_pct - b.change_pct)[0];
+
+    if (summaryEl) {
+      summaryEl.innerHTML = `
+        <span>전체 <b>${enriched.length}종목</b> · 상승 <b class="up-text">${upCount}</b> / 하락 <b class="down-text">${downCount}</b></span>
+        <span>최강세: <b>${best.name}(${best.symbol.replace(".KS", "")})</b> <b class="${dirClass(best.change_pct, false)}">${fmtSignedPct(best.change_pct)}</b> · 최약세: <b>${worst.name}(${worst.symbol.replace(".KS", "")})</b> <b class="${dirClass(worst.change_pct, false)}">${fmtSignedPct(worst.change_pct)}</b></span>
+        <span style="color:var(--ink-muted);">👆 타일 면적 = 실제 ETF 편입 비중(%) · 클릭 시 1분봉 차트 전환</span>
+      `;
+    }
+
+    const rect = container.getBoundingClientRect();
+    const w = Math.max(300, rect.width || (window.innerWidth <= 768 ? 350 : 980));
+    const h = Math.max(320, rect.height || (window.innerWidth <= 768 ? 510 : 460));
+
+    const layout = computeSquarifiedTreemap(enriched, w, h);
+
+    container.innerHTML = layout
+      .map((cell) => {
+        const wgt = cell.weight;
+        let tier = "tm-tier-md";
+        if (wgt >= 6.8) tier = "tm-tier-xl";
+        else if (wgt >= 4.0) tier = "tm-tier-lg";
+        else if (wgt >= 2.1) tier = "tm-tier-md";
+        else if (wgt >= 1.1) tier = "tm-tier-sm";
+        else tier = "tm-tier-xs";
+
+        const bg = getTreemapTileBgColor(cell.change_pct);
+        const dispSym = cell.symbol.replace(".KS", "");
+        const priceStr = fmtPrice(cell.price, cell.cur);
+        const pctStr = fmtSignedPct(cell.change_pct);
+
+        return `
+          <div class="tm-cell-outer ${tier}" style="left:${cell.leftPct.toFixed(3)}%; top:${cell.topPct.toFixed(3)}%; width:${cell.widthPct.toFixed(3)}%; height:${cell.heightPct.toFixed(3)}%;">
+            <button
+              type="button"
+              class="tm-cell num"
+              style="background:${bg};"
+              data-tm-sym="${cell.symbol}"
+              data-tm-name="${cell.name}"
+              data-tm-cur="${cell.cur}"
+              title="${cell.name} (${dispSym}) · 비중 ${wgt.toFixed(2)}% · ${priceStr} (${pctStr})"
+            >
+              <span class="tm-ticker">${dispSym}</span>
+              <span class="tm-name">${cell.name}</span>
+              <span class="tm-pct">${pctStr}</span>
+              <span class="tm-meta">비중 ${wgt.toFixed(1)}% · ${priceStr}</span>
+            </button>
+          </div>
+        `;
+      })
+      .join("");
+
+    container.querySelectorAll(".tm-cell").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const sym = btn.getAttribute("data-tm-sym");
+        const nm = btn.getAttribute("data-tm-name");
+        const cur = btn.getAttribute("data-tm-cur") || "USD";
+        selectTickerForLiveChart(sym, sym, nm, cur, true);
+      });
+    });
+  }
+
+  function bindTreemapControls() {
+    const tabs = document.getElementById("treemapModeTabs");
+    if (!tabs) return;
+    tabs.querySelectorAll("[data-tm-mode]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tabs.querySelectorAll("[data-tm-mode]").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.treemapMode = btn.getAttribute("data-tm-mode") || "SOXX";
+        renderSoxxTreemap();
+      });
+    });
+  }
+
+  /* ========================================================================
      14. 모바일 하단 탭 & 상단 네비게이션 스크롤 스파이
      ======================================================================== */
   function bindNavigationScrollSpy() {
@@ -2754,6 +3055,7 @@
     bindPreferenceControls();
     bindMainChartInteractions();
     bindLiveSearchBox();
+    bindTreemapControls();
     bindCdsInteractions();
     bindHoldingsControls();
     bindNewsControls();
@@ -2764,6 +3066,7 @@
       renderTopTickerStrip();
       renderBriefingSection();
       renderEtfTrio();
+      renderSoxxTreemap();
       renderDramFlowPanel();
       renderCdsSpecialCorner();
       renderMacroGrid();
@@ -2785,6 +3088,7 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         redrawMainChartFromState();
+        renderSoxxTreemap();
         drawCdsTrajectoryChart();
         renderMacroGrid();
       }, 150);

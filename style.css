@@ -2156,3 +2156,149 @@ a {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+
+/* ==========================================================================
+   SOXX (SOXL) & RAM 실제 비중 비례 트리맵 히트맵 (Squarified Treemap)
+   ========================================================================== */
+.soxx-treemap-panel {
+  margin-top: 14px;
+}
+
+.treemap-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  background: var(--bg-box);
+  border: 1px solid var(--border-line);
+  border-radius: 9px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  font-size: 0.76rem;
+  color: var(--ink-secondary);
+}
+
+.soxx-treemap-wrap {
+  position: relative;
+  width: 100%;
+  height: 460px;
+  background: var(--bg-box);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  user-select: none;
+}
+
+.tm-cell-outer {
+  position: absolute;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.tm-cell {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px 5px;
+  box-sizing: border-box;
+  cursor: pointer;
+  overflow: hidden;
+  color: #FFFFFF;
+  transition: transform 0.14s ease, filter 0.14s ease, border-color 0.14s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.tm-cell:hover,
+.tm-cell:active {
+  filter: brightness(1.12);
+  border-color: #EAC574;
+  z-index: 2;
+}
+
+.tm-ticker {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.tm-name {
+  font-weight: 700;
+  opacity: 0.92;
+  line-height: 1.15;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 96%;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.tm-pct {
+  font-weight: 800;
+  line-height: 1.15;
+  margin-top: 2px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.tm-meta {
+  font-weight: 600;
+  opacity: 0.86;
+  line-height: 1.1;
+  margin-top: 2px;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* 타일 면적(비중)별 반응형 타이포그래피 등급 */
+.tm-tier-xl .tm-ticker { font-size: 1.24rem; }
+.tm-tier-xl .tm-name { font-size: 0.78rem; }
+.tm-tier-xl .tm-pct { font-size: 0.98rem; }
+.tm-tier-xl .tm-meta { font-size: 0.70rem; }
+
+.tm-tier-lg .tm-ticker { font-size: 1.02rem; }
+.tm-tier-lg .tm-name { font-size: 0.72rem; }
+.tm-tier-lg .tm-pct { font-size: 0.84rem; }
+.tm-tier-lg .tm-meta { font-size: 0.65rem; }
+
+.tm-tier-md .tm-ticker { font-size: 0.86rem; }
+.tm-tier-md .tm-name { font-size: 0.66rem; }
+.tm-tier-md .tm-pct { font-size: 0.76rem; }
+.tm-tier-md .tm-meta { font-size: 0.60rem; }
+
+.tm-tier-sm .tm-ticker { font-size: 0.74rem; }
+.tm-tier-sm .tm-name { display: none; }
+.tm-tier-sm .tm-pct { font-size: 0.66rem; margin-top: 1px; }
+.tm-tier-sm .tm-meta { font-size: 0.56rem; margin-top: 0; }
+
+.tm-tier-xs .tm-ticker { font-size: 0.64rem; }
+.tm-tier-xs .tm-name,
+.tm-tier-xs .tm-meta { display: none; }
+.tm-tier-xs .tm-pct { font-size: 0.58rem; margin-top: 0; }
+
+@media (max-width: 768px) {
+  .soxx-treemap-wrap {
+    height: 510px;
+  }
+  .tm-tier-xl .tm-ticker { font-size: 1.02rem; }
+  .tm-tier-xl .tm-name { font-size: 0.68rem; }
+  .tm-tier-xl .tm-pct { font-size: 0.84rem; }
+  .tm-tier-xl .tm-meta { font-size: 0.62rem; }
+
+  .tm-tier-lg .tm-ticker { font-size: 0.88rem; }
+  .tm-tier-lg .tm-name { font-size: 0.62rem; }
+  .tm-tier-lg .tm-pct { font-size: 0.74rem; }
+  .tm-tier-lg .tm-meta { font-size: 0.58rem; }
+
+  .tm-tier-md .tm-ticker { font-size: 0.74rem; }
+  .tm-tier-md .tm-name { display: none; }
+  .tm-tier-md .tm-pct { font-size: 0.66rem; }
+  .tm-tier-md .tm-meta { font-size: 0.54rem; }
+}
