@@ -732,10 +732,34 @@
         ${displayList
           .map((h) => {
             const w = Math.min(100, Math.max(2, Number(h.weight_pct || 0)));
+            const nmUpper = String(h.name || "").toUpperCase();
+            const tkUpper = String(h.ticker || "").toUpperCase();
+            let mappedSym = "";
+            let mappedName = h.name;
+            let mappedCur = "USD";
+            if (nmUpper.includes("SAMSUNG") || tkUpper.includes("005930")) {
+              mappedSym = "005930.KS";
+              mappedName = "삼성전자";
+              mappedCur = "KRW";
+            } else if (nmUpper.includes("HYNIX") || tkUpper.includes("000660")) {
+              mappedSym = "000660.KS";
+              mappedName = "SK하이닉스";
+              mappedCur = "KRW";
+            } else if (nmUpper.includes("MICRON") || tkUpper.startsWith("MU")) {
+              mappedSym = "MU";
+              mappedName = "마이크론 테크놀로지";
+              mappedCur = "USD";
+            } else if (nmUpper.includes("SANDISK") || tkUpper.includes("SNDK")) {
+              mappedSym = "SNDK";
+              mappedName = "샌디스크";
+              mappedCur = "USD";
+            }
             return `
-              <div class="dram-hold-row">
+              <div class="dram-hold-row ${mappedSym ? "clickable" : ""}" ${
+              mappedSym ? `data-dram-jump-sym="${mappedSym}" data-dram-jump-name="${mappedName}" data-dram-jump-cur="${mappedCur}" data-dram-jump-w="${w.toFixed(2)}" title="터치하여 ${mappedName} 상세 차트·지표 띄우기"` : ""
+            }>
                 <div class="dram-hold-top">
-                  <span><strong>${h.name}</strong> <small style="color:var(--ink-muted);">(${h.ticker || ""})</small></span>
+                  <span><strong>${h.name}</strong> <small style="color:var(--ink-muted);">(${h.ticker || ""})</small> ${mappedSym ? '<small style="color:var(--gold-main); font-weight:700;">↗ 상세</small>' : ""}</span>
                   <strong>${w.toFixed(2)}%</strong>
                 </div>
                 <div class="dram-bar-track">
@@ -754,6 +778,18 @@
         if (state.dramHoldingsMode !== nextMode) {
           state.dramHoldingsMode = nextMode;
           renderDramFlowPanel();
+        }
+      });
+    });
+
+    box.querySelectorAll("[data-dram-jump-sym]").forEach((row) => {
+      row.addEventListener("click", () => {
+        const sym = row.getAttribute("data-dram-jump-sym");
+        const nm = row.getAttribute("data-dram-jump-name");
+        const cur = row.getAttribute("data-dram-jump-cur") || "USD";
+        const w = parseFloat(row.getAttribute("data-dram-jump-w") || "0");
+        if (sym) {
+          openStockPopupOrJump(sym, nm, cur, w, "MODAL");
         }
       });
     });
@@ -2153,15 +2189,235 @@
   }
 
   /* ========================================================================
-     11. 바텀시트 상세 모달 (모바일 최적화)
+     11. 바텀시트 상세 모달 & 히트맵 종목 터치 즉시 팝업/이동 엔진
      ======================================================================== */
+  const EXTRA_SOXX_STOCK_META = {
+    ADI: {
+      name_kr: "아날로그 디바이스 (ADI)",
+      subsector: "산업·차량용 아날로그 반도체",
+      etf_group: "SOXX 핵심 (4.67%)",
+      role_note: "텍사스 인스트루먼트(TXN)와 함께 글로벌 아날로그 신호처리 반도체를 양분하는 대표 기업으로, 산업 자동화 및 데이터센터 전력 제어 수요의 핵심 수혜주입니다.",
+    },
+    TER: {
+      name_kr: "테라다인 (Teradyne)",
+      subsector: "반도체 자동화 테스트(ATE) 장비",
+      etf_group: "SOXX 장비 (2.76%)",
+      role_note: "엔비디아·TSMC·메모리 3사의 AI 가속기 및 HBM 수율 검사를 담당하는 글로벌 반도체 테스트 장비(ATE) 및 협동로봇 선두 기업입니다.",
+    },
+    MCHP: {
+      name_kr: "마이크로칩 테크놀로지 (MCHP)",
+      subsector: "마이크로컨트롤러(MCU) · 아날로그",
+      etf_group: "SOXX 편입 (2.35%)",
+      role_note: "자동차·방산·산업용 마이크로컨트롤러(MCU)와 데이터센터 스토리지 컨트롤러를 공급하며 레거시 반도체 재고 사이클의 풍향계 역할을 합니다.",
+    },
+    ALAB: {
+      name: "아스테라 랩스 (Astera Labs)",
+      name_kr: "아스테라 랩스 (Astera Labs)",
+      subsector: "AI 데이터센터 초고속 연결칩 (PCIe·CXL)",
+      etf_group: "SOXX AI연결 (1.54%)",
+      role_note: "AI 서버 내부에서 GPU와 CPU, HBM·CXL 메모리를 병목 없이 초고속으로 연결하는 리타이머(Retimer) 반도체의 독보적 강자입니다.",
+    },
+    CRDO: {
+      name_kr: "크레도 테크놀로지 (Credo)",
+      subsector: "AI 데이터센터 고속 연결 솔루션 (AEC)",
+      etf_group: "SOXX AI네트워크 (1.32%)",
+      role_note: "하이퍼스케일 AI 클러스터의 전력 소모를 획기적으로 줄이는 액티브 전기 케이블(AEC) 및 고속 SerDes 인터커넥트 핵심 수혜주입니다.",
+    },
+    ENTG: {
+      name_kr: "인테그리스 (Entegris)",
+      subsector: "첨단 반도체 소재 · 초고순도 케미컬",
+      etf_group: "SOXX 소재 (1.18%)",
+      role_note: "2나노 GAA 파운드리 공정과 16단 HBM 적층에 필수적인 초고순도 세정·연마(CMP)·오염제어 소재를 독점 공급하는 글로벌 1위 반도체 소재 기업입니다.",
+    },
+    ONTO: {
+      name_kr: "온토 이노베이션 (Onto Innovation)",
+      subsector: "HBM·CoWoS 첨단 패키징 계측·검사장비",
+      etf_group: "SOXX 패키징장비 (1.02%)",
+      role_note: "TSMC의 CoWoS 패키징과 HBM 적층 미세 결함을 잡아내는 3D 광학 계측·검사 장비 강자로 KLA와 함께 후공정 수율의 핵심 축입니다.",
+    },
+    SWKS: {
+      name_kr: "스카이웍스 솔루션즈 (Skyworks)",
+      subsector: "RF 무선통신 · 온디바이스 AI 칩",
+      etf_group: "SOXX 무선통신 (0.70%)",
+      role_note: "스마트폰 및 자율주행·IoT 기기용 5G/6G RF 프론트엔드 모듈을 공급하며 온디바이스 AI 교체 주기와 밀접하게 연동됩니다.",
+    },
+  };
+
+  function pulseElementHighlight(el) {
+    if (!el) return;
+    el.classList.remove("card-focus-pulse");
+    void el.offsetWidth;
+    el.classList.add("card-focus-pulse");
+    setTimeout(() => {
+      el.classList.remove("card-focus-pulse");
+    }, 3400);
+  }
+
+  function resolveOrBuildStockItem(symbol, fallbackName, fallbackCur, weightPct) {
+    const d = state.data;
+    const holdMatch = (d?.holdings || []).find((h) => h.ticker === symbol);
+    const liveMatch = state.soxxLiveMap?.[symbol];
+    const extraMeta = EXTRA_SOXX_STOCK_META[symbol] || {};
+    const cur = fallbackCur || holdMatch?.currency || (String(symbol).endsWith(".KS") ? "KRW" : "USD");
+
+    const tmRef =
+      SOXX_TREEMAP_CONSTITUENTS.find((x) => x.symbol === symbol) ||
+      RAM_TREEMAP_CONSTITUENTS.find((x) => x.symbol === symbol);
+    const effWeight = weightPct || tmRef?.weight || null;
+
+    if (holdMatch) {
+      const price = liveMatch?.price ?? holdMatch.price;
+      const change_pct = liveMatch?.change_pct ?? holdMatch.change_pct;
+      const change = liveMatch?.change ?? holdMatch.change;
+      return {
+        ...holdMatch,
+        price,
+        change,
+        change_pct,
+        etf_group: effWeight ? `${holdMatch.etf_group || "핵심 편입"} · 비중 ${effWeight.toFixed(2)}%` : holdMatch.etf_group,
+      };
+    }
+
+    const price = liveMatch?.price ?? tmRef?.defaultPrice ?? 100;
+    const change_pct = liveMatch?.change_pct ?? tmRef?.defaultPct ?? 0;
+    const change = liveMatch?.change ?? Number(((price * change_pct) / (100 + change_pct || 100)).toFixed(2));
+
+    return {
+      ticker: symbol,
+      symbol,
+      name_kr: extraMeta.name_kr || fallbackName || tmRef?.name || symbol,
+      currency: cur,
+      price,
+      change,
+      change_pct,
+      etf_group: extraMeta.etf_group || (effWeight ? `ETF 편입 비중 ${effWeight.toFixed(2)}%` : "SOXX 구성종목"),
+      subsector: extraMeta.subsector || "글로벌 반도체 핵심 구성종목",
+      support_20d: Number((price * 0.94).toFixed(2)),
+      resistance_20d: Number((price * 1.06).toFixed(2)),
+      rs_score: change_pct >= 0 ? 78 : 64,
+      rsi14: 52.0,
+      returns: { "1m": null, "3m": null, "1y": null },
+      role_note:
+        extraMeta.role_note ||
+        `${fallbackName || symbol} 종목은 iShares SOXX / Direxion SOXL 반도체 지수를 구성하는 핵심 편입 종목입니다.`,
+      candles: [],
+    };
+  }
+
+  function scrollToStockCard(symbol, fallbackName, fallbackCur) {
+    const sym = String(symbol || "");
+    let card = document.querySelector(`#holdingsCardGrid .stock-card[data-ticker="${sym}"]`);
+
+    // 필터 때문에 숨겨져 있으면 자동으로 '전체 보기(ALL)'로 풀어서 렌더링
+    if (!card && state.holdingFilter !== "ALL") {
+      const existsInData = (state.data?.holdings || []).some((h) => h.ticker === sym);
+      if (existsInData) {
+        state.holdingFilter = "ALL";
+        document.querySelectorAll("[data-holding-filter]").forEach((b) => {
+          b.classList.toggle("active", b.getAttribute("data-holding-filter") === "ALL");
+        });
+        renderHoldings();
+        card = document.querySelector(`#holdingsCardGrid .stock-card[data-ticker="${sym}"]`);
+      }
+    }
+
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      pulseElementHighlight(card);
+      return true;
+    }
+
+    // 22선 카드에 없는 소형 SOXX 구성종목이면 상단 메인 1분봉 차트로 이동 후 포커스
+    selectTickerForLiveChart(sym, sym, fallbackName || sym, fallbackCur || "USD", true, true);
+    const chartPanel = document.querySelector(".chart-panel");
+    pulseElementHighlight(chartPanel);
+    return false;
+  }
+
+  function openStockPopupOrJump(symbol, name, cur, weightPct, actionOverride) {
+    const mode = actionOverride || state.treemapClickAction || "MODAL";
+    const item = resolveOrBuildStockItem(symbol, name, cur, weightPct);
+
+    // 백그라운드에서 상단 메인 차트도 해당 종목 1분봉으로 동기화
+    selectTickerForLiveChart(symbol, symbol, item.name_kr || name || symbol, item.currency || cur || "USD", false, true);
+
+    if (mode === "CHART") {
+      const chartEl = document.querySelector(".chart-panel");
+      if (chartEl) {
+        chartEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        pulseElementHighlight(chartEl);
+      }
+      return;
+    }
+
+    if (mode === "CARD") {
+      scrollToStockCard(symbol, item.name_kr || name, item.currency || cur);
+      return;
+    }
+
+    openDetailModal(item, "STOCK");
+  }
+
+  async function loadModalLiveChart(item, interval) {
+    const sym = item.ticker || item.key || "SOXX";
+    const cnbcMap = { US10Y: "US10Y", US5Y: "US5Y", WTI: "@CL.1", BRENT: "@LCO.1", GOLD: "@GC.1", VIX: ".VIX", USDKRW: "KRW=" };
+    const cnbcSym = cnbcMap[sym] || sym;
+    const cur = item.currency || (item.unit === "%" ? "PCT" : item.unit === "원" ? "KRW" : "USD");
+
+    if (interval === "1D" && Array.isArray(item.candles) && item.candles.length > 5) {
+      drawCandlestickChart("modalChartCanvas", item.candles.slice(-75), {
+        support20: item.support_20d,
+        resistance20: item.resistance_20d,
+        currency: cur,
+      });
+    }
+
+    try {
+      const now = new Date();
+      const lookbackDays = interval === "1M" ? 4 : interval === "5M" ? 7 : interval === "15M" ? 14 : 180;
+      const startDt = new Date(now.getTime() - lookbackDays * 86400 * 1000);
+      const endDt = new Date(now.getTime() + 2 * 86400 * 1000);
+      const encSym = encodeURIComponent(cnbcSym);
+      const barUrl = `https://ts-api.cnbc.com/harmony/app/bars/${encSym}/${interval}/${formatCnbcTs(startDt)}/${formatCnbcTs(endDt)}/adjusted/EST5EDT.json`;
+
+      const resp = await fetch(barUrl, { cache: "no-store" });
+      if (!resp.ok) return;
+      const json = await resp.json();
+      const rawBars = json?.barData?.priceBars || [];
+      const parsed = parseCnbcPriceBars(rawBars, interval);
+      if (parsed.length > 5) {
+        const sliced = parsed.slice(interval === "1D" ? -75 : -80);
+        const recent20 = sliced.slice(-20);
+        const sup20 = Math.min(...recent20.map((x) => x.low));
+        const res20 = Math.max(...recent20.map((x) => x.high));
+        drawCandlestickChart("modalChartCanvas", sliced, {
+          support20: sup20,
+          resistance20: res20,
+          currency: cur,
+        });
+
+        // 소형 SOXX 종목 등 로컬 일봉 수익률이 비어있던 경우 모달 지표 자동 보강
+        const supEl = document.getElementById("modalSupVal");
+        const resEl = document.getElementById("modalResVal");
+        if (supEl) supEl.textContent = fmtPrice(sup20, cur);
+        if (resEl) resEl.textContent = fmtPrice(res20, cur);
+      }
+    } catch (e) {
+      // 오프라인 시 기본 스냅샷 유지
+    }
+  }
+
   function openDetailModal(item, type) {
     const modal = document.getElementById("detailModal");
     if (!modal) return;
 
+    const sym = item.ticker || item.key || "SOXX";
+    const cur = item.currency || (item.unit === "%" ? "PCT" : item.unit === "원" ? "KRW" : "USD");
+    const hasCardInGrid = (state.data?.holdings || []).some((h) => h.ticker === sym);
+
     document.getElementById("modalKicker").textContent =
       type === "MACRO" ? `${item.category || "매크로"} 상세 추이` : `${item.etf_group || ""} · ${item.subsector || ""}`;
-    document.getElementById("modalTitle").textContent = `${item.name_kr} (${item.ticker || item.key || ""})`;
+    document.getElementById("modalTitle").textContent = `${item.name_kr} (${sym.replace(".KS", "")})`;
 
     const priceBanner = document.getElementById("modalPriceBanner");
     priceBanner.innerHTML = `
@@ -2169,28 +2425,75 @@
         <span class="etf-price" style="font-size:1.35rem;">${fmtPrice(item.price, item.currency, item.unit)}</span>
         <span class="etf-chg-pill ${dirClass(item.change_pct, true)}">${fmtSignedChange(item.change, item.change_pct)}</span>
       </div>
-      <button type="button" class="live-search-btn" id="btnModalToMainChart" style="padding:7px 12px; font-size:0.76rem;">
-        📈 상단 라이브 차트(1분·5분봉)로 열기
-      </button>
+      <div class="modal-action-btns">
+        <button type="button" class="modal-jump-btn primary" id="btnModalToMainChart">
+          📈 상단 1분봉 메인차트로 이동
+        </button>
+        ${
+          type === "STOCK"
+            ? `<button type="button" class="modal-jump-btn" id="btnModalToStockCard">
+                💎 ${hasCardInGrid ? "하단 종목 카드로 이동" : "핵심종목 섹션으로 이동"}
+              </button>`
+            : ""
+        }
+      </div>
     `;
+
+    // 모달 차트 상단 주기 선택 바 삽입 (1분봉 / 5분봉 / 15분봉 / 일봉)
+    let modalIvBar = document.getElementById("modalIvBar");
+    const canvasWrap = modal.querySelector(".modal-canvas-wrap");
+    if (!modalIvBar && canvasWrap) {
+      modalIvBar = document.createElement("div");
+      modalIvBar.id = "modalIvBar";
+      modalIvBar.className = "modal-iv-bar";
+      canvasWrap.parentNode.insertBefore(modalIvBar, canvasWrap);
+    }
+    const defaultModalIv = type === "STOCK" ? "1M" : "1D";
+    if (modalIvBar) {
+      modalIvBar.innerHTML = `
+        <span class="num" style="font-size:0.74rem; font-weight:700; color:var(--ink-secondary);">실시간 차트 미리보기 (지지·저항선 포함)</span>
+        <div class="interval-tabs">
+          <button type="button" class="iv-btn ${defaultModalIv === "1M" ? "active" : ""}" data-miv="1M" style="font-size:0.72rem; padding:3px 8px;">1분봉</button>
+          <button type="button" class="iv-btn" data-miv="5M" style="font-size:0.72rem; padding:3px 8px;">5분봉</button>
+          <button type="button" class="iv-btn" data-miv="15M" style="font-size:0.72rem; padding:3px 8px;">15분봉</button>
+          <button type="button" class="iv-btn ${defaultModalIv === "1D" ? "active" : ""}" data-miv="1D" style="font-size:0.72rem; padding:3px 8px;">일봉</button>
+        </div>
+      `;
+      modalIvBar.querySelectorAll("[data-miv]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modalIvBar.querySelectorAll("[data-miv]").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const iv = btn.getAttribute("data-miv") || "1M";
+          loadModalLiveChart(item, iv);
+        });
+      });
+    }
 
     const jumpBtn = document.getElementById("btnModalToMainChart");
     if (jumpBtn) {
       jumpBtn.addEventListener("click", () => {
         modal.setAttribute("hidden", "");
-        const sym = item.ticker || item.key || "SOXX";
         const cnbcMap = { US10Y: "US10Y", US5Y: "US5Y", WTI: "@CL.1", BRENT: "@LCO.1", GOLD: "@GC.1", VIX: ".VIX", USDKRW: "KRW=" };
         const cnbcSym = cnbcMap[sym] || sym;
-        const cur = item.currency || (item.unit === "%" ? "PCT" : item.unit === "원" ? "KRW" : "USD");
-        selectTickerForLiveChart(sym, cnbcSym, item.name_kr, cur, true);
+        selectTickerForLiveChart(sym, cnbcSym, item.name_kr, cur, true, true);
+        const chartPanel = document.querySelector(".chart-panel");
+        pulseElementHighlight(chartPanel);
+      });
+    }
+
+    const cardJumpBtn = document.getElementById("btnModalToStockCard");
+    if (cardJumpBtn) {
+      cardJumpBtn.addEventListener("click", () => {
+        modal.setAttribute("hidden", "");
+        scrollToStockCard(sym, item.name_kr, cur);
       });
     }
 
     const metricsGrid = document.getElementById("modalMetricsGrid");
     if (type === "STOCK") {
       metricsGrid.innerHTML = `
-        <div class="metric-cell num"><small>20일 지지선</small><strong>${fmtPrice(item.support_20d, item.currency)}</strong></div>
-        <div class="metric-cell num"><small>20일 저항선</small><strong>${fmtPrice(item.resistance_20d, item.currency)}</strong></div>
+        <div class="metric-cell num"><small>구간 지지선</small><strong id="modalSupVal">${fmtPrice(item.support_20d, item.currency)}</strong></div>
+        <div class="metric-cell num"><small>구간 저항선</small><strong id="modalResVal">${fmtPrice(item.resistance_20d, item.currency)}</strong></div>
         <div class="metric-cell num"><small>RS 상대강도</small><strong>${item.rs_score ?? "-"} / 99</strong></div>
         <div class="metric-cell num"><small>1개월 수익률</small><strong class="${dirClass(item.returns?.["1m"])}">${fmtSignedPct(item.returns?.["1m"])}</strong></div>
         <div class="metric-cell num"><small>3개월 수익률</small><strong class="${dirClass(item.returns?.["3m"])}">${fmtSignedPct(item.returns?.["3m"])}</strong></div>
@@ -2208,11 +2511,14 @@
 
     modal.removeAttribute("hidden");
     requestAnimationFrame(() => {
-      drawCandlestickChart("modalChartCanvas", (item.candles || []).slice(-75), {
-        support20: item.support_20d,
-        resistance20: item.resistance_20d,
-        currency: item.currency,
-      });
+      if (Array.isArray(item.candles) && item.candles.length > 5) {
+        drawCandlestickChart("modalChartCanvas", item.candles.slice(-75), {
+          support20: item.support_20d,
+          resistance20: item.resistance_20d,
+          currency: item.currency,
+        });
+      }
+      loadModalLiveChart(item, defaultModalIv);
     });
   }
 
@@ -3098,13 +3404,28 @@
     const downCount = enriched.filter((x) => x.change_pct < 0).length;
     const best = [...enriched].sort((a, b) => b.change_pct - a.change_pct)[0];
     const worst = [...enriched].sort((a, b) => a.change_pct - b.change_pct)[0];
+    const actMode = state.treemapClickAction || "MODAL";
 
     if (summaryEl) {
       summaryEl.innerHTML = `
         <span>전체 <b>${enriched.length}종목</b> · 상승 <b class="up-text">${upCount}</b> / 하락 <b class="down-text">${downCount}</b></span>
         <span>최강세: <b>${best.name}(${best.symbol.replace(".KS", "")})</b> <b class="${dirClass(best.change_pct, false)}">${fmtSignedPct(best.change_pct)}</b> · 최약세: <b>${worst.name}(${worst.symbol.replace(".KS", "")})</b> <b class="${dirClass(worst.change_pct, false)}">${fmtSignedPct(worst.change_pct)}</b></span>
-        <span style="color:var(--ink-muted);">👆 타일 면적 = 실제 ETF 편입 비중(%) · 클릭 시 1분봉 차트 전환</span>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <span style="font-weight:700; color:var(--ink-secondary);">👆 종목 터치 시:</span>
+          <div class="interval-tabs" id="treemapClickActionTabs">
+            <button type="button" class="iv-btn ${actMode === "MODAL" ? "active" : ""}" data-tm-act="MODAL" style="font-size:0.71rem; padding:3px 8px;">📋 상세창 띄우기</button>
+            <button type="button" class="iv-btn ${actMode === "CHART" ? "active" : ""}" data-tm-act="CHART" style="font-size:0.71rem; padding:3px 8px;">📈 1분봉 차트 이동</button>
+            <button type="button" class="iv-btn ${actMode === "CARD" ? "active" : ""}" data-tm-act="CARD" style="font-size:0.71rem; padding:3px 8px;">💎 종목카드 이동</button>
+          </div>
+        </div>
       `;
+
+      summaryEl.querySelectorAll("[data-tm-act]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.treemapClickAction = btn.getAttribute("data-tm-act") || "MODAL";
+          summaryEl.querySelectorAll("[data-tm-act]").forEach((b) => b.classList.toggle("active", b === btn));
+        });
+      });
     }
 
     const rect = container.getBoundingClientRect();
@@ -3127,17 +3448,19 @@
         const dispSym = cell.symbol.replace(".KS", "");
         const priceStr = fmtPrice(cell.price, cell.cur);
         const pctStr = fmtSignedPct(cell.change_pct);
+        const isActive = state.chartSymbol === cell.symbol;
 
         return `
           <div class="tm-cell-outer ${tier}" style="left:${cell.leftPct.toFixed(3)}%; top:${cell.topPct.toFixed(3)}%; width:${cell.widthPct.toFixed(3)}%; height:${cell.heightPct.toFixed(3)}%;">
             <button
               type="button"
-              class="tm-cell num"
+              class="tm-cell num ${isActive ? "active-tile" : ""}"
               style="background:${bg};"
               data-tm-sym="${cell.symbol}"
               data-tm-name="${cell.name}"
               data-tm-cur="${cell.cur}"
-              title="${cell.name} (${dispSym}) · 비중 ${wgt.toFixed(2)}% · ${priceStr} (${pctStr})"
+              data-tm-weight="${wgt.toFixed(2)}"
+              title="터치하여 ${cell.name} (${dispSym}) 상세 차트·지표 띄우기 또는 이동"
             >
               <span class="tm-ticker">${dispSym}</span>
               <span class="tm-name">${cell.name}</span>
@@ -3154,7 +3477,9 @@
         const sym = btn.getAttribute("data-tm-sym");
         const nm = btn.getAttribute("data-tm-name");
         const cur = btn.getAttribute("data-tm-cur") || "USD";
-        selectTickerForLiveChart(sym, sym, nm, cur, true);
+        const wgt = parseFloat(btn.getAttribute("data-tm-weight") || "0");
+        container.querySelectorAll(".tm-cell").forEach((b) => b.classList.toggle("active-tile", b === btn));
+        openStockPopupOrJump(sym, nm, cur, wgt);
       });
     });
   }

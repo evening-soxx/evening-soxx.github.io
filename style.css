@@ -2302,3 +2302,84 @@ a {
   .tm-tier-md .tm-pct { font-size: 0.66rem; }
   .tm-tier-md .tm-meta { font-size: 0.54rem; }
 }
+
+.tm-cell.active-tile {
+  border: 2.5px solid #F5D58A !important;
+  box-shadow: 0 0 0 2px rgba(245, 213, 138, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  z-index: 3;
+}
+
+@keyframes goldPulseHighlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 167, 74, 0.75);
+    border-color: #D9A74A;
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(217, 167, 74, 0.18);
+    border-color: #EAC574;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 167, 74, 0);
+  }
+}
+
+.card-focus-pulse {
+  animation: goldPulseHighlight 1.6s ease-out 2;
+  border-color: #D9A74A !important;
+}
+
+.modal-action-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.modal-jump-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid var(--gold-border);
+  background: var(--bg-box);
+  color: var(--ink-primary);
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.modal-jump-btn.primary {
+  background: var(--gold-main);
+  color: #FFFFFF;
+  border-color: var(--gold-main);
+}
+
+.modal-jump-btn:hover,
+.modal-jump-btn:active {
+  filter: brightness(1.07);
+  border-color: var(--gold-main);
+}
+
+.modal-iv-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.dram-hold-row.clickable {
+  cursor: pointer;
+  padding: 5px 6px;
+  margin: -2px -6px;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+
+.dram-hold-row.clickable:hover,
+.dram-hold-row.clickable:active {
+  background: rgba(181, 137, 46, 0.1);
+}
+
