@@ -312,9 +312,11 @@ def fetch_dram_etf_flow():
         series = d.get("series", [])[-60:]
         holdings = d.get("holdings", [])
         shares_now = d.get("current_shares", 0)
+        shares_1d = series[-2]["shares_outstanding"] if len(series) >= 2 else shares_now
         shares_5d = series[-6]["shares_outstanding"] if len(series) >= 6 else shares_now
         shares_20d = series[-21]["shares_outstanding"] if len(series) >= 21 else shares_now
-        nav_now = d.get("current_nav", 50.0)
+        nav_now = d.get("current_nav", 50.0) or (series[-2].get("nav") if len(series) >= 2 else 50.0) or 50.0
+        inflow_1d_usd = (shares_now - shares_1d) * nav_now
         inflow_5d_usd = (shares_now - shares_5d) * nav_now
         inflow_20d_usd = (shares_now - shares_20d) * nav_now
 
@@ -340,9 +342,11 @@ def fetch_dram_etf_flow():
             "latest_date": d.get("latest_date", ""),
             "current_aum": d.get("current_aum", 0.0),
             "current_shares": shares_now,
+            "shares_change_1d": shares_now - shares_1d,
             "current_nav": nav_now,
             "current_price": d.get("current_price", 0.0),
             "premium_discount_pct": round(((d.get("current_price", nav_now) - nav_now) / nav_now) * 100.0, 2) if nav_now else 0.0,
+            "inflow_1d_usd": round(inflow_1d_usd, 0),
             "inflow_5d_usd": round(inflow_5d_usd, 0),
             "inflow_20d_usd": round(inflow_20d_usd, 0),
             "series": series,

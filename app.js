@@ -40,8 +40,12 @@
 
     const df = raw.dram_flow || {};
     const dram_etf_flow = {
+      latest_date: df.latest_date || "",
       latest_aum: df.current_aum,
       latest_aum_krw_trillion: df.current_aum_krw_trillion,
+      current_shares: df.current_shares || 0,
+      shares_change_1d: df.shares_change_1d || 0,
+      inflow_1d_usd: df.inflow_1d_usd || 0,
       inflow_5d_usd: df.inflow_5d_usd,
       inflow_20d_usd: df.inflow_20d_usd,
       top_holdings: (df.holdings || [])
@@ -610,6 +614,48 @@
     });
   }
 
+  function groupDramHoldingsByCompany(rawHoldings) {
+    const groups = new Map();
+    const matchRule = [
+      { key: "MU", match: /MICRON|MU\b/i, name: "Micron Technology (현물+스왑 합산)", ticker: "MU · 3개 계약 통합" },
+      { key: "005930.KS", match: /SAMSUNG/i, name: "Samsung Electronics (현물+스왑 합산)", ticker: "005930 KS · 현물+스왑" },
+      { key: "000660.KS", match: /SK\s*HYNIX/i, name: "SK hynix Inc (현물+스왑 합산)", ticker: "000660 KS · 현물+스왑" },
+      { key: "CXMT", match: /CXMT/i, name: "CXMT Corp (창신메모리 장외스왑)", ticker: "CXMT SWAP" },
+      { key: "SNDK", match: /SANDISK|SNDK/i, name: "Sandisk Corp (샌디스크 현물)", ticker: "SNDK" },
+      { key: "2344.TW", match: /WINBOND/i, name: "Winbond Electronics (윈본드)", ticker: "2344 TW" },
+      { key: "2408.TW", match: /NANYA/i, name: "Nanya Technology (난야테크)", ticker: "2408 TW" },
+      { key: "GIGA", match: /GIGADEVICE/i, name: "GigaDevice Semi (기가디바이스)", ticker: "3986 HK / SWAP" },
+      { key: "285A.JP", match: /KIOXIA/i, name: "Kioxia Holdings (키옥시아)", ticker: "285A JP" },
+      { key: "2337.TW", match: /MACRONIX/i, name: "Macronix International (매크로닉스)", ticker: "2337 TW" },
+    ];
+
+    (rawHoldings || []).forEach((h) => {
+      const nm = String(h.name || "");
+      const tk = String(h.ticker || "");
+      if (nm.includes("Treasury Bill") || nm.includes("Government Obligations") || nm.includes("Cash")) return;
+      const w = Number(h.weight_pct || h.weight || 0);
+      if (w <= 0) return;
+
+      let matched = null;
+      for (const r of matchRule) {
+        if (r.match.test(nm) || r.match.test(tk)) {
+          matched = r;
+          break;
+        }
+      }
+      const gKey = matched ? matched.key : nm;
+      const prev = groups.get(gKey) || {
+        name: matched ? matched.name : nm,
+        ticker: matched ? matched.ticker : tk,
+        weight_pct: 0,
+      };
+      prev.weight_pct = Math.round((prev.weight_pct + w) * 100) / 100;
+      groups.set(gKey, prev);
+    });
+
+    return Array.from(groups.values()).sort((a, b) => b.weight_pct - a.weight_pct);
+  }
+
   function renderDramFlowPanel() {
     const d = state.data;
     const box = document.getElementById("dramFlowContent");
@@ -618,41 +664,72 @@
     const flow = d.dram_etf_flow || {};
     const holdings = flow.top_holdings || [];
     const aumB = flow.latest_aum ? (flow.latest_aum / 1e9).toFixed(2) : "-";
-    const krwT = flow.latest_aum_krw_trillion || (flow.latest_aum ? ((flow.latest_aum * 1335) / 1e12).toFixed(1) : "25.6");
+    const krwT = flow.latest_aum_krw_trillion || (flow.latest_aum ? ((flow.latest_aum * 1385) / 1e12).toFixed(1) : "27.5");
+    const f1Num = flow.inflow_1d_usd ? flow.inflow_1d_usd / 1e6 : 0;
     const f5Num = flow.inflow_5d_usd ? flow.inflow_5d_usd / 1e6 : 0;
     const f20Num = flow.inflow_20d_usd ? flow.inflow_20d_usd / 1e6 : 0;
+    const f1Str = f1Num.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const f5Str = f5Num.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const f20Str = f20Num.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const sh1d = Number(flow.shares_change_1d || 0);
+    const sh1dMan = Math.round(sh1d / 10000);
+
+    const dateBadge = document.getElementById("dramFlowDateBadge");
+    if (dateBadge) {
+      dateBadge.textContent = flow.latest_date
+        ? `정산 기준: ${flow.latest_date} · 미 장마감 후 일 1회 갱신`
+        : "미 정규장 마감 후 일 1회 자동 갱신";
+    }
+
+    const mode = state.dramHoldingsMode || "raw";
+    const displayList =
+      mode === "combined"
+        ? groupDramHoldingsByCompany(holdings).slice(0, 8)
+        : holdings
+            .filter(
+              (h) =>
+                !String(h.name || "").includes("Treasury Bill") &&
+                !String(h.name || "").includes("Government Obligations") &&
+                !String(h.name || "").includes("Cash")
+            )
+            .slice(0, 8);
 
     box.innerHTML = `
-      <div class="etf-metrics-grid num" style="margin-top:0;">
+      <div class="etf-metrics-grid num" style="margin-top:0; grid-template-columns:repeat(2, 1fr);">
         <div class="metric-cell">
           <small>DRAM ETF 순자산(AUM)</small>
           <strong>$${aumB}B (약 ${krwT}조원)</strong>
+          <span style="display:block; font-size:0.68rem; color:var(--ink-muted); margin-top:2px;">운용사 일별 정산 총자산</span>
         </div>
         <div class="metric-cell">
-          <small>최근 5거래일 자금 유입</small>
+          <small>당일(1거래일) 자금 유입 · 매일 리셋</small>
+          <strong class="${dirClass(f1Num)}">$${f1Num > 0 ? "+" : ""}${f1Str}M</strong>
+          <span style="display:block; font-size:0.68rem; color:var(--ink-muted); margin-top:2px;">발행좌수 ${sh1d > 0 ? "+" : ""}${sh1dMan}만 좌 변동</span>
+        </div>
+        <div class="metric-cell">
+          <small>최근 5거래일 누적 자금 유입</small>
           <strong class="${dirClass(f5Num)}">$${f5Num > 0 ? "+" : ""}${f5Str}M</strong>
+          <span style="display:block; font-size:0.68rem; color:var(--ink-muted); margin-top:2px;">최근 5영업일 누적 합산</span>
         </div>
         <div class="metric-cell">
-          <small>최근 20거래일 자금 유입</small>
+          <small>최근 20거래일 누적 자금 유입</small>
           <strong class="${dirClass(f20Num)}">$${f20Num > 0 ? "+" : ""}${f20Str}M</strong>
+          <span style="display:block; font-size:0.68rem; color:var(--ink-muted); margin-top:2px;">최근 20영업일 누적 합산</span>
         </div>
       </div>
 
-      <p style="font-size:0.78rem; color:var(--ink-secondary); margin-top:12px; line-height:1.54;">
-        💡 <strong>RAM(2배 레버리지)</strong>은 <strong>Roundhill DRAM ETF</strong>를 기초자산으로 삼습니다. DRAM ETF의 발행주식수와 순자산이 늘어나면 월가 기관 자금이 삼성전자·SK하이닉스·마이크론으로 실제 유입되고 있음을 뜻합니다.
-      </p>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <p style="font-size:0.76rem; color:var(--ink-secondary); margin:0; line-height:1.48; flex:1; min-width:210px;">
+          💡 <strong>당일(1거래일) 유입</strong>은 매일 미 정규장 마감 후 새로 리셋·정산되며, <strong>5일·20일 유입</strong>은 기간 누적 흐름입니다.
+        </p>
+        <div class="interval-tabs" id="dramHoldingsModeTabs" style="flex-shrink:0;">
+          <button type="button" class="iv-btn ${mode === "raw" ? "active" : ""}" data-dram-mode="raw" style="font-size:0.72rem; padding:4px 8px;">원장 계약별(현물·스왑)</button>
+          <button type="button" class="iv-btn ${mode === "combined" ? "active" : ""}" data-dram-mode="combined" style="font-size:0.72rem; padding:4px 8px;">기업별 합산 비중</button>
+        </div>
+      </div>
 
       <div class="dram-holdings-list num">
-        ${holdings
-          .filter(
-            (h) =>
-              !String(h.name || "").includes("Treasury Bill") &&
-              !String(h.name || "").includes("Government Obligations") &&
-              !String(h.name || "").includes("Cash")
-          )
-          .slice(0, 8)
+        ${displayList
           .map((h) => {
             const w = Math.min(100, Math.max(2, Number(h.weight_pct || 0)));
             return `
@@ -662,7 +739,7 @@
                   <strong>${w.toFixed(2)}%</strong>
                 </div>
                 <div class="dram-bar-track">
-                  <div class="dram-bar-fill" style="width:${Math.min(100, w * 3.5)}%;"></div>
+                  <div class="dram-bar-fill" style="width:${Math.min(100, w * 3.2)}%;"></div>
                 </div>
               </div>
             `;
@@ -670,6 +747,90 @@
           .join("")}
       </div>
     `;
+
+    box.querySelectorAll("[data-dram-mode]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const nextMode = btn.getAttribute("data-dram-mode") || "raw";
+        if (state.dramHoldingsMode !== nextMode) {
+          state.dramHoldingsMode = nextMode;
+          renderDramFlowPanel();
+        }
+      });
+    });
+  }
+
+  async function fetchLiveDramEtfFlow() {
+    try {
+      const targetUrl = "https://stockeasy.intellio.kr/stockdata/api/v1/memory-prices/dram-etf/overview";
+      const jinaUrl = `https://r.jina.ai/${targetUrl}`;
+      const resp = await fetch(jinaUrl, {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      });
+      if (!resp.ok) return false;
+      const wrapper = await resp.json();
+      const rawContent = wrapper?.data?.content || "";
+      if (!rawContent) return false;
+      const d = JSON.parse(rawContent);
+      if (!d || !d.current_aum) return false;
+
+      const series = Array.isArray(d.series) ? d.series.slice(-60) : [];
+      const sharesNow = Number(d.current_shares || (series.length ? series[series.length - 1].shares_outstanding : 0));
+      const shares1d = series.length >= 2 ? Number(series[series.length - 2].shares_outstanding || sharesNow) : sharesNow;
+      const shares5d = series.length >= 6 ? Number(series[series.length - 6].shares_outstanding || sharesNow) : sharesNow;
+      const shares20d = series.length >= 21 ? Number(series[series.length - 21].shares_outstanding || sharesNow) : sharesNow;
+      const navNow =
+        Number(d.current_nav) ||
+        (series.length >= 2 && Number(series[series.length - 2].nav)) ||
+        50.0;
+
+      const inflow1d = Math.round((sharesNow - shares1d) * navNow);
+      const inflow5d = Math.round((sharesNow - shares5d) * navNow);
+      const inflow20d = Math.round((sharesNow - shares20d) * navNow);
+
+      const cleanHoldings = (d.holdings || [])
+        .filter((h) => {
+          const nm = String(h.name || "");
+          const tk = String(h.ticker || "");
+          return (
+            !h.is_money_market &&
+            !nm.includes("Treasury Bill") &&
+            !nm.includes("Government Obligations") &&
+            !nm.includes("Cash") &&
+            !["KRW", "CNY", "TWD"].includes(tk) &&
+            Number(h.weight) > 0
+          );
+        })
+        .map((h) => ({
+          ticker: String(h.ticker || ""),
+          name: String(h.name || ""),
+          weight_pct: Math.round(Number(h.weight || 0) * 100) / 100,
+        }));
+
+      const usdkrw =
+        (state.data?.macros || []).find((m) => m.symbol === "USDKRW" || m.key === "USDKRW")?.price || 1385;
+
+      if (state.data) {
+        state.data.dram_etf_flow = {
+          latest_date: d.latest_date || (series.length ? series[series.length - 1].as_of : ""),
+          latest_aum: Number(d.current_aum),
+          latest_aum_krw_trillion: ((Number(d.current_aum) * usdkrw) / 1e12).toFixed(1),
+          current_shares: sharesNow,
+          shares_change_1d: sharesNow - shares1d,
+          inflow_1d_usd: inflow1d,
+          inflow_5d_usd: inflow5d,
+          inflow_20d_usd: inflow20d,
+          top_holdings: cleanHoldings,
+        };
+        renderDramFlowPanel();
+        if (state.treemapMode === "RAM") {
+          renderSoxxTreemap();
+        }
+      }
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   /* ========================================================================
@@ -1876,7 +2037,7 @@
 
     try {
       const tsParam = Date.now();
-      const [remoteSnapResp, koMem, koAi, koGeo, koOil, koBond, enCnbc] = await Promise.all([
+      const [remoteSnapResp, koMem, koAi, koGeo, koOil, koBond, enCnbc, liveDramOk] = await Promise.all([
         fetch(`./intelligence_data.json?t=${tsParam}`, { cache: "no-store" }).catch(() => null),
         fetchLiveGoogleNewsViaJina("(삼성전자 OR SK하이닉스 OR 마이크론) (HBM OR DRAM OR 반도체)", "메모리 · RAM", "ko", 8),
         fetchLiveGoogleNewsViaJina("(엔비디아 OR TSMC OR 브로드컴 OR 필라델피아반도체) AI 반도체", "SOXX · AI반도체", "ko", 8),
@@ -1884,6 +2045,7 @@
         fetchLiveGoogleNewsViaJina("(국제유가 OR WTI OR 브렌트유 OR 호르무즈 원유)", "유가 · 에너지", "ko", 6),
         fetchLiveGoogleNewsViaJina("(미국 국채 금리 10년물 OR 연준 FOMC OR 기준금리)", "채권 · 금리", "ko", 6),
         fetchCnbcLiveBreakingNews(6),
+        fetchLiveDramEtfFlow(),
       ]);
 
       let snapNews = [];
@@ -1892,7 +2054,7 @@
           const rawJson = await remoteSnapResp.json();
           const norm = normalizeRawData(rawJson);
           if (norm) {
-            if (norm.dram_etf_flow && norm.dram_etf_flow.latest_aum) {
+            if (!liveDramOk && norm.dram_etf_flow && norm.dram_etf_flow.latest_aum) {
               d.dram_etf_flow = norm.dram_etf_flow;
               renderDramFlowPanel();
             }
@@ -3077,6 +3239,7 @@
 
     fetchLiveQuotesFromCNBC(false);
     fetchCdsCompanyStockQuotes();
+    fetchLiveDramEtfFlow();
     scheduleNewsAutoRefresh();
     setTimeout(() => refreshNewsAndIntelligence(false), 2000);
     setInterval(() => fetchLiveQuotesFromCNBC(false), 30000);
