@@ -4068,11 +4068,16 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
 
-    // 마크다운 링크 [제목](URL) 변환 (제목 내부에 [속보] 등 대괄호가 포함된 경우도 완벽 처리)
-    safe = safe.replace(
-      /\[((?:[^\[\]]|\[[^\]]*\])+)\]\((https?:\/\/[^\s\)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--gold-main); font-weight:700; text-decoration:underline;">$1 ↗</a>'
-    );
+    // 1) 마크다운 링크 [제목](URL) 변환 (제목 내부에 [[속보] ...] 등 대괄호가 중첩된 경우도 줄 단위로 안전하게 변환)
+    safe = safe.replace(/\[([^\n]+?)\]\((https?:\/\/[^\s\)]+)\)/g, (match, label, url) => {
+      const cleanLabel = label.replace(/^\[+/, "[").replace(/\]+$/, "]");
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--gold-main); font-weight:700; text-decoration:underline; overflow-wrap:anywhere; word-break:break-word;">${cleanLabel} ↗</a>`;
+    });
+
+    // 2) 만약 변환되지 않고 남은 긴 생(raw) URL이 있다면 칸 밖으로 삐져나가지 않도록 깔끔한 링크 버튼으로 축약
+    safe = safe.replace(/(^|[\s(])(https?:\/\/[^\s)<"]+)/g, (match, prefix, url) => {
+      return `${prefix}<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--gold-main); font-weight:700; text-decoration:underline;">[원문 링크 ↗]</a>`;
+    });
     // 굵은 글씨 **텍스트**
     safe = safe.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     // 제목 ### 텍스트

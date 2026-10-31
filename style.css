@@ -2444,6 +2444,21 @@ a {
   color: var(--status-good);
 }
 
+.ai-analyst-desk .ctrl-btn,
+.news-live-search-bar .ctrl-btn {
+  color: var(--ink-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  font-weight: 700;
+}
+
+.ai-analyst-desk .ctrl-btn:hover,
+.news-live-search-bar .ctrl-btn:hover {
+  border-color: var(--gold-main);
+  color: var(--gold-main);
+  background: var(--gold-soft);
+}
+
 .ai-key-toggle-btn {
   font-weight: 800 !important;
   border-color: var(--gold-border) !important;
@@ -2732,8 +2747,13 @@ a {
 .ai-chat-messages {
   flex: 1;
   min-height: 295px;
-  max-height: 380px;
+  max-height: 400px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg-card);
   border: 1px solid var(--border-line);
   border-radius: 10px;
@@ -2747,18 +2767,23 @@ a {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 96%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .ai-msg.user {
   align-self: flex-end;
   align-items: flex-end;
+  max-width: 92%;
 }
 
 .ai-msg.assistant {
   align-self: flex-start;
   align-items: flex-start;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .ai-msg-role {
@@ -2772,7 +2797,18 @@ a {
   border-radius: 10px;
   font-size: 0.82rem;
   line-height: 1.58;
-  word-break: keep-all;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+
+.ai-msg-bubble a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ai-msg.user .ai-msg-bubble {
@@ -2786,6 +2822,8 @@ a {
   color: var(--ink-primary);
   border: 1px solid var(--border-line);
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .ai-msg-bubble h4,
