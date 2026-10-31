@@ -176,6 +176,13 @@ a {
   position: sticky;
   top: 0;
   z-index: 120;
+  /* iOS Safari & PWA Standalone 상단 Safe Area(노치/다이나믹 아일랜드) 안전 여백 완벽 대응 */
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: constant(safe-area-inset-left);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: constant(safe-area-inset-right);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 .header-inner {
@@ -346,7 +353,7 @@ a {
   background: var(--bg-subtle);
   border-bottom: 1px solid var(--border-line);
   position: sticky;
-  top: 84px;
+  top: calc(84px + env(safe-area-inset-top, 0px));
   z-index: 100;
   overflow-x: auto;
   scrollbar-width: none;
@@ -401,7 +408,7 @@ a {
 
 .study-section {
   display: none;
-  scroll-margin-top: 132px;
+  scroll-margin-top: calc(132px + env(safe-area-inset-top, 0px));
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -1937,7 +1944,7 @@ a {
   -webkit-backdrop-filter: blur(14px);
   border-top: 1px solid rgba(226, 180, 90, 0.28);
   z-index: 150;
-  padding: 5px 4px calc(6px + env(safe-area-inset-bottom));
+  padding: 5px calc(4px + env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) calc(4px + env(safe-area-inset-left, 0px));
   justify-content: space-around;
 }
 .m-nav-item {
@@ -1995,12 +2002,16 @@ a {
     gap: 3px;
   }
   .ctrl-btn {
-    padding: 4px 6px;
-    font-size: 0.64rem;
+    padding: 5px 7px;
+    font-size: 0.65rem;
     border-radius: 6px;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .font-btn {
-    padding: 4px 5px;
+    padding: 5px 6px;
   }
 
   .section-nav {
@@ -2019,7 +2030,7 @@ a {
   }
 
   .study-section {
-    scroll-margin-top: 84px;
+    scroll-margin-top: calc(88px + env(safe-area-inset-top, 0px));
     width: 100%;
     max-width: 100%;
     min-width: 0;
