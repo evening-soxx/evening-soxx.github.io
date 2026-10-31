@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="style.css?v=20261029_4" />
+  <link rel="stylesheet" href="style.css?v=20261031_1" />
 </head>
 <body>
   <!-- 상단 고정 앱 헤더 & 원터치 실시간 티커 스트립 -->
@@ -68,7 +68,7 @@
   <nav class="section-nav" aria-label="주요 섹션 이동">
     <div class="section-nav-inner">
       <a href="#sec-live" class="nav-pill active" data-nav="sec-live">I. 실시간 차트 · SOXX &amp; RAM</a>
-      <a href="#sec-brief" class="nav-pill" data-nav="sec-brief">II. 저녁 시황 · 자금 유입</a>
+      <a href="#sec-brief" class="nav-pill" data-nav="sec-brief">II. 저녁 시황 · 🤖 AI 문답봇</a>
       <a href="#sec-cds" class="nav-pill" data-nav="sec-cds">★ 스페셜: 오라클 · 코어위브 CDS</a>
       <a href="#sec-macro" class="nav-pill" data-nav="sec-macro">III. 전쟁 · 유가 · 채권 레이더</a>
       <a href="#sec-holdings" class="nav-pill" data-nav="sec-holdings">IV. 핵심 보유 종목 20선</a>
@@ -195,13 +195,168 @@
       </div>
     </section>
 
-    <!-- [섹션 2] 어쩐지저녁의 시황 노트 & RAM 모펀드(DRAM) 월가 자금 유입 -->
+    <!-- [섹션 2] 어쩐지저녁의 시황 노트 & 반도체 전문 AI 질의응답·실시간 서치 봇 -->
     <section class="study-section" id="sec-brief">
       <div class="section-head">
         <div>
-          <span class="section-kicker">EVENING MARKET NOTE &amp; FUND FLOW</span>
-          <h2 class="section-title">오늘의 어쩐지저녁 시황 노트 &amp; 월가 자금 유입</h2>
-          <p class="section-desc">SOXX(AI·시스템반도체)와 RAM(메모리 2배 레버리지)의 추세 판독 및 기초자산 DRAM ETF 기관 자금 흐름입니다.</p>
+          <span class="section-kicker">EVENING MARKET NOTE · LIVE AI ANALYST &amp; FUND FLOW</span>
+          <h2 class="section-title">오늘의 어쩐지저녁 시황 노트 &amp; 🤖 반도체 전문 AI 질의응답 봇</h2>
+          <p class="section-desc">실시간 SOXX·반도체 미시황 뉴스를 긁어모으고, 내 유료 API 키(Gemini·OpenAI·Perplexity)와 실시간 웹 검색으로 즉답하는 전용 데스크입니다.</p>
+        </div>
+      </div>
+
+      <!-- ★ 신규 탑재: 반도체 전문 실시간 미시황 크롤러 & AI 질의응답 봇 데스크 -->
+      <div class="panel-card ai-analyst-desk" id="aiAnalystDesk">
+        <div class="ai-desk-top">
+          <div class="ai-desk-title-group">
+            <span class="ai-desk-kicker">LIVE SEMICONDUCTOR INTELLIGENCE &amp; WEB SEARCH AI</span>
+            <h3 class="ai-desk-title">🤖 어쩐지저녁의 SOXX · 반도체 미시황 실시간 서치 &amp; 질의응답 AI</h3>
+          </div>
+          <div class="ai-desk-top-actions">
+            <span class="ai-key-status-badge" id="aiKeyStatusBadge">🟡 내장 인텔리전스 모드 (유료 키 연동 대기)</span>
+            <button type="button" class="ctrl-btn ai-key-toggle-btn" id="btnToggleAiKeyDrawer" aria-expanded="false">
+              🔑 유료 API 키 설정 ▾
+            </button>
+          </div>
+        </div>
+
+        <!-- 유료 API 키 로컬 금고 설정 드로어 (브라우저 localStorage 전용 · 외부 노출 0%) -->
+        <div class="ai-key-drawer" id="aiKeyDrawer" hidden>
+          <div class="ai-key-drawer-grid">
+            <div class="ai-key-field">
+              <label for="aiProviderSelect">AI 엔진 · 실시간 검색 제공사</label>
+              <select id="aiProviderSelect" class="ai-select">
+                <option value="auto">자동 감지 (키 접두사로 Gemini / OpenAI / Perplexity 자동 판별)</option>
+                <option value="gemini">Google Gemini API (AIza... · 실시간 Google 검색 Grounding 탑재)</option>
+                <option value="openai">OpenAI API (sk-... · GPT-4o / GPT-4.1 실시간 Web Search 탑재)</option>
+                <option value="perplexity">Perplexity Sonar API (pplx-... · 실시간 월가·웹 심층 검색)</option>
+              </select>
+            </div>
+            <div class="ai-key-field">
+              <label for="aiModelSelect">상세 모델 선택</label>
+              <select id="aiModelSelect" class="ai-select">
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash (초고속 · Google 실시간 웹검색 기본)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro (심층 추론 · Google 실시간 웹검색)</option>
+                <option value="gpt-4o">OpenAI GPT-4o (실시간 Web Search Preview)</option>
+                <option value="gpt-4.1">OpenAI GPT-4.1 (실시간 Web Search Preview)</option>
+                <option value="sonar-pro">Perplexity Sonar Pro (실시간 글로벌 금융·뉴스 검색)</option>
+              </select>
+            </div>
+            <div class="ai-key-field ai-key-input-col">
+              <label for="aiApiKeyInput">내 유료 API 키 입력 (AIza... / sk-... / pplx-...)</label>
+              <div class="ai-key-input-row">
+                <input
+                  type="password"
+                  id="aiApiKeyInput"
+                  class="ai-key-input"
+                  placeholder="여기에 Gemini(AIza...), OpenAI(sk-...), 또는 Perplexity(pplx-...) 유료 키를 붙여넣으세요"
+                  autocomplete="off"
+                />
+                <button type="button" class="ctrl-btn" id="btnToggleKeyMask" title="키 보기/숨기기">👁️</button>
+                <button type="button" class="live-search-btn" id="btnSaveAiKey">연동 저장</button>
+                <button type="button" class="ctrl-btn" id="btnTestAiKey">연결 테스트</button>
+                <button type="button" class="ctrl-btn" id="btnClearAiKey">삭제</button>
+              </div>
+            </div>
+          </div>
+          <p class="ai-key-security-note" id="aiKeyFeedbackMsg">
+            🔒 <strong>안심 로컬 보관:</strong> 입력하신 API 키는 GitHub나 외부 서버로 절대 전송되지 않으며, 오직 현재 브라우저(<code>localStorage</code>)에만 저장되어 Google · OpenAI · Perplexity 공식 서버와 직접 통신합니다.
+          </p>
+        </div>
+
+        <!-- 좌우 2단: [좌] 실시간 SOXX·반도체 미시황 뉴스 크롤러 / [우] 반도체 전문 질의응답 AI 봇 -->
+        <div class="ai-desk-body-grid">
+          <!-- [좌측] 1. 실시간 SOXX · 반도체 미시황 뉴스 스캐너 -->
+          <div class="ai-scanner-col">
+            <div class="ai-subpanel-head">
+              <div>
+                <span class="ai-sub-badge">1. REAL-TIME MICRO-MARKET CRAWLER</span>
+                <h4 class="ai-sub-title">📡 실시간 SOXX · 반도체 미시황 뉴스 수집기</h4>
+              </div>
+              <span class="num ai-scanner-stat" id="aiScannerStatusText">실시간 수집 대기...</span>
+            </div>
+
+            <!-- 키워드 즉석 뉴스 서치 바 -->
+            <div class="ai-news-search-row">
+              <input
+                type="search"
+                id="aiNewsTopicInput"
+                class="ai-news-search-input"
+                placeholder="🔍 미시황 뉴스 즉시 서치 (예: 인텔, 마이크론 HBM, 엔비디아, 코어위브, 유가, 금리)"
+                autocomplete="off"
+              />
+              <button type="button" class="live-search-btn" id="btnAiSearchNewsNow">실시간 서치</button>
+              <button type="button" class="ctrl-btn" id="btnAiCrawlAllNow" title="전 섹터 한·미 실시간 반도체 속보 대량 수집">
+                ⚡ 전체 강제수집
+              </button>
+            </div>
+
+            <!-- 원터치 미시황 토픽 필터 칩 -->
+            <div class="ai-topic-chips" id="aiTopicChips">
+              <button type="button" class="ai-topic-chip active" data-ai-topic="ALL">전체 미시황 속보</button>
+              <button type="button" class="ai-topic-chip" data-ai-topic="엔비디아 브로드컴 TSMC AMD AI반도체">SOXX·AI빅테크</button>
+              <button type="button" class="ai-topic-chip" data-ai-topic="SK하이닉스 삼성전자 마이크론 HBM D램">RAM·HBM메모리</button>
+              <button type="button" class="ai-topic-chip" data-ai-topic="인텔 마벨 샌디스크 ASML 반도체">인텔·장비·특징주</button>
+              <button type="button" class="ai-topic-chip" data-ai-topic="국제유가 이란 호르무즈 미국 국채 금리">유가·전쟁·금리</button>
+            </div>
+
+            <!-- 실시간 긁어모은 미시황 뉴스 스트림 리스트 -->
+            <div class="ai-micro-news-list" id="aiMicroNewsList">
+              <!-- JS에서 실시간 수집된 한·미 뉴스 및 [이 기사로 AI 질문] 버튼 렌더링 -->
+            </div>
+          </div>
+
+          <!-- [우측] 2. 반도체 전문 실시간 서치 & 질의응답 AI 봇 -->
+          <div class="ai-chat-col">
+            <div class="ai-subpanel-head">
+              <div>
+                <span class="ai-sub-badge">2. INTERACTIVE SEMICONDUCTOR Q&amp;A BOT</span>
+                <h4 class="ai-sub-title">💬 반도체 전문 질의응답 &amp; 실시간 사이트 서치 봇</h4>
+              </div>
+              <div class="ai-chat-toggles">
+                <label class="ai-check-label" title="질문할 때 실시간 뉴스·웹사이트를 즉시 서치하여 답변에 반영합니다">
+                  <input type="checkbox" id="chkAiLiveWebSearch" checked />
+                  <span>🌐 실시간 웹·뉴스 서치 반영</span>
+                </label>
+                <button type="button" class="ctrl-btn" id="btnAiClearChat" style="padding:3px 8px; font-size:0.72rem;">대화 초기화</button>
+              </div>
+            </div>
+
+            <!-- 원터치 빠른 질문 버튼 -->
+            <div class="ai-quick-prompts" id="aiQuickPrompts">
+              <button type="button" class="ai-prompt-btn" data-prompt="방금 수집된 최신 뉴스와 실시간 시세를 바탕으로 오늘 SOXX·SOXL·RAM이 움직인 핵심 원인 3가지와 향후 대응 전략을 요약해줘.">
+                🔥 오늘 SOXX·SOXL·RAM 급등락 핵심 원인 &amp; 뉴스 서치
+              </button>
+              <button type="button" class="ai-prompt-btn" data-prompt="오늘 반도체 보유종목 중 가장 낙폭이 크거나 눈에 띄는 특징주(인텔, AMD, 마이크론, 샌디스크, 엔비디아 등)의 급락/급등 이유를 실시간 서치하고 20일 지지선·RSI 기준 타점을 알려줘.">
+                📉 오늘 급락/급등 특징주 이유 서치 &amp; 지지선·RSI 점검
+              </button>
+              <button type="button" class="ai-prompt-btn" data-prompt="삼성전자, SK하이닉스, 마이크론(MU)의 HBM3E·HBM4 수주 및 D램·낸드 가격 관련 가장 최신 뉴스를 서치해서 RAM(2X) 투자 관점으로 정리해줘.">
+                🧠 삼전·닉스·마이크론 HBM·D램 최신 속보 서치
+              </button>
+              <button type="button" class="ai-prompt-btn" data-prompt="현재 미국 10년물 국채금리, WTI/브렌트 유가, VIX 지수, 그리고 오라클·코어위브 CDS 흐름을 종합할 때 지금 SOXL(3X)과 RAM(2X) 레버리지 비중을 어떻게 가져가야 할까?">
+                🛢️ 금리·유가·CDS 기반 SOXL·RAM 레버리지 비중 전략
+              </button>
+            </div>
+
+            <!-- 대화 메시지 영역 -->
+            <div class="ai-chat-messages" id="aiChatMessages" aria-live="polite">
+              <!-- 초기 환영 메시지 및 질의응답 렌더링 -->
+            </div>
+
+            <!-- 질문 입력 폼 -->
+            <form class="ai-chat-form" id="aiChatForm">
+              <input
+                type="text"
+                id="aiChatInput"
+                class="ai-chat-input"
+                placeholder="질문을 입력하세요 (예: 인텔 왜 폭락했어? / 마이크론 지지선 어디야? / 엔비디아 최신 뉴스 서치해줘)"
+                autocomplete="off"
+              />
+              <button type="submit" class="ai-chat-submit-btn" id="btnAiChatSubmit">
+                🚀 서치 &amp; 질문
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -346,20 +501,36 @@
         <div>
           <span class="section-kicker">GLOBAL NEWSROOM &amp; RISK STREAM</span>
           <h2 class="section-title">실시간 글로벌 소식 &amp; 지정학 뉴스룸</h2>
-          <p class="section-desc">메모리(HBM·DRAM), SOXX AI 반도체, 중동·대만 지정학, 국제유가, 미 국채 금리 관련 최신 뉴스를 실시간으로 자동 수집합니다.</p>
+          <p class="section-desc">메모리(HBM·DRAM), SOXX AI 반도체, 중동·대만 지정학, 국제유가, 미 국채 금리 관련 최신 뉴스를 실시간 다중 채널로 자동 수집·검색합니다.</p>
         </div>
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:4px;">
           <span class="live-pulse-badge num" id="newsAutoStatusBadge" title="설정된 간격마다 최신 뉴스와 시황 지표를 자동으로 새로고침합니다">
             <span class="pulse-dot"></span>
-            <span id="newsLastRefreshedText">5분 자동 새로고침 대기</span>
+            <span id="newsLastRefreshedText">실시간 자동 새로고침 대기</span>
           </span>
           <div class="interval-tabs" id="newsRefreshIntervalTabs" role="group" aria-label="뉴스 자동 새로고침 간격">
+            <button type="button" class="iv-btn" data-news-iv="1">1분 실시간</button>
             <button type="button" class="iv-btn active" data-news-iv="5">5분 간격</button>
             <button type="button" class="iv-btn" data-news-iv="10">10분 간격</button>
           </div>
           <button type="button" class="ctrl-btn" id="btnRefreshNewsNow" style="font-weight:800;">
             <span id="newsRefreshSpinIcon" class="refresh-icon">↻</span> 지금 새로고침
           </button>
+        </div>
+      </div>
+
+      <!-- 뉴스룸 내 실시간 키워드 즉석 서치 바 -->
+      <div class="news-live-search-bar" id="newsLiveSearchWrap">
+        <div class="search-input-wrap" style="flex:1;">
+          <input
+            type="search"
+            id="newsKeywordSearchInput"
+            class="live-search-input"
+            placeholder="🔍 실시간 뉴스 키워드 즉석 서치 (예: 인텔, 마이크론, 엔비디아, HBM4, 샌디스크, 이란 유가, 연준 금리)"
+            autocomplete="off"
+          />
+          <button type="button" class="live-search-btn" id="btnNewsKeywordSearch">뉴스 즉시 서치</button>
+          <button type="button" class="ctrl-btn" id="btnNewsKeywordReset" style="padding:0 12px;">전체보기</button>
         </div>
       </div>
 
@@ -444,7 +615,7 @@
   </nav>
 
   <!-- 초기 스냅샷 데이터 및 실시간 인터랙티브 앱 스크립트 -->
-  <script src="intelligence_data.js?v=20261029_4"></script>
-  <script src="app.js?v=20261029_4"></script>
+  <script src="intelligence_data.js?v=20261031_1"></script>
+  <script src="app.js?v=20261031_1"></script>
 </body>
 </html>

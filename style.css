@@ -2383,3 +2383,541 @@ a {
   background: rgba(181, 137, 46, 0.1);
 }
 
+/* ==========================================================================
+   15. 반도체 전문 실시간 미시황 서치 & AI 질의응답 봇 데스크 (#sec-brief & #sec-news)
+   ========================================================================== */
+.ai-analyst-desk {
+  margin-bottom: 14px;
+  border: 1.5px solid var(--gold-border);
+  background: var(--bg-card);
+  box-shadow: 0 8px 26px rgba(24, 34, 29, 0.08);
+  padding: 16px;
+}
+
+.ai-desk-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-line);
+}
+
+.ai-desk-kicker {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--gold-main);
+  margin-bottom: 2px;
+}
+
+.ai-desk-title {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+.ai-desk-top-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-key-status-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--bg-box);
+  border: 1px solid var(--border-line);
+  color: var(--ink-secondary);
+}
+
+.ai-key-status-badge.connected {
+  background: var(--status-good-bg);
+  border-color: rgba(31, 122, 84, 0.35);
+  color: var(--status-good);
+}
+
+.ai-key-toggle-btn {
+  font-weight: 800 !important;
+  border-color: var(--gold-border) !important;
+  color: var(--gold-main) !important;
+  background: var(--gold-soft) !important;
+}
+
+.ai-key-drawer {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-box);
+  border: 1px solid var(--gold-border);
+}
+
+.ai-key-drawer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.6fr;
+  gap: 10px;
+  align-items: end;
+}
+
+.ai-key-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ai-key-field label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink-secondary);
+}
+
+.ai-select,
+.ai-key-input {
+  height: 38px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border-line);
+  background: var(--bg-card);
+  color: var(--ink-primary);
+  font-size: 0.8rem;
+  font-family: inherit;
+  width: 100%;
+  min-width: 0;
+}
+
+.ai-key-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.ai-key-security-note {
+  margin: 9px 0 0;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.ai-desk-body-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.22fr;
+  gap: 14px;
+  margin-top: 14px;
+  align-items: stretch;
+}
+
+.ai-scanner-col,
+.ai-chat-col {
+  background: var(--bg-box);
+  border: 1px solid var(--border-line);
+  border-radius: var(--radius-md);
+  padding: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ai-subpanel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-sub-badge {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--gold-main);
+}
+
+.ai-sub-title {
+  font-family: var(--font-serif);
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--ink-primary);
+  margin: 2px 0 0;
+}
+
+.ai-scanner-stat {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold-main);
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.ai-news-search-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.ai-news-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border-line);
+  background: var(--bg-card);
+  color: var(--ink-primary);
+  font-size: 0.79rem;
+}
+
+.ai-topic-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.ai-topic-chip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-line);
+  background: var(--bg-card);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.ai-topic-chip.active,
+.ai-topic-chip:hover {
+  background: var(--gold-main);
+  color: #FFFFFF;
+  border-color: var(--gold-main);
+}
+
+.ai-micro-news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 430px;
+  overflow-y: auto;
+  padding-right: 3px;
+}
+
+.ai-micro-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-line);
+  border-radius: 8px;
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: border-color 0.15s;
+}
+
+.ai-micro-item:hover {
+  border-color: var(--gold-main);
+}
+
+.ai-micro-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.66rem;
+  color: var(--ink-muted);
+}
+
+.ai-micro-cat {
+  font-weight: 800;
+  color: var(--gold-main);
+  background: var(--gold-soft);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.ai-micro-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ai-micro-link {
+  font-size: 0.81rem;
+  font-weight: 600;
+  line-height: 1.42;
+  color: var(--ink-primary);
+  text-decoration: none;
+  flex: 1;
+  word-break: keep-all;
+}
+
+.ai-micro-link:hover {
+  color: var(--gold-main);
+  text-decoration: underline;
+}
+
+.ai-micro-ask-btn {
+  flex-shrink: 0;
+  font-size: 0.67rem;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--gold-border);
+  background: var(--gold-soft);
+  color: var(--gold-main);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ai-micro-ask-btn:hover {
+  background: var(--gold-main);
+  color: #FFFFFF;
+}
+
+.ai-chat-toggles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.ai-quick-prompts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.ai-prompt-btn {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-line);
+  background: var(--bg-card);
+  color: var(--ink-primary);
+  cursor: pointer;
+  transition: border-color 0.14s, background 0.14s;
+}
+
+.ai-prompt-btn:hover,
+.ai-prompt-btn:active {
+  border-color: var(--gold-main);
+  background: var(--gold-soft);
+}
+
+.ai-chat-messages {
+  flex: 1;
+  min-height: 295px;
+  max-height: 380px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-line);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 96%;
+}
+
+.ai-msg.user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.ai-msg.assistant {
+  align-self: flex-start;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.ai-msg-role {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--ink-muted);
+}
+
+.ai-msg-bubble {
+  padding: 10px 13px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.58;
+  word-break: keep-all;
+}
+
+.ai-msg.user .ai-msg-bubble {
+  background: #18221D;
+  color: #F6F3EB;
+  border: 1px solid rgba(217, 167, 74, 0.45);
+}
+
+.ai-msg.assistant .ai-msg-bubble {
+  background: var(--bg-box);
+  color: var(--ink-primary);
+  border: 1px solid var(--border-line);
+  width: 100%;
+}
+
+.ai-msg-bubble h4,
+.ai-msg-bubble strong {
+  color: var(--ink-primary);
+}
+
+.ai-msg-bubble ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.ai-msg-bubble li {
+  margin-bottom: 4px;
+}
+
+.ai-source-links {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.ai-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-main);
+  text-decoration: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-source-chip:hover {
+  background: var(--gold-main);
+  color: #FFFFFF;
+}
+
+.ai-chat-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-chat-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--gold-border);
+  background: var(--bg-card);
+  color: var(--ink-primary);
+  font-size: 0.83rem;
+}
+
+.ai-chat-submit-btn {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #18221D, #273830);
+  color: #F5D58A;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid rgba(217, 167, 74, 0.55);
+}
+
+.ai-chat-submit-btn:hover {
+  filter: brightness(1.12);
+}
+
+.news-live-search-bar {
+  margin-bottom: 10px;
+}
+
+.news-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.news-ai-ask-btn {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--gold-border);
+  background: var(--gold-soft);
+  color: var(--gold-main);
+  cursor: pointer;
+}
+
+.news-ai-ask-btn:hover {
+  background: var(--gold-main);
+  color: #FFFFFF;
+}
+
+@media (max-width: 960px) {
+  .ai-key-drawer-grid {
+    grid-template-columns: 1fr;
+  }
+  .ai-desk-body-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-quick-prompts {
+    grid-template-columns: 1fr;
+  }
+  .ai-news-search-row {
+    flex-wrap: wrap;
+  }
+  .ai-news-search-input {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+}
+
+

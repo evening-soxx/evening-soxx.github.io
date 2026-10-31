@@ -1933,36 +1933,67 @@
   }
 
   /* ========================================================================
-     10. 글로벌 소식 & 지정학 뉴스룸
+     10. 글로벌 소식 & 지정학 뉴스룸 (다중 채널 실시간 크롤러 & 키워드 즉석 서치)
      ======================================================================== */
+  state.newsSearchKeyword = "";
+
   function renderNews() {
     const d = state.data;
     const grid = document.getElementById("newsGrid");
     if (!grid || !d || !Array.isArray(d.news)) return;
 
+    const kw = String(state.newsSearchKeyword || "").trim().toLowerCase();
     const filtered = d.news.filter((n) => {
-      if (state.newsFilter === "ALL") return true;
-      return n.category === state.newsFilter;
+      if (state.newsFilter !== "ALL" && n.category !== state.newsFilter) return false;
+      if (kw) {
+        const hay = `${n.title || ""} ${n.source || ""} ${n.category || ""}`.toLowerCase();
+        return hay.includes(kw);
+      }
+      return true;
     });
 
     if (filtered.length === 0) {
-      grid.innerHTML = `<div class="panel-card" style="grid-column:1/-1; text-align:center; color:var(--ink-muted);">해당 카테고리의 최신 소식이 없습니다.</div>`;
+      grid.innerHTML = `<div class="panel-card" style="grid-column:1/-1; text-align:center; color:var(--ink-muted);">해당 조건(${kw || state.newsFilter})의 최신 소식을 실시간 검색 중이거나 결과가 없습니다. 상단 [뉴스 즉시 서치]를 눌러 웹에서 새로 긁어오세요.</div>`;
       return;
     }
 
     grid.innerHTML = filtered
       .map(
-        (n) => `
-        <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" class="news-card">
-          <div class="news-meta">
-            <span class="news-cat-tag">${n.category || "소식"}</span>
-            <span class="news-source num">${n.source || "Global News"} · ${n.pub_date || ""}</span>
+        (n, idx) => `
+        <article class="news-card">
+          <div>
+            <div class="news-meta">
+              <span class="news-cat-tag">${n.category || "소식"}</span>
+              <span class="news-source num">${n.source || "Global News"} · ${n.pub_date || n.date || ""}</span>
+            </div>
+            <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+              <h3 class="news-title" style="margin-top:6px;">${n.title || ""}</h3>
+            </a>
           </div>
-          <h3 class="news-title">${n.title || ""}</h3>
-        </a>
+          <div class="news-card-foot">
+            <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" style="font-size:0.71rem; color:var(--ink-muted); text-decoration:none;">원문 기사 열기 ↗</a>
+            <button type="button" class="news-ai-ask-btn" data-ask-news-idx="${idx}">🤖 AI 시황해설</button>
+          </div>
+        </article>
       `
       )
       .join("");
+
+    grid.querySelectorAll("[data-ask-news-idx]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const i = parseInt(btn.getAttribute("data-ask-news-idx") || "0", 10);
+        const item = filtered[i];
+        if (item && typeof askAiAboutNewsItem === "function") {
+          askAiAboutNewsItem(item);
+        }
+      });
+    });
+
+    if (typeof renderAiMicroNewsFeed === "function") {
+      renderAiMicroNewsFeed();
+    }
   }
 
   function formatKstDateStrFromEpochSec(epochSec) {
@@ -1975,63 +2006,147 @@
     return `${mm}.${dd} ${hh}:${mi}`;
   }
 
-  function parseJinaRssMarkdown(mdText, category, lang, limit) {
-    if (!mdText || typeof mdText !== "string") return [];
-    const blocks = mdText.split("### [").slice(1);
-    const items = [];
-    for (let i = 0; i < blocks.length; i++) {
-      const b = blocks[i];
-      const mHead = b.match(/^([^\]]+)\]\((https?:\/\/[^\)]+)\)/);
-      const mDate = b.match(/([A-Z][a-z]{2},\s+\d{1,2}\s+[A-Za-z]{3}\s+\d{4}\s+\d{2}:\d{2}:\d{2}\s+GMT)/);
-      if (!mHead || !mDate) continue;
-      let rawTitle = mHead[1].trim();
-      const link = mHead[2].trim();
-      const pubStr = mDate[1];
-      const dtMs = Date.parse(pubStr);
-      if (isNaN(dtMs)) continue;
-      const ts = Math.floor(dtMs / 1000);
-      let source = "Google 뉴스";
-      const dashIdx = rawTitle.lastIndexOf(" - ");
-      if (dashIdx > 0 && rawTitle.length - dashIdx < 28) {
-        source = rawTitle.slice(dashIdx + 3).trim();
-        rawTitle = rawTitle.slice(0, dashIdx).trim();
-      }
-      items.push({
-        title: rawTitle,
-        link,
-        source,
-        date: formatKstDateStrFromEpochSec(ts),
-        pub_date: formatKstDateStrFromEpochSec(ts),
-        timestamp: ts,
-        category,
-        lang,
-      });
+  function extractRealBingUrl(rawLink) {
+    if (!rawLink) return "#";
+    try {
+      const u = new URL(rawLink);
+      const target = u.searchParams.get("url");
+      if (target && target.startsWith("http")) return target;
+    } catch (e) {
+      // ignore
     }
-    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    return items.slice(0, limit || 8);
+    return rawLink;
   }
 
-  async function fetchLiveGoogleNewsViaJina(query, category, lang, limit) {
+  // 1) Bing News 실시간 RSS -> rss2json (CORS: * 완벽 지원, 한국어/영어 최신순)
+  async function fetchBingLiveNewsViaRss2Json(query, category, lang = "ko", limit = 8) {
     try {
-      const qWithTime = query.includes("when:") ? query : `${query} when:2d`;
-      const enc = encodeURIComponent(qWithTime);
-      const rssUrl =
-        lang === "ko"
-          ? `https://news.google.com/rss/search?q=${enc}&hl=ko&gl=KR&ceid=KR:ko`
-          : `https://news.google.com/rss/search?q=${enc}&hl=en-US&gl=US&ceid=US:en`;
-      const resp = await fetch(`https://r.jina.ai/${rssUrl}`, { cache: "no-store" });
+      const cc = lang === "ko" ? "KR" : "US";
+      const setlang = lang === "ko" ? "ko" : "en";
+      const rssUrl = `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&setlang=${setlang}&cc=${cc}&sortby=date&format=rss`;
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+      const resp = await fetch(apiUrl, { cache: "no-store" });
       if (!resp.ok) return [];
-      const txt = await resp.text();
-      return parseJinaRssMarkdown(txt, category, lang, limit);
+      const data = await resp.json();
+      const rawItems = data?.items || [];
+      const out = [];
+      rawItems.forEach((it) => {
+        let title = String(it.title || "").trim();
+        if (!title) return;
+        const link = extractRealBingUrl(it.link || "#");
+        // rss2json pubDate는 "YYYY-MM-DD HH:MM:SS" UTC 포맷
+        const pubRaw = String(it.pubDate || "").trim();
+        let dtMs = Date.parse(pubRaw.includes("T") ? pubRaw : pubRaw.replace(" ", "T") + "Z");
+        if (isNaN(dtMs)) dtMs = Date.now();
+        const ts = Math.floor(dtMs / 1000);
+        let source = lang === "ko" ? "실시간 뉴스" : "Wall St. News";
+        const dashIdx = title.lastIndexOf(" - ");
+        if (dashIdx > 0 && title.length - dashIdx < 26) {
+          source = title.slice(dashIdx + 3).trim();
+          title = title.slice(0, dashIdx).trim();
+        }
+        out.push({
+          title,
+          link,
+          source,
+          date: formatKstDateStrFromEpochSec(ts),
+          pub_date: formatKstDateStrFromEpochSec(ts),
+          timestamp: ts,
+          category,
+          lang,
+        });
+      });
+      out.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      return out.slice(0, limit);
     } catch (e) {
       return [];
     }
   }
 
-  async function fetchCnbcLiveBreakingNews(limit = 8) {
+  // 2) 한국 주요 경제지(한국경제·매일경제·연합뉴스) 실시간 RSS -> 반도체/매크로 키워드 자동 분류
+  async function fetchKoreanMajorEconomyLiveRss() {
+    const feeds = [
+      { name: "한국경제", url: "https://www.hankyung.com/feed/finance" },
+      { name: "한국경제 IT", url: "https://www.hankyung.com/feed/it" },
+      { name: "매일경제", url: "https://www.mk.co.kr/rss/50200011/" },
+      { name: "연합뉴스", url: "https://www.yna.co.kr/rss/economy.xml" },
+    ];
+    const results = [];
+    await Promise.all(
+      feeds.map(async (f) => {
+        try {
+          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`;
+          const resp = await fetch(apiUrl, { cache: "no-store" });
+          if (!resp.ok) return;
+          const json = await resp.json();
+          (json?.items || []).forEach((it) => {
+            const title = String(it.title || "").trim();
+            if (!title) return;
+            let cat = null;
+            if (/(삼성전자|SK하이닉스|하이닉스|마이크론|HBM|D램|DRAM|낸드|샌디스크|한미반도체|메모리)/i.test(title)) {
+              cat = "메모리 · RAM";
+            } else if (/(엔비디아|TSMC|브로드컴|AMD|인텔|반도체|AI칩|AI 칩|파운드리|ASML|마벨|퀄컴|필라델피아)/i.test(title)) {
+              cat = "SOXX · AI반도체";
+            } else if (/(국제유가|WTI|브렌트유|원유|호르무즈|정유|에너지)/i.test(title)) {
+              cat = "유가 · 에너지";
+            } else if (/(이란|중동|전쟁|대만|관세|수출통제|트럼프)/i.test(title)) {
+              cat = "전쟁 · 지정학";
+            } else if (/(국채|금리|연준|FOMC|환율|달러|채권)/i.test(title)) {
+              cat = "채권 · 금리";
+            }
+            if (!cat) return;
+            const pubRaw = String(it.pubDate || "").trim();
+            // 한국 언론사 RSS를 rss2json이 파싱할 때 UTC 변환 여부 보정 (미래 시각이면 -9시간)
+            let dtMs = Date.parse(pubRaw.includes("T") ? pubRaw : pubRaw.replace(" ", "T") + "Z");
+            if (isNaN(dtMs)) dtMs = Date.now();
+            if (dtMs > Date.now() + 1800 * 1000) {
+              dtMs -= 9 * 3600 * 1000;
+            }
+            const ts = Math.floor(dtMs / 1000);
+            results.push({
+              title,
+              link: it.link || "#",
+              source: f.name,
+              date: formatKstDateStrFromEpochSec(ts),
+              pub_date: formatKstDateStrFromEpochSec(ts),
+              timestamp: ts,
+              category: cat,
+              lang: "ko",
+            });
+          });
+        } catch (e) {
+          // ignore
+        }
+      })
+    );
+    return results;
+  }
+
+  // 3) CNBC Queryly 실시간 월가 속보 API (CORS: * 무제한, 초고속) + 한글 핵심 태그 자동 부착
+  function buildKoreanTagForEnglishHeadline(title) {
+    const t = String(title || "");
+    const tags = [];
+    if (/nvidia|nvda|jensen/i.test(t)) tags.push("엔비디아");
+    if (/intel|intc/i.test(t)) tags.push("인텔");
+    if (/amd|advanced micro/i.test(t)) tags.push("AMD");
+    if (/micron|\bmu\b|hbm|dram|memory/i.test(t)) tags.push("마이크론·메모리");
+    if (/broadcom|avgo/i.test(t)) tags.push("브로드컴");
+    if (/tsmc|taiwan semi/i.test(t)) tags.push("TSMC");
+    if (/marvell|mrvl/i.test(t)) tags.push("마벨");
+    if (/asml/i.test(t)) tags.push("ASML");
+    if (/sandisk|sndk|western digital|wdc|seagate/i.test(t)) tags.push("스토리지·낸드");
+    if (/oracle|orcl|coreweave/i.test(t)) tags.push("AI인프라·CDS");
+    if (/oil|crude|brent|wti|opec|iran/i.test(t)) tags.push("유가·중동");
+    if (/treasury|yield|fed|powell|rate|inflation/i.test(t)) tags.push("미금리·연준");
+    if (/tariff|china|export/i.test(t)) tags.push("관세·지정학");
+    if (tags.length === 0 && /chip|semiconductor|ai/i.test(t)) tags.push("AI·반도체");
+    return tags.length > 0 ? `[월가속보 · ${tags.slice(0, 2).join("·")}] ` : "";
+  }
+
+  async function fetchCnbcLiveByCategory(query, category, limit = 6, addKrPrefix = false) {
     try {
       const url = `https://api.queryly.com/cnbc/json.aspx?queryly_key=31a35d40a9a64ab3&query=${encodeURIComponent(
-        "semiconductor OR Micron OR NVIDIA OR HBM OR TSMC OR Broadcom"
+        query
       )}&endindex=0&batchsize=${limit}&sort=date`;
       const resp = await fetch(url, { cache: "no-store" });
       if (!resp.ok) return [];
@@ -2039,20 +2154,21 @@
       const results = json?.results || [];
       const items = [];
       results.forEach((r) => {
-        const title = (r["cn:title"] || r.title || "").trim();
+        const rawTitle = (r["cn:title"] || r.title || "").trim();
         const link = r.url || r["cn:liveURL"] || "#";
         const pubIso = r.datePublished || r["cn:lastPubDate"] || "";
         const dtMs = Date.parse(pubIso);
-        if (!title || isNaN(dtMs)) return;
+        if (!rawTitle || isNaN(dtMs)) return;
         const ts = Math.floor(dtMs / 1000);
+        const prefix = addKrPrefix ? buildKoreanTagForEnglishHeadline(rawTitle) : "";
         items.push({
-          title,
+          title: `${prefix}${rawTitle}`,
           link,
           source: "CNBC Live",
           date: formatKstDateStrFromEpochSec(ts),
           pub_date: formatKstDateStrFromEpochSec(ts),
           timestamp: ts,
-          category: "월가 영문속보",
+          category,
           lang: "en",
         });
       });
@@ -2062,54 +2178,193 @@
     }
   }
 
+  // 한글 키워드 -> 영문 월가 티커/키워드 매핑 (한글로 검색해도 미국 CNBC 실시간 속보까지 동시에 긁어옴)
+  function mapKoreanQueryToEnglish(q) {
+    const map = [
+      [/엔비디아/g, "NVIDIA"],
+      [/마이크론/g, "Micron"],
+      [/하이닉스|SK하이닉스/g, "SK Hynix"],
+      [/삼성전자|삼전/g, "Samsung semiconductor"],
+      [/인텔/g, "Intel"],
+      [/브로드컴/g, "Broadcom"],
+      [/마벨/g, "Marvell"],
+      [/샌디스크/g, "SanDisk"],
+      [/웨스턴디지털/g, "Western Digital"],
+      [/씨게이트/g, "Seagate"],
+      [/한미반도체/g, "HBM semiconductor"],
+      [/오라클/g, "Oracle AI"],
+      [/코어위브/g, "CoreWeave"],
+      [/퀄컴/g, "Qualcomm"],
+      [/어플라이드/g, "Applied Materials"],
+      [/램리서치/g, "Lam Research"],
+      [/유가|원유|호르무즈/g, "crude oil WTI Brent Iran"],
+      [/금리|국채|연준/g, "Treasury yield Fed rate"],
+      [/관세|전쟁|이란|중동/g, "Iran Middle East tariff chip"],
+      [/반도체/g, "semiconductor SOXX"],
+    ];
+    let out = String(q || "");
+    map.forEach(([re, en]) => {
+      out = out.replace(re, en);
+    });
+    return out;
+  }
+
+  // 사용자가 원하는 키워드로 한국 + 미국 실시간 뉴스를 즉석에서 긁어오는 함수
+  async function searchLiveNewsByKeyword(rawKeyword, targetSection) {
+    const kw = String(rawKeyword || "").trim();
+    if (!kw) return [];
+
+    const spinIcon = document.getElementById("newsRefreshSpinIcon");
+    const statusTxt = document.getElementById("newsLastRefreshedText");
+    const aiStat = document.getElementById("aiScannerStatusText");
+    if (spinIcon) spinIcon.classList.add("spinning");
+    if (statusTxt) statusTxt.textContent = `'${kw}' 실시간 뉴스 서치 중...`;
+    if (aiStat) aiStat.textContent = `'${kw}' 실시간 서치 중...`;
+
+    try {
+      const enKw = mapKoreanQueryToEnglish(kw);
+      let guessedCat = "SOXX · AI반도체";
+      if (/(하이닉스|삼성|마이크론|HBM|D램|DRAM|낸드|샌디스크|메모리|RAM)/i.test(kw)) {
+        guessedCat = "메모리 · RAM";
+      } else if (/(유가|원유|WTI|브렌트|에너지)/i.test(kw)) {
+        guessedCat = "유가 · 에너지";
+      } else if (/(전쟁|이란|중동|호르무즈|대만|관세)/i.test(kw)) {
+        guessedCat = "전쟁 · 지정학";
+      } else if (/(금리|국채|연준|FOMC|채권|환율)/i.test(kw)) {
+        guessedCat = "채권 · 금리";
+      }
+
+      const [bingKo, cnbcEn] = await Promise.all([
+        fetchBingLiveNewsViaRss2Json(`${kw} 반도체 OR 증시`, guessedCat, "ko", 10),
+        fetchCnbcLiveByCategory(enKw, guessedCat, 8, true),
+      ]);
+
+      const fresh = [...bingKo, ...cnbcEn];
+      if (state.data && Array.isArray(state.data.news)) {
+        const combined = [...fresh, ...state.data.news];
+        const seen = new Set();
+        const deduped = [];
+        combined.forEach((it) => {
+          if (!it || !it.title) return;
+          const normKey = String(it.title).replace(/\[[^\]]+\]\s*/, "").replace(/\s+/g, "").slice(0, 26);
+          if (seen.has(normKey)) return;
+          seen.add(normKey);
+          deduped.push(it);
+        });
+        deduped.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        state.data.news = deduped.slice(0, 80);
+      }
+
+      if (targetSection === "NEWSROOM") {
+        state.newsFilter = "ALL";
+        state.newsSearchKeyword = kw;
+        document.querySelectorAll("[data-news-filter]").forEach((b) => {
+          b.classList.toggle("active", b.getAttribute("data-news-filter") === "ALL");
+        });
+      }
+      renderNews();
+
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      if (statusTxt) statusTxt.textContent = `'${kw}' ${fresh.length}건 실시간 서치 완료 (${hh}:${mm}:${ss})`;
+      if (aiStat) aiStat.textContent = `'${kw}' ${fresh.length}건 서치 (${hh}:${mm}:${ss})`;
+      return fresh;
+    } catch (e) {
+      return [];
+    } finally {
+      if (spinIcon) setTimeout(() => spinIcon.classList.remove("spinning"), 350);
+    }
+  }
+
   async function refreshNewsAndIntelligence(isManual) {
     const d = state.data;
     if (!d) return;
 
     const spinIcon = document.getElementById("newsRefreshSpinIcon");
     const statusTxt = document.getElementById("newsLastRefreshedText");
+    const aiStat = document.getElementById("aiScannerStatusText");
     if (spinIcon) spinIcon.classList.add("spinning");
-    if (statusTxt && isManual) statusTxt.textContent = "실시간 뉴스·지표 수집 중...";
+    if (statusTxt && isManual) statusTxt.textContent = "한·미 실시간 속보 크롤링 중...";
+    if (aiStat && isManual) aiStat.textContent = "실시간 뉴스 크롤링 중...";
 
     try {
       const tsParam = Date.now();
-      const [remoteSnapResp, koMem, koAi, koGeo, koOil, koBond, enCnbc, liveDramOk] = await Promise.all([
+      const rawGithubUrl = `https://raw.githubusercontent.com/evening-soxx/evening-soxx.github.io/main/intelligence_data.json?t=${tsParam}`;
+
+      const [
+        localSnapResp,
+        rawGithubResp,
+        bingMem,
+        bingAi,
+        bingIntel,
+        bingOil,
+        bingBond,
+        krMajor,
+        cnbcAi,
+        cnbcMem,
+        cnbcMacro,
+        cnbcWallSt,
+        liveDramOk,
+      ] = await Promise.all([
         fetch(`./intelligence_data.json?t=${tsParam}`, { cache: "no-store" }).catch(() => null),
-        fetchLiveGoogleNewsViaJina("(삼성전자 OR SK하이닉스 OR 마이크론) (HBM OR DRAM OR 반도체)", "메모리 · RAM", "ko", 8),
-        fetchLiveGoogleNewsViaJina("(엔비디아 OR TSMC OR 브로드컴 OR 필라델피아반도체) AI 반도체", "SOXX · AI반도체", "ko", 8),
-        fetchLiveGoogleNewsViaJina("(중동 전쟁 OR 대만 해협 OR 미중 반도체 수출통제 관세)", "전쟁 · 지정학", "ko", 6),
-        fetchLiveGoogleNewsViaJina("(국제유가 OR WTI OR 브렌트유 OR 호르무즈 원유)", "유가 · 에너지", "ko", 6),
-        fetchLiveGoogleNewsViaJina("(미국 국채 금리 10년물 OR 연준 FOMC OR 기준금리)", "채권 · 금리", "ko", 6),
-        fetchCnbcLiveBreakingNews(6),
+        fetch(rawGithubUrl, { cache: "no-store" }).catch(() => null),
+        fetchBingLiveNewsViaRss2Json("SK하이닉스 삼성전자 반도체 HBM", "메모리 · RAM", "ko", 8),
+        fetchBingLiveNewsViaRss2Json("엔비디아 브로드컴 TSMC 반도체", "SOXX · AI반도체", "ko", 8),
+        fetchBingLiveNewsViaRss2Json("인텔 AMD 필라델피아 반도체", "SOXX · AI반도체", "ko", 8),
+        fetchBingLiveNewsViaRss2Json("국제유가 이란 호르무즈 중동", "유가 · 에너지", "ko", 6),
+        fetchBingLiveNewsViaRss2Json("미국 국채 금리 연준 증시", "채권 · 금리", "ko", 6),
+        fetchKoreanMajorEconomyLiveRss(),
+        fetchCnbcLiveByCategory("NVIDIA OR Broadcom OR AMD OR Intel OR TSMC OR Marvell", "SOXX · AI반도체", 6, true),
+        fetchCnbcLiveByCategory("Micron OR HBM OR DRAM OR SanDisk OR Western Digital", "메모리 · RAM", 5, true),
+        fetchCnbcLiveByCategory("Iran oil OR Brent crude OR 10-year Treasury yield OR tariff", "전쟁 · 지정학", 5, true),
+        fetchCnbcLiveByCategory("semiconductor OR NVIDIA OR Micron OR Intel OR AMD OR TSMC", "월가 영문속보", 8, false),
         fetchLiveDramEtfFlow(),
       ]);
 
       let snapNews = [];
-      if (remoteSnapResp && remoteSnapResp.ok) {
-        try {
-          const rawJson = await remoteSnapResp.json();
-          const norm = normalizeRawData(rawJson);
-          if (norm) {
-            if (!liveDramOk && norm.dram_etf_flow && norm.dram_etf_flow.latest_aum) {
-              d.dram_etf_flow = norm.dram_etf_flow;
-              renderDramFlowPanel();
+      for (const resp of [rawGithubResp, localSnapResp]) {
+        if (resp && resp.ok) {
+          try {
+            const rawJson = await resp.json();
+            const norm = normalizeRawData(rawJson);
+            if (norm) {
+              if (!liveDramOk && norm.dram_etf_flow && norm.dram_etf_flow.latest_aum) {
+                d.dram_etf_flow = norm.dram_etf_flow;
+                renderDramFlowPanel();
+              }
+              if (Array.isArray(norm.news)) {
+                snapNews.push(...norm.news);
+              }
             }
-            if (Array.isArray(norm.news)) {
-              snapNews = norm.news;
-            }
+          } catch (e) {
+            // 무시
           }
-        } catch (e) {
-          // 스냅샷 파싱 실패 시 무시
         }
       }
 
-      const combined = [...koMem, ...koAi, ...koGeo, ...koOil, ...koBond, ...enCnbc, ...snapNews, ...(d.news || [])];
+      const combined = [
+        ...bingMem,
+        ...bingAi,
+        ...bingIntel,
+        ...bingOil,
+        ...bingBond,
+        ...krMajor,
+        ...cnbcAi,
+        ...cnbcMem,
+        ...cnbcMacro,
+        ...cnbcWallSt,
+        ...snapNews,
+        ...(d.news || []),
+      ];
+
       const seen = new Set();
       const deduped = [];
       for (let i = 0; i < combined.length; i++) {
         const it = combined[i];
         if (!it || !it.title) continue;
-        const normKey = String(it.title).replace(/\s+/g, "").slice(0, 28);
+        const normKey = String(it.title).replace(/\[[^\]]+\]\s*/, "").replace(/\s+/g, "").slice(0, 26);
         if (seen.has(normKey)) continue;
         seen.add(normKey);
         deduped.push({
@@ -2121,7 +2376,7 @@
 
       deduped.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       if (deduped.length > 0) {
-        d.news = deduped.slice(0, 48);
+        d.news = deduped.slice(0, 72);
         renderNews();
       }
 
@@ -2132,7 +2387,10 @@
       const mm = String(now.getMinutes()).padStart(2, "0");
       const ss = String(now.getSeconds()).padStart(2, "0");
       if (statusTxt) {
-        statusTxt.textContent = `${state.newsRefreshMinutes}분 자동 · 최근 ${hh}:${mm}:${ss} 갱신`;
+        statusTxt.textContent = `${state.newsRefreshMinutes}분 자동 · 최근 ${hh}:${mm}:${ss} 실시간 갱신 (${d.news.length}건)`;
+      }
+      if (aiStat) {
+        aiStat.textContent = `최근 ${hh}:${mm}:${ss} · ${d.news.length}건 수집됨`;
       }
     } catch (e) {
       // 오프라인 시 기존 뉴스 유지
@@ -2157,10 +2415,43 @@
     document.querySelectorAll("[data-news-filter]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.newsFilter = btn.getAttribute("data-news-filter") || "ALL";
+        state.newsSearchKeyword = "";
+        const kwInput = document.getElementById("newsKeywordSearchInput");
+        if (kwInput) kwInput.value = "";
         document.querySelectorAll("[data-news-filter]").forEach((b) => b.classList.toggle("active", b === btn));
         renderNews();
       });
     });
+
+    const kwInput = document.getElementById("newsKeywordSearchInput");
+    const kwBtn = document.getElementById("btnNewsKeywordSearch");
+    const kwReset = document.getElementById("btnNewsKeywordReset");
+
+    if (kwBtn && kwInput) {
+      kwBtn.addEventListener("click", () => {
+        const val = kwInput.value.trim();
+        if (val) {
+          searchLiveNewsByKeyword(val, "NEWSROOM");
+        } else {
+          state.newsSearchKeyword = "";
+          renderNews();
+        }
+      });
+      kwInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          kwBtn.click();
+        }
+      });
+    }
+
+    if (kwReset) {
+      kwReset.addEventListener("click", () => {
+        state.newsSearchKeyword = "";
+        if (kwInput) kwInput.value = "";
+        renderNews();
+      });
+    }
 
     const ivTabs = document.getElementById("newsRefreshIntervalTabs");
     if (ivTabs) {
@@ -2174,7 +2465,7 @@
           scheduleNewsAutoRefresh();
           const statusTxt = document.getElementById("newsLastRefreshedText");
           if (statusTxt) {
-            statusTxt.textContent = `${ivVal}분 간격 자동 새로고침 적용됨`;
+            statusTxt.textContent = `${ivVal}분 간격 실시간 자동 수집 적용됨`;
           }
         });
       });
@@ -3535,6 +3826,820 @@
   }
 
   /* ========================================================================
+     14-B. 반도체 전문 실시간 미시황 서치 & AI 질의응답 봇 데스크 (#sec-brief)
+     ======================================================================== */
+  state.aiTopicFilter = "ALL";
+  state.aiChatHistory = [];
+
+  function getStoredAiConfig() {
+    const rawKey = (localStorage.getItem("evening_soxx_ai_key") || "").trim();
+    const selProvider = localStorage.getItem("evening_soxx_ai_provider") || "auto";
+    const selModel = localStorage.getItem("evening_soxx_ai_model") || "gemini-2.5-flash";
+
+    let provider = selProvider;
+    if (provider === "auto") {
+      if (rawKey.startsWith("AIza")) provider = "gemini";
+      else if (rawKey.startsWith("pplx-")) provider = "perplexity";
+      else if (rawKey.startsWith("sk-")) provider = "openai";
+      else provider = "gemini";
+    }
+
+    let model = selModel;
+    if (provider === "gemini" && !model.startsWith("gemini")) {
+      model = "gemini-2.5-flash";
+    } else if (provider === "openai" && !model.startsWith("gpt")) {
+      model = "gpt-4o";
+    } else if (provider === "perplexity" && !model.startsWith("sonar")) {
+      model = "sonar-pro";
+    }
+
+    return { apiKey: rawKey, provider, rawProvider: selProvider, model };
+  }
+
+  function updateAiKeyBadgeUI() {
+    const cfg = getStoredAiConfig();
+    const badge = document.getElementById("aiKeyStatusBadge");
+    if (!badge) return;
+
+    if (cfg.apiKey && cfg.apiKey.length > 10) {
+      const pName =
+        cfg.provider === "gemini"
+          ? "Google Gemini + 실시간 검색"
+          : cfg.provider === "perplexity"
+          ? "Perplexity Sonar 실시간 검색"
+          : "OpenAI + 실시간 웹 검색";
+      badge.textContent = `🟢 유료 API 연결됨 (${pName})`;
+      badge.classList.add("connected");
+    } else {
+      badge.textContent = "🟡 내장 인텔리전스 모드 (유료 키 입력 시 실시간 웹 서치 확장)";
+      badge.classList.remove("connected");
+    }
+  }
+
+  function renderAiMicroNewsFeed() {
+    const listEl = document.getElementById("aiMicroNewsList");
+    const statEl = document.getElementById("aiScannerStatusText");
+    if (!listEl || !state.data || !Array.isArray(state.data.news)) return;
+
+    const allNews = state.data.news;
+    const topic = state.aiTopicFilter || "ALL";
+    let items = allNews;
+
+    if (topic !== "ALL") {
+      const keywords = topic
+        .split(/\s+/)
+        .map((w) => w.trim().toLowerCase())
+        .filter(Boolean);
+      items = allNews.filter((n) => {
+        const hay = `${n.title || ""} ${n.category || ""} ${n.source || ""}`.toLowerCase();
+        return keywords.some((k) => hay.includes(k));
+      });
+      if (items.length === 0) items = allNews.slice(0, 15);
+    }
+
+    const topItems = items.slice(0, 24);
+    if (statEl && !statEl.textContent.includes("서치 중")) {
+      statEl.textContent = `실시간 스트림 ${allNews.length}건 대기`;
+    }
+
+    if (topItems.length === 0) {
+      listEl.innerHTML = `<div style="padding:14px; text-align:center; color:var(--ink-muted); font-size:0.8rem;">수집된 미시황 속보가 없습니다. 상단 [⚡ 전체 강제수집] 버튼을 눌러주세요.</div>`;
+      return;
+    }
+
+    listEl.innerHTML = topItems
+      .map(
+        (n, idx) => `
+        <div class="ai-micro-item">
+          <div class="ai-micro-meta">
+            <span class="ai-micro-cat">${n.category || "실시간 속보"}</span>
+            <span class="num">${n.source || "News"} · ${n.pub_date || n.date || ""}</span>
+          </div>
+          <div class="ai-micro-title-row">
+            <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" class="ai-micro-link">${n.title || ""}</a>
+            <button type="button" class="ai-micro-ask-btn" data-micro-ask="${idx}" title="이 뉴스가 SOXX·RAM에 미치는 영향을 AI에게 즉시 질문합니다">💬 AI 질문</button>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+
+    listEl.querySelectorAll("[data-micro-ask]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const i = parseInt(btn.getAttribute("data-micro-ask") || "0", 10);
+        const target = topItems[i];
+        if (target) {
+          askAiAboutNewsItem(target);
+        }
+      });
+    });
+  }
+
+  function askAiAboutNewsItem(newsItem) {
+    if (!newsItem) return;
+    const desk = document.getElementById("aiAnalystDesk");
+    if (desk) {
+      desk.scrollIntoView({ behavior: "smooth", block: "start" });
+      pulseElementHighlight(desk);
+    }
+    const q = `[뉴스 심층 분석] "${newsItem.title}" (${newsItem.source || "속보"}, ${
+      newsItem.pub_date || newsItem.date || ""
+    }) 소식과 관련하여, 최신 배경 뉴스를 실시간 서치하고 이 이슈가 SOXX·SOXL(3X)·RAM(2X) 및 관련 반도체 종목에 미칠 영향과 대응 전략을 알려줘.`;
+    handleAiUserQuestion(q);
+  }
+
+  function formatSimpleMarkdown(text) {
+    if (!text) return "";
+    let safe = String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // 마크다운 링크 [제목](URL) 변환
+    safe = safe.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--gold-main); font-weight:700; text-decoration:underline;">$1 ↗</a>'
+    );
+    // 굵은 글씨 **텍스트**
+    safe = safe.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    // 제목 ### 텍스트
+    safe = safe.replace(/^###\s+(.+)$/gm, '<h4 style="margin:8px 0 4px; font-size:0.88rem; color:var(--gold-main);">■ $1</h4>');
+    safe = safe.replace(/^##\s+(.+)$/gm, '<h4 style="margin:10px 0 4px; font-size:0.92rem; color:var(--gold-main);">■ $1</h4>');
+    // 불릿 리스트
+    safe = safe.replace(/^\s*[-•]\s+(.+)$/gm, "• $1");
+    // 줄바꿈
+    safe = safe.replace(/\n/g, "<br/>");
+    return safe;
+  }
+
+  function appendAiChatMessage(role, htmlOrMarkdown, sources = [], isRawHtml = false) {
+    const box = document.getElementById("aiChatMessages");
+    if (!box) return null;
+
+    const msgEl = document.createElement("div");
+    msgEl.className = `ai-msg ${role}`;
+
+    const roleLabel =
+      role === "user"
+        ? "👤 나의 질문"
+        : "🤖 어쩐지저녁의 SOXX 반도체 애널리스트 (실시간 데이터 + 웹 서치 연동)";
+
+    const bodyHtml = isRawHtml ? htmlOrMarkdown : formatSimpleMarkdown(htmlOrMarkdown);
+
+    let sourcesHtml = "";
+    if (Array.isArray(sources) && sources.length > 0) {
+      const validSources = sources
+        .filter((s) => s && s.link && s.link.startsWith("http"))
+        .slice(0, 6);
+      if (validSources.length > 0) {
+        sourcesHtml = `
+          <div class="ai-source-links">
+            <span style="font-size:0.66rem; font-weight:800; color:var(--ink-muted); width:100%;">🔗 실시간 서치 참조 뉴스 · 사이트 원문:</span>
+            ${validSources
+              .map(
+                (s) =>
+                  `<a href="${s.link}" target="_blank" rel="noopener noreferrer" class="ai-source-chip" title="${(
+                    s.title || ""
+                  ).replace(/"/g, "&quot;")}">📰 ${(s.title || s.source || "관련 기사").slice(0, 38)} ↗</a>`
+              )
+              .join("")}
+          </div>
+        `;
+      }
+    }
+
+    msgEl.innerHTML = `
+      <span class="ai-msg-role">${roleLabel}</span>
+      <div class="ai-msg-bubble">${bodyHtml}${sourcesHtml}</div>
+    `;
+
+    box.appendChild(msgEl);
+    box.scrollTop = box.scrollHeight;
+    return msgEl;
+  }
+
+  function buildLiveMarketContextForAi(extraSearchedNews = []) {
+    const d = state.data || {};
+    const etfs = d.etfs || {};
+    const holdings = d.holdings || [];
+    const macros = d.macros || [];
+    const df = d.dram_etf_flow || {};
+
+    const etfLines = ["SOXX", "SOXL", "RAM", "DRAM"]
+      .map((k) => {
+        const e = etfs[k];
+        if (!e) return null;
+        return `- ${k} (${e.name_kr}): 현재가 $${e.price} (${fmtSignedPct(e.change_pct)}), 20일 지지 $${e.support_20d || "-"} / 저항 $${e.resistance_20d || "-"}, RSI(14)=${e.rsi14 || "-"}, 50일선위=${e.above_sma50 ? "Y" : "N"}`;
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const holdingLines = holdings
+      .map((h) => {
+        const curUnit = h.currency === "KRW" ? "원" : "$";
+        return `- ${h.name_kr}(${h.ticker.replace(".KS", "")}): ${h.price}${curUnit} (${fmtSignedPct(
+          h.change_pct
+        )}), RS=${h.rs_score || "-"}, RSI=${h.rsi14 || "-"}, 20일지지=${h.support_20d || "-"}, 20일저항=${
+          h.resistance_20d || "-"
+        }, MTT정배열=${h.mtt?.mtt_pass ? "통과" : "미통과"}, SOXX비중=${h.soxx_weight || 0}%, DRAM비중=${h.dram_weight || 0}%`;
+      })
+      .join("\n");
+
+    const macroLines = macros
+      .map((m) => `- ${m.name_kr}(${m.key}): ${m.price}${m.unit || ""} (${fmtSignedPct(m.change_pct)}) [${m.status_label || ""}]`)
+      .join("\n");
+
+    const cdsLast = CDS_2026_SERIES[CDS_2026_SERIES.length - 1] || { orcl: 288, crwv: 1140 };
+    const orclQ = state.cdsLiveQuotes?.ORCL || {};
+    const crwvQ = state.cdsLiveQuotes?.CRWV || {};
+
+    const combinedNews = [...(extraSearchedNews || []), ...(d.news || [])];
+    const seen = new Set();
+    const topNews = [];
+    combinedNews.forEach((n) => {
+      if (!n || !n.title || topNews.length >= 22) return;
+      const k = n.title.slice(0, 24);
+      if (seen.has(k)) return;
+      seen.add(k);
+      topNews.push(`- [${n.category || "속보"} | ${n.source || ""} | ${n.pub_date || n.date || ""}] ${n.title} (${n.link || ""})`);
+    });
+
+    return `
+[현재 시각 및 데스크 기준]: ${d.updated_at_kst || "실시간 연동"}
+
+[1. 4대 핵심 반도체 ETF 실시간 시세]
+${etfLines}
+
+[2. Roundhill DRAM ETF(RAM 모펀드) 월가 자금 유입]
+- 순자산(AUM): $${df.latest_aum ? (df.latest_aum / 1e6).toFixed(2) + "M" : "-"}, 1일 자금유입: $${df.inflow_1d_usd ? (df.inflow_1d_usd / 1e6).toFixed(2) + "M" : "0"}, 5일 유입: $${df.inflow_5d_usd ? (df.inflow_5d_usd / 1e6).toFixed(2) + "M" : "-"}
+
+[3. 오라클(ORCL) & 코어위브(CRWV) 5년물 CDS 및 주가]
+- 오라클(ORCL): 5Y CDS ${cdsLast.orcl}bps (BBB- 투자적격 방어선), 주가 ${orclQ.price ? "$" + orclQ.price : "-"} (${fmtSignedPct(orclQ.change_pct)})
+- 코어위브(CRWV): 5Y CDS ${cdsLast.crwv}bps (1,000bp 부실경계선 상회), 주가 ${crwvQ.price ? "$" + crwvQ.price : "-"} (${fmtSignedPct(crwvQ.change_pct)})
+
+[4. 전쟁 · 유가 · 채권 · 환율 8대 매크로 지표]
+${macroLines}
+
+[5. SOXX & RAM 핵심 보유 22종목 실시간 지표]
+${holdingLines}
+
+[6. 방금 수집·서치된 실시간 한·미 반도체 & 거시경제 뉴스 헤드라인]
+${topNews.join("\n")}
+`.trim();
+  }
+
+  async function callGeminiWithLiveSearch(apiKey, model, question, contextText) {
+    const sysInstruction = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 전문 애널리스트 AI입니다.
+사용자의 질문에 대해:
+1) 반드시 제공된 [실시간 데스크 시세·지표·뉴스 컨텍스트]와 Google 실시간 웹 검색 결과를 결합하여 가장 최신 팩트와 정확한 수치(현재가, 등락률, 20일 지지/저항선, RSI, RS 상대강도, 금리/유가/CDS)를 근거로 빠르고 명쾌하게 한국어로 답변하세요.
+2) SOXX(1X), SOXL(3X), RAM(메모리 2X), DRAM(1X) 및 관련 개별 종목(삼성전자, SK하이닉스, 마이크론, 엔비디아, 브로드컴, AMD, 인텔, TSMC 등) 투자 관점의 실전 시사점을 꼭 짚어주세요.
+3) 가독성이 뛰어나도록 핵심 소제목(###)과 불릿(•), 굵은 글씨(**)를 활용해 일목요연하게 정리하세요.`;
+
+    const promptText = `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+      model
+    )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
+
+    // 1차: Google Search Grounding 도구 포함 호출
+    if (useSearch) {
+      try {
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: sysInstruction }] },
+            contents: [{ role: "user", parts: [{ text: promptText }] }],
+            tools: [{ google_search: {} }],
+            generationConfig: { temperature: 0.35 },
+          }),
+        });
+        if (resp.ok) {
+          const json = await resp.json();
+          const cand = json?.candidates?.[0];
+          const text = (cand?.content?.parts || []).map((p) => p.text || "").join("\n").trim();
+          const chunks = cand?.groundingMetadata?.groundingChunks || [];
+          const webSources = [];
+          chunks.forEach((c) => {
+            if (c?.web?.uri) {
+              webSources.push({ title: c.web.title || "Google 실시간 웹 검색 출처", link: c.web.uri, source: "Google Search" });
+            }
+          });
+          if (text) return { text, sources: webSources };
+        }
+      } catch (e) {
+        // 폴백 진행
+      }
+    }
+
+    // 2차 폴백: 기본 generateContent 호출 (이미 실시간 수집된 뉴스·시세가 컨텍스트로 들어감)
+    const resp2 = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: sysInstruction }] },
+        contents: [{ role: "user", parts: [{ text: promptText }] }],
+        generationConfig: { temperature: 0.35 },
+      }),
+    });
+    if (!resp2.ok) {
+      const errTxt = await resp2.text().catch(() => "");
+      throw new Error(`Gemini API 오류 (${resp2.status}): ${errTxt.slice(0, 140)}`);
+    }
+    const json2 = await resp2.json();
+    const text2 = (json2?.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("\n").trim();
+    return { text: text2 || "응답을 생성하지 못했습니다.", sources: [] };
+  }
+
+  async function callOpenAiWithLiveSearch(apiKey, model, question, contextText) {
+    const sysPrompt = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 전문 애널리스트 AI입니다. 실시간 데스크 데이터(SOXX, SOXL, RAM, DRAM, 22대 반도체 종목, 국채금리, 유가, CDS)와 최신 웹/뉴스 검색 결과를 바탕으로 수치와 근거 중심의 명쾌한 한국어 분석을 제공하세요.`;
+    const userPrompt = `[질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스]:\n${contextText}`;
+    const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
+
+    // 1차: OpenAI Responses API + web_search_preview
+    if (useSearch) {
+      try {
+        const resp = await fetch("https://api.openai.com/v1/responses", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: model || "gpt-4o",
+            instructions: sysPrompt,
+            input: userPrompt,
+            tools: [{ type: "web_search_preview" }],
+          }),
+        });
+        if (resp.ok) {
+          const json = await resp.json();
+          let outText = json.output_text || "";
+          const webSources = [];
+          (json.output || []).forEach((item) => {
+            (item.content || []).forEach((c) => {
+              if (!outText && c.text) outText += c.text + "\n";
+              (c.annotations || []).forEach((ann) => {
+                if (ann.url) {
+                  webSources.push({ title: ann.title || "웹 검색 출처", link: ann.url, source: "Web Search" });
+                }
+              });
+            });
+          });
+          if (outText.trim()) return { text: outText.trim(), sources: webSources };
+        }
+      } catch (e) {
+        // Chat Completions로 폴백
+      }
+    }
+
+    // 2차: OpenAI Chat Completions API
+    const resp2 = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: model || "gpt-4o",
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.35,
+      }),
+    });
+    if (!resp2.ok) {
+      const errTxt = await resp2.text().catch(() => "");
+      throw new Error(`OpenAI API 오류 (${resp2.status}): ${errTxt.slice(0, 140)}`);
+    }
+    const json2 = await resp2.json();
+    const text2 = json2?.choices?.[0]?.message?.content || "";
+    return { text: text2, sources: [] };
+  }
+
+  async function callPerplexityLiveSearch(apiKey, model, question, contextText) {
+    const sysPrompt = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 애널리스트입니다. 실시간 웹 검색과 제공된 데스크 데이터를 결합해 한국어로 정확하고 깊이 있게 답변하세요.`;
+    const resp = await fetch("https://api.perplexity.ai/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: model.startsWith("sonar") ? model : "sonar-pro",
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: `[질문]: ${question}\n\n[현재 데스크 실시간 시세·지표]:\n${contextText}` },
+        ],
+        temperature: 0.25,
+      }),
+    });
+    if (!resp.ok) {
+      const errTxt = await resp.text().catch(() => "");
+      throw new Error(`Perplexity API 오류 (${resp.status}): ${errTxt.slice(0, 140)}`);
+    }
+    const json = await resp.json();
+    const text = json?.choices?.[0]?.message?.content || "";
+    const citations = (json?.citations || []).map((u, i) => ({
+      title: `Perplexity 실시간 웹 출처 #${i + 1}`,
+      link: u,
+      source: "Perplexity",
+    }));
+    return { text, sources: citations };
+  }
+
+  // 유료 API 키 미입력 상태에서도 실시간 서치된 뉴스 + 실시간 시세·지지선·RSI를 결합해 즉시 답변하는 내장 애널리스트 엔진
+  function generateBuiltInAnalystAnswer(question, searchedNews) {
+    const d = state.data || {};
+    const etfs = d.etfs || {};
+    const holdings = d.holdings || [];
+    const macros = d.macros || [];
+    const q = String(question || "");
+
+    const soxx = etfs.SOXX || {};
+    const soxl = etfs.SOXL || {};
+    const ram = etfs.RAM || {};
+    const dram = etfs.DRAM || {};
+    const us10y = macros.find((m) => m.key === "US10Y") || {};
+    const wti = macros.find((m) => m.key === "WTI") || {};
+    const brent = macros.find((m) => m.key === "BRENT") || {};
+    const vix = macros.find((m) => m.key === "VIX") || {};
+
+    // 질문에 언급된 종목 자동 매칭
+    const matchedStocks = holdings.filter((h) => {
+      const cleanTk = h.ticker.replace(".KS", "").toLowerCase();
+      const qLow = q.toLowerCase();
+      return (
+        qLow.includes(cleanTk) ||
+        q.includes(h.name_kr) ||
+        (h.name_en && qLow.includes(h.name_en.split(" ")[0].toLowerCase()))
+      );
+    });
+
+    const worstMovers = [...holdings].sort((a, b) => (a.change_pct || 0) - (b.change_pct || 0)).slice(0, 4);
+    const bestMovers = [...holdings].sort((a, b) => (b.change_pct || 0) - (a.change_pct || 0)).slice(0, 3);
+    const oversoldStocks = holdings.filter((h) => Number(h.rsi14 || 50) <= 42);
+
+    const newsPool = (searchedNews && searchedNews.length > 0 ? searchedNews : d.news || []).slice(0, 6);
+    const newsBulletStr =
+      newsPool.length > 0
+        ? newsPool
+            .map((n) => `• **[${n.source || "속보"} · ${n.pub_date || n.date || ""}]** [${n.title}](${n.link || "#"})`)
+            .join("\n")
+        : "• 현재 수집된 실시간 뉴스가 없습니다.";
+
+    let specificStockSection = "";
+    if (matchedStocks.length > 0) {
+      specificStockSection =
+        `### 🎯 질문하신 핵심 종목 실시간 정밀 진단\n` +
+        matchedStocks
+          .map((s) => {
+            const u = s.currency === "KRW" ? "원" : "$";
+            return `• **${s.name_kr} (${s.ticker.replace(".KS", "")})**: 현재가 **${fmtPrice(
+              s.price,
+              s.currency
+            )} (${fmtSignedPct(s.change_pct)})** | 20일 지지선 **${fmtPrice(
+              s.support_20d,
+              s.currency
+            )}** · 저항선 **${fmtPrice(s.resistance_20d, s.currency)}** | RSI(14) **${
+              s.rsi14 ?? "-"
+            }** | RS 상대강도 **${s.rs_score ?? "-"}/99** (${s.role_note || ""})`;
+          })
+          .join("\n") +
+        "\n\n";
+    } else {
+      specificStockSection =
+        `### 📊 당일 반도체 핵심 등락 특징주 & 지지선·RSI 점검\n` +
+        `• **당일 주요 하락/조정 종목**: ${worstMovers
+          .map(
+            (x) =>
+              `**${x.name_kr}**(${fmtSignedPct(x.change_pct)}, RSI ${x.rsi14}, 20일지지 ${fmtPrice(
+                x.support_20d,
+                x.currency
+              )})`
+          )
+          .join(" / ")}\n` +
+        `• **당일 상대적 선방/강세 종목**: ${bestMovers
+          .map((x) => `**${x.name_kr}**(${fmtSignedPct(x.change_pct)}, RS ${x.rs_score})`)
+          .join(" / ")}\n` +
+        (oversoldStocks.length > 0
+          ? `• **RSI 과매도(42 이하) 눌림목 감시 구간**: ${oversoldStocks
+              .map((x) => `${x.name_kr}(RSI ${x.rsi14})`)
+              .join(", ")}\n\n`
+          : "\n");
+    }
+
+    const answer = `### ⚡ 실시간 SOXX · SOXL · RAM & 매크로 핵심 브리핑
+• **4대 반도체 ETF 현황**: **SOXX** $${soxx.price ?? "-"} (**${fmtSignedPct(
+      soxx.change_pct
+    )}**) · **SOXL(3X)** $${soxl.price ?? "-"} (**${fmtSignedPct(
+      soxl.change_pct
+    )}**) · **RAM(메모리 2X)** $${ram.price ?? "-"} (**${fmtSignedPct(
+      ram.change_pct
+    )}**) · **DRAM(1X)** $${dram.price ?? "-"} (**${fmtSignedPct(dram.change_pct)}**)
+• **거시경제 & 크레딧 압력**: 미 10년물 국채금리 **${us10y.price ?? "-"}%** · WTI 유가 **$${
+      wti.price ?? "-"
+    }** (브렌트유 **$${brent.price ?? "-"}**) · VIX 공포지수 **${
+      vix.price ?? "-"
+    }pt** · 오라클 CDS **288bps** / 코어위브 CDS **1,140bps**
+
+${specificStockSection}### 📰 질문 관련 방금 서치된 실시간 한·미 속보
+${newsBulletStr}
+
+### 💡 실전 대응 포인트 (SOXX · SOXL · RAM)
+• **지지선 및 레버리지 관리**: SOXX 20일 지지선(**$${soxx.support_20d ?? "-"}**) 및 DRAM 20일 지지선(**$${
+      dram.support_20d ?? "-"
+    }**) 방어 여부를 1차 기준으로 삼고, 국제유가($100 상회)와 미 10년물 금리(4.9~5.0%)가 안정될 때까지 3배(SOXL)·2배(RAM) 레버리지는 분할 대응이 유리합니다.
+• *(안내: 상단 **[🔑 유료 API 키 설정]**에 본인 소유의 Gemini \`AIza...\`, OpenAI \`sk-...\`, 또는 Perplexity \`pplx-...\` 키를 입력하시면 Google/OpenAI 실시간 웹 검색 엔진이 결합된 심층 자유 문답이 즉시 활성화됩니다.)*`;
+
+    return { text: answer, sources: newsPool };
+  }
+
+  async function handleAiUserQuestion(rawQuestion) {
+    const q = String(rawQuestion || "").trim();
+    if (!q) return;
+
+    const inputEl = document.getElementById("aiChatInput");
+    const submitBtn = document.getElementById("btnAiChatSubmit");
+    if (inputEl && inputEl.value.trim() === q) {
+      inputEl.value = "";
+    }
+
+    appendAiChatMessage("user", q);
+    const loadingMsg = appendAiChatMessage(
+      "assistant",
+      "⏳ <strong>실시간 관련 뉴스·사이트 서치 및 SOXX·RAM 포트폴리오 지표 분석 중입니다...</strong> (한·미 실시간 속보 API 및 AI 엔진 타격 중)",
+      [],
+      true
+    );
+
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      // 1) 질문에서 핵심 키워드를 추출해 실시간 한·미 뉴스(Bing RSS + CNBC Queryly) 즉시 서치
+      const useLiveSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
+      let searchedNews = [];
+      if (useLiveSearch) {
+        const cleanQuery = q
+          .replace(/\[[^\]]+\]/g, "")
+          .replace(/(오늘|지금|방금|최신|뉴스|서치해줘|찾아줘|알려줘|어때|왜|이유|전망|분석|요약해줘)/g, " ")
+          .trim()
+          .slice(0, 38);
+        const searchTarget = cleanQuery.length >= 2 ? cleanQuery : "SOXX 엔비디아 SK하이닉스 반도체";
+        searchedNews = await searchLiveNewsByKeyword(searchTarget, "AI_DESK");
+      }
+
+      const cfg = getStoredAiConfig();
+      const contextText = buildLiveMarketContextForAi(searchedNews);
+
+      let result = null;
+      if (cfg.apiKey && cfg.apiKey.length > 10) {
+        if (cfg.provider === "gemini") {
+          result = await callGeminiWithLiveSearch(cfg.apiKey, cfg.model, q, contextText);
+        } else if (cfg.provider === "perplexity") {
+          result = await callPerplexityLiveSearch(cfg.apiKey, cfg.model, q, contextText);
+        } else {
+          result = await callOpenAiWithLiveSearch(cfg.apiKey, cfg.model, q, contextText);
+        }
+      } else {
+        result = generateBuiltInAnalystAnswer(q, searchedNews);
+      }
+
+      const mergedSources = [...(result.sources || []), ...(searchedNews || []).slice(0, 5)];
+      if (loadingMsg) loadingMsg.remove();
+      appendAiChatMessage("assistant", result.text, mergedSources, false);
+    } catch (err) {
+      if (loadingMsg) loadingMsg.remove();
+      // 유료 키 오류 시에도 내장 실시간 서치 브리핑을 함께 제공하여 질문이 끊기지 않도록 방어
+      const fallback = generateBuiltInAnalystAnswer(q, state.data?.news?.slice(0, 5) || []);
+      appendAiChatMessage(
+        "assistant",
+        `⚠️ **유료 API 호출 안내 (${err.message || "연결 확인 필요"})**\n키 설정을 확인해 주세요. 아래는 실시간 수집된 뉴스 및 데스크 지표 기반 즉석 분석입니다.\n\n${
+          fallback.text
+        }`,
+        fallback.sources,
+        false
+      );
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  }
+
+  function initAiAnalystDesk() {
+    const cfg = getStoredAiConfig();
+    const provSel = document.getElementById("aiProviderSelect");
+    const modSel = document.getElementById("aiModelSelect");
+    const keyInput = document.getElementById("aiApiKeyInput");
+    const drawer = document.getElementById("aiKeyDrawer");
+    const btnToggleDrawer = document.getElementById("btnToggleAiKeyDrawer");
+    const feedbackEl = document.getElementById("aiKeyFeedbackMsg");
+
+    if (provSel) provSel.value = cfg.rawProvider || "auto";
+    if (modSel && cfg.model) modSel.value = cfg.model;
+    if (keyInput && cfg.apiKey) keyInput.value = cfg.apiKey;
+    updateAiKeyBadgeUI();
+    renderAiMicroNewsFeed();
+
+    // 초기 웰컴 메시지
+    const chatBox = document.getElementById("aiChatMessages");
+    if (chatBox && chatBox.children.length === 0) {
+      appendAiChatMessage(
+        "assistant",
+        `반갑습니다! **『어쩐지저녁의 SOXX』 실시간 반도체·매크로 전문 AI 애널리스트**입니다.\n` +
+          `• **1. 실시간 미시황 뉴스 수집**: 좌측 패널에서 한국(한경·매경·연합·Bing) 및 미국 월가(CNBC Live) 속보를 실시간으로 긁어모으고 원하는 키워드를 즉시 서치합니다.\n` +
+          `• **2. 실시간 사이트 서치 & 질의응답**: 아래 빠른 질문 버튼을 누르거나 궁금한 종목·이슈(예: *"인텔 왜 폭락했어?"*, *"마이크론·하이닉스 HBM 최신 뉴스 찾아줘"*, *"지금 SOXL·RAM 지지선 어디야?"*)를 질문해 보세요.\n` +
+          `• 상단 **[🔑 유료 API 키 설정]**에 본인의 **Gemini(\`AIza...\`)**, **OpenAI(\`sk-...\`)**, 또는 **Perplexity(\`pplx-...\`)** 유료 키를 연동하시면 실시간 Google/웹 검색 Grounding이 결합된 초정밀 AI 분석이 가동됩니다.`
+      );
+    }
+
+    if (btnToggleDrawer && drawer) {
+      btnToggleDrawer.addEventListener("click", () => {
+        const isHidden = drawer.hasAttribute("hidden");
+        if (isHidden) {
+          drawer.removeAttribute("hidden");
+          btnToggleDrawer.textContent = "🔑 유료 API 키 설정 ▴";
+          btnToggleDrawer.setAttribute("aria-expanded", "true");
+        } else {
+          drawer.setAttribute("hidden", "");
+          btnToggleDrawer.textContent = "🔑 유료 API 키 설정 ▾";
+          btnToggleDrawer.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+
+    const btnMask = document.getElementById("btnToggleKeyMask");
+    if (btnMask && keyInput) {
+      btnMask.addEventListener("click", () => {
+        keyInput.type = keyInput.type === "password" ? "text" : "password";
+      });
+    }
+
+    if (keyInput && provSel && modSel) {
+      keyInput.addEventListener("input", () => {
+        const v = keyInput.value.trim();
+        if (v.startsWith("AIza")) {
+          if (provSel.value === "auto") modSel.value = "gemini-2.5-flash";
+        } else if (v.startsWith("sk-")) {
+          if (provSel.value === "auto") modSel.value = "gpt-4o";
+        } else if (v.startsWith("pplx-")) {
+          if (provSel.value === "auto") modSel.value = "sonar-pro";
+        }
+      });
+    }
+
+    const btnSaveKey = document.getElementById("btnSaveAiKey");
+    if (btnSaveKey && keyInput && provSel && modSel) {
+      btnSaveKey.addEventListener("click", () => {
+        const k = keyInput.value.trim();
+        localStorage.setItem("evening_soxx_ai_key", k);
+        localStorage.setItem("evening_soxx_ai_provider", provSel.value);
+        localStorage.setItem("evening_soxx_ai_model", modSel.value);
+        updateAiKeyBadgeUI();
+        if (feedbackEl) {
+          feedbackEl.innerHTML = k
+            ? `✅ <strong>유료 API 키가 현재 브라우저에 안전하게 저장되었습니다!</strong> 이제 질문 시 실시간 웹 검색 및 AI 심층 분석이 즉시 작동합니다.`
+            : `ℹ️ API 키가 비어 있어 기본 내장 인텔리전스 모드로 동작합니다.`;
+        }
+      });
+    }
+
+    const btnClearKey = document.getElementById("btnClearAiKey");
+    if (btnClearKey && keyInput) {
+      btnClearKey.addEventListener("click", () => {
+        keyInput.value = "";
+        localStorage.removeItem("evening_soxx_ai_key");
+        updateAiKeyBadgeUI();
+        if (feedbackEl) {
+          feedbackEl.innerHTML = `🗑️ 저장된 API 키를 브라우저에서 완전히 삭제했습니다.`;
+        }
+      });
+    }
+
+    const btnTestKey = document.getElementById("btnTestAiKey");
+    if (btnTestKey && keyInput && provSel && modSel) {
+      btnTestKey.addEventListener("click", async () => {
+        const k = keyInput.value.trim();
+        if (!k) {
+          if (feedbackEl) feedbackEl.innerHTML = `⚠️ 먼저 테스트할 유료 API 키(AIza... / sk-... / pplx-...)를 입력해 주세요.`;
+          return;
+        }
+        localStorage.setItem("evening_soxx_ai_key", k);
+        localStorage.setItem("evening_soxx_ai_provider", provSel.value);
+        localStorage.setItem("evening_soxx_ai_model", modSel.value);
+        updateAiKeyBadgeUI();
+
+        if (feedbackEl) feedbackEl.innerHTML = `⏳ <strong>API 키 연결 및 실시간 검색 응답 테스트 중...</strong>`;
+        try {
+          const t0 = Date.now();
+          const curCfg = getStoredAiConfig();
+          let res = null;
+          if (curCfg.provider === "gemini") {
+            res = await callGeminiWithLiveSearch(curCfg.apiKey, curCfg.model, "연결 테스트: 한 줄로 인사해줘.", "SOXX 실시간 데스크 연결 테스트");
+          } else if (curCfg.provider === "perplexity") {
+            res = await callPerplexityLiveSearch(curCfg.apiKey, curCfg.model, "연결 테스트: 한 줄로 인사해줘.", "SOXX 실시간 데스크 연결 테스트");
+          } else {
+            res = await callOpenAiWithLiveSearch(curCfg.apiKey, curCfg.model, "연결 테스트: 한 줄로 인사해줘.", "SOXX 실시간 데스크 연결 테스트");
+          }
+          const elapsed = ((Date.now() - t0) / 1000).toFixed(2);
+          if (feedbackEl) {
+            feedbackEl.innerHTML = `🟢 <strong>연결 성공! (${curCfg.provider.toUpperCase()} · ${curCfg.model} · 응답 ${elapsed}초)</strong>: "${(
+              res?.text || ""
+            ).slice(0, 80)}"`;
+          }
+        } catch (e) {
+          if (feedbackEl) {
+            feedbackEl.innerHTML = `❌ <strong>연결 실패:</strong> ${e.message || "API 키 또는 모델 권한을 확인해 주세요."}`;
+          }
+        }
+      });
+    }
+
+    // 미시황 뉴스 즉석 서치 바 및 토픽 칩
+    const topicInput = document.getElementById("aiNewsTopicInput");
+    const btnSearchNews = document.getElementById("btnAiSearchNewsNow");
+    const btnCrawlAll = document.getElementById("btnAiCrawlAllNow");
+
+    if (btnSearchNews && topicInput) {
+      btnSearchNews.addEventListener("click", () => {
+        const val = topicInput.value.trim();
+        if (val) {
+          state.aiTopicFilter = val;
+          searchLiveNewsByKeyword(val, "AI_DESK");
+        } else {
+          state.aiTopicFilter = "ALL";
+          renderAiMicroNewsFeed();
+        }
+      });
+      topicInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          btnSearchNews.click();
+        }
+      });
+    }
+
+    if (btnCrawlAll) {
+      btnCrawlAll.addEventListener("click", () => {
+        state.aiTopicFilter = "ALL";
+        if (topicInput) topicInput.value = "";
+        document.querySelectorAll("[data-ai-topic]").forEach((b) => {
+          b.classList.toggle("active", b.getAttribute("data-ai-topic") === "ALL");
+        });
+        refreshNewsAndIntelligence(true);
+      });
+    }
+
+    document.querySelectorAll("[data-ai-topic]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const tp = chip.getAttribute("data-ai-topic") || "ALL";
+        state.aiTopicFilter = tp;
+        document.querySelectorAll("[data-ai-topic]").forEach((b) => b.classList.toggle("active", b === chip));
+        if (tp === "ALL") {
+          renderAiMicroNewsFeed();
+        } else {
+          searchLiveNewsByKeyword(tp, "AI_DESK");
+        }
+      });
+    });
+
+    // 빠른 질문 프롬프트 버튼
+    document.querySelectorAll("[data-prompt]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const p = btn.getAttribute("data-prompt");
+        if (p) handleAiUserQuestion(p);
+      });
+    });
+
+    // 대화 초기화
+    const btnClearChat = document.getElementById("btnAiClearChat");
+    if (btnClearChat && chatBox) {
+      btnClearChat.addEventListener("click", () => {
+        chatBox.innerHTML = "";
+        appendAiChatMessage(
+          "assistant",
+          "대화 내역이 초기화되었습니다. 궁금하신 반도체 종목이나 실시간 미시황 이슈를 질문해 주세요."
+        );
+      });
+    }
+
+    // 채팅 폼 전송
+    const chatForm = document.getElementById("aiChatForm");
+    const chatInput = document.getElementById("aiChatInput");
+    if (chatForm && chatInput) {
+      chatForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const q = chatInput.value.trim();
+        if (q) {
+          chatInput.value = "";
+          handleAiUserQuestion(q);
+        }
+      });
+    }
+  }
+
+  /* ========================================================================
      15. 초기 구동
      ======================================================================== */
   function init() {
@@ -3561,6 +4666,8 @@
       renderNews();
       loadLiveChart("SOXX", "SOXX", "iShares 미국 반도체 ETF", "1M", "USD");
     }
+
+    initAiAnalystDesk();
 
     fetchLiveQuotesFromCNBC(false);
     fetchCdsCompanyStockQuotes();

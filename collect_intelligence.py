@@ -357,8 +357,8 @@ def fetch_dram_etf_flow():
         return None
 
 
-def fetch_google_rss(query, category, lang="ko", limit=8):
-    q_with_time = f"{query} when:3d" if "when:" not in query else query
+def fetch_google_rss(query, category, lang="ko", limit=10):
+    q_with_time = f"{query} when:1d" if "when:" not in query else query
     encoded = urllib.parse.quote(q_with_time)
     if lang == "ko":
         url = f"https://news.google.com/rss/search?q={encoded}&hl=ko&gl=KR&ceid=KR:ko"
@@ -378,7 +378,7 @@ def fetch_google_rss(query, category, lang="ko", limit=8):
 
             if " - " in title:
                 parts = title.rsplit(" - ", 1)
-                if len(parts[1]) < 25:
+                if len(parts[1]) < 28:
                     title = parts[0].strip()
                     if source == "Global News":
                         source = parts[1].strip()
@@ -406,6 +406,41 @@ def fetch_google_rss(query, category, lang="ko", limit=8):
         items = items[:limit]
     except Exception as e:
         print(f"RSS Error [{category}]: {e}")
+    return items
+
+
+def fetch_cnbc_queryly(query, category, limit=8):
+    items = []
+    try:
+        encoded = urllib.parse.quote(query)
+        url = f"https://api.queryly.com/cnbc/json.aspx?queryly_key=31a35d40a9a64ab3&query={encoded}&endindex=0&batchsize={limit}&sort=date"
+        raw = http_get(url, timeout=8)
+        data = json.loads(raw)
+        for r in data.get("results", []):
+            title = str(r.get("cn:title") or r.get("title") or "").strip()
+            link = str(r.get("url") or r.get("cn:liveURL") or "#").strip()
+            pub_iso = str(r.get("datePublished") or r.get("cn:lastPubDate") or "").strip()
+            if not title or not pub_iso:
+                continue
+            ts = 0
+            dt_str = pub_iso[:16]
+            try:
+                dt_obj = datetime.fromisoformat(pub_iso.replace("Z", "+00:00")).astimezone(KST)
+                dt_str = dt_obj.strftime("%m.%d %H:%M")
+                ts = dt_obj.timestamp()
+            except Exception:
+                pass
+            items.append({
+                "title": title,
+                "link": link,
+                "source": "CNBC Live",
+                "date": dt_str,
+                "timestamp": ts,
+                "category": category,
+                "lang": "en",
+            })
+    except Exception as e:
+        print(f"CNBC Queryly Error [{category}]: {e}")
     return items
 
 
@@ -626,24 +661,39 @@ def main():
     dram_flow = fetch_dram_etf_flow()
 
     news_queries = [
-        ("삼성전자 OR SK하이닉스 OR 마이크론 HBM DRAM 반도체", "메모리 · RAM", "ko", 8),
-        ("엔비디아 OR TSMC OR 브로드컴 OR 필라델피아반도체 AI 칩", "SOXX · AI반도체", "ko", 8),
-        ("중동 전쟁 OR 대만 해협 OR 미중 반도체 수출통제 관세", "전쟁 · 지정학", "ko", 6),
-        ("국제유가 WTI 브렌트유 OR 호르무즈 원유 에너지", "유가 · 에너지", "ko", 6),
-        ("미국 국채 금리 10년물 OR 연준 FOMC 기준금리 채권", "채권 · 금리", "ko", 6),
-        ("SOXX OR Micron MU OR SK Hynix HBM DRAM semiconductor", "월가 영문속보", "en", 6),
+        ("(SK하이닉스 OR 삼성전자 OR 마이크론 OR HBM OR 샌디스크 OR 한미반도체 OR D램) 반도체 when:1d", "메모리 · RAM", "ko", 12),
+        ("(엔비디아 OR 브로드컴 OR TSMC OR AMD OR 인텔 OR 필라델피아반도체 OR 마벨 OR ASML) when:1d", "SOXX · AI반도체", "ko", 12),
+        ("(중동 OR 이란 OR 호르무즈 OR 대만 해협 OR 트럼프 관세 OR 수출통제) when:1d", "전쟁 · 지정학", "ko", 8),
+        ("(국제유가 OR WTI OR 브렌트유 OR 원유) when:1d", "유가 · 에너지", "ko", 8),
+        ("(미국 국채 OR 연준 OR FOMC OR 금리 OR 국고채 OR 환율) when:1d", "채권 · 금리", "ko", 8),
+        ("(SOXX OR NVIDIA OR Micron OR Intel OR AMD OR TSMC OR Broadcom OR HBM) semiconductor when:1d", "월가 영문속보", "en", 10),
     ]
 
     all_news = []
     seen_titles = set()
     for q, cat, lang, lim in news_queries:
         items = fetch_google_rss(q, cat, lang=lang, limit=lim)
+        if len(items) < 4:
+            # 1일 내 기사가 적으면 3일 범위로 보강
+            items = fetch_google_rss(q.replace("when:1d", "when:3d"), cat, lang=lang, limit=lim)
         for it in items:
             norm = re.sub(r"\s+", "", it["title"])[:30]
             if norm not in seen_titles:
                 seen_titles.add(norm)
                 all_news.append(it)
         print(f"  ✓ 뉴스 수집 완료: [{cat}] {len(items)}건")
+
+    cnbc_queries = [
+        ("NVIDIA OR Broadcom OR AMD OR Intel OR TSMC OR Marvell OR semiconductor", "월가 영문속보", 8),
+        ("Micron OR HBM OR DRAM OR SanDisk OR memory chip", "월가 영문속보", 6),
+    ]
+    for cq, ccat, clim in cnbc_queries:
+        citems = fetch_cnbc_queryly(cq, ccat, limit=clim)
+        for it in citems:
+            norm = re.sub(r"\s+", "", it["title"])[:30]
+            if norm not in seen_titles:
+                seen_titles.add(norm)
+                all_news.append(it)
 
     all_news.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
 
