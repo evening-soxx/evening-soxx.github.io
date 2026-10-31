@@ -1943,11 +1943,14 @@
     if (!grid || !d || !Array.isArray(d.news)) return;
 
     const kw = String(state.newsSearchKeyword || "").trim().toLowerCase();
+    const enKw = kw ? mapKoreanQueryToEnglish(kw).toLowerCase() : "";
     const filtered = d.news.filter((n) => {
       if (state.newsFilter !== "ALL" && n.category !== state.newsFilter) return false;
       if (kw) {
-        const hay = `${n.title || ""} ${n.source || ""} ${n.category || ""}`.toLowerCase();
-        return hay.includes(kw);
+        const hay = `${n.title || ""} ${n.summary || ""} ${n.matched_query || ""} ${n.source || ""} ${
+          n.category || ""
+        }`.toLowerCase();
+        return hay.includes(kw) || (enKw && hay.includes(enKw));
       }
       return true;
     });
@@ -1969,6 +1972,11 @@
             <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
               <h3 class="news-title" style="margin-top:6px;">${n.title || ""}</h3>
             </a>
+            ${
+              n.summary
+                ? `<p style="font-size:0.75rem; color:var(--ink-muted); margin:6px 0 0; line-height:1.42; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${n.summary}</p>`
+                : ""
+            }
           </div>
           <div class="news-card-foot">
             <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" style="font-size:0.71rem; color:var(--ink-muted); text-decoration:none;">원문 기사 열기 ↗</a>
@@ -2018,6 +2026,61 @@
     return rawLink;
   }
 
+  // 0) Daum 최신 뉴스 실시간 크롤러 (Jina Reader 경유, CORS: * 무제한, 본문 요약 + 초단위 시각 추출)
+  async function fetchDaumLiveNewsViaJina(query, category, limit = 10) {
+    try {
+      const targetUrl = `https://search.daum.net/search?w=news&sort=recency&q=${encodeURIComponent(query)}`;
+      const jinaUrl = `https://r.jina.ai/${targetUrl}`;
+      const resp = await fetch(jinaUrl, { cache: "no-store" });
+      if (!resp.ok) return [];
+      const txt = await resp.text();
+      const blocks = txt.split("\n*   ");
+      const out = [];
+      for (let i = 1; i < blocks.length; i++) {
+        const b = blocks[i];
+        const mPress = b.match(/\*\*([^*]+)\*\*\]\(https?:\/\/v\.daum\.net\/channel/);
+        const press = mPress ? mPress[1].trim() : "실시간 속보";
+        const mTitle = b.match(/\*\*\[([\s\S]+?)\]\((https?:\/\/v\.daum\.net\/v\/(\d{14})\d*)\)\*\*/);
+        if (!mTitle) continue;
+        const rawTitle = mTitle[1].replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
+        const link = mTitle[2].replace(/^http:\/\//, "https://");
+        const dt14 = mTitle[3];
+        const rest = b.slice(b.indexOf(mTitle[0]) + mTitle[0].length);
+        const mSum = rest.match(/\[([\s\S]+?)\]\(https?:\/\/v\.daum\.net\/v\/\d+\)/);
+        const summary = mSum
+          ? mSum[1].replace(/\*\*/g, "").replace(/\s+/g, " ").trim().slice(0, 220)
+          : "";
+
+        const yyyy = parseInt(dt14.slice(0, 4), 10);
+        const mm = parseInt(dt14.slice(4, 6), 10) - 1;
+        const dd = parseInt(dt14.slice(6, 8), 10);
+        const hh = parseInt(dt14.slice(8, 10), 10);
+        const mi = parseInt(dt14.slice(10, 12), 10);
+        const ss = parseInt(dt14.slice(12, 14), 10);
+        // dt14는 KST 기준이므로 UTC epoch 계산 시 -9시간
+        const ts = Math.floor((Date.UTC(yyyy, mm, dd, hh, mi, ss) - 9 * 3600 * 1000) / 1000);
+        const dateStr = `${dt14.slice(4, 6)}.${dt14.slice(6, 8)} ${dt14.slice(8, 10)}:${dt14.slice(10, 12)}`;
+
+        out.push({
+          title: rawTitle,
+          summary,
+          link,
+          source: press,
+          date: dateStr,
+          pub_date: dateStr,
+          timestamp: ts,
+          category,
+          lang: "ko",
+          matched_query: String(query || "").toLowerCase(),
+        });
+        if (out.length >= limit) break;
+      }
+      return out;
+    } catch (e) {
+      return [];
+    }
+  }
+
   // 1) Bing News 실시간 RSS -> rss2json (CORS: * 완벽 지원, 한국어/영어 최신순)
   async function fetchBingLiveNewsViaRss2Json(query, category, lang = "ko", limit = 8) {
     try {
@@ -2045,8 +2108,14 @@
           source = title.slice(dashIdx + 3).trim();
           title = title.slice(0, dashIdx).trim();
         }
+        const rawDesc = String(it.description || it.content || "")
+          .replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 220);
         out.push({
           title,
+          summary: rawDesc,
           link,
           source,
           date: formatKstDateStrFromEpochSec(ts),
@@ -2161,8 +2230,14 @@
         if (!rawTitle || isNaN(dtMs)) return;
         const ts = Math.floor(dtMs / 1000);
         const prefix = addKrPrefix ? buildKoreanTagForEnglishHeadline(rawTitle) : "";
+        const rawDesc = String(r.description || r["cn:promoText"] || "")
+          .replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 220);
         items.push({
           title: `${prefix}${rawTitle}`,
+          summary: rawDesc,
           link,
           source: "CNBC Live",
           date: formatKstDateStrFromEpochSec(ts),
@@ -2234,12 +2309,17 @@
         guessedCat = "채권 · 금리";
       }
 
-      const [bingKo, cnbcEn] = await Promise.all([
-        fetchBingLiveNewsViaRss2Json(`${kw} 반도체 OR 증시`, guessedCat, "ko", 10),
-        fetchCnbcLiveByCategory(enKw, guessedCat, 8, true),
+      const [daumKo, bingKo, cnbcEn] = await Promise.all([
+        fetchDaumLiveNewsViaJina(kw, guessedCat, 10),
+        fetchBingLiveNewsViaRss2Json(kw, guessedCat, "ko", 6),
+        fetchCnbcLiveByCategory(enKw, guessedCat, 6, true),
       ]);
 
-      const fresh = [...bingKo, ...cnbcEn];
+      const kwLow = kw.toLowerCase();
+      const fresh = [...daumKo, ...bingKo, ...cnbcEn].map((item) => ({
+        ...item,
+        matched_query: kwLow,
+      }));
       if (state.data && Array.isArray(state.data.news)) {
         const combined = [...fresh, ...state.data.news];
         const seen = new Set();
@@ -2247,12 +2327,21 @@
         combined.forEach((it) => {
           if (!it || !it.title) return;
           const normKey = String(it.title).replace(/\[[^\]]+\]\s*/, "").replace(/\s+/g, "").slice(0, 26);
-          if (seen.has(normKey)) return;
+          if (seen.has(normKey)) {
+            // 이미 존재하는 기사에 방금 검색한 키워드 태그 보강
+            const existing = deduped.find(
+              (x) => String(x.title).replace(/\[[^\]]+\]\s*/, "").replace(/\s+/g, "").slice(0, 26) === normKey
+            );
+            if (existing && it.matched_query) {
+              existing.matched_query = `${existing.matched_query || ""} ${it.matched_query}`.trim();
+            }
+            return;
+          }
           seen.add(normKey);
           deduped.push(it);
         });
         deduped.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        state.data.news = deduped.slice(0, 80);
+        state.data.news = deduped.slice(0, 96);
       }
 
       if (targetSection === "NEWSROOM") {
@@ -2261,15 +2350,18 @@
         document.querySelectorAll("[data-news-filter]").forEach((b) => {
           b.classList.toggle("active", b.getAttribute("data-news-filter") === "ALL");
         });
+      } else if (targetSection === "AI_DESK") {
+        state.aiTopicFilter = kw;
       }
       renderNews();
+      renderAiMicroNewsFeed();
 
       const now = new Date();
       const hh = String(now.getHours()).padStart(2, "0");
       const mm = String(now.getMinutes()).padStart(2, "0");
       const ss = String(now.getSeconds()).padStart(2, "0");
       if (statusTxt) statusTxt.textContent = `'${kw}' ${fresh.length}건 실시간 서치 완료 (${hh}:${mm}:${ss})`;
-      if (aiStat) aiStat.textContent = `'${kw}' ${fresh.length}건 서치 (${hh}:${mm}:${ss})`;
+      if (aiStat) aiStat.textContent = `'${kw}' ${fresh.length}건 실시간 수집됨 (${hh}:${mm}:${ss})`;
       return fresh;
     } catch (e) {
       return [];
@@ -2296,11 +2388,9 @@
       const [
         localSnapResp,
         rawGithubResp,
-        bingMem,
-        bingAi,
-        bingIntel,
-        bingOil,
-        bingBond,
+        daumMem,
+        daumAi,
+        bingMacro,
         krMajor,
         cnbcAi,
         cnbcMem,
@@ -2310,11 +2400,9 @@
       ] = await Promise.all([
         fetch(`./intelligence_data.json?t=${tsParam}`, { cache: "no-store" }).catch(() => null),
         fetch(rawGithubUrl, { cache: "no-store" }).catch(() => null),
-        fetchBingLiveNewsViaRss2Json("SK하이닉스 삼성전자 반도체 HBM", "메모리 · RAM", "ko", 8),
-        fetchBingLiveNewsViaRss2Json("엔비디아 브로드컴 TSMC 반도체", "SOXX · AI반도체", "ko", 8),
-        fetchBingLiveNewsViaRss2Json("인텔 AMD 필라델피아 반도체", "SOXX · AI반도체", "ko", 8),
-        fetchBingLiveNewsViaRss2Json("국제유가 이란 호르무즈 중동", "유가 · 에너지", "ko", 6),
-        fetchBingLiveNewsViaRss2Json("미국 국채 금리 연준 증시", "채권 · 금리", "ko", 6),
+        fetchDaumLiveNewsViaJina("SK하이닉스 마이크론 삼성전자 HBM", "메모리 · RAM", 8),
+        fetchDaumLiveNewsViaJina("엔비디아 인텔 TSMC 필라델피아반도체", "SOXX · AI반도체", 8),
+        fetchBingLiveNewsViaRss2Json("국제유가 국채 금리 연준 반도체", "채권 · 금리", "ko", 6),
         fetchKoreanMajorEconomyLiveRss(),
         fetchCnbcLiveByCategory("NVIDIA OR Broadcom OR AMD OR Intel OR TSMC OR Marvell", "SOXX · AI반도체", 6, true),
         fetchCnbcLiveByCategory("Micron OR HBM OR DRAM OR SanDisk OR Western Digital", "메모리 · RAM", 5, true),
@@ -2345,11 +2433,9 @@
       }
 
       const combined = [
-        ...bingMem,
-        ...bingAi,
-        ...bingIntel,
-        ...bingOil,
-        ...bingBond,
+        ...daumMem,
+        ...daumAi,
+        ...bingMacro,
         ...krMajor,
         ...cnbcAi,
         ...cnbcMem,
@@ -3839,6 +3925,8 @@
     let provider = selProvider;
     if (provider === "auto") {
       if (rawKey.startsWith("AIza")) provider = "gemini";
+      else if (rawKey.startsWith("gsk_")) provider = "groq";
+      else if (rawKey.startsWith("sk-or-")) provider = "openrouter";
       else if (rawKey.startsWith("pplx-")) provider = "perplexity";
       else if (rawKey.startsWith("sk-")) provider = "openai";
       else provider = "gemini";
@@ -3847,6 +3935,10 @@
     let model = selModel;
     if (provider === "gemini" && !model.startsWith("gemini")) {
       model = "gemini-2.5-flash";
+    } else if (provider === "groq" && !model.includes("llama") && !model.includes("qwen") && !model.includes("mixtral")) {
+      model = "llama-3.3-70b-versatile";
+    } else if (provider === "openrouter" && !model.includes("/")) {
+      model = "deepseek/deepseek-chat-v3-0324:free";
     } else if (provider === "openai" && !model.startsWith("gpt")) {
       model = "gpt-4o";
     } else if (provider === "perplexity" && !model.startsWith("sonar")) {
@@ -3864,14 +3956,18 @@
     if (cfg.apiKey && cfg.apiKey.length > 10) {
       const pName =
         cfg.provider === "gemini"
-          ? "Google Gemini + 실시간 검색"
+          ? "Google Gemini (무료/유료 키 활성)"
+          : cfg.provider === "groq"
+          ? "Groq 무료 초고속 AI 활성"
+          : cfg.provider === "openrouter"
+          ? "OpenRouter 무료 AI 활성"
           : cfg.provider === "perplexity"
           ? "Perplexity Sonar 실시간 검색"
-          : "OpenAI + 실시간 웹 검색";
-      badge.textContent = `🟢 유료 API 연결됨 (${pName})`;
+          : "OpenAI 실시간 AI 활성";
+      badge.textContent = `🟢 API 키 연결됨 (${pName})`;
       badge.classList.add("connected");
     } else {
-      badge.textContent = "🟡 내장 인텔리전스 모드 (유료 키 입력 시 실시간 웹 서치 확장)";
+      badge.textContent = "🟡 내장 인텔리전스 모드 (무료 API 키 연동 가능)";
       badge.classList.remove("connected");
     }
   }
@@ -3886,24 +3982,32 @@
     let items = allNews;
 
     if (topic !== "ALL") {
-      const keywords = topic
+      const rawWords = topic
         .split(/\s+/)
         .map((w) => w.trim().toLowerCase())
         .filter(Boolean);
+      const enWords = mapKoreanQueryToEnglish(topic)
+        .split(/\s+/)
+        .map((w) => w.trim().toLowerCase())
+        .filter((w) => w.length >= 2);
+      const keywords = Array.from(new Set([...rawWords, ...enWords]));
+
       items = allNews.filter((n) => {
-        const hay = `${n.title || ""} ${n.category || ""} ${n.source || ""}`.toLowerCase();
+        const hay = `${n.title || ""} ${n.summary || ""} ${n.matched_query || ""} ${n.category || ""} ${
+          n.source || ""
+        }`.toLowerCase();
         return keywords.some((k) => hay.includes(k));
       });
-      if (items.length === 0) items = allNews.slice(0, 15);
     }
 
     const topItems = items.slice(0, 24);
     if (statEl && !statEl.textContent.includes("서치 중")) {
-      statEl.textContent = `실시간 스트림 ${allNews.length}건 대기`;
+      statEl.textContent =
+        topic === "ALL" ? `실시간 스트림 ${allNews.length}건 대기` : `'${topic}' 관련 ${items.length}건 필터됨`;
     }
 
     if (topItems.length === 0) {
-      listEl.innerHTML = `<div style="padding:14px; text-align:center; color:var(--ink-muted); font-size:0.8rem;">수집된 미시황 속보가 없습니다. 상단 [⚡ 전체 강제수집] 버튼을 눌러주세요.</div>`;
+      listEl.innerHTML = `<div style="padding:14px; text-align:center; color:var(--ink-muted); font-size:0.8rem;">'${topic}' 관련 실시간 속보를 수집 중이거나 일치하는 기사가 없습니다. 상단 <strong>[실시간 서치]</strong> 버튼을 누르시면 즉시 한·미 최신 기사를 긁어옵니다.</div>`;
       return;
     }
 
@@ -3916,7 +4020,16 @@
             <span class="num">${n.source || "News"} · ${n.pub_date || n.date || ""}</span>
           </div>
           <div class="ai-micro-title-row">
-            <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" class="ai-micro-link">${n.title || ""}</a>
+            <div style="flex:1; min-width:0;">
+              <a href="${n.link || "#"}" target="_blank" rel="noopener noreferrer" class="ai-micro-link">${
+          n.title || ""
+        }</a>
+              ${
+                n.summary
+                  ? `<div style="font-size:0.71rem; color:var(--ink-muted); margin-top:3px; line-height:1.38; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${n.summary}</div>`
+                  : ""
+              }
+            </div>
             <button type="button" class="ai-micro-ask-btn" data-micro-ask="${idx}" title="이 뉴스가 SOXX·RAM에 미치는 영향을 AI에게 즉시 질문합니다">💬 AI 질문</button>
           </div>
         </div>
@@ -3955,9 +4068,9 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
 
-    // 마크다운 링크 [제목](URL) 변환
+    // 마크다운 링크 [제목](URL) 변환 (제목 내부에 [속보] 등 대괄호가 포함된 경우도 완벽 처리)
     safe = safe.replace(
-      /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g,
+      /\[((?:[^\[\]]|\[[^\]]*\])+)\]\((https?:\/\/[^\s\)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--gold-main); font-weight:700; text-decoration:underline;">$1 ↗</a>'
     );
     // 굵은 글씨 **텍스트**
@@ -4061,7 +4174,8 @@
       const k = n.title.slice(0, 24);
       if (seen.has(k)) return;
       seen.add(k);
-      topNews.push(`- [${n.category || "속보"} | ${n.source || ""} | ${n.pub_date || n.date || ""}] ${n.title} (${n.link || ""})`);
+      const sumPart = n.summary ? ` — 요약: ${n.summary}` : "";
+      topNews.push(`- [${n.category || "속보"} | ${n.source || ""} | ${n.pub_date || n.date || ""}] ${n.title}${sumPart} (${n.link || ""})`);
     });
 
     return `
@@ -4091,65 +4205,118 @@ ${topNews.join("\n")}
   async function callGeminiWithLiveSearch(apiKey, model, question, contextText) {
     const sysInstruction = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 전문 애널리스트 AI입니다.
 사용자의 질문에 대해:
-1) 반드시 제공된 [실시간 데스크 시세·지표·뉴스 컨텍스트]와 Google 실시간 웹 검색 결과를 결합하여 가장 최신 팩트와 정확한 수치(현재가, 등락률, 20일 지지/저항선, RSI, RS 상대강도, 금리/유가/CDS)를 근거로 빠르고 명쾌하게 한국어로 답변하세요.
-2) SOXX(1X), SOXL(3X), RAM(메모리 2X), DRAM(1X) 및 관련 개별 종목(삼성전자, SK하이닉스, 마이크론, 엔비디아, 브로드컴, AMD, 인텔, TSMC 등) 투자 관점의 실전 시사점을 꼭 짚어주세요.
-3) 가독성이 뛰어나도록 핵심 소제목(###)과 불릿(•), 굵은 글씨(**)를 활용해 일목요연하게 정리하세요.`;
+1) 반드시 사용자가 물어본 핵심 질문에 첫 문단부터 정면으로 명쾌하게 답변하세요.
+2) 제공된 [실시간 데스크 시세·지표·뉴스 컨텍스트]와 Google 실시간 웹 검색 결과를 결합하여 최신 팩트와 정확한 수치(현재가, 등락률, 20일 지지/저항선, RSI, RS 상대강도, 금리/유가/CDS)를 근거로 한국어로 설명하세요.
+3) SOXX(1X), SOXL(3X), RAM(메모리 2X), DRAM(1X) 및 관련 개별 종목 투자 관점의 실전 시사점을 꼭 짚어주세요.
+4) 가독성이 뛰어나도록 핵심 소제목(###)과 불릿(•), 굵은 글씨(**)를 활용해 일목요연하게 정리하세요.`;
 
     const promptText = `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      model
-    )}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
     const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
+    const candidateModels = [model || "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"].filter(
+      (v, i, arr) => arr.indexOf(v) === i
+    );
 
-    // 1차: Google Search Grounding 도구 포함 호출
-    if (useSearch) {
+    let lastErr = "";
+    for (const m of candidateModels) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        m
+      )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      // 1차: Google Search Grounding 포함 시도
+      if (useSearch) {
+        try {
+          const resp = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: sysInstruction }] },
+              contents: [{ role: "user", parts: [{ text: promptText }] }],
+              tools: [{ google_search: {} }],
+              generationConfig: { temperature: 0.35 },
+            }),
+          });
+          if (resp.ok) {
+            const json = await resp.json();
+            const cand = json?.candidates?.[0];
+            const text = (cand?.content?.parts || []).map((p) => p.text || "").join("\n").trim();
+            const chunks = cand?.groundingMetadata?.groundingChunks || [];
+            const webSources = [];
+            chunks.forEach((c) => {
+              if (c?.web?.uri) {
+                webSources.push({ title: c.web.title || "Google 실시간 웹 검색 출처", link: c.web.uri, source: "Google Search" });
+              }
+            });
+            if (text) return { text, sources: webSources };
+          }
+        } catch (e) {
+          // 폴백 진행
+        }
+      }
+
+      // 2차: 무료 티어 호환 기본 generateContent 호출 (실시간 수집된 뉴스 본문 요약이 이미 컨텍스트에 포함됨)
       try {
-        const resp = await fetch(url, {
+        const resp2 = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             system_instruction: { parts: [{ text: sysInstruction }] },
             contents: [{ role: "user", parts: [{ text: promptText }] }],
-            tools: [{ google_search: {} }],
             generationConfig: { temperature: 0.35 },
           }),
         });
-        if (resp.ok) {
-          const json = await resp.json();
-          const cand = json?.candidates?.[0];
-          const text = (cand?.content?.parts || []).map((p) => p.text || "").join("\n").trim();
-          const chunks = cand?.groundingMetadata?.groundingChunks || [];
-          const webSources = [];
-          chunks.forEach((c) => {
-            if (c?.web?.uri) {
-              webSources.push({ title: c.web.title || "Google 실시간 웹 검색 출처", link: c.web.uri, source: "Google Search" });
-            }
-          });
-          if (text) return { text, sources: webSources };
+        if (resp2.ok) {
+          const json2 = await resp2.json();
+          const text2 = (json2?.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("\n").trim();
+          if (text2) return { text: text2, sources: [] };
+        } else {
+          lastErr = `(${resp2.status}) ` + (await resp2.text().catch(() => "")).slice(0, 100);
         }
       } catch (e) {
-        // 폴백 진행
+        lastErr = e.message || String(e);
       }
     }
 
-    // 2차 폴백: 기본 generateContent 호출 (이미 실시간 수집된 뉴스·시세가 컨텍스트로 들어감)
-    const resp2 = await fetch(url, {
+    throw new Error(`Gemini API 호출 실패: ${lastErr}`);
+  }
+
+  async function callGroqOrOpenRouterFreeApi(apiKey, provider, model, question, contextText) {
+    const sysPrompt = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 전문 애널리스트 AI입니다.
+사용자의 질문에 첫 문단부터 직접적으로 명확히 답하고, 제공된 [실시간 데스크 시세·지표·뉴스]의 최신 기사 요약과 수치(현재가, 등락률, 20일 지지/저항선, RSI, 금리, 유가, CDS)를 근거로 SOXX·SOXL·RAM 투자 전략을 한국어로 일목요연하게 브리핑하세요.`;
+    const endpoint =
+      provider === "groq"
+        ? "https://api.groq.com/openai/v1/chat/completions"
+        : "https://openrouter.ai/api/v1/chat/completions";
+    const effModel =
+      provider === "groq"
+        ? model.includes("llama") || model.includes("qwen")
+          ? model
+          : "llama-3.3-70b-versatile"
+        : model.includes("/")
+        ? model
+        : "deepseek/deepseek-chat-v3-0324:free";
+
+    const resp = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: sysInstruction }] },
-        contents: [{ role: "user", parts: [{ text: promptText }] }],
-        generationConfig: { temperature: 0.35 },
+        model: effModel,
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스]:\n${contextText}` },
+        ],
+        temperature: 0.35,
       }),
     });
-    if (!resp2.ok) {
-      const errTxt = await resp2.text().catch(() => "");
-      throw new Error(`Gemini API 오류 (${resp2.status}): ${errTxt.slice(0, 140)}`);
+    if (!resp.ok) {
+      const errTxt = await resp.text().catch(() => "");
+      throw new Error(`${provider.toUpperCase()} API 오류 (${resp.status}): ${errTxt.slice(0, 140)}`);
     }
-    const json2 = await resp2.json();
-    const text2 = (json2?.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("\n").trim();
-    return { text: text2 || "응답을 생성하지 못했습니다.", sources: [] };
+    const json = await resp.json();
+    const text = json?.choices?.[0]?.message?.content || "";
+    return { text, sources: [] };
   }
 
   async function callOpenAiWithLiveSearch(apiKey, model, question, contextText) {
@@ -4250,7 +4417,7 @@ ${topNews.join("\n")}
     return { text, sources: citations };
   }
 
-  // 유료 API 키 미입력 상태에서도 실시간 서치된 뉴스 + 실시간 시세·지지선·RSI를 결합해 즉시 답변하는 내장 애널리스트 엔진
+  // API 키 미입력 상태에서도 질문 키워드 실시간 뉴스 본문 요약(summary) + 종목 수치를 결합해 질문에 직접 답하는 엔진
   function generateBuiltInAnalystAnswer(question, searchedNews) {
     const d = state.data || {};
     const etfs = d.etfs || {};
@@ -4280,23 +4447,39 @@ ${topNews.join("\n")}
 
     const worstMovers = [...holdings].sort((a, b) => (a.change_pct || 0) - (b.change_pct || 0)).slice(0, 4);
     const bestMovers = [...holdings].sort((a, b) => (b.change_pct || 0) - (a.change_pct || 0)).slice(0, 3);
-    const oversoldStocks = holdings.filter((h) => Number(h.rsi14 || 50) <= 42);
 
     const newsPool = (searchedNews && searchedNews.length > 0 ? searchedNews : d.news || []).slice(0, 6);
-    const newsBulletStr =
-      newsPool.length > 0
-        ? newsPool
-            .map((n) => `• **[${n.source || "속보"} · ${n.pub_date || n.date || ""}]** [${n.title}](${n.link || "#"})`)
-            .join("\n")
-        : "• 현재 수집된 실시간 뉴스가 없습니다.";
+
+    // 1) 질문에 대한 직접 요약 (방금 서치한 뉴스의 본문 요약 summary + 헤드라인 합성)
+    const directSummaryLines = [];
+    if (newsPool.length > 0) {
+      newsPool.slice(0, 4).forEach((n, idx) => {
+        const safeTitle = String(n.title || "")
+          .replace(/\[/g, "〈")
+          .replace(/\]/g, "〉");
+        const desc = n.summary && n.summary.length > 12 ? `\n  └ 📝 *본문 핵심*: ${n.summary}` : "";
+        directSummaryLines.push(
+          `• **핵심 팩트 ${idx + 1} (${n.source || "속보"} · ${n.pub_date || n.date || ""})**: **[${safeTitle}](${
+            n.link || "#"
+          })**${desc}`
+        );
+      });
+    } else {
+      directSummaryLines.push("• 해당 키워드의 실시간 기사를 찾지 못해 현재 데스크 시세 기준으로 진단합니다.");
+    }
 
     let specificStockSection = "";
     if (matchedStocks.length > 0) {
       specificStockSection =
-        `### 🎯 질문하신 핵심 종목 실시간 정밀 진단\n` +
+        `### 📊 질문하신 종목 실시간 주가 · 지지선 · 기술적 타점\n` +
         matchedStocks
           .map((s) => {
-            const u = s.currency === "KRW" ? "원" : "$";
+            const rsiState =
+              Number(s.rsi14) <= 35
+                ? "🔥 과매도 구간 (기술적 반등 감시)"
+                : Number(s.rsi14) >= 70
+                ? "⚠️ 과열 구간 (차익실현 주의)"
+                : "중립 구간";
             return `• **${s.name_kr} (${s.ticker.replace(".KS", "")})**: 현재가 **${fmtPrice(
               s.price,
               s.currency
@@ -4305,14 +4488,14 @@ ${topNews.join("\n")}
               s.currency
             )}** · 저항선 **${fmtPrice(s.resistance_20d, s.currency)}** | RSI(14) **${
               s.rsi14 ?? "-"
-            }** | RS 상대강도 **${s.rs_score ?? "-"}/99** (${s.role_note || ""})`;
+            } (${rsiState})** | RS 상대강도 **${s.rs_score ?? "-"}/99**\n  └ *핵심 역할*: ${s.role_note || ""}`;
           })
           .join("\n") +
         "\n\n";
     } else {
       specificStockSection =
-        `### 📊 당일 반도체 핵심 등락 특징주 & 지지선·RSI 점검\n` +
-        `• **당일 주요 하락/조정 종목**: ${worstMovers
+        `### 📊 현재 반도체 섹터 주요 등락 특징주 & 지지선\n` +
+        `• **당일 급락·조정 주도주**: ${worstMovers
           .map(
             (x) =>
               `**${x.name_kr}**(${fmtSignedPct(x.change_pct)}, RSI ${x.rsi14}, 20일지지 ${fmtPrice(
@@ -4321,38 +4504,28 @@ ${topNews.join("\n")}
               )})`
           )
           .join(" / ")}\n` +
-        `• **당일 상대적 선방/강세 종목**: ${bestMovers
+        `• **당일 상대적 강세·방어주**: ${bestMovers
           .map((x) => `**${x.name_kr}**(${fmtSignedPct(x.change_pct)}, RS ${x.rs_score})`)
-          .join(" / ")}\n` +
-        (oversoldStocks.length > 0
-          ? `• **RSI 과매도(42 이하) 눌림목 감시 구간**: ${oversoldStocks
-              .map((x) => `${x.name_kr}(RSI ${x.rsi14})`)
-              .join(", ")}\n\n`
-          : "\n");
+          .join(" / ")}\n\n`;
     }
 
-    const answer = `### ⚡ 실시간 SOXX · SOXL · RAM & 매크로 핵심 브리핑
-• **4대 반도체 ETF 현황**: **SOXX** $${soxx.price ?? "-"} (**${fmtSignedPct(
+    const answer = `### 🎯 질문("${q.slice(0, 42)}${q.length > 42 ? "..." : ""}") 실시간 서치 결과 요약
+${directSummaryLines.join("\n")}
+
+${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
+• **4대 반도체 ETF**: **SOXX** $${soxx.price ?? "-"} (**${fmtSignedPct(
       soxx.change_pct
-    )}**) · **SOXL(3X)** $${soxl.price ?? "-"} (**${fmtSignedPct(
+    )}**, 20일지지 $${soxx.support_20d ?? "-"}) · **SOXL(3X)** $${soxl.price ?? "-"} (**${fmtSignedPct(
       soxl.change_pct
-    )}**) · **RAM(메모리 2X)** $${ram.price ?? "-"} (**${fmtSignedPct(
+    )}**) · **RAM(2X)** $${ram.price ?? "-"} (**${fmtSignedPct(
       ram.change_pct
-    )}**) · **DRAM(1X)** $${dram.price ?? "-"} (**${fmtSignedPct(dram.change_pct)}**)
-• **거시경제 & 크레딧 압력**: 미 10년물 국채금리 **${us10y.price ?? "-"}%** · WTI 유가 **$${
+    )}**) · **DRAM(1X)** $${dram.price ?? "-"} (**${fmtSignedPct(dram.change_pct)}**, 20일지지 $${dram.support_20d ?? "-"})
+• **매크로 & CDS**: 미 10년물 금리 **${us10y.price ?? "-"}%** · WTI 유가 **$${
       wti.price ?? "-"
-    }** (브렌트유 **$${brent.price ?? "-"}**) · VIX 공포지수 **${
+    }** (브렌트유 **$${brent.price ?? "-"}**) · VIX **${
       vix.price ?? "-"
     }pt** · 오라클 CDS **288bps** / 코어위브 CDS **1,140bps**
-
-${specificStockSection}### 📰 질문 관련 방금 서치된 실시간 한·미 속보
-${newsBulletStr}
-
-### 💡 실전 대응 포인트 (SOXX · SOXL · RAM)
-• **지지선 및 레버리지 관리**: SOXX 20일 지지선(**$${soxx.support_20d ?? "-"}**) 및 DRAM 20일 지지선(**$${
-      dram.support_20d ?? "-"
-    }**) 방어 여부를 1차 기준으로 삼고, 국제유가($100 상회)와 미 10년물 금리(4.9~5.0%)가 안정될 때까지 3배(SOXL)·2배(RAM) 레버리지는 분할 대응이 유리합니다.
-• *(안내: 상단 **[🔑 유료 API 키 설정]**에 본인 소유의 Gemini \`AIza...\`, OpenAI \`sk-...\`, 또는 Perplexity \`pplx-...\` 키를 입력하시면 Google/OpenAI 실시간 웹 검색 엔진이 결합된 심층 자유 문답이 즉시 활성화됩니다.)*`;
+• 💡 **무료 AI 키 연동 안내 (결제카드 불필요)**: 이미 발급받아 두신 **무료 API 키(Google AI Studio의 \`AIza...\` 또는 Groq의 \`gsk_...\`)**를 상단 **[🔑 무료·유료 API 키 설정]**에 넣으시면, 정형화된 요약이 아니라 **AI가 질문 의도에 맞춰 실시간 검색 기사를 읽고 자유롭게 직접 대답**해 줍니다!`;
 
     return { text: answer, sources: newsPool };
   }
@@ -4398,6 +4571,8 @@ ${newsBulletStr}
       if (cfg.apiKey && cfg.apiKey.length > 10) {
         if (cfg.provider === "gemini") {
           result = await callGeminiWithLiveSearch(cfg.apiKey, cfg.model, q, contextText);
+        } else if (cfg.provider === "groq" || cfg.provider === "openrouter") {
+          result = await callGroqOrOpenRouterFreeApi(cfg.apiKey, cfg.provider, cfg.model, q, contextText);
         } else if (cfg.provider === "perplexity") {
           result = await callPerplexityLiveSearch(cfg.apiKey, cfg.model, q, contextText);
         } else {
@@ -4412,11 +4587,10 @@ ${newsBulletStr}
       appendAiChatMessage("assistant", result.text, mergedSources, false);
     } catch (err) {
       if (loadingMsg) loadingMsg.remove();
-      // 유료 키 오류 시에도 내장 실시간 서치 브리핑을 함께 제공하여 질문이 끊기지 않도록 방어
       const fallback = generateBuiltInAnalystAnswer(q, state.data?.news?.slice(0, 5) || []);
       appendAiChatMessage(
         "assistant",
-        `⚠️ **유료 API 호출 안내 (${err.message || "연결 확인 필요"})**\n키 설정을 확인해 주세요. 아래는 실시간 수집된 뉴스 및 데스크 지표 기반 즉석 분석입니다.\n\n${
+        `⚠️ **API 키 호출 안내 (${err.message || "연결 확인 필요"})**\n키 설정을 확인해 주세요. 아래는 실시간 수집된 뉴스 및 데스크 지표 기반 즉석 분석입니다.\n\n${
           fallback.text
         }`,
         fallback.sources,
@@ -4448,9 +4622,8 @@ ${newsBulletStr}
       appendAiChatMessage(
         "assistant",
         `반갑습니다! **『어쩐지저녁의 SOXX』 실시간 반도체·매크로 전문 AI 애널리스트**입니다.\n` +
-          `• **1. 실시간 미시황 뉴스 수집**: 좌측 패널에서 한국(한경·매경·연합·Bing) 및 미국 월가(CNBC Live) 속보를 실시간으로 긁어모으고 원하는 키워드를 즉시 서치합니다.\n` +
-          `• **2. 실시간 사이트 서치 & 질의응답**: 아래 빠른 질문 버튼을 누르거나 궁금한 종목·이슈(예: *"인텔 왜 폭락했어?"*, *"마이크론·하이닉스 HBM 최신 뉴스 찾아줘"*, *"지금 SOXL·RAM 지지선 어디야?"*)를 질문해 보세요.\n` +
-          `• 상단 **[🔑 유료 API 키 설정]**에 본인의 **Gemini(\`AIza...\`)**, **OpenAI(\`sk-...\`)**, 또는 **Perplexity(\`pplx-...\`)** 유료 키를 연동하시면 실시간 Google/웹 검색 Grounding이 결합된 초정밀 AI 분석이 가동됩니다.`
+          `• **결제카드 없는 무료 API 키 100% 지원**: 상단 **[🔑 무료·유료 API 키 설정]**을 눌러 이미 받아두신 **무료 API 키(Google Gemini \`AIza...\` 또는 Groq \`gsk_...\`)**를 붙여넣고 **[연동 저장]**을 눌러주세요!\n` +
+          `• 실시간 뉴스와 시세는 브라우저가 먼저 **비용 0원**으로 긁어모아 AI에게 전달하므로, 무료 API 키만 넣으셔도 내가 물어본 질문에 맞춰 실시간 서치 기반의 정확한 대답을 즉시 받아보실 수 있습니다.`
       );
     }
 
@@ -4459,11 +4632,11 @@ ${newsBulletStr}
         const isHidden = drawer.hasAttribute("hidden");
         if (isHidden) {
           drawer.removeAttribute("hidden");
-          btnToggleDrawer.textContent = "🔑 유료 API 키 설정 ▴";
+          btnToggleDrawer.textContent = "🔑 무료·유료 API 키 설정 ▴";
           btnToggleDrawer.setAttribute("aria-expanded", "true");
         } else {
           drawer.setAttribute("hidden", "");
-          btnToggleDrawer.textContent = "🔑 유료 API 키 설정 ▾";
+          btnToggleDrawer.textContent = "🔑 무료·유료 API 키 설정 ▾";
           btnToggleDrawer.setAttribute("aria-expanded", "false");
         }
       });
@@ -4481,6 +4654,10 @@ ${newsBulletStr}
         const v = keyInput.value.trim();
         if (v.startsWith("AIza")) {
           if (provSel.value === "auto") modSel.value = "gemini-2.5-flash";
+        } else if (v.startsWith("gsk_")) {
+          if (provSel.value === "auto") modSel.value = "llama-3.3-70b-versatile";
+        } else if (v.startsWith("sk-or-")) {
+          if (provSel.value === "auto") modSel.value = "deepseek/deepseek-chat-v3-0324:free";
         } else if (v.startsWith("sk-")) {
           if (provSel.value === "auto") modSel.value = "gpt-4o";
         } else if (v.startsWith("pplx-")) {
@@ -4499,8 +4676,8 @@ ${newsBulletStr}
         updateAiKeyBadgeUI();
         if (feedbackEl) {
           feedbackEl.innerHTML = k
-            ? `✅ <strong>유료 API 키가 현재 브라우저에 안전하게 저장되었습니다!</strong> 이제 질문 시 실시간 웹 검색 및 AI 심층 분석이 즉시 작동합니다.`
-            : `ℹ️ API 키가 비어 있어 기본 내장 인텔리전스 모드로 동작합니다.`;
+            ? `✅ <strong>API 키가 현재 브라우저에 안전하게 저장되었습니다!</strong> 이제 우측 채팅창에 질문하시면 AI가 실시간 서치 뉴스를 읽고 직접 답변합니다.`
+            : `ℹ️ API 키가 비어 있어 기본 내장 요약 모드로 동작합니다.`;
         }
       });
     }
@@ -4522,7 +4699,7 @@ ${newsBulletStr}
       btnTestKey.addEventListener("click", async () => {
         const k = keyInput.value.trim();
         if (!k) {
-          if (feedbackEl) feedbackEl.innerHTML = `⚠️ 먼저 테스트할 유료 API 키(AIza... / sk-... / pplx-...)를 입력해 주세요.`;
+          if (feedbackEl) feedbackEl.innerHTML = `⚠️ 먼저 테스트할 무료 또는 유료 API 키(AIza... / gsk_... / sk-...)를 입력해 주세요.`;
           return;
         }
         localStorage.setItem("evening_soxx_ai_key", k);
@@ -4530,13 +4707,15 @@ ${newsBulletStr}
         localStorage.setItem("evening_soxx_ai_model", modSel.value);
         updateAiKeyBadgeUI();
 
-        if (feedbackEl) feedbackEl.innerHTML = `⏳ <strong>API 키 연결 및 실시간 검색 응답 테스트 중...</strong>`;
+        if (feedbackEl) feedbackEl.innerHTML = `⏳ <strong>API 키 연결 및 응답 테스트 중...</strong>`;
         try {
           const t0 = Date.now();
           const curCfg = getStoredAiConfig();
           let res = null;
           if (curCfg.provider === "gemini") {
             res = await callGeminiWithLiveSearch(curCfg.apiKey, curCfg.model, "연결 테스트: 한 줄로 인사해줘.", "SOXX 실시간 데스크 연결 테스트");
+          } else if (curCfg.provider === "groq" || curCfg.provider === "openrouter") {
+            res = await callGroqOrOpenRouterFreeApi(curCfg.apiKey, curCfg.provider, curCfg.model, "연결 테스트: 한 줄로 인사해줘.", "SOXX 실시간 데스크 연결 테스트");
           } else if (curCfg.provider === "perplexity") {
             res = await callPerplexityLiveSearch(curCfg.apiKey, curCfg.model, "연결 테스트: 한 줄로 인사해줘.", "SOXX 실시간 데스크 연결 테스트");
           } else {
@@ -4550,7 +4729,7 @@ ${newsBulletStr}
           }
         } catch (e) {
           if (feedbackEl) {
-            feedbackEl.innerHTML = `❌ <strong>연결 실패:</strong> ${e.message || "API 키 또는 모델 권한을 확인해 주세요."}`;
+            feedbackEl.innerHTML = `❌ <strong>연결 실패:</strong> ${e.message || "API 키를 확인해 주세요."}`;
           }
         }
       });
