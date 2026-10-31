@@ -2259,22 +2259,22 @@
       [/엔비디아/g, "NVIDIA"],
       [/마이크론/g, "Micron"],
       [/하이닉스|SK하이닉스/g, "SK Hynix"],
-      [/삼성전자|삼전/g, "Samsung semiconductor"],
+      [/삼성전자|삼전/g, "Samsung"],
       [/인텔/g, "Intel"],
       [/브로드컴/g, "Broadcom"],
       [/마벨/g, "Marvell"],
       [/샌디스크/g, "SanDisk"],
       [/웨스턴디지털/g, "Western Digital"],
       [/씨게이트/g, "Seagate"],
-      [/한미반도체/g, "HBM semiconductor"],
-      [/오라클/g, "Oracle AI"],
+      [/한미반도체/g, "HBM"],
+      [/오라클/g, "Oracle"],
       [/코어위브/g, "CoreWeave"],
       [/퀄컴/g, "Qualcomm"],
       [/어플라이드/g, "Applied Materials"],
       [/램리서치/g, "Lam Research"],
-      [/유가|원유|호르무즈/g, "crude oil WTI Brent Iran"],
-      [/금리|국채|연준/g, "Treasury yield Fed rate"],
-      [/관세|전쟁|이란|중동/g, "Iran Middle East tariff chip"],
+      [/유가|원유|호르무즈/g, "crude oil WTI Brent"],
+      [/금리|국채|연준/g, "Treasury yield Fed"],
+      [/관세|전쟁|이란|중동/g, "Iran Middle East tariff"],
       [/반도체/g, "semiconductor SOXX"],
     ];
     let out = String(q || "");
@@ -2292,9 +2292,13 @@
     const spinIcon = document.getElementById("newsRefreshSpinIcon");
     const statusTxt = document.getElementById("newsLastRefreshedText");
     const aiStat = document.getElementById("aiScannerStatusText");
+    const aiListEl = document.getElementById("aiMicroNewsList");
     if (spinIcon) spinIcon.classList.add("spinning");
     if (statusTxt) statusTxt.textContent = `'${kw}' 실시간 뉴스 서치 중...`;
     if (aiStat) aiStat.textContent = `'${kw}' 실시간 서치 중...`;
+    if (targetSection === "AI_DESK" && aiListEl) {
+      aiListEl.innerHTML = `<div style="padding:18px 12px; text-align:center; color:var(--gold-main); font-size:0.82rem; font-weight:700;">⏳ '${kw}' 관련 한·미 실시간 최신 속보를 웹에서 긁어오는 중입니다...</div>`;
+    }
 
     try {
       const enKw = mapKoreanQueryToEnglish(kw);
@@ -2320,6 +2324,9 @@
         ...item,
         matched_query: kwLow,
       }));
+      state.lastSearchedQuery = kw;
+      state.lastSearchedItems = fresh;
+
       if (state.data && Array.isArray(state.data.news)) {
         const combined = [...fresh, ...state.data.news];
         const seen = new Set();
@@ -2328,12 +2335,14 @@
           if (!it || !it.title) return;
           const normKey = String(it.title).replace(/\[[^\]]+\]\s*/, "").replace(/\s+/g, "").slice(0, 26);
           if (seen.has(normKey)) {
-            // 이미 존재하는 기사에 방금 검색한 키워드 태그 보강
             const existing = deduped.find(
               (x) => String(x.title).replace(/\[[^\]]+\]\s*/, "").replace(/\s+/g, "").slice(0, 26) === normKey
             );
             if (existing && it.matched_query) {
               existing.matched_query = `${existing.matched_query || ""} ${it.matched_query}`.trim();
+            }
+            if (existing && !existing.summary && it.summary) {
+              existing.summary = it.summary;
             }
             return;
           }
@@ -2353,8 +2362,6 @@
       } else if (targetSection === "AI_DESK") {
         state.aiTopicFilter = kw;
       }
-      renderNews();
-      renderAiMicroNewsFeed();
 
       const now = new Date();
       const hh = String(now.getHours()).padStart(2, "0");
@@ -2362,6 +2369,9 @@
       const ss = String(now.getSeconds()).padStart(2, "0");
       if (statusTxt) statusTxt.textContent = `'${kw}' ${fresh.length}건 실시간 서치 완료 (${hh}:${mm}:${ss})`;
       if (aiStat) aiStat.textContent = `'${kw}' ${fresh.length}건 실시간 수집됨 (${hh}:${mm}:${ss})`;
+
+      renderNews();
+      renderAiMicroNewsFeed();
       return fresh;
     } catch (e) {
       return [];
@@ -3985,19 +3995,32 @@
       const rawWords = topic
         .split(/\s+/)
         .map((w) => w.trim().toLowerCase())
-        .filter(Boolean);
+        .filter((w) => w && w !== "반도체");
       const enWords = mapKoreanQueryToEnglish(topic)
         .split(/\s+/)
         .map((w) => w.trim().toLowerCase())
-        .filter((w) => w.length >= 2);
+        .filter((w) => w.length >= 2 && w !== "semiconductor");
       const keywords = Array.from(new Set([...rawWords, ...enWords]));
 
-      items = allNews.filter((n) => {
-        const hay = `${n.title || ""} ${n.summary || ""} ${n.matched_query || ""} ${n.category || ""} ${
-          n.source || ""
-        }`.toLowerCase();
-        return keywords.some((k) => hay.includes(k));
+      const matchedFromAll = allNews.filter((n) => {
+        const hay = `${n.title || ""} ${n.summary || ""} ${n.matched_query || ""}`.toLowerCase();
+        return keywords.length === 0 ? true : keywords.some((k) => hay.includes(k));
       });
+
+      // 방금 실시간 서치한 결과가 있으면 최상단에 우선 배치
+      if (state.lastSearchedQuery === topic && Array.isArray(state.lastSearchedItems) && state.lastSearchedItems.length > 0) {
+        const seen = new Set();
+        items = [];
+        [...state.lastSearchedItems, ...matchedFromAll].forEach((it) => {
+          if (!it || !it.title) return;
+          const k = it.title.slice(0, 24);
+          if (seen.has(k)) return;
+          seen.add(k);
+          items.push(it);
+        });
+      } else {
+        items = matchedFromAll;
+      }
     }
 
     const topItems = items.slice(0, 24);
@@ -4750,9 +4773,13 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
         const val = topicInput.value.trim();
         if (val) {
           state.aiTopicFilter = val;
+          document.querySelectorAll("[data-ai-topic]").forEach((b) => b.classList.remove("active"));
           searchLiveNewsByKeyword(val, "AI_DESK");
         } else {
           state.aiTopicFilter = "ALL";
+          document.querySelectorAll("[data-ai-topic]").forEach((b) => {
+            b.classList.toggle("active", b.getAttribute("data-ai-topic") === "ALL");
+          });
           renderAiMicroNewsFeed();
         }
       });
@@ -4760,6 +4787,15 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
         if (e.key === "Enter") {
           e.preventDefault();
           btnSearchNews.click();
+        }
+      });
+      topicInput.addEventListener("search", () => {
+        if (!topicInput.value.trim()) {
+          state.aiTopicFilter = "ALL";
+          document.querySelectorAll("[data-ai-topic]").forEach((b) => {
+            b.classList.toggle("active", b.getAttribute("data-ai-topic") === "ALL");
+          });
+          renderAiMicroNewsFeed();
         }
       });
     }
