@@ -430,6 +430,9 @@
         const cnbc = btn.getAttribute("data-tkcnbc");
         const name = btn.getAttribute("data-tkname");
         const cur = btn.getAttribute("data-tkcur");
+        if (state.activeSectionTab !== "sec-live" && typeof switchActiveSectionTab === "function") {
+          switchActiveSectionTab("sec-live", { scrollTop: false, updateHash: true });
+        }
         selectTickerForLiveChart(sym, cnbc, name, cur, false);
         const chartPanel = document.querySelector(".chart-panel");
         if (chartPanel) chartPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -904,8 +907,13 @@
     loadLiveChart(state.chartSymbol, state.chartCnbcSymbol, state.chartName, state.chartInterval, state.chartCurrency);
 
     if (shouldScroll) {
-      const chartEl = document.querySelector(".chart-panel");
-      if (chartEl) chartEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (state.activeSectionTab !== "sec-live" && typeof switchActiveSectionTab === "function") {
+        switchActiveSectionTab("sec-live", { scrollTop: false, updateHash: true });
+      }
+      requestAnimationFrame(() => {
+        const chartEl = document.querySelector(".chart-panel");
+        if (chartEl) chartEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     }
   }
 
@@ -2693,6 +2701,9 @@
 
   function scrollToStockCard(symbol, fallbackName, fallbackCur) {
     const sym = String(symbol || "");
+    if (state.activeSectionTab !== "sec-holdings" && typeof switchActiveSectionTab === "function") {
+      switchActiveSectionTab("sec-holdings", { scrollTop: false, updateHash: true });
+    }
     let card = document.querySelector(`#holdingsCardGrid .stock-card[data-ticker="${sym}"]`);
 
     // 필터 때문에 숨겨져 있으면 자동으로 '전체 보기(ALL)'로 풀어서 렌더링
@@ -3885,39 +3896,109 @@
   }
 
   /* ========================================================================
-     14. 모바일 하단 탭 & 상단 네비게이션 스크롤 스파이
+     14. 상단 6대 탭 & 모바일 하단 탭 독자 페이지 전환 (스크롤 없이 즉시 상단 노출)
      ======================================================================== */
-  function bindNavigationScrollSpy() {
-    const sections = ["sec-live", "sec-brief", "sec-cds", "sec-macro", "sec-holdings", "sec-news"];
-    const topPills = document.querySelectorAll(".nav-pill");
-    const bottomItems = document.querySelectorAll(".m-nav-item");
+  state.activeSectionTab = "sec-live";
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.id;
-            topPills.forEach((p) => p.classList.toggle("active", p.getAttribute("data-nav") === id));
-            bottomItems.forEach((m) => m.classList.toggle("active", m.getAttribute("data-mnav") === id));
-          }
-        });
-      },
-      { rootMargin: "-20% 0px -65% 0px", threshold: 0.01 }
-    );
+  function switchActiveSectionTab(targetId, options = {}) {
+    const sections = ["sec-live", "sec-brief", "sec-cds", "sec-macro", "sec-holdings", "sec-news"];
+    const validId = sections.includes(targetId) ? targetId : "sec-live";
+    const scrollTop = options.scrollTop !== false;
+    const updateHash = options.updateHash !== false;
+
+    state.activeSectionTab = validId;
 
     sections.forEach((id) => {
       const el = document.getElementById(id);
-      if (el) observer.observe(el);
+      if (el) {
+        el.classList.toggle("active-tab-page", id === validId);
+      }
     });
 
-    // 상단·하단 네비게이션에서 '실시간 차트' 탭 클릭 시에도 디폴트 1분봉(1M)으로 즉시 전환
-    document.querySelectorAll('[data-nav="sec-live"], [data-mnav="sec-live"]').forEach((navEl) => {
-      navEl.addEventListener("click", () => {
-        if (state.chartInterval !== "1M") {
+    document.querySelectorAll(".nav-pill").forEach((p) => {
+      p.classList.toggle("active", p.getAttribute("data-nav") === validId);
+    });
+    document.querySelectorAll(".m-nav-item").forEach((m) => {
+      m.classList.toggle("active", m.getAttribute("data-mnav") === validId);
+    });
+
+    if (updateHash && window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", `#${validId}`);
+    }
+
+    if (scrollTop) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    // 숨겨져 있던 탭이 열릴 때 캔버스 차트·트리맵·스파크라인 크기를 즉시 재계산하여 렌더링
+    requestAnimationFrame(() => {
+      if (validId === "sec-live") {
+        redrawMainChartFromState();
+        renderSoxxTreemap();
+      } else if (validId === "sec-cds") {
+        drawCdsTrajectoryChart();
+      } else if (validId === "sec-macro") {
+        renderMacroGrid();
+      } else if (validId === "sec-holdings") {
+        renderHoldings();
+      } else if (validId === "sec-brief") {
+        renderBriefingSection();
+        renderDramFlowPanel();
+        renderAiMicroNewsFeed();
+      } else if (validId === "sec-news") {
+        renderNews();
+      }
+    });
+  }
+
+  function bindNavigationScrollSpy() {
+    const sections = ["sec-live", "sec-brief", "sec-cds", "sec-macro", "sec-holdings", "sec-news"];
+
+    // 상단 탭 및 모바일 하단 탭 클릭 시 해당 섹션만 단독 페이지로 최상단에 즉시 표시
+    document.querySelectorAll("[data-nav], [data-mnav]").forEach((navEl) => {
+      navEl.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetId = navEl.getAttribute("data-nav") || navEl.getAttribute("data-mnav") || "sec-live";
+        switchActiveSectionTab(targetId, { scrollTop: true, updateHash: true });
+
+        if (targetId === "sec-live" && state.chartInterval !== "1M") {
           setChartIntervalTabUI("1M");
           loadLiveChart(state.chartSymbol, state.chartCnbcSymbol, state.chartName, "1M", state.chartCurrency);
         }
       });
+    });
+
+    // 좌측 상단 브랜드 로고 클릭 시 1번 탭(실시간 차트)으로 이동
+    const brandGroup = document.querySelector(".brand-group");
+    if (brandGroup) {
+      brandGroup.addEventListener("click", (e) => {
+        e.preventDefault();
+        switchActiveSectionTab("sec-live", { scrollTop: true, updateHash: true });
+      });
+    }
+
+    // 1번 탭 내부 '시황 노트 ▾' 배너 버튼 클릭 시 2번 탭(저녁 시황 · AI 문답봇)으로 즉시 전환
+    const moreBriefBtn = document.querySelector(".epb-more-btn");
+    if (moreBriefBtn) {
+      moreBriefBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        switchActiveSectionTab("sec-brief", { scrollTop: true, updateHash: true });
+      });
+    }
+
+    // URL 해시(#sec-brief, #sec-cds 등)로 직접 접속하거나 뒤로가기 시 해당 탭 자동 활성화
+    const initialHash = (window.location.hash || "").replace(/^#/, "");
+    if (sections.includes(initialHash)) {
+      switchActiveSectionTab(initialHash, { scrollTop: true, updateHash: false });
+    } else {
+      switchActiveSectionTab("sec-live", { scrollTop: false, updateHash: false });
+    }
+
+    window.addEventListener("hashchange", () => {
+      const h = (window.location.hash || "").replace(/^#/, "");
+      if (sections.includes(h) && h !== state.activeSectionTab) {
+        switchActiveSectionTab(h, { scrollTop: true, updateHash: false });
+      }
     });
   }
 
@@ -4073,6 +4154,9 @@
 
   function askAiAboutNewsItem(newsItem) {
     if (!newsItem) return;
+    if (state.activeSectionTab !== "sec-brief" && typeof switchActiveSectionTab === "function") {
+      switchActiveSectionTab("sec-brief", { scrollTop: true, updateHash: true });
+    }
     const desk = document.getElementById("aiAnalystDesk");
     if (desk) {
       desk.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -4872,7 +4956,6 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
     bindHoldingsControls();
     bindNewsControls();
     bindModalEvents();
-    bindNavigationScrollSpy();
 
     if (state.data) {
       renderTopTickerStrip();
@@ -4888,6 +4971,7 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
     }
 
     initAiAnalystDesk();
+    bindNavigationScrollSpy();
 
     fetchLiveQuotesFromCNBC(false);
     fetchCdsCompanyStockQuotes();

@@ -366,21 +366,27 @@ a {
 }
 
 .nav-pill {
-  padding: 10px 14px;
-  font-size: 0.82rem;
+  padding: 11px 15px;
+  font-size: 0.83rem;
   font-weight: 700;
   color: var(--ink-secondary);
-  border-bottom: 2.5px solid transparent;
+  border-bottom: 3px solid transparent;
   transition: all 0.16s ease;
+  cursor: pointer;
 }
-.nav-pill:hover,
+.nav-pill:hover {
+  color: var(--gold-main);
+  background: rgba(181, 137, 46, 0.06);
+}
 .nav-pill.active {
   color: var(--gold-main);
+  font-weight: 800;
   border-bottom-color: var(--gold-main);
+  background: var(--gold-soft);
 }
 
 /* ==========================================================================
-   3. 메인 레이아웃 & 한 줄 시황 배너
+   3. 메인 레이아웃 & 탭별 독립 페이지 뷰 (클릭한 탭만 최상단 단독 표시)
    ========================================================================== */
 .app-main {
   max-width: 1280px;
@@ -389,15 +395,32 @@ a {
   padding: 18px 16px 96px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
   min-width: 0;
 }
 
 .study-section {
+  display: none;
   scroll-margin-top: 132px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
+}
+
+.study-section.active-tab-page {
+  display: block;
+  animation: tabPageFadeIn 0.16s ease-out;
+}
+
+@keyframes tabPageFadeIn {
+  from {
+    opacity: 0.35;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .section-head {
