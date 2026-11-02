@@ -4374,8 +4374,17 @@ ${holdingLines}
   }
 
   async function callGeminiWithLiveSearch(apiKey, model, question, contextText) {
-    const sysInstruction = STOCK_AI_SYSTEM_PROMPT;
-    const promptText = `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
+    const nowKstStr = new Date().toLocaleString("ko-KR", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const sysInstruction = `${STOCK_AI_SYSTEM_PROMPT}\n\n[★ 현재 기준 시각(KST): ${nowKstStr} — 날짜·시간·일상 대화 질문에는 억지로 증시 브리핑을 붙이지 말고 해당 질문에만 자연스럽고 정확하게 답변하세요.]`;
+    const promptText = `[현재 한국 시각(KST)]: ${nowKstStr}\n[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
     const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
     const candidateModels = [model || "gemini-3-flash-preview", "gemini-3.5-flash"].filter(
       (v, i, arr) => arr.indexOf(v) === i

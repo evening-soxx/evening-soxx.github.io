@@ -226,6 +226,28 @@ function getSemiBriefing() {
 }
 
 // ⚡ [핵심 최적화] thinkingBudget: 0 설정으로 생각 토큰 낭비 및 타임아웃 원천 박멸! 1.5초 이내 칼응답
+function getNowKST() {
+    var cal = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("Asia/Seoul"));
+    var days = ["일", "월", "화", "수", "목", "금", "토"];
+    var y = cal.get(java.util.Calendar.YEAR);
+    var m = cal.get(java.util.Calendar.MONTH) + 1;
+    var d = cal.get(java.util.Calendar.DATE);
+    var dow = days[cal.get(java.util.Calendar.DAY_OF_WEEK) - 1];
+    var h = cal.get(java.util.Calendar.HOUR_OF_DAY);
+    var min = ("0" + cal.get(java.util.Calendar.MINUTE)).slice(-2);
+    return y + "년 " + m + "월 " + d + "일 " + dow + "요일 " + h + ":" + min;
+}
+
+// 카카오톡에서 지저분하게 보이는 마크다운 별표(** / *) 및 샵(#) 완전 제거
+function cleanKakaoText(txt) {
+    if (!txt) return "";
+    return String(txt)
+        .replace(/\*\*/g, "")
+        .replace(/^\s*\*\s+/gm, "• ")
+        .replace(/^#+\s*/gm, "📌 ")
+        .trim();
+}
+
 function askGemini(promptText) {
     if (!GEMINI_API_KEY) return null;
     // 검증된 고속 모델: gemini-3-flash-preview (1.5초) -> gemini-3.5-flash (2.2초)
@@ -237,7 +259,7 @@ function askGemini(promptText) {
             var body = JSON.stringify({
                 contents: [{ parts: [{ text: promptText }] }],
                 generationConfig: {
-                    temperature: 0.35,
+                    temperature: 0.3,
                     maxOutputTokens: 380,
                     thinkingConfig: { thinkingBudget: 0 }
                 }
@@ -254,7 +276,7 @@ function askGemini(promptText) {
             if (res.statusCode() === 200) {
                 var json = JSON.parse(res.body());
                 var parts = json.candidates[0].content.parts;
-                return parts[parts.length - 1].text.trim();
+                return cleanKakaoText(parts[parts.length - 1].text);
             }
             lastCode = res.statusCode();
         } catch (e) { lastCode = String(e); }
@@ -312,8 +334,34 @@ function matchDetailCard(q) {
     return getStockInfo(t, false);
 }
 
+// 질문이 주식·경제·시황 관련인지 판별
+function isMarketRelatedQuestion(q) {
+    return /주가|현재가|주식|증시|시황|국장|미장|미증시|장마감|프리장|데이장|애프터장|코스피|코스닥|나스닥|다우|에스앤피|s&p|반도체|필반|sox|etf|금리|국채|채권|환율|달러|엔화|유가|기름|원유|wti|금값|은값|구리|원자재|비트|코인|이더|공탐|매수|매도|추매|손절|익절|물타기|전망|실적|수급|외인|외국인|기관|개미|차트|지지|저항|배당|공매도|상한가|하한가|섹터|테마|호재|악재|뉴스|속보|비중|레버리지|인버스|반등|폭락|폭등|급등|급락|조정|불장|물렸|살까|팔까/i.test(q);
+}
+
+// 단순 날짜·시간·요일 질문인지 판별
+function isDateTimeQuestion(q) {
+    var hasDateWord = /몇\s*년|몇\s*월|며칠|몇\s*일|무슨\s*요일|몇\s*시|날짜|오늘\s*일정|오늘이\s*언제/.test(q);
+    return hasDateWord && !isMarketRelatedQuestion(q);
+}
+
+// 시황 질문용 초고속 최신 뉴스 헤드라인 4건
+function getQuickNewsLines() {
+    var lines = [];
+    try {
+        var kr = fetchJson("https://api.stock.naver.com/news/mainnews?page=1&pageSize=2");
+        for (var i = 0; i < kr.length; i++) lines.push("- [국내속보] " + kr[i].tit);
+    } catch (e) {}
+    try {
+        var us = fetchJson("https://api.stock.naver.com/news/worldNews?page=1&pageSize=2");
+        for (var j = 0; j < us.length; j++) lines.push("- [해외속보] " + us[j].tit);
+    } catch (e) {}
+    return lines.join("\n");
+}
+
 // 질문에서 특정 종목 또는 특정 지표만 핀포인트 추출 (불필요한 15개 API 전체 호출 방지!)
 function extractContextCard(q) {
+    if (isDateTimeQuestion(q)) return null;
     if (q.indexOf("유가") !== -1 || q.indexOf("원유") !== -1 || q.indexOf("기름") !== -1) return getOilInfo();
     if (q.indexOf("금리") !== -1 || q.indexOf("국채") !== -1) return getBondInfo();
     if (q.indexOf("금값") !== -1 || q.indexOf("원자재") !== -1) return getMetalsInfo();
@@ -326,11 +374,16 @@ function extractContextCard(q) {
         return null;
     }
 
-    var cleaned = q.replace(/주가|현재가|실적|전망|어때|어떻게|왜|이래|얼마야|얼마|알려줘|보여줘|대해|오늘|요즘|\?/g, " ").trim();
+    var stopWords = [
+        "지금","시장","증시","주식","저녁","점심","아침","메뉴","분위기","상황","오늘","내일","어제","요즘",
+        "몇년","몇년도","몇월","몇일","며칠","무슨","요일","날짜","시간","몇시","누구","안녕","고마워","반가워",
+        "진짜","정말","너무","이거","저거","그거","어디","언제","누가","무엇","뭐야","뭔데","왜이래","이상해","바보"
+    ];
+    var cleaned = q.replace(/주가|현재가|실적|전망|어때|어떻게|왜|이래|얼마야|얼마|알려줘|보여줘|대해|오늘|요즘|몇년도|몇년|몇월|몇일|며칠|\?|\!|\.|,/g, " ").trim();
     var words = cleaned.split(/\s+/);
     for (var i = 0; i < words.length; i++) {
-        var w = words[i].trim();
-        if (w.length >= 2 && ["지금","시장","증시","주식","저녁","점심","메뉴","분위기","상황"].indexOf(w) === -1) {
+        var w = words[i].trim().replace(/(은|는|이|가|을|를|의|도|만|랑|하고|이나|나)$/, "");
+        if (w.length >= 2 && stopWords.indexOf(w) === -1) {
             var info = getStockInfo(w, false);
             if (info) return info;
         }
@@ -342,7 +395,14 @@ function extractContextCard(q) {
 function handleTikitaka(room, sender, text) {
     var q = text.replace(/^어쩐지(의)?\s*(주식비서|비서)?(야)?[~!?,.\s]*/, "").trim();
     if (q.indexOf("야") === 0 || q.indexOf("~") === 0 || q.indexOf("!") === 0) q = q.substring(1).trim();
-    if (!q) return "네 " + sender + "님! 🎩 어쩐지 주식비서 대기 중입니다. 코스피·코스닥·미국 증시 어떤 주식이든 편하게 물어보세요! 😎";
+    if (!q) return "네 " + sender + "님! 🎩 어쩐지 주식비서 대기 중입니다. 무엇이든 편하게 물어보세요! 😎";
+
+    var nowKST = getNowKST();
+
+    // 0) 날짜·시간·요일 질문은 0.01초 즉시 칼답! (엉뚱한 2025년 답변 및 억지 코스피 브리핑 원천 차단)
+    if (isDateTimeQuestion(q)) {
+        return "📅 지금 시각은 한국 기준 " + nowKST + " 입니다!";
+    }
 
     // 1) '어쩐지야 현대차', '어쩐지야 유가', '어쩐지야 soxl' 등 단어만 부르면 즉시 디테일 카드 반환!
     var directCard = matchDetailCard(q);
@@ -351,28 +411,40 @@ function handleTikitaka(room, sender, text) {
     if (q.indexOf("요약") !== -1) {
         var logs = chatHistory[room] || [];
         if (logs.length < 3) return "🎩 아직 요약할 대화가 부족해요!";
-        return askGemini("다음 단톡방 주식 대화를 핵심만 읽기 쉽게 3줄로 요약해줘:\n" + logs.join("\n"));
+        return askGemini("[현재 시각(KST): " + nowKST + "]\n다음 단톡방 대화를 마크다운 별표(**) 없이 핵심만 읽기 쉽게 3줄로 요약해줘:\n" + logs.join("\n"));
     }
 
-    // 2) 질문 형태 ("오늘 미증시 전망은?", "현대차 실적 어때?", "에코프로 요즘 왜 빠져?")
+    // 2) 질문 형태 분석 (종목 질문 vs 시황 질문 vs 일상 대화)
     var detailCard = extractContextCard(q);
+    var isMkt = (detailCard !== null) || isMarketRelatedQuestion(q);
     var ctx = (chatHistory[room] || []).slice(-4).join("\n");
-    
-    // 💡 네트워크 부하 최소화: 개별 종목 질문이면 종목 데이터만, 일반 시황 질문이면 4대 주요 지수만 가볍게 전달!
+
+    // 💡 일상 대화("안녕", "밥 먹었어?", "너 왜 그래?" 등)에는 절대로 지수 데이터를 넣지 않음! (코스피 앵무새 방지)
+    if (!isMkt) {
+        var casualPrompt = "너는 센스있고 친근한 단톡방 비서 '어쩐지 주식비서'야.\n"
+            + "[현재 한국 시각(KST): " + nowKST + "]\n"
+            + "[★ 절대 지침]\n"
+            + "1. 지금 질문은 주식/시황 질문이 아니라 일상 대화야. 절대로 코스피, 나스닥, 주식 시황, 투자 전략 이야기를 꺼내지 마!\n"
+            + "2. 절대로 마크다운 별표(** 또는 *)를 쓰지 마.\n"
+            + "3. 질문 의도에 딱 맞게 사람처럼 자연스럽고 위트 있게 1~2문장으로만 답해줘.\n"
+            + "[최근 대화]\n" + ctx + "\n[" + sender + "님의 말]: " + q;
+        return askGemini(casualPrompt);
+    }
+
+    // 💡 진짜 주식/시황 질문일 때만 실시간 데이터 + 최신 속보 헤드라인 주입!
     var mktData = "";
     if (detailCard) {
         mktData = "\n[질문 대상 종목/지표 실시간 데이터 및 속보]\n" + detailCard;
     } else {
-        mktData = "\n[실시간 주요 지수]\n" + getQuickMarketSummary();
+        mktData = "\n[실시간 주요 지수]\n" + getQuickMarketSummary() + "\n[실시간 주요 뉴스 헤드라인]\n" + getQuickNewsLines();
     }
 
     var sysPrompt = "너는 대한민국 최고 수준의 센스있고 명쾌한 금융 AI '어쩐지 주식비서'야.\n"
-        + "너는 한국 주식(코스피·코스닥 전 종목)과 미국 증시, 글로벌 매크로를 모두 완벽히 꿰뚫고 있어.\n"
+        + "[현재 한국 시각(KST): " + nowKST + "]\n"
         + "[★ 핵심 지침]\n"
-        + "1. 한국 주식 질문 시(예: 현대차, 에코프로, 카카오, 알테오젠 등): 해당 종목의 최신 수급, 실적, 테마, 뉴스 팩트 및 지지/저항선에 집중해 답해. 절대로 불필요하게 SOXX나 DRAM 얘기를 억지로 끼워넣지 마!\n"
-        + "2. 미국 증시 및 글로벌 질문 시: 금리, 국채, 빅테크 및 수급을 바탕으로 명쾌하게 짚어줘.\n"
-        + "3. 반도체 관련 질문 시(삼성전자, SK하이닉스, SOXX 등)에만 HBM 수요, D램 사이클을 연계해 분석해.\n"
-        + "4. 첫 줄부터 질문에 직격으로 결론을 말하고, 카카오톡 단톡방에 어울리는 간결하고 가독성 좋은 어조(불릿, 이모지)로 3~4줄 내외로 답해줘.\n"
+        + "1. 물어본 종목이나 질문 주제에만 정확히 핀포인트로 답해! 물어보지도 않은 코스피 몇 천 돌파 타령이나 뻔한 투자 전략을 앵무새처럼 반복하지 마.\n"
+        + "2. 아래 제공된 [실시간 데이터 및 속보]에 있는 수치와 뉴스 팩트만 근거로 답하고, 데이터에 없는 외인/기관 수급이나 상승/하락 이유를 혼자 상상해서 지어내지 마.\n"
+        + "3. 카카오톡에서는 마크다운이 안 먹히니 절대로 별표(** 또는 *)나 샵(#)을 쓰지 말고, 깔끔한 기호(•)와 이모지로 2~4줄 이내로 핵심만 답해줘.\n"
         + mktData + "\n[최근 단톡방 흐름]\n" + ctx + "\n[" + sender + "님의 질문]: " + q;
 
     var aiAns = askGemini(sysPrompt);
