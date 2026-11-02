@@ -30,19 +30,46 @@ function fmtArrow(code, ratio) {
     return "➖0.00%";
 }
 
-// 1. 핵심 주요 지수 (초고속 조회용: 나스닥, S&P500, 필라반도체 중심)
+// 1. 핵심 미장·반도체·매크로 종합 스냅샷 (AI 브리핑용: 나스닥/S&P/필반 + SOXX/SOXL/NVDA 프리장 + 유가/금리/환율)
 function getQuickMarketSummary() {
     var lines = [];
     var t = [
         ["🇺🇸 나스닥", "https://api.stock.naver.com/index/.IXIC/basic"],
         ["🇺🇸 S&P500", "https://api.stock.naver.com/index/.INX/basic"],
-        ["💾 필라반도체", "https://api.stock.naver.com/index/.SOX/basic"]
+        ["💾 필라반도체(SOX)", "https://api.stock.naver.com/index/.SOX/basic"]
     ];
     for (var i = 0; i < t.length; i++) {
         try {
             var d = fetchJson(t[i][1]);
             var c = d.compareToPreviousPrice ? d.compareToPreviousPrice.code : "";
             lines.push(t[i][0] + ": " + (d.closePrice || "-") + " (" + fmtArrow(c, d.fluctuationsRatio) + ")");
+        } catch (e) {}
+    }
+    var coreSyms = [["SOXX", "SOXX.O"], ["SOXL", "SOXL.K"], ["엔비디아(NVDA)", "NVDA.O"]];
+    for (var j = 0; j < coreSyms.length; j++) {
+        try {
+            var sd = fetchJson("https://api.stock.naver.com/stock/" + coreSyms[j][1] + "/basic");
+            var sc = sd.compareToPreviousPrice ? sd.compareToPreviousPrice.code : "";
+            var om = sd.overMarketPriceInfo;
+            var over = "";
+            if (om && om.overPrice) {
+                var sName = (om.tradingSessionType === "PRE_MARKET") ? "프리장" : (om.tradingSessionType === "AFTER_MARKET" ? "애프터장" : "데이장");
+                var oc = om.compareToPreviousPrice ? om.compareToPreviousPrice.code : "";
+                over = " | 실시간 " + sName + ": $" + om.overPrice + " (" + fmtArrow(oc, om.fluctuationsRatio) + ")";
+            }
+            lines.push("• " + coreSyms[j][0] + ": 정규장 $" + sd.closePrice + " (" + fmtArrow(sc, sd.fluctuationsRatio) + ")" + over);
+        } catch (e) {}
+    }
+    var macros = [
+        ["🛢️ WTI유가", "energy", "CLcv1", "$"],
+        ["🏦 미10년물국채", "bond", "US10YT=RR", "%"],
+        ["💵 원/달러환율", "exchange", "FX_USDKRW", "원"]
+    ];
+    for (var k = 0; k < macros.length; k++) {
+        try {
+            var md = fetchJson("https://m.stock.naver.com/front-api/marketIndex/productDetail?category=" + macros[k][1] + "&reutersCode=" + macros[k][2]).result;
+            var mc = md.compareToPreviousPrice ? md.compareToPreviousPrice.code : "";
+            lines.push(macros[k][0] + ": " + (md.closePrice || md.calcPrice) + macros[k][3] + " (" + fmtArrow(mc, md.fluctuationsRatio) + ")");
         } catch (e) {}
     }
     return lines.join("\n");
@@ -128,7 +155,7 @@ function getExchangeRates() {
     var fx = [["💵 원/달러", "FX_USDKRW"], ["💴 원/엔(100엔)", "FX_JPYKRW"]];
     for (var i = 0; i < fx.length; i++) {
         try {
-            var d = fetchJson("https://m.stock.naver.com/front-api/marketIndex/productDetail?category=" + fx[i][1]).result;
+            var d = fetchJson("https://m.stock.naver.com/front-api/marketIndex/productDetail?category=exchange&reutersCode=" + fx[i][1]).result;
             var c = d.compareToPreviousPrice ? d.compareToPreviousPrice.code : "";
             lines.push(fx[i][0] + ": " + (d.calcPrice || d.closePrice) + "원 (" + fmtArrow(c, d.fluctuationsRatio) + ")");
         } catch (e) {}
@@ -379,7 +406,10 @@ function getQuickNewsLines() {
     var lines = [];
     try {
         var us = fetchJson("https://api.stock.naver.com/news/worldNews?page=1&pageSize=4");
-        for (var j = 0; j < us.length; j++) lines.push("- [미장속보] " + us[j].tit);
+        for (var j = 0; j < us.length; j++) {
+            var sub = us[j].subcontent ? (": " + String(us[j].subcontent).substring(0, 55)) : "";
+            lines.push("- [미장속보] " + us[j].tit + sub);
+        }
     } catch (e) {}
     return lines.join("\n");
 }
@@ -394,8 +424,8 @@ function extractContextCard(q) {
     if (q.indexOf("공탐") !== -1) return getFearAndGreed();
     if (q.indexOf("비트") !== -1 || q.indexOf("코인") !== -1) return getCryptoInfo();
 
-    // 일반 시황/전망 질문은 종목 검색을 건너뜀 (초고속 응답 보장)
-    if (q.indexOf("미증시") !== -1 || q.indexOf("미장") !== -1 || q.indexOf("국장") !== -1 || q.indexOf("증시") !== -1 || q.indexOf("시장") !== -1) {
+    // 일반 시황/전망/지정학/매크로 질문은 개별 종목 검색을 건너뛰고 즉시 종합 시황으로 연결 (초고속 응답 보장)
+    if (/미증시|미장|국장|증시|시장|전쟁|이란|중동|종전|휴전|합의|트럼프|관세|연준|파월|fomc|물가|고용|실업|나스닥|필반|반도체/i.test(q)) {
         return null;
     }
 
@@ -417,7 +447,7 @@ function extractContextCard(q) {
     return null;
 }
 
-// 🎯 [핵심] 한국주식 전 종목 + 미국주식 + 매크로 전천후 주식비서 AI 티키타카
+// 🎯 [핵심] 월스트리트 & 여의도 수석 투자전략가급 지능의 어쩐지 주식비서 AI 티키타카
 function handleTikitaka(room, sender, text) {
     var q = text.replace(/^어쩐지(의)?\s*(주식비서|비서)?(야)?[~!?,.\s]*/, "").trim();
     if (q.indexOf("야") === 0 || q.indexOf("~") === 0 || q.indexOf("!") === 0) q = q.substring(1).trim();
@@ -425,7 +455,7 @@ function handleTikitaka(room, sender, text) {
 
     var nowKST = getNowKST();
 
-    // 0) 날짜·시간·요일 질문은 0.01초 즉시 칼답! (엉뚱한 2025년 답변 및 억지 코스피 브리핑 원천 차단)
+    // 0) 날짜·시간·요일 질문은 0.01초 즉시 칼답!
     if (isDateTimeQuestion(q)) {
         return "📅 지금 시각은 한국 기준 " + nowKST + " 입니다!";
     }
@@ -440,38 +470,24 @@ function handleTikitaka(room, sender, text) {
         return askGemini("[현재 시각(KST): " + nowKST + "]\n다음 단톡방 대화를 마크다운 별표(**) 없이 핵심만 읽기 쉽게 3줄로 요약해줘:\n" + logs.join("\n"));
     }
 
-    // 2) 질문 형태 분석 (종목 질문 vs 시황 질문 vs 일상 대화)
+    // 2) 종목 디테일 카드 또는 실시간 미장·반도체·매크로 스냅샷 결합
     var detailCard = extractContextCard(q);
-    var isMkt = (detailCard !== null) || isMarketRelatedQuestion(q);
     var ctx = (chatHistory[room] || []).slice(-4).join("\n");
 
-    // 💡 일상 대화("안녕", "밥 먹었어?", "너 왜 그래?" 등)에는 절대로 지수 데이터를 넣지 않음! (코스피 앵무새 방지)
-    if (!isMkt) {
-        var casualPrompt = "너는 센스있고 친근한 단톡방 비서 '어쩐지 주식비서'야.\n"
-            + "[현재 한국 시각(KST): " + nowKST + "]\n"
-            + "[★ 절대 지침]\n"
-            + "1. 지금 질문은 주식/시황 질문이 아니라 일상 대화야. 절대로 코스피, 나스닥, 주식 시황, 투자 전략 이야기를 꺼내지 마!\n"
-            + "2. 절대로 마크다운 별표(** 또는 *)를 쓰지 마.\n"
-            + "3. 질문 의도에 딱 맞게 사람처럼 자연스럽고 위트 있게 1~2문장으로만 답해줘.\n"
-            + "[최근 대화]\n" + ctx + "\n[" + sender + "님의 말]: " + q;
-        return askGemini(casualPrompt);
-    }
-
-    // 💡 진짜 주식/시황 질문일 때만 실시간 데이터 + 최신 속보 헤드라인 주입!
     var mktData = "";
     if (detailCard) {
-        mktData = "\n[질문 대상 종목/지표 실시간 데이터 및 속보]\n" + detailCard;
+        mktData = "\n[질문 대상 종목/지표 실시간 데이터]\n" + detailCard + "\n[실시간 미장·매크로 요약]\n" + getQuickMarketSummary();
     } else {
-        mktData = "\n[실시간 주요 지수]\n" + getQuickMarketSummary() + "\n[실시간 주요 뉴스 헤드라인]\n" + getQuickNewsLines();
+        mktData = "\n[실시간 미장·반도체·매크로 데이터]\n" + getQuickMarketSummary() + "\n[실시간 미장 속보 헤드라인]\n" + getQuickNewsLines();
     }
 
-    var sysPrompt = "너는 대한민국 최고 수준의 센스있고 명쾌한 금융 AI '어쩐지 주식비서'야.\n"
+    var sysPrompt = "너는 월스트리트와 글로벌 매크로·반도체 시장을 완벽히 꿰뚫고 있는 대한민국 최고 수준의 실전 투자전략가 AI '어쩐지 주식비서'야.\n"
         + "[현재 한국 시각(KST): " + nowKST + "]\n"
-        + "[★ 핵심 지침]\n"
-        + "1. 물어본 종목이나 질문 주제에만 첫 줄부터 직격으로 시원하게 답해! 절대로 '제공된 데이터에 없어 확인이 어렵습니다'처럼 회피하지 말고, 아래 실시간 데이터(현재가, 52주 최고·최저가, 시총, 수급, 뉴스)와 금융 지식을 결합해 명쾌하게 설명해줘.\n"
-        + "2. 물어보지도 않은 코스피 몇 천 돌파 타령이나 뻔한 3단 불릿을 앵무새처럼 반복하지 마.\n"
-        + "3. 카카오톡에서는 마크다운이 안 먹히니 절대로 별표(** 또는 *)나 샵(#)을 쓰지 말고, 정중한 존댓말(~입니다/해요)과 깔끔한 기호(•), 이모지로 2~4줄 이내로 핵심만 답해줘.\n"
-        + mktData + "\n[최근 단톡방 흐름]\n" + ctx + "\n[" + sender + "님의 질문]: " + q;
+        + "[★ 핵심 답변 지침]\n"
+        + "1. 여기는 미국 주식·반도체(SOXX, SOXL, 빅테크) 투자자 단톡방이야. 단순 인사(안녕, 고마워 등)가 아닌 이상, 단톡방 멤버의 모든 질문이나 한탄(지정학·전쟁·금리·유가·반도체·종목 등)에 대해 바보처럼 영혼 없는 위로('푹 쉬세요' 등)로 얼버무리지 말고, 월가 수석 전략가답게 날카롭고 똑똑한 시장 인사이트로 답해줘!\n"
+        + "2. 아래 [실시간 미장·반도체·매크로 데이터]의 실제 수치(SOXX/SOXL 정규장·프리장 흐름, 유가, 미 10년물 국채금리, 필라반도체 등락, 52주 최고/최저가 등)를 자연스럽게 인용하면서 왜 시장이 그렇게 움직이는지 핵심 메커니즘과 실전 대응 전략을 3~4줄로 명쾌하게 짚어줘.\n"
+        + "3. 카카오톡에서는 마크다운이 안 먹히니 절대로 별표(** 또는 *)나 샵(#)을 쓰지 말고, 정중하고 시원시원한 존댓말(~입니다/해요)과 깔끔한 기호(•), 이모지를 사용해줘.\n"
+        + mktData + "\n[최근 단톡방 흐름]\n" + ctx + "\n[" + sender + "님의 말]: " + q;
 
     var aiAns = askGemini(sysPrompt);
     if (detailCard) return detailCard + "\n\n🎩 [비서 브리핑]\n" + aiAns;
