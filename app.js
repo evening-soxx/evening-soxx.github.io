@@ -4377,7 +4377,7 @@ ${holdingLines}
     const sysInstruction = STOCK_AI_SYSTEM_PROMPT;
     const promptText = `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
     const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
-    const candidateModels = [model || "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-3.5-flash"].filter(
+    const candidateModels = [model || "gemini-3-flash-preview", "gemini-3.5-flash"].filter(
       (v, i, arr) => arr.indexOf(v) === i
     );
 
@@ -4399,7 +4399,7 @@ ${holdingLines}
                 system_instruction: { parts: [{ text: sysInstruction }] },
                 contents: [{ role: "user", parts: [{ text: promptText }] }],
                 tools: [{ google_search: {} }],
-                generationConfig: { temperature: 0.35 },
+                generationConfig: { temperature: 0.35, thinkingConfig: { thinkingBudget: 0 } },
               }),
             },
             10000
@@ -4432,7 +4432,7 @@ ${holdingLines}
             body: JSON.stringify({
               system_instruction: { parts: [{ text: sysInstruction }] },
               contents: [{ role: "user", parts: [{ text: promptText }] }],
-              generationConfig: { temperature: 0.35 },
+              generationConfig: { temperature: 0.35, thinkingConfig: { thinkingBudget: 0 } },
             }),
           },
           10000

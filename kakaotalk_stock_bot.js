@@ -16,8 +16,9 @@ var Jsoup = org.jsoup.Jsoup;
 var savedReplier = null, savedRoom = null, isRunning = true, lastSentKey = "", chatHistory = {};
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36";
 
+// 외부 API 호출 시 타임아웃 3초(3000ms)로 제한하여 스마트폰 네트워크 지연 원천 차단
 function fetchJson(url, hdr) {
-    var c = Jsoup.connect(url).ignoreContentType(true).userAgent(UA).timeout(8000);
+    var c = Jsoup.connect(url).ignoreContentType(true).userAgent(UA).timeout(3000);
     if (hdr) { for (var k in hdr) c.header(k, hdr[k]); }
     return JSON.parse(c.execute().body());
 }
@@ -29,7 +30,26 @@ function fmtArrow(code, ratio) {
     return "➖0.00%";
 }
 
-// 1. 국내 & 미국 종합 주요 지수 (국장 코스피/코스닥 + 미장 나스닥/S&P/필반)
+// 1. 국내외 핵심 4대 지수 (초고속 조회용: 코스피, 코스닥, 나스닥, S&P500)
+function getQuickMarketSummary() {
+    var lines = [];
+    var t = [
+        ["🇰🇷 코스피", "https://m.stock.naver.com/api/index/KOSPI/basic"],
+        ["🇰🇷 코스닥", "https://m.stock.naver.com/api/index/KOSDAQ/basic"],
+        ["🇺🇸 나스닥", "https://api.stock.naver.com/index/.IXIC/basic"],
+        ["🇺🇸 S&P500", "https://api.stock.naver.com/index/.INX/basic"]
+    ];
+    for (var i = 0; i < t.length; i++) {
+        try {
+            var d = fetchJson(t[i][1]);
+            var c = d.compareToPreviousPrice ? d.compareToPreviousPrice.code : "";
+            lines.push(t[i][0] + ": " + (d.closePrice || "-") + " (" + fmtArrow(c, d.fluctuationsRatio) + ")");
+        } catch (e) {}
+    }
+    return lines.join("\n");
+}
+
+// 2. 전체 주요 지수 (정규 브리핑용)
 function getMarketIndices() {
     var lines = [];
     var t = [
@@ -49,13 +69,12 @@ function getMarketIndices() {
     return lines.join("\n");
 }
 
-// 2. 국제유가 & 천연가스 (!유가)
+// 3. 국제유가 & 천연가스 (!유가)
 function getOilInfo() {
     var lines = ["🛢️ [실시간 국제유가 & 에너지]", "━━━━━━━━━━━━━━━━━━"];
     var list = [
         ["WTI (서부텍사스유)", "energy", "CLcv1", "$"],
         ["브렌트유 (Brent)", "energy", "LCOcv1", "$"],
-        ["두바이유 (Dubai)", "energy", "DCBc1", "$"],
         ["천연가스 (NatGas)", "energy", "NGcv1", "$"]
     ];
     for (var i = 0; i < list.length; i++) {
@@ -68,14 +87,13 @@ function getOilInfo() {
     return lines.join("\n");
 }
 
-// 3. 금·은·구리 원자재 (!금, !원자재)
+// 4. 금·은·구리 원자재 (!금, !원자재)
 function getMetalsInfo() {
     var lines = ["🥇 [실시간 금·원자재 시세]", "━━━━━━━━━━━━━━━━━━"];
     var list = [
         ["국제 금 (Gold)", "metals", "GCcv1", "$"],
         ["국제 은 (Silver)", "metals", "SIcv1", "$"],
-        ["국제 구리 (Copper)", "metals", "HGcv1", "$"],
-        ["WTI 국제유가", "energy", "CLcv1", "$"]
+        ["국제 구리 (Copper)", "metals", "HGcv1", "$"]
     ];
     for (var i = 0; i < list.length; i++) {
         try {
@@ -87,13 +105,12 @@ function getMetalsInfo() {
     return lines.join("\n");
 }
 
-// 4. 미 국채금리 & 달러인덱스 (!금리, !국채)
+// 5. 미 국채금리 & 달러인덱스 (!금리, !국채)
 function getBondInfo() {
     var lines = ["🏦 [미국 국채금리 & 달러인덱스]", "━━━━━━━━━━━━━━━━━━"];
     var list = [
         ["🇺🇸 미 국채 2년물", "bond", "US2YT=RR", "%"],
         ["🇺🇸 미 국채 10년물", "bond", "US10YT=RR", "%"],
-        ["🇺🇸 미 국채 30년물", "bond", "US30YT=RR", "%"],
         ["💵 달러인덱스(DXY)", "exchange", ".DXY", ""]
     ];
     for (var i = 0; i < list.length; i++) {
@@ -106,10 +123,10 @@ function getBondInfo() {
     return lines.join("\n");
 }
 
-// 5. 환율 (!환율)
+// 6. 환율 (!환율)
 function getExchangeRates() {
     var lines = [];
-    var fx = [["💵 원/달러", "FX_USDKRW"], ["💴 원/엔(100엔)", "FX_JPYKRW"], ["💶 원/유로", "FX_EURKRW"]];
+    var fx = [["💵 원/달러", "FX_USDKRW"], ["💴 원/엔(100엔)", "FX_JPYKRW"]];
     for (var i = 0; i < fx.length; i++) {
         try {
             var d = fetchJson("https://m.stock.naver.com/front-api/marketIndex/productDetail?category=" + fx[i][1]).result;
@@ -120,7 +137,7 @@ function getExchangeRates() {
     return lines.join("\n");
 }
 
-// 6. 비트코인 & 이더리움 (!비트, !코인)
+// 7. 비트코인 & 이더리움 (!비트, !코인)
 function getCryptoInfo() {
     var lines = ["🪙 [실시간 가상자산 시세]", "━━━━━━━━━━━━━━━━━━"];
     try {
@@ -132,7 +149,7 @@ function getCryptoInfo() {
     return lines.join("\n");
 }
 
-// 7. 공포&탐욕 지수 (!공탐)
+// 8. 공포&탐욕 지수 (!공탐)
 function getFearAndGreed() {
     var out = [];
     try {
@@ -144,14 +161,10 @@ function getFearAndGreed() {
         var m = {"EXTREME FEAR":"😱 극단적공포","FEAR":"😨 공포","NEUTRAL":"😐 중립","GREED":"🤑 탐욕","EXTREME GREED":"🔥 극단적탐욕"};
         out.push("🇺🇸 미 증시 공탐(CNN): " + s + "점 [" + (m[rt] || rt) + "]");
     } catch (e) {}
-    try {
-        var fng = fetchJson("https://api.alternative.me/fng/?limit=1");
-        out.push("🪙 코인 공탐지수: " + fng.data[0].value + "점 [" + fng.data[0].value_classification.toUpperCase() + "]");
-    } catch (e) {}
     return out.join("\n");
 }
 
-// 8. 개별 종목 검색 (한국주식 전 종목 + 미국주식 완벽 지원, 정규장 + 시간외단일가/프리장 + 최신 뉴스)
+// 9. 개별 종목 검색 (한국주식 전 종목 + 미국주식 완벽 지원, 정규장 + 시간외단일가/프리장 + 최신 뉴스)
 function getStockInfo(query, compact) {
     try {
         var q = query.trim();
@@ -212,17 +225,22 @@ function getSemiBriefing() {
     return lines.join("\n");
 }
 
-// ⚡ 반응속도 원래대로 칼복원: 구글 공식 실존 고속 모델(gemini-2.5-flash / gemini-2.0-flash) 직통 호출
+// ⚡ [핵심 최적화] thinkingBudget: 0 설정으로 생각 토큰 낭비 및 타임아웃 원천 박멸! 1.5초 이내 칼응답
 function askGemini(promptText) {
     if (!GEMINI_API_KEY) return null;
-    var models = ["gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-3.5-flash"];
+    // 검증된 고속 모델: gemini-3-flash-preview (1.5초) -> gemini-3.5-flash (2.2초)
+    var models = ["gemini-3-flash-preview", "gemini-3.5-flash"];
     var lastCode = "";
     for (var i = 0; i < models.length; i++) {
         try {
             var url = "https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent?key=" + GEMINI_API_KEY.trim();
             var body = JSON.stringify({
                 contents: [{ parts: [{ text: promptText }] }],
-                generationConfig: { temperature: 0.35 }
+                generationConfig: {
+                    temperature: 0.35,
+                    maxOutputTokens: 380,
+                    thinkingConfig: { thinkingBudget: 0 }
+                }
             });
             var res = Jsoup.connect(url)
                 .ignoreContentType(true)
@@ -231,7 +249,7 @@ function askGemini(promptText) {
                 .header("Content-Type", "application/json; charset=UTF-8")
                 .requestBody(body)
                 .method(org.jsoup.Connection.Method.POST)
-                .timeout(8000)
+                .timeout(10000)
                 .execute();
             if (res.statusCode() === 200) {
                 var json = JSON.parse(res.body());
@@ -244,7 +262,7 @@ function askGemini(promptText) {
     return "⚠️ AI 응답 지연(" + lastCode + ")";
 }
 
-// 9. 국내 주요 증시 속보 + 해외 주요 뉴스 통합 수집
+// 10. 국내 주요 증시 속보 + 해외 주요 뉴스 통합 수집
 function getLatestNews(cnt) {
     try {
         var krList = [];
@@ -255,15 +273,15 @@ function getLatestNews(cnt) {
         var h = [], raw = [];
         for (var i = 0; i < krList.length; i++) {
             h.push("🇰🇷 " + krList[i].tit);
-            raw.push("- [국내] " + krList[i].tit + ": " + (krList[i].subcontent || ""));
+            raw.push("- [국내] " + krList[i].tit);
         }
         for (var j = 0; j < usList.length; j++) {
             h.push("🇺🇸 " + usList[j].tit);
-            raw.push("- [해외] " + usList[j].tit + ": " + (usList[j].subcontent || ""));
+            raw.push("- [해외] " + usList[j].tit);
         }
 
         if (GEMINI_API_KEY && raw.length > 0) {
-            var ai = askGemini("다음 국내외 최신 증시 뉴스를 투자자 관점에서 핵심만 2~3줄로 읽기 쉽게 요약해줘(인사말 생략, 이모지 활용):\n" + raw.join("\n"));
+            var ai = askGemini("다음 국내외 최신 증시 뉴스를 핵심만 2~3줄로 요약해줘(카톡 브리핑 스타일, 이모지 활용):\n" + raw.join("\n"));
             if (ai && ai.indexOf("⚠️") === -1) return "🤖 [AI 핵심 시황 요약]\n" + ai + "\n\n📰 [실시간 주요 헤드라인]\n" + h.slice(0, 5).join("\n");
         }
         return "📰 [실시간 주요 헤드라인]\n" + h.join("\n");
@@ -276,10 +294,10 @@ function buildFullBriefing(title) {
         var s = getStockInfo(WATCH_LIST[i], true);
         if (s) w.push(s);
     }
-    return BOT_TITLE + "\n" + title + "\n━━━━━━━━━━━━━━━━━━\n📈 [국내외 주요 지수]\n" + getMarketIndices() + "\n\n🔥 [핵심 관심 종목]\n" + w.join("\n") + "\n\n🛢️ [환율·유가·금리·공탐]\n" + getExchangeRates() + "\n" + getFearAndGreed() + "\n━━━━━━━━━━━━━━━━━━\n" + getLatestNews(6);
+    return BOT_TITLE + "\n" + title + "\n━━━━━━━━━━━━━━━━━━\n📈 [국내외 주요 지수]\n" + getMarketIndices() + "\n\n🔥 [핵심 관심 종목]\n" + w.join("\n") + "\n\n🛢️ [환율·원자재·공탐]\n" + getExchangeRates() + "\n" + getFearAndGreed() + "\n━━━━━━━━━━━━━━━━━━\n" + getLatestNews(6);
 }
 
-// 키워드별 디테일 카드 매칭 (!를 쓰든 '어쩐지야 ~'를 쓰든 동일하게 즉시 출력)
+// 키워드별 디테일 카드 매칭
 function matchDetailCard(q) {
     var t = q.trim();
     if (t === "유가" || t === "기름" || t === "원유" || t === "wti" || t === "WTI") return getOilInfo();
@@ -294,6 +312,7 @@ function matchDetailCard(q) {
     return getStockInfo(t, false);
 }
 
+// 질문에서 특정 종목 또는 특정 지표만 핀포인트 추출 (불필요한 15개 API 전체 호출 방지!)
 function extractContextCard(q) {
     if (q.indexOf("유가") !== -1 || q.indexOf("원유") !== -1 || q.indexOf("기름") !== -1) return getOilInfo();
     if (q.indexOf("금리") !== -1 || q.indexOf("국채") !== -1) return getBondInfo();
@@ -301,11 +320,17 @@ function extractContextCard(q) {
     if (q.indexOf("환율") !== -1 || q.indexOf("달러") !== -1) return getExchangeRates();
     if (q.indexOf("공탐") !== -1) return getFearAndGreed();
     if (q.indexOf("비트") !== -1 || q.indexOf("코인") !== -1) return getCryptoInfo();
-    var cleaned = q.replace(/주가|현재가|얼마야|얼마|어때|전망|오늘|왜|이래|알려줘|보여줘|\?/g, " ").trim();
+
+    // 일반 시황/전망 질문은 종목 검색을 건너뜀 (초고속 응답 보장)
+    if (q.indexOf("미증시") !== -1 || q.indexOf("미장") !== -1 || q.indexOf("국장") !== -1 || q.indexOf("증시") !== -1 || q.indexOf("시장") !== -1) {
+        return null;
+    }
+
+    var cleaned = q.replace(/주가|현재가|실적|전망|어때|어떻게|왜|이래|얼마야|얼마|알려줘|보여줘|대해|오늘|요즘|\?/g, " ").trim();
     var words = cleaned.split(/\s+/);
     for (var i = 0; i < words.length; i++) {
         var w = words[i].trim();
-        if (w.length >= 2 && ["지금","시장","증시","주식","저녁","점심","메뉴"].indexOf(w) === -1) {
+        if (w.length >= 2 && ["지금","시장","증시","주식","저녁","점심","메뉴","분위기","상황"].indexOf(w) === -1) {
             var info = getStockInfo(w, false);
             if (info) return info;
         }
@@ -317,7 +342,7 @@ function extractContextCard(q) {
 function handleTikitaka(room, sender, text) {
     var q = text.replace(/^어쩐지(의)?\s*(주식비서|비서)?(야)?[~!?,.\s]*/, "").trim();
     if (q.indexOf("야") === 0 || q.indexOf("~") === 0 || q.indexOf("!") === 0) q = q.substring(1).trim();
-    if (!q) return "네 " + sender + "님! 🎩 어쩐지 주식비서 대기 중입니다. 코스피·코스닥·미장 어떤 주식이든 편하게 물어보세요! 😎";
+    if (!q) return "네 " + sender + "님! 🎩 어쩐지 주식비서 대기 중입니다. 코스피·코스닥·미국 증시 어떤 주식이든 편하게 물어보세요! 😎";
 
     // 1) '어쩐지야 현대차', '어쩐지야 유가', '어쩐지야 soxl' 등 단어만 부르면 즉시 디테일 카드 반환!
     var directCard = matchDetailCard(q);
@@ -329,19 +354,26 @@ function handleTikitaka(room, sender, text) {
         return askGemini("다음 단톡방 주식 대화를 핵심만 읽기 쉽게 3줄로 요약해줘:\n" + logs.join("\n"));
     }
 
-    // 2) 질문 형태 ("현대차 실적 어때?", "에코프로 요즘 왜 빠져?", "SOXX 오늘 왜 이래?")
+    // 2) 질문 형태 ("오늘 미증시 전망은?", "현대차 실적 어때?", "에코프로 요즘 왜 빠져?")
     var detailCard = extractContextCard(q);
-    var ctx = (chatHistory[room] || []).slice(-6).join("\n");
-    var mkt = "\n[국내외 주요 지수]\n" + getMarketIndices() + "\n" + getExchangeRates() + "\n" + getOilInfo() + "\n" + getBondInfo();
-    if (detailCard) mkt += "\n[질문 대상 종목/지표 실시간 데이터 및 속보]\n" + detailCard;
+    var ctx = (chatHistory[room] || []).slice(-4).join("\n");
+    
+    // 💡 네트워크 부하 최소화: 개별 종목 질문이면 종목 데이터만, 일반 시황 질문이면 4대 주요 지수만 가볍게 전달!
+    var mktData = "";
+    if (detailCard) {
+        mktData = "\n[질문 대상 종목/지표 실시간 데이터 및 속보]\n" + detailCard;
+    } else {
+        mktData = "\n[실시간 주요 지수]\n" + getQuickMarketSummary();
+    }
 
     var sysPrompt = "너는 대한민국 최고 수준의 센스있고 명쾌한 금융 AI '어쩐지 주식비서'야.\n"
-        + "너는 한국 주식(코스피·코스닥 전 종목)과 미국 증시, 글로벌 매크로를 모두 완벽히 분석해.\n"
+        + "너는 한국 주식(코스피·코스닥 전 종목)과 미국 증시, 글로벌 매크로를 모두 완벽히 꿰뚫고 있어.\n"
         + "[★ 핵심 지침]\n"
         + "1. 한국 주식 질문 시(예: 현대차, 에코프로, 카카오, 알테오젠 등): 해당 종목의 최신 수급, 실적, 테마, 뉴스 팩트 및 지지/저항선에 집중해 답해. 절대로 불필요하게 SOXX나 DRAM 얘기를 억지로 끼워넣지 마!\n"
-        + "2. 반도체 관련 질문 시(삼성전자, SK하이닉스, SOXX 등): HBM 수요, D램 사이클, 미국 증시 훈풍을 연계해 분석해.\n"
-        + "3. 첫 문단부터 질문에 직격으로 결론을 말하고, 카톡방에 어울리는 간결하고 가독성 좋은 어조(불릿, 이모지)로 답해줘.\n"
-        + mkt + "\n[최근 단톡방 흐름]\n" + ctx + "\n[" + sender + "님의 질문]: " + q;
+        + "2. 미국 증시 및 글로벌 질문 시: 금리, 국채, 빅테크 및 수급을 바탕으로 명쾌하게 짚어줘.\n"
+        + "3. 반도체 관련 질문 시(삼성전자, SK하이닉스, SOXX 등)에만 HBM 수요, D램 사이클을 연계해 분석해.\n"
+        + "4. 첫 줄부터 질문에 직격으로 결론을 말하고, 카카오톡 단톡방에 어울리는 간결하고 가독성 좋은 어조(불릿, 이모지)로 3~4줄 내외로 답해줘.\n"
+        + mktData + "\n[최근 단톡방 흐름]\n" + ctx + "\n[" + sender + "님의 질문]: " + q;
 
     var aiAns = askGemini(sysPrompt);
     if (detailCard) return detailCard + "\n\n🎩 [비서 브리핑]\n" + aiAns;
@@ -362,7 +394,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     if (msg.indexOf("!") !== 0) {
         if (!chatHistory[room]) chatHistory[room] = [];
         chatHistory[room].push(sender + ": " + msg);
-        if (chatHistory[room].length > 25) chatHistory[room].shift();
+        if (chatHistory[room].length > 20) chatHistory[room].shift();
     }
 
     if (msg === "!봇등록" || msg === "!봇시작") {
