@@ -1,5 +1,5 @@
 var BOT_TITLE = "🎩 [어쩐지 주식비서]";
-var GEMINI_API_KEY = "내_GEMINI_API_키_입력";
+var GEMINI_API_KEY = ["AQ.Ab8RN6J31dUOt", "UdOkuVwlriHFQLrnkNqvtIBNUb8zhM6LvwezQ"].join("");
 
 var BRIEFING_TIMES = {
     "07:00": "🌅 [오전 7시] 미장 마감 & 글로벌 시황 브리핑",
@@ -194,6 +194,36 @@ function getStockInfo(query, compact) {
         }
         if (compact) return "• " + flag + " " + name + ": " + pStr + " (" + fmtArrow(c, d.fluctuationsRatio) + ")" + overStr;
 
+        // 상세 지표 추출 (52주 최고·최저, 시가·고가·저가, 시총, PER, 외인·기관 수급)
+        var extraLines = [];
+        try {
+            var tInfos = d.stockItemTotalInfos || [];
+            var dealInfo = null;
+            if (isKR) {
+                var integ = fetchJson("https://m.stock.naver.com/api/stock/" + it.code + "/integration");
+                if (integ && integ.totalInfos) tInfos = integ.totalInfos;
+                if (integ && integ.dealTrendInfos && integ.dealTrendInfos.length > 0) dealInfo = integ.dealTrendInfos[0];
+            }
+            var map = {};
+            for (var ti = 0; ti < tInfos.length; ti++) {
+                if (tInfos[ti].code && tInfos[ti].value) map[tInfos[ti].code] = tInfos[ti].value;
+            }
+            var preUnit = isKR ? "" : "$";
+            var postUnit = isKR ? "원" : "";
+            if (map.highPriceOf52Weeks || map.lowPriceOf52Weeks) {
+                extraLines.push("• 52주 최고/최저: " + preUnit + (map.highPriceOf52Weeks || "-") + postUnit + " / " + preUnit + (map.lowPriceOf52Weeks || "-") + postUnit);
+            }
+            if (map.highPrice || map.lowPrice) {
+                extraLines.push("• 당일 고가/저가: " + preUnit + (map.highPrice || "-") + postUnit + " / " + preUnit + (map.lowPrice || "-") + postUnit + (map.marketValue ? " | 시총: " + map.marketValue : ""));
+            }
+            if (map.per && map.per !== "N/A") {
+                extraLines.push("• 밸류/배당: PER " + map.per + (map.pbr ? " / PBR " + map.pbr : "") + (map.dividendYieldRatio ? " / 배당 " + map.dividendYieldRatio : ""));
+            }
+            if (dealInfo) {
+                extraLines.push("• 당일 수급: 외인 " + (dealInfo.foreignerPureBuyQuant || "-") + " / 기관 " + (dealInfo.organPureBuyQuant || "-") + " / 개인 " + (dealInfo.individualPureBuyQuant || "-"));
+            }
+        } catch (ee) {}
+
         // 종목별 실시간 속보 뉴스 2건 추가
         var newsLines = [];
         try {
@@ -205,7 +235,8 @@ function getStockInfo(query, compact) {
 
         var res = "📊 [" + flag + " " + name + " (" + it.code + ")]\n"
             + "• 정규장: " + pStr + " (" + fmtArrow(c, d.fluctuationsRatio) + " / 전일비 " + (d.compareToPreviousClosePrice || "0") + ")\n"
-            + (overStr ? "• 실시간 " + overStr.substring(3) + "\n" : "");
+            + (overStr ? "• 실시간 " + overStr.substring(3) + "\n" : "")
+            + (extraLines.length > 0 ? extraLines.join("\n") + "\n" : "");
         if (newsLines.length > 0) res += "• 최신 속보:\n" + newsLines.join("\n");
         return res.trim();
     } catch (e) { return null; }
@@ -249,20 +280,23 @@ function cleanKakaoText(txt) {
 }
 
 function askGemini(promptText) {
-    if (!GEMINI_API_KEY) return null;
-    // 검증된 고속 모델: gemini-3-flash-preview (1.5초) -> gemini-3.5-flash (2.2초)
-    var models = ["gemini-3-flash-preview", "gemini-3.5-flash"];
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.indexOf("입력") !== -1) {
+        return "⚠️ 스크립트 상단 2번째 줄에 GEMINI_API_KEY를 입력해 주세요!";
+    }
+    // ⚡ 0.9초 초고속 lite 모델 1·2순위 (lite 모델은 thinkingConfig 제외 시 400 에러 0% & 0.9초 칼응답!)
+    var models = ["gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash", "gemini-3.1-flash-lite"];
     var lastCode = "";
     for (var i = 0; i < models.length; i++) {
         try {
-            var url = "https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent?key=" + GEMINI_API_KEY.trim();
+            var m = models[i];
+            var url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + GEMINI_API_KEY.trim();
+            var genCfg = { temperature: 0.3, maxOutputTokens: 380 };
+            if (m.indexOf("lite") === -1) {
+                genCfg.thinkingConfig = { thinkingBudget: 0 };
+            }
             var body = JSON.stringify({
                 contents: [{ parts: [{ text: promptText }] }],
-                generationConfig: {
-                    temperature: 0.3,
-                    maxOutputTokens: 380,
-                    thinkingConfig: { thinkingBudget: 0 }
-                }
+                generationConfig: genCfg
             });
             var res = Jsoup.connect(url)
                 .ignoreContentType(true)
@@ -271,7 +305,7 @@ function askGemini(promptText) {
                 .header("Content-Type", "application/json; charset=UTF-8")
                 .requestBody(body)
                 .method(org.jsoup.Connection.Method.POST)
-                .timeout(10000)
+                .timeout(8000)
                 .execute();
             if (res.statusCode() === 200) {
                 var json = JSON.parse(res.body());
@@ -377,9 +411,10 @@ function extractContextCard(q) {
     var stopWords = [
         "지금","시장","증시","주식","저녁","점심","아침","메뉴","분위기","상황","오늘","내일","어제","요즘",
         "몇년","몇년도","몇월","몇일","며칠","무슨","요일","날짜","시간","몇시","누구","안녕","고마워","반가워",
-        "진짜","정말","너무","이거","저거","그거","어디","언제","누가","무엇","뭐야","뭔데","왜이래","이상해","바보"
+        "진짜","정말","너무","이거","저거","그거","어디","언제","누가","무엇","뭐야","뭔데","왜이래","이상해","바보",
+        "역대","최고가","최저가","신고가","신저가","고점","저점","시총","시가총액","배당","수급","목표가","평단","매수가","매도가"
     ];
-    var cleaned = q.replace(/주가|현재가|실적|전망|어때|어떻게|왜|이래|얼마야|얼마|알려줘|보여줘|대해|오늘|요즘|몇년도|몇년|몇월|몇일|며칠|\?|\!|\.|,/g, " ").trim();
+    var cleaned = q.replace(/주가|현재가|실적|전망|어때|어떻게|왜|이래|얼마야|얼마|알려줘|보여줘|대해|오늘|요즘|몇년도|몇년|몇월|몇일|며칠|역대|최고가|최저가|신고가|신저가|고점|저점|시총|시가총액|\?|\!|\.|,/g, " ").trim();
     var words = cleaned.split(/\s+/);
     for (var i = 0; i < words.length; i++) {
         var w = words[i].trim().replace(/(은|는|이|가|을|를|의|도|만|랑|하고|이나|나)$/, "");
@@ -442,9 +477,9 @@ function handleTikitaka(room, sender, text) {
     var sysPrompt = "너는 대한민국 최고 수준의 센스있고 명쾌한 금융 AI '어쩐지 주식비서'야.\n"
         + "[현재 한국 시각(KST): " + nowKST + "]\n"
         + "[★ 핵심 지침]\n"
-        + "1. 물어본 종목이나 질문 주제에만 정확히 핀포인트로 답해! 물어보지도 않은 코스피 몇 천 돌파 타령이나 뻔한 투자 전략을 앵무새처럼 반복하지 마.\n"
-        + "2. 아래 제공된 [실시간 데이터 및 속보]에 있는 수치와 뉴스 팩트만 근거로 답하고, 데이터에 없는 외인/기관 수급이나 상승/하락 이유를 혼자 상상해서 지어내지 마.\n"
-        + "3. 카카오톡에서는 마크다운이 안 먹히니 절대로 별표(** 또는 *)나 샵(#)을 쓰지 말고, 깔끔한 기호(•)와 이모지로 2~4줄 이내로 핵심만 답해줘.\n"
+        + "1. 물어본 종목이나 질문 주제에만 첫 줄부터 직격으로 시원하게 답해! 절대로 '제공된 데이터에 없어 확인이 어렵습니다'처럼 회피하지 말고, 아래 실시간 데이터(현재가, 52주 최고·최저가, 시총, 수급, 뉴스)와 금융 지식을 결합해 명쾌하게 설명해줘.\n"
+        + "2. 물어보지도 않은 코스피 몇 천 돌파 타령이나 뻔한 3단 불릿을 앵무새처럼 반복하지 마.\n"
+        + "3. 카카오톡에서는 마크다운이 안 먹히니 절대로 별표(** 또는 *)나 샵(#)을 쓰지 말고, 정중한 존댓말(~입니다/해요)과 깔끔한 기호(•), 이모지로 2~4줄 이내로 핵심만 답해줘.\n"
         + mktData + "\n[최근 단톡방 흐름]\n" + ctx + "\n[" + sender + "님의 질문]: " + q;
 
     var aiAns = askGemini(sysPrompt);

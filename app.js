@@ -4386,7 +4386,7 @@ ${holdingLines}
     const sysInstruction = `${STOCK_AI_SYSTEM_PROMPT}\n\n[★ 현재 기준 시각(KST): ${nowKstStr} — 날짜·시간·일상 대화 질문에는 억지로 증시 브리핑을 붙이지 말고 해당 질문에만 자연스럽고 정확하게 답변하세요.]`;
     const promptText = `[현재 한국 시각(KST)]: ${nowKstStr}\n[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
     const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
-    const candidateModels = [model || "gemini-3-flash-preview", "gemini-3.5-flash"].filter(
+    const candidateModels = [model || "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash", "gemini-3.1-flash-lite"].filter(
       (v, i, arr) => arr.indexOf(v) === i
     );
 
@@ -4395,6 +4395,9 @@ ${holdingLines}
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
         m
       )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const genCfg = m.includes("lite")
+        ? { temperature: 0.35 }
+        : { temperature: 0.35, thinkingConfig: { thinkingBudget: 0 } };
 
       // 1차: Google Search Grounding 포함 시도 (타임아웃 10초 적용)
       if (useSearch) {
@@ -4408,7 +4411,7 @@ ${holdingLines}
                 system_instruction: { parts: [{ text: sysInstruction }] },
                 contents: [{ role: "user", parts: [{ text: promptText }] }],
                 tools: [{ google_search: {} }],
-                generationConfig: { temperature: 0.35, thinkingConfig: { thinkingBudget: 0 } },
+                generationConfig: genCfg,
               }),
             },
             10000
@@ -4441,7 +4444,7 @@ ${holdingLines}
             body: JSON.stringify({
               system_instruction: { parts: [{ text: sysInstruction }] },
               contents: [{ role: "user", parts: [{ text: promptText }] }],
-              generationConfig: { temperature: 0.35, thinkingConfig: { thinkingBudget: 0 } },
+              generationConfig: genCfg,
             }),
           },
           10000
