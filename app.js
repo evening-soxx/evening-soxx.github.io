@@ -2034,12 +2034,22 @@
     return rawLink;
   }
 
-  // 0) Daum 최신 뉴스 실시간 크롤러 (Jina Reader 경유, CORS: * 무제한, 본문 요약 + 초단위 시각 추출)
+  // 초고속 반응을 위한 타임아웃 래퍼 (무한정 대기로 인한 사용자 체감 지연 원천 차단)
+  function fetchWithTimeout(resource, options = {}, timeoutMs = 1500) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(resource, {
+      ...options,
+      signal: controller.signal,
+    }).finally(() => clearTimeout(id));
+  }
+
+  // 0) Daum 최신 뉴스 실시간 크롤러 (Jina Reader 경유, CORS: * 무제한, 1.5초 타임아웃으로 칼같은 반응속도 복원)
   async function fetchDaumLiveNewsViaJina(query, category, limit = 10) {
     try {
       const targetUrl = `https://search.daum.net/search?w=news&sort=recency&q=${encodeURIComponent(query)}`;
       const jinaUrl = `https://r.jina.ai/${targetUrl}`;
-      const resp = await fetch(jinaUrl, { cache: "no-store" });
+      const resp = await fetchWithTimeout(jinaUrl, { cache: "no-store" }, 1500);
       if (!resp.ok) return [];
       const txt = await resp.text();
       const blocks = txt.split("\n*   ");
@@ -2089,14 +2099,14 @@
     }
   }
 
-  // 1) Bing News 실시간 RSS -> rss2json (CORS: * 완벽 지원, 한국어/영어 최신순)
+  // 1) Bing News 실시간 RSS -> rss2json (CORS: * 완벽 지원, 한국어/영어 최신순, 2초 타임아웃)
   async function fetchBingLiveNewsViaRss2Json(query, category, lang = "ko", limit = 8) {
     try {
       const cc = lang === "ko" ? "KR" : "US";
       const setlang = lang === "ko" ? "ko" : "en";
       const rssUrl = `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&setlang=${setlang}&cc=${cc}&sortby=date&format=rss`;
       const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-      const resp = await fetch(apiUrl, { cache: "no-store" });
+      const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" }, 2200);
       if (!resp.ok) return [];
       const data = await resp.json();
       const rawItems = data?.items || [];
@@ -2153,7 +2163,7 @@
       feeds.map(async (f) => {
         try {
           const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`;
-          const resp = await fetch(apiUrl, { cache: "no-store" });
+          const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" }, 1800);
           if (!resp.ok) return;
           const json = await resp.json();
           (json?.items || []).forEach((it) => {
@@ -2213,6 +2223,11 @@
     if (/asml/i.test(t)) tags.push("ASML");
     if (/sandisk|sndk|western digital|wdc|seagate/i.test(t)) tags.push("스토리지·낸드");
     if (/oracle|orcl|coreweave/i.test(t)) tags.push("AI인프라·CDS");
+    if (/tesla|tsla/i.test(t)) tags.push("테슬라");
+    if (/apple|aapl/i.test(t)) tags.push("애플");
+    if (/hyundai/i.test(t)) tags.push("현대차");
+    if (/samsung/i.test(t)) tags.push("삼성전자");
+    if (/sk hynix|hynix/i.test(t)) tags.push("SK하이닉스");
     if (/oil|crude|brent|wti|opec|iran/i.test(t)) tags.push("유가·중동");
     if (/treasury|yield|fed|powell|rate|inflation/i.test(t)) tags.push("미금리·연준");
     if (/tariff|china|export/i.test(t)) tags.push("관세·지정학");
@@ -2225,7 +2240,7 @@
       const url = `https://api.queryly.com/cnbc/json.aspx?queryly_key=31a35d40a9a64ab3&query=${encodeURIComponent(
         query
       )}&endindex=0&batchsize=${limit}&sort=date`;
-      const resp = await fetch(url, { cache: "no-store" });
+      const resp = await fetchWithTimeout(url, { cache: "no-store" }, 1500);
       if (!resp.ok) return [];
       const json = await resp.json();
       const results = json?.results || [];
@@ -2261,28 +2276,53 @@
     }
   }
 
-  // 한글 키워드 -> 영문 월가 티커/키워드 매핑 (한글로 검색해도 미국 CNBC 실시간 속보까지 동시에 긁어옴)
+  // 한글 키워드 -> 영문 글로벌/월가 티커 및 키워드 매핑 (한국 주식 및 미국 증시 모두 지원)
   function mapKoreanQueryToEnglish(q) {
     const map = [
+      // 미국 반도체 & 빅테크
       [/엔비디아/g, "NVIDIA"],
       [/마이크론/g, "Micron"],
-      [/하이닉스|SK하이닉스/g, "SK Hynix"],
-      [/삼성전자|삼전/g, "Samsung"],
       [/인텔/g, "Intel"],
       [/브로드컴/g, "Broadcom"],
       [/마벨/g, "Marvell"],
       [/샌디스크/g, "SanDisk"],
       [/웨스턴디지털/g, "Western Digital"],
       [/씨게이트/g, "Seagate"],
-      [/한미반도체/g, "HBM"],
       [/오라클/g, "Oracle"],
       [/코어위브/g, "CoreWeave"],
       [/퀄컴/g, "Qualcomm"],
       [/어플라이드/g, "Applied Materials"],
       [/램리서치/g, "Lam Research"],
+      [/테슬라/g, "Tesla"],
+      [/애플/g, "Apple"],
+      [/마이크로소프트/g, "Microsoft"],
+      [/구글|알파벳/g, "Alphabet Google"],
+      [/메타/g, "Meta"],
+      [/아마존/g, "Amazon"],
+      // 한국 대표 주식 (글로벌 매체 동시 서치 연동)
+      [/삼성전자|삼전/g, "Samsung Electronics"],
+      [/하이닉스|SK하이닉스/g, "SK Hynix"],
+      [/한미반도체/g, "HBM Hanmi Semi"],
+      [/현대차|현대자동차/g, "Hyundai Motor"],
+      [/기아/g, "Kia Motors"],
+      [/LG에너지솔루션|LG엔솔/g, "LG Energy Solution"],
+      [/에코프로비엠|에코프로/g, "Ecopro"],
+      [/포스코홀딩스|포스코/g, "POSCO Holdings"],
+      [/카카오/g, "Kakao"],
+      [/네이버/g, "NAVER"],
+      [/알테오젠/g, "Alteogen"],
+      [/삼성바이오로직스|삼바/g, "Samsung Biologics"],
+      [/셀트리온/g, "Celltrion"],
+      [/한화에어로스페이스|한화에어로/g, "Hanwha Aerospace"],
+      [/현대로템/g, "Hyundai Rotem"],
+      [/두산에너빌리티/g, "Doosan Enerbility"],
+      [/코스피/g, "KOSPI"],
+      [/코스닥/g, "KOSDAQ"],
+      // 매크로
       [/유가|원유|호르무즈/g, "crude oil WTI Brent"],
-      [/금리|국채|연준/g, "Treasury yield Fed"],
+      [/금리|국채|연준|FOMC/g, "Treasury yield Fed rate"],
       [/관세|전쟁|이란|중동/g, "Iran Middle East tariff"],
+      [/환율|원달러/g, "KRW USD exchange rate"],
       [/반도체/g, "semiconductor SOXX"],
     ];
     let out = String(q || "");
@@ -2292,7 +2332,7 @@
     return out;
   }
 
-  // 사용자가 원하는 키워드로 한국 + 미국 실시간 뉴스를 즉석에서 긁어오는 함수
+  // 사용자가 원하는 키워드로 한국 주식 + 미국 증시 실시간 뉴스를 초고속으로 퍼오는 함수
   async function searchLiveNewsByKeyword(rawKeyword, targetSection) {
     const kw = String(rawKeyword || "").trim();
     if (!kw) return [];
@@ -2310,20 +2350,33 @@
 
     try {
       const enKw = mapKoreanQueryToEnglish(kw);
-      let guessedCat = "SOXX · AI반도체";
+      let guessedCat = "한국주식 · 증시";
       if (/(하이닉스|삼성|마이크론|HBM|D램|DRAM|낸드|샌디스크|메모리|RAM)/i.test(kw)) {
         guessedCat = "메모리 · RAM";
+      } else if (/(엔비디아|TSMC|브로드컴|AMD|인텔|반도체|SOXX|SOXL)/i.test(kw)) {
+        guessedCat = "SOXX · AI반도체";
+      } else if (/(2차전지|배터리|에코프로|엘앤에프|포스코|LG엔솔|금양)/i.test(kw)) {
+        guessedCat = "2차전지 · 배터리";
+      } else if (/(현대차|기아|자동차|모빌리티|자율주행)/i.test(kw)) {
+        guessedCat = "자동차 · 모빌리티";
+      } else if (/(바이오|제약|알테오젠|삼천당|셀트리온|삼성바이오|HLB)/i.test(kw)) {
+        guessedCat = "바이오 · 제약";
+      } else if (/(방산|한화에어로|현대로템|LIG넥스원|한국항공우주|원전|두산에너)/i.test(kw)) {
+        guessedCat = "방산 · 원전";
+      } else if (/(네이버|카카오|플랫폼|소프트웨어|AI)/i.test(kw)) {
+        guessedCat = "플랫폼 · IT";
       } else if (/(유가|원유|WTI|브렌트|에너지)/i.test(kw)) {
         guessedCat = "유가 · 에너지";
       } else if (/(전쟁|이란|중동|호르무즈|대만|관세)/i.test(kw)) {
         guessedCat = "전쟁 · 지정학";
-      } else if (/(금리|국채|연준|FOMC|채권|환율)/i.test(kw)) {
-        guessedCat = "채권 · 금리";
+      } else if (/(금리|국채|연준|FOMC|채권|환율|원달러)/i.test(kw)) {
+        guessedCat = "채권 · 환율 · 매크로";
       }
 
+      // Daum(Jina 1.5초 타임아웃) + Bing 한국어 RSS(2.2초 타임아웃) + CNBC(1.5초 타임아웃) 병렬 실행 (원래 속도 칼복원)
       const [daumKo, bingKo, cnbcEn] = await Promise.all([
         fetchDaumLiveNewsViaJina(kw, guessedCat, 10),
-        fetchBingLiveNewsViaRss2Json(kw, guessedCat, "ko", 6),
+        fetchBingLiveNewsViaRss2Json(kw, guessedCat, "ko", 8),
         fetchCnbcLiveByCategory(enKw, guessedCat, 6, true),
       ]);
 
@@ -4243,85 +4296,85 @@
     return msgEl;
   }
 
+  // 『어쩐지 주식비서』 전천후 주식 전문 AI 시스템 프롬프트 (한국주식 전 종목 + 미국 증시 + 글로벌 매크로)
+  const STOCK_AI_SYSTEM_PROMPT = `당신은 대한민국 최고 수준의 실전 금융 애널리스트이자 시장 인텔리전스 AI인 『어쩐지 주식비서』입니다.
+당신은 한국 주식(코스피·코스닥 전 종목: 삼성전자, 현대차, 에코프로, 카카오, 네이버, 바이오, 방산, 원전, 금융주, 개별 테마주 등)과 미국 증시(SOXX, 엔비디아, 테슬라, 빅테크, AI 인프라 등), 글로벌 매크로(환율, 금리, 유가, 지정학)를 아우르는 전천후 주식 전문 분석을 제공합니다.
+
+[★ 최우선 답변 지침 - 반드시 준수]
+1. 질문 직격 답변 (첫 문단): 사용자가 질문한 종목이나 주제에 대해 군더더기 없이 핵심 결론부터 정면으로 명쾌하게 답변하세요.
+2. 질문 맞춤형 유연한 분석 (SOXX/DRAM 강제 주입 절대 금지):
+   - 【한국 주식 질문 시 (예: 현대차, 에코프로, 카카오, 알테오젠, 삼천당제약, 코스피 등)】:
+     해당 한국 주식의 최신 사업 현황, 실적 추이, 기관·외국인 수급 동향, 업종 모멘텀/테마 이슈, 최근 공시 및 뉴스 팩트, 기술적 지지/저항선 및 실전 대응 전략에 집중하여 분석하세요.
+     ※ 절대 주의: 반도체와 무관한 일반 한국 주식 질문에 억지로 SOXX, SOXL, RAM, DRAM 이야기를 끼워넣지 마세요!
+   - 【반도체 관련 한국 주식 질문 시 (예: 삼성전자, SK하이닉스, 한미반도체 등)】:
+     해당 기업의 실적·수급과 함께 HBM 수요, D램/낸드 사이클, 미국 필라델피아 반도체 지수(SOXX) 및 글로벌 AI 빅테크 동향과의 연관성을 입체적으로 분석하세요.
+   - 【미국 주식 및 반도체 ETF 질문 시 (예: 엔비디아, SOXX, SOXL, RAM 등)】:
+     실시간 주가 지표(20일 지지/저항선, RSI, RS 상대강도, 월가 자금 흐름)를 바탕으로 정밀한 매매 타점과 전략을 브리핑하세요.
+   - 【매크로·시장 전반 질문 시 (예: 원/달러 환율, 미 국채금리, 유가, 전쟁 등)】:
+     환율, 금리, 유가 등의 변화가 한국 증시(코스피/코스닥) 및 글로벌 시장에 미치는 파급 효과를 연결하여 설명하세요.
+3. 실시간 최신 정보 결합:
+   제공된 [실시간 데스크 시세·지표·뉴스 컨텍스트]와 실시간 웹 검색 결과를 결합하여, 가장 최근의 헤드라인·수치·일정·팩트를 근거로 신뢰도 높게 설명하세요.
+4. 가독성 높은 구조화:
+   가독성이 뛰어나도록 핵심 소제목(###), 불릿(•), 굵은 글씨(**)를 활용해 일목요연하고 직관적으로 브리핑하세요.`;
+
   function buildLiveMarketContextForAi(extraSearchedNews = []) {
     const d = state.data || {};
     const etfs = d.etfs || {};
     const holdings = d.holdings || [];
     const macros = d.macros || [];
-    const df = d.dram_etf_flow || {};
-
-    const etfLines = ["SOXX", "SOXL", "RAM", "DRAM"]
-      .map((k) => {
-        const e = etfs[k];
-        if (!e) return null;
-        return `- ${k} (${e.name_kr}): 현재가 $${e.price} (${fmtSignedPct(e.change_pct)}), 20일 지지 $${e.support_20d || "-"} / 저항 $${e.resistance_20d || "-"}, RSI(14)=${e.rsi14 || "-"}, 50일선위=${e.above_sma50 ? "Y" : "N"}`;
-      })
-      .filter(Boolean)
-      .join("\n");
-
-    const holdingLines = holdings
-      .map((h) => {
-        const curUnit = h.currency === "KRW" ? "원" : "$";
-        return `- ${h.name_kr}(${h.ticker.replace(".KS", "")}): ${h.price}${curUnit} (${fmtSignedPct(
-          h.change_pct
-        )}), RS=${h.rs_score || "-"}, RSI=${h.rsi14 || "-"}, 20일지지=${h.support_20d || "-"}, 20일저항=${
-          h.resistance_20d || "-"
-        }, MTT정배열=${h.mtt?.mtt_pass ? "통과" : "미통과"}, SOXX비중=${h.soxx_weight || 0}%, DRAM비중=${h.dram_weight || 0}%`;
-      })
-      .join("\n");
-
-    const macroLines = macros
-      .map((m) => `- ${m.name_kr}(${m.key}): ${m.price}${m.unit || ""} (${fmtSignedPct(m.change_pct)}) [${m.status_label || ""}]`)
-      .join("\n");
-
-    const cdsLast = CDS_2026_SERIES[CDS_2026_SERIES.length - 1] || { orcl: 288, crwv: 1140 };
-    const orclQ = state.cdsLiveQuotes?.ORCL || {};
-    const crwvQ = state.cdsLiveQuotes?.CRWV || {};
 
     const combinedNews = [...(extraSearchedNews || []), ...(d.news || [])];
     const seen = new Set();
     const topNews = [];
     combinedNews.forEach((n) => {
-      if (!n || !n.title || topNews.length >= 22) return;
-      const k = n.title.slice(0, 24);
+      if (!n || !n.title || topNews.length >= 24) return;
+      const k = String(n.title).slice(0, 24);
       if (seen.has(k)) return;
       seen.add(k);
       const sumPart = n.summary ? ` — 요약: ${n.summary}` : "";
       topNews.push(`- [${n.category || "속보"} | ${n.source || ""} | ${n.pub_date || n.date || ""}] ${n.title}${sumPart} (${n.link || ""})`);
     });
 
+    const macroLines = macros
+      .map((m) => `- ${m.name_kr}(${m.key}): ${m.price}${m.unit || ""} (${fmtSignedPct(m.change_pct)}) [${m.status_label || ""}]`)
+      .join("\n");
+
+    const etfLines = ["SOXX", "SOXL", "RAM", "DRAM"]
+      .map((k) => {
+        const e = etfs[k];
+        if (!e) return null;
+        return `- ${k} (${e.name_kr}): 현재가 $${e.price} (${fmtSignedPct(e.change_pct)}), 20일 지지 $${e.support_20d || "-"} / 저항 $${e.resistance_20d || "-"}, RSI(14)=${e.rsi14 || "-"}`;
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const holdingLines = holdings
+      .slice(0, 16)
+      .map((h) => {
+        const curUnit = h.currency === "KRW" ? "원" : "$";
+        return `- ${h.name_kr}(${h.ticker.replace(".KS", "")}): ${h.price}${curUnit} (${fmtSignedPct(
+          h.change_pct
+        )}), RSI=${h.rsi14 || "-"}, 지지=${h.support_20d || "-"}, 저항=${h.resistance_20d || "-"}`;
+      })
+      .join("\n");
+
     return `
-[현재 시각 및 데스크 기준]: ${d.updated_at_kst || "실시간 연동"}
+[★ 데스크 안내]: 사용자가 한국 주식을 물어보면 아래 [1. 실시간 뉴스 및 한국 시장 데이터]를 바탕으로 해당 종목에 집중하여 명쾌히 답변하세요. 질문과 무관한 SOXX/DRAM을 억지로 언급하지 마세요.
 
-[1. 4대 핵심 반도체 ETF 실시간 시세]
-${etfLines}
+[1. 방금 웹에서 실시간 수집·서치된 최신 속보 및 관련 뉴스 (${topNews.length}건)]
+${topNews.length > 0 ? topNews.join("\n") : "(실시간 뉴스 수집 대기 중)"}
 
-[2. Roundhill DRAM ETF(RAM 모펀드) 월가 자금 유입]
-- 순자산(AUM): $${df.latest_aum ? (df.latest_aum / 1e6).toFixed(2) + "M" : "-"}, 1일 자금유입: $${df.inflow_1d_usd ? (df.inflow_1d_usd / 1e6).toFixed(2) + "M" : "0"}, 5일 유입: $${df.inflow_5d_usd ? (df.inflow_5d_usd / 1e6).toFixed(2) + "M" : "-"}
-
-[3. 오라클(ORCL) & 코어위브(CRWV) 5년물 CDS 및 주가]
-- 오라클(ORCL): 5Y CDS ${cdsLast.orcl}bps (BBB- 투자적격 방어선), 주가 ${orclQ.price ? "$" + orclQ.price : "-"} (${fmtSignedPct(orclQ.change_pct)})
-- 코어위브(CRWV): 5Y CDS ${cdsLast.crwv}bps (1,000bp 부실경계선 상회), 주가 ${crwvQ.price ? "$" + crwvQ.price : "-"} (${fmtSignedPct(crwvQ.change_pct)})
-
-[4. 전쟁 · 유가 · 채권 · 환율 8대 매크로 지표]
+[2. 글로벌 매크로 & 한국 증시 영향 지표 (환율 · 금리 · 유가 · VIX)]
 ${macroLines}
 
-[5. SOXX & RAM 핵심 보유 22종목 실시간 지표]
+[3. 주요 반도체 ETF 및 글로벌 핵심 종목 실시간 참고 시세]
+${etfLines}
 ${holdingLines}
-
-[6. 방금 수집·서치된 실시간 한·미 반도체 & 거시경제 뉴스 헤드라인]
-${topNews.join("\n")}
 `.trim();
   }
 
   async function callGeminiWithLiveSearch(apiKey, model, question, contextText) {
-    const sysInstruction = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 전문 애널리스트 AI입니다.
-사용자의 질문에 대해:
-1) 반드시 사용자가 물어본 핵심 질문에 첫 문단부터 정면으로 명쾌하게 답변하세요.
-2) 제공된 [실시간 데스크 시세·지표·뉴스 컨텍스트]와 Google 실시간 웹 검색 결과를 결합하여 최신 팩트와 정확한 수치(현재가, 등락률, 20일 지지/저항선, RSI, RS 상대강도, 금리/유가/CDS)를 근거로 한국어로 설명하세요.
-3) SOXX(1X), SOXL(3X), RAM(메모리 2X), DRAM(1X) 및 관련 개별 종목 투자 관점의 실전 시사점을 꼭 짚어주세요.
-4) 가독성이 뛰어나도록 핵심 소제목(###)과 불릿(•), 굵은 글씨(**)를 활용해 일목요연하게 정리하세요.`;
-
+    const sysInstruction = STOCK_AI_SYSTEM_PROMPT;
     const promptText = `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
     const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
     const candidateModels = [model || "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"].filter(
@@ -4334,19 +4387,23 @@ ${topNews.join("\n")}
         m
       )}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-      // 1차: Google Search Grounding 포함 시도
+      // 1차: Google Search Grounding 포함 시도 (타임아웃 10초 적용)
       if (useSearch) {
         try {
-          const resp = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: sysInstruction }] },
-              contents: [{ role: "user", parts: [{ text: promptText }] }],
-              tools: [{ google_search: {} }],
-              generationConfig: { temperature: 0.35 },
-            }),
-          });
+          const resp = await fetchWithTimeout(
+            url,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                system_instruction: { parts: [{ text: sysInstruction }] },
+                contents: [{ role: "user", parts: [{ text: promptText }] }],
+                tools: [{ google_search: {} }],
+                generationConfig: { temperature: 0.35 },
+              }),
+            },
+            10000
+          );
           if (resp.ok) {
             const json = await resp.json();
             const cand = json?.candidates?.[0];
@@ -4367,15 +4424,19 @@ ${topNews.join("\n")}
 
       // 2차: 무료 티어 호환 기본 generateContent 호출 (실시간 수집된 뉴스 본문 요약이 이미 컨텍스트에 포함됨)
       try {
-        const resp2 = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: sysInstruction }] },
-            contents: [{ role: "user", parts: [{ text: promptText }] }],
-            generationConfig: { temperature: 0.35 },
-          }),
-        });
+        const resp2 = await fetchWithTimeout(
+          url,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: sysInstruction }] },
+              contents: [{ role: "user", parts: [{ text: promptText }] }],
+              generationConfig: { temperature: 0.35 },
+            }),
+          },
+          10000
+        );
         if (resp2.ok) {
           const json2 = await resp2.json();
           const text2 = (json2?.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("\n").trim();
@@ -4392,8 +4453,7 @@ ${topNews.join("\n")}
   }
 
   async function callGroqOrOpenRouterFreeApi(apiKey, provider, model, question, contextText) {
-    const sysPrompt = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 전문 애널리스트 AI입니다.
-사용자의 질문에 첫 문단부터 직접적으로 명확히 답하고, 제공된 [실시간 데스크 시세·지표·뉴스]의 최신 기사 요약과 수치(현재가, 등락률, 20일 지지/저항선, RSI, 금리, 유가, CDS)를 근거로 SOXX·SOXL·RAM 투자 전략을 한국어로 일목요연하게 브리핑하세요.`;
+    const sysPrompt = STOCK_AI_SYSTEM_PROMPT;
     const endpoint =
       provider === "groq"
         ? "https://api.groq.com/openai/v1/chat/completions"
@@ -4407,21 +4467,25 @@ ${topNews.join("\n")}
         ? model
         : "deepseek/deepseek-chat-v3-0324:free";
 
-    const resp = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+    const resp = await fetchWithTimeout(
+      endpoint,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: effModel,
+          messages: [
+            { role: "system", content: sysPrompt },
+            { role: "user", content: `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스]:\n${contextText}` },
+          ],
+          temperature: 0.35,
+        }),
       },
-      body: JSON.stringify({
-        model: effModel,
-        messages: [
-          { role: "system", content: sysPrompt },
-          { role: "user", content: `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스]:\n${contextText}` },
-        ],
-        temperature: 0.35,
-      }),
-    });
+      12000
+    );
     if (!resp.ok) {
       const errTxt = await resp.text().catch(() => "");
       throw new Error(`${provider.toUpperCase()} API 오류 (${resp.status}): ${errTxt.slice(0, 140)}`);
@@ -4432,26 +4496,30 @@ ${topNews.join("\n")}
   }
 
   async function callOpenAiWithLiveSearch(apiKey, model, question, contextText) {
-    const sysPrompt = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 전문 애널리스트 AI입니다. 실시간 데스크 데이터(SOXX, SOXL, RAM, DRAM, 22대 반도체 종목, 국채금리, 유가, CDS)와 최신 웹/뉴스 검색 결과를 바탕으로 수치와 근거 중심의 명쾌한 한국어 분석을 제공하세요.`;
+    const sysPrompt = STOCK_AI_SYSTEM_PROMPT;
     const userPrompt = `[질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스]:\n${contextText}`;
     const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
 
     // 1차: OpenAI Responses API + web_search_preview
     if (useSearch) {
       try {
-        const resp = await fetch("https://api.openai.com/v1/responses", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+        const resp = await fetchWithTimeout(
+          "https://api.openai.com/v1/responses",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model: model || "gpt-4o",
+              instructions: sysPrompt,
+              input: userPrompt,
+              tools: [{ type: "web_search_preview" }],
+            }),
           },
-          body: JSON.stringify({
-            model: model || "gpt-4o",
-            instructions: sysPrompt,
-            input: userPrompt,
-            tools: [{ type: "web_search_preview" }],
-          }),
-        });
+          12000
+        );
         if (resp.ok) {
           const json = await resp.json();
           let outText = json.output_text || "";
@@ -4474,21 +4542,25 @@ ${topNews.join("\n")}
     }
 
     // 2차: OpenAI Chat Completions API
-    const resp2 = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+    const resp2 = await fetchWithTimeout(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: model || "gpt-4o",
+          messages: [
+            { role: "system", content: sysPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.35,
+        }),
       },
-      body: JSON.stringify({
-        model: model || "gpt-4o",
-        messages: [
-          { role: "system", content: sysPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.35,
-      }),
-    });
+      12000
+    );
     if (!resp2.ok) {
       const errTxt = await resp2.text().catch(() => "");
       throw new Error(`OpenAI API 오류 (${resp2.status}): ${errTxt.slice(0, 140)}`);
@@ -4499,22 +4571,26 @@ ${topNews.join("\n")}
   }
 
   async function callPerplexityLiveSearch(apiKey, model, question, contextText) {
-    const sysPrompt = `당신은 『어쩐지저녁의 SOXX』 데스크의 수석 반도체·거시경제 애널리스트입니다. 실시간 웹 검색과 제공된 데스크 데이터를 결합해 한국어로 정확하고 깊이 있게 답변하세요.`;
-    const resp = await fetch("https://api.perplexity.ai/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+    const sysPrompt = STOCK_AI_SYSTEM_PROMPT;
+    const resp = await fetchWithTimeout(
+      "https://api.perplexity.ai/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: model.startsWith("sonar") ? model : "sonar-pro",
+          messages: [
+            { role: "system", content: sysPrompt },
+            { role: "user", content: `[질문]: ${question}\n\n[현재 데스크 실시간 시세·지표]:\n${contextText}` },
+          ],
+          temperature: 0.25,
+        }),
       },
-      body: JSON.stringify({
-        model: model.startsWith("sonar") ? model : "sonar-pro",
-        messages: [
-          { role: "system", content: sysPrompt },
-          { role: "user", content: `[질문]: ${question}\n\n[현재 데스크 실시간 시세·지표]:\n${contextText}` },
-        ],
-        temperature: 0.25,
-      }),
-    });
+      12000
+    );
     if (!resp.ok) {
       const errTxt = await resp.text().catch(() => "");
       throw new Error(`Perplexity API 오류 (${resp.status}): ${errTxt.slice(0, 140)}`);
@@ -4557,8 +4633,7 @@ ${topNews.join("\n")}
       );
     });
 
-    const worstMovers = [...holdings].sort((a, b) => (a.change_pct || 0) - (b.change_pct || 0)).slice(0, 4);
-    const bestMovers = [...holdings].sort((a, b) => (b.change_pct || 0) - (a.change_pct || 0)).slice(0, 3);
+    const isGeneralKoreanStock = matchedStocks.length === 0 && !/(soxx|soxl|ram|dram|반도체|미국|월가)/i.test(q);
 
     const newsPool = (searchedNews && searchedNews.length > 0 ? searchedNews : d.news || []).slice(0, 6);
 
@@ -4577,7 +4652,7 @@ ${topNews.join("\n")}
         );
       });
     } else {
-      directSummaryLines.push("• 해당 키워드의 실시간 기사를 찾지 못해 현재 데스크 시세 기준으로 진단합니다.");
+      directSummaryLines.push("• 해당 종목/키워드의 실시간 기사를 검색 중이며, 최신 시장 데이터 기준으로 브리핑합니다.");
     }
 
     let specificStockSection = "";
@@ -4604,40 +4679,22 @@ ${topNews.join("\n")}
           })
           .join("\n") +
         "\n\n";
-    } else {
+    } else if (isGeneralKoreanStock) {
       specificStockSection =
-        `### 📊 현재 반도체 섹터 주요 등락 특징주 & 지지선\n` +
-        `• **당일 급락·조정 주도주**: ${worstMovers
-          .map(
-            (x) =>
-              `**${x.name_kr}**(${fmtSignedPct(x.change_pct)}, RSI ${x.rsi14}, 20일지지 ${fmtPrice(
-                x.support_20d,
-                x.currency
-              )})`
-          )
-          .join(" / ")}\n` +
-        `• **당일 상대적 강세·방어주**: ${bestMovers
-          .map((x) => `**${x.name_kr}**(${fmtSignedPct(x.change_pct)}, RS ${x.rs_score})`)
-          .join(" / ")}\n\n`;
+        `### 📈 질문하신 한국 종목 [${q.slice(0, 24)}] 실시간 진단 포인트\n` +
+        `• 방금 수집된 실시간 속보 헤드라인과 본문 핵심을 바탕으로 기관·외국인 수급과 최근 공시 팩트를 종합 체크 중입니다.\n` +
+        `• 미 국채금리(**${us10y.price ?? "-"}%**) 및 원/달러 환율·유가(**$${wti.price ?? "-"}**) 흐름이 국내 증시 투자심리에 미치는 영향을 함께 고려하세요.\n\n`;
     }
 
     const answer = `### 🎯 질문("${q.slice(0, 42)}${q.length > 42 ? "..." : ""}") 실시간 서치 결과 요약
 ${directSummaryLines.join("\n")}
 
-${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
-• **4대 반도체 ETF**: **SOXX** $${soxx.price ?? "-"} (**${fmtSignedPct(
-      soxx.change_pct
-    )}**, 20일지지 $${soxx.support_20d ?? "-"}) · **SOXL(3X)** $${soxl.price ?? "-"} (**${fmtSignedPct(
-      soxl.change_pct
-    )}**) · **RAM(2X)** $${ram.price ?? "-"} (**${fmtSignedPct(
-      ram.change_pct
-    )}**) · **DRAM(1X)** $${dram.price ?? "-"} (**${fmtSignedPct(dram.change_pct)}**, 20일지지 $${dram.support_20d ?? "-"})
-• **매크로 & CDS**: 미 10년물 금리 **${us10y.price ?? "-"}%** · WTI 유가 **$${
+${specificStockSection}### 🌐 글로벌 매크로 & 시장 환경 지표
+• **환율 & 금리 & 유가**: 미 10년물 금리 **${us10y.price ?? "-"}%** · WTI 유가 **$${
       wti.price ?? "-"
-    }** (브렌트유 **$${brent.price ?? "-"}**) · VIX **${
-      vix.price ?? "-"
-    }pt** · 오라클 CDS **288bps** / 코어위브 CDS **1,140bps**
-• 💡 **무료 AI 키 연동 안내 (결제카드 불필요)**: 이미 발급받아 두신 **무료 API 키(Google AI Studio의 \`AIza...\` 또는 Groq의 \`gsk_...\`)**를 상단 **[🔑 무료·유료 API 키 설정]**에 넣으시면, 정형화된 요약이 아니라 **AI가 질문 의도에 맞춰 실시간 검색 기사를 읽고 자유롭게 직접 대답**해 줍니다!`;
+    }** (브렌트유 **$${brent.price ?? "-"}**) · VIX 변동성 **${vix.price ?? "-"}pt**
+• **참고 반도체 ETF**: **SOXX** $${soxx.price ?? "-"} (${fmtSignedPct(soxx.change_pct)}) · **RAM(2X)** $${ram.price ?? "-"} (${fmtSignedPct(ram.change_pct)})
+• 💡 **무료 AI 키 연동 안내 (결제카드 불필요)**: 상단 **[🔑 무료·유료 API 키 설정]**에 **무료 API 키(Google Gemini \`AIza...\` 또는 Groq \`gsk_...\`)**를 등록하시면, 정형화된 요약이 아니라 **AI가 질문하신 모든 한국 주식에 대해 실시간 웹 검색을 직접 수행하며 맞춤형으로 심층 답변**해 줍니다!`;
 
     return { text: answer, sources: newsPool };
   }
@@ -4655,7 +4712,7 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
     appendAiChatMessage("user", q);
     const loadingMsg = appendAiChatMessage(
       "assistant",
-      "⏳ <strong>실시간 관련 뉴스·사이트 서치 및 SOXX·RAM 포트폴리오 지표 분석 중입니다...</strong> (한·미 실시간 속보 API 및 AI 엔진 타격 중)",
+      "⏳ <strong>실시간 관련 뉴스·시장 데이터 서치 및 AI 분석 중입니다...</strong> (초고속 속보 API & AI 엔진 구동 중)",
       [],
       true
     );
@@ -4663,16 +4720,17 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      // 1) 질문에서 핵심 키워드를 추출해 실시간 한·미 뉴스(Bing RSS + CNBC Queryly) 즉시 서치
+      // 1) 질문에서 핵심 종목/키워드를 추출해 실시간 뉴스(Daum + Bing RSS + CNBC) 초고속 서치
       const useLiveSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
       let searchedNews = [];
       if (useLiveSearch) {
         const cleanQuery = q
           .replace(/\[[^\]]+\]/g, "")
-          .replace(/(오늘|지금|방금|최신|뉴스|서치해줘|찾아줘|알려줘|어때|왜|이유|전망|분석|요약해줘)/g, " ")
+          .replace(/(오늘|지금|방금|최신|뉴스|서치해줘|찾아줘|알려줘|어때|왜|이유|전망|분석|요약해줘|해줘|좀|대해|어떻게|생각해|앞으로|목표가|주가)/g, " ")
+          .replace(/\s+/g, " ")
           .trim()
           .slice(0, 38);
-        const searchTarget = cleanQuery.length >= 2 ? cleanQuery : "SOXX 엔비디아 SK하이닉스 반도체";
+        const searchTarget = cleanQuery.length >= 2 ? cleanQuery : q.slice(0, 30);
         searchedNews = await searchLiveNewsByKeyword(searchTarget, "AI_DESK");
       }
 
@@ -4702,7 +4760,7 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
       const fallback = generateBuiltInAnalystAnswer(q, state.data?.news?.slice(0, 5) || []);
       appendAiChatMessage(
         "assistant",
-        `⚠️ **API 키 호출 안내 (${err.message || "연결 확인 필요"})**\n키 설정을 확인해 주세요. 아래는 실시간 수집된 뉴스 및 데스크 지표 기반 즉석 분석입니다.\n\n${
+        `⚠️ **API 키 호출 안내 (${err.message || "연결 확인 필요"})**\n키 설정을 확인해 주세요. 아래는 실시간 수집된 뉴스 및 시장 지표 기반 즉석 분석입니다.\n\n${
           fallback.text
         }`,
         fallback.sources,
@@ -4733,9 +4791,9 @@ ${specificStockSection}### ⚡ SOXX · SOXL · RAM & 매크로 연동 브리핑
     if (chatBox && chatBox.children.length === 0) {
       appendAiChatMessage(
         "assistant",
-        `반갑습니다! **『어쩐지저녁의 SOXX』 실시간 반도체·매크로 전문 AI 애널리스트**입니다.\n` +
-          `• **결제카드 없는 무료 API 키 100% 지원**: 상단 **[🔑 무료·유료 API 키 설정]**을 눌러 이미 받아두신 **무료 API 키(Google Gemini \`AIza...\` 또는 Groq \`gsk_...\`)**를 붙여넣고 **[연동 저장]**을 눌러주세요!\n` +
-          `• 실시간 뉴스와 시세는 브라우저가 먼저 **비용 0원**으로 긁어모아 AI에게 전달하므로, 무료 API 키만 넣으셔도 내가 물어본 질문에 맞춰 실시간 서치 기반의 정확한 대답을 즉시 받아보실 수 있습니다.`
+        `반갑습니다! **『어쩐지 주식비서』 한국주식 & 글로벌 증시 실시간 AI 애널리스트**입니다.\n` +
+          `• **한국주식 전 종목(코스피·코스닥) & 미국 증시(SOXX·빅테크)·매크로 완벽 지원**: 삼성전자, 현대차, 에코프로, 카카오, 알테오젠 등 어떤 한국 주식이든 실시간 뉴스 서치와 공시·수급·차트 지표를 기반으로 명쾌하게 답변해 드립니다.\n` +
+          `• **결제카드 없는 무료 API 키 100% 지원**: 상단 **[🔑 무료·유료 API 키 설정]**에 **무료 API 키(Google Gemini \`AIza...\` 또는 Groq \`gsk_...\`)**를 등록하시면 AI가 실시간 웹 검색을 결합하여 질문에 즉시 답해 드립니다.`
       );
     }
 
