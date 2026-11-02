@@ -215,7 +215,7 @@ function getSemiBriefing() {
 // ⚡ 반응속도 원래대로 칼복원: 구글 공식 실존 고속 모델(gemini-2.5-flash / gemini-2.0-flash) 직통 호출
 function askGemini(promptText) {
     if (!GEMINI_API_KEY) return null;
-    var models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    var models = ["gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-3.5-flash"];
     var lastCode = "";
     for (var i = 0; i < models.length; i++) {
         try {

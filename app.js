@@ -4377,7 +4377,7 @@ ${holdingLines}
     const sysInstruction = STOCK_AI_SYSTEM_PROMPT;
     const promptText = `[사용자 질문]: ${question}\n\n[실시간 데스크 시세·지표·뉴스 컨텍스트]:\n${contextText}`;
     const useSearch = document.getElementById("chkAiLiveWebSearch")?.checked !== false;
-    const candidateModels = [model || "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"].filter(
+    const candidateModels = [model || "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-3.5-flash"].filter(
       (v, i, arr) => arr.indexOf(v) === i
     );
 
