@@ -30,14 +30,13 @@ function fmtArrow(code, ratio) {
     return "➖0.00%";
 }
 
-// 1. 국내외 핵심 4대 지수 (초고속 조회용: 코스피, 코스닥, 나스닥, S&P500)
+// 1. 핵심 주요 지수 (초고속 조회용: 나스닥, S&P500, 필라반도체 중심)
 function getQuickMarketSummary() {
     var lines = [];
     var t = [
-        ["🇰🇷 코스피", "https://m.stock.naver.com/api/index/KOSPI/basic"],
-        ["🇰🇷 코스닥", "https://m.stock.naver.com/api/index/KOSDAQ/basic"],
         ["🇺🇸 나스닥", "https://api.stock.naver.com/index/.IXIC/basic"],
-        ["🇺🇸 S&P500", "https://api.stock.naver.com/index/.INX/basic"]
+        ["🇺🇸 S&P500", "https://api.stock.naver.com/index/.INX/basic"],
+        ["💾 필라반도체", "https://api.stock.naver.com/index/.SOX/basic"]
     ];
     for (var i = 0; i < t.length; i++) {
         try {
@@ -224,14 +223,16 @@ function getStockInfo(query, compact) {
             }
         } catch (ee) {}
 
-        // 종목별 실시간 속보 뉴스 2건 추가
+        // 미국 주식만 실시간 속보 뉴스 2건 추가 (국장 뉴스 완전 제외)
         var newsLines = [];
-        try {
-            var nList = fetchJson("https://api.stock.naver.com/news/stock/" + codeKey + "?page=1&pageSize=2");
-            for (var ni = 0; ni < nList.length; ni++) {
-                newsLines.push("  └ 📰 " + nList[ni].tit);
-            }
-        } catch (ne) {}
+        if (!isKR) {
+            try {
+                var nList = fetchJson("https://api.stock.naver.com/news/stock/" + codeKey + "?page=1&pageSize=2");
+                for (var ni = 0; ni < nList.length; ni++) {
+                    newsLines.push("  └ 📰 " + nList[ni].tit);
+                }
+            } catch (ne) {}
+        }
 
         var res = "📊 [" + flag + " " + name + " (" + it.code + ")]\n"
             + "• 정규장: " + pStr + " (" + fmtArrow(c, d.fluctuationsRatio) + " / 전일비 " + (d.compareToPreviousClosePrice || "0") + ")\n"
@@ -318,29 +319,23 @@ function askGemini(promptText) {
     return "⚠️ AI 응답 지연(" + lastCode + ")";
 }
 
-// 10. 국내 주요 증시 속보 + 해외 주요 뉴스 통합 수집
+// 10. 미국·해외 주요 증시 뉴스 수집 (국장 뉴스 완전 제외)
 function getLatestNews(cnt) {
     try {
-        var krList = [];
         var usList = [];
-        try { krList = fetchJson("https://api.stock.naver.com/news/mainnews?page=1&pageSize=3"); } catch (e) {}
-        try { usList = fetchJson("https://api.stock.naver.com/news/worldNews?page=1&pageSize=3"); } catch (e) {}
+        try { usList = fetchJson("https://api.stock.naver.com/news/worldNews?page=1&pageSize=" + (cnt || 5)); } catch (e) {}
 
         var h = [], raw = [];
-        for (var i = 0; i < krList.length; i++) {
-            h.push("🇰🇷 " + krList[i].tit);
-            raw.push("- [국내] " + krList[i].tit);
-        }
         for (var j = 0; j < usList.length; j++) {
             h.push("🇺🇸 " + usList[j].tit);
-            raw.push("- [해외] " + usList[j].tit);
+            raw.push("- " + usList[j].tit);
         }
 
         if (GEMINI_API_KEY && raw.length > 0) {
-            var ai = askGemini("다음 국내외 최신 증시 뉴스를 핵심만 2~3줄로 요약해줘(카톡 브리핑 스타일, 이모지 활용):\n" + raw.join("\n"));
-            if (ai && ai.indexOf("⚠️") === -1) return "🤖 [AI 핵심 시황 요약]\n" + ai + "\n\n📰 [실시간 주요 헤드라인]\n" + h.slice(0, 5).join("\n");
+            var ai = askGemini("다음 미국·글로벌 최신 증시 뉴스를 핵심만 2~3줄로 요약해줘(카톡 브리핑 스타일, 마크다운 별표 없이 이모지 활용):\n" + raw.join("\n"));
+            if (ai && ai.indexOf("⚠️") === -1) return "🤖 [AI 글로벌 시황 요약]\n" + ai + "\n\n📰 [실시간 미장 주요 헤드라인]\n" + h.slice(0, 5).join("\n");
         }
-        return "📰 [실시간 주요 헤드라인]\n" + h.join("\n");
+        return "📰 [실시간 미장 주요 헤드라인]\n" + h.join("\n");
     } catch (e) { return "📰 뉴스 조회 지연"; }
 }
 
@@ -379,16 +374,12 @@ function isDateTimeQuestion(q) {
     return hasDateWord && !isMarketRelatedQuestion(q);
 }
 
-// 시황 질문용 초고속 최신 뉴스 헤드라인 4건
+// 시황 질문용 초고속 미국·글로벌 뉴스 헤드라인 4건 (국장 뉴스 제외)
 function getQuickNewsLines() {
     var lines = [];
     try {
-        var kr = fetchJson("https://api.stock.naver.com/news/mainnews?page=1&pageSize=2");
-        for (var i = 0; i < kr.length; i++) lines.push("- [국내속보] " + kr[i].tit);
-    } catch (e) {}
-    try {
-        var us = fetchJson("https://api.stock.naver.com/news/worldNews?page=1&pageSize=2");
-        for (var j = 0; j < us.length; j++) lines.push("- [해외속보] " + us[j].tit);
+        var us = fetchJson("https://api.stock.naver.com/news/worldNews?page=1&pageSize=4");
+        for (var j = 0; j < us.length; j++) lines.push("- [미장속보] " + us[j].tit);
     } catch (e) {}
     return lines.join("\n");
 }
