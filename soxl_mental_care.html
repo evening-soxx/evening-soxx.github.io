@@ -1,0 +1,2421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SOXL 멘탈케어 요양소 — 레버리지 민족 3D 명예의 전당 (SOXL 100·200·300·400·500)</title>
+<meta name="description" content="어쩐지저녁의 SOXX — SOXL 100·200·300·400·500 액자가 걸린 3D SOXL 멘탈케어 요양소">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg-deep: #070d0b;
+    --gold: #eab85c;
+    --gold-light: #ffe39f;
+    --bull-green: #2ee59d;
+    --glass-dark: rgba(9, 17, 15, 0.84);
+    --glass-border: rgba(234, 184, 92, 0.34);
+    --text-cream: #f4f7f5;
+    --text-muted: #9cb0a8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body, html {
+    width: 100%; height: 100%; overflow: hidden;
+    background: var(--bg-deep);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-cream);
+  }
+
+  #canvas-container {
+    position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1;
+  }
+
+  #avatar-labels {
+    position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden;
+  }
+  .avatar-tag {
+    position: absolute; transform: translate(-50%, -100%);
+    background: rgba(8, 16, 14, 0.82); border: 1px solid rgba(234, 184, 92, 0.42);
+    color: #fff3d1; padding: 3px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+    backdrop-filter: blur(6px); transition: opacity 0.2s;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.45);
+  }
+  .avatar-tag.is-me {
+    border-color: rgba(46, 229, 157, 0.9);
+    background: rgba(11, 34, 26, 0.92);
+    color: #9effd6;
+  }
+  .avatar-bubble {
+    position: absolute; transform: translate(-50%, -100%);
+    background: rgba(234, 184, 92, 0.96); color: #0b1411;
+    padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 800;
+    white-space: nowrap; margin-top: -26px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+    animation: popBubble 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  }
+  @keyframes popBubble {
+    from { transform: translate(-50%, -80%) scale(0.7); opacity: 0; }
+    to { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+  }
+
+  /* 입장 게이트 (부트 오버레이) */
+  #boot-screen {
+    position: fixed; inset: 0; z-index: 200;
+    background: radial-gradient(circle at 50% 35%, #122820 0%, #070e0c 72%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #boot-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .boot-emblem {
+    width: 92px; height: 92px; border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 38px; margin-bottom: 18px;
+    background: radial-gradient(circle, rgba(46, 229, 157, 0.22), rgba(234, 184, 92, 0.08));
+    box-shadow: 0 0 42px rgba(46, 229, 157, 0.28), inset 0 0 20px rgba(234, 184, 92, 0.25);
+    animation: pulseGlow 2.8s infinite ease-in-out;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 32px rgba(46, 229, 157, 0.25); }
+    50% { transform: scale(1.05); box-shadow: 0 0 58px rgba(234, 184, 92, 0.55); }
+  }
+  .boot-sub {
+    color: var(--bull-green); font-size: 12px; letter-spacing: 3.5px;
+    text-transform: uppercase; margin-bottom: 8px; font-weight: 800;
+  }
+  .boot-title {
+    font-family: 'Noto Serif KR', serif; font-size: clamp(26px, 4vw, 38px);
+    font-weight: 900; color: #fff8ea; margin-bottom: 12px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .boot-desc {
+    max-width: 560px; color: var(--text-muted); font-size: 14px; line-height: 1.75;
+    margin-bottom: 22px;
+  }
+  .boot-frames-preview {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;
+  }
+  .boot-frame-pill {
+    padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 800;
+    background: rgba(234, 184, 92, 0.12); border: 1px solid rgba(234, 184, 92, 0.45);
+    color: var(--gold-light); letter-spacing: 0.5px;
+  }
+  .boot-nick-wrap {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(234, 184, 92, 0.35);
+    padding: 6px 14px; border-radius: 999px;
+  }
+  .boot-nick-wrap span { font-size: 12px; color: var(--gold); font-weight: 700; }
+  .boot-nick-input {
+    background: transparent; border: none; outline: none; color: #fff;
+    font-size: 14px; font-weight: 700; width: 170px; text-align: center;
+  }
+  .boot-enter-btn {
+    padding: 15px 40px; border-radius: 999px;
+    background: linear-gradient(135deg, #2ee59d 0%, #eab85c 100%);
+    color: #07120e; font-size: 16px; font-weight: 900; border: none;
+    cursor: pointer; letter-spacing: 0.5px;
+    box-shadow: 0 10px 30px rgba(46, 229, 157, 0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .boot-enter-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 14px 36px rgba(234, 184, 92, 0.55);
+  }
+
+  /* 상단 HUD 바 */
+  #top-bar {
+    position: fixed; top: 14px; left: 16px; right: 16px; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between;
+    pointer-events: none; gap: 10px; flex-wrap: wrap;
+  }
+  .hud-group {
+    display: flex; align-items: center; gap: 8px; pointer-events: auto; flex-wrap: wrap;
+  }
+  .glass-pill {
+    background: var(--glass-dark);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    padding: 8px 15px; border-radius: 999px;
+    color: var(--text-cream); font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.42);
+    transition: all 0.22s ease;
+  }
+  button.glass-pill, a.glass-pill { cursor: pointer; text-decoration: none; }
+  button.glass-pill:hover, a.glass-pill:hover {
+    border-color: var(--gold); background: rgba(22, 38, 32, 0.92);
+    transform: translateY(-1px);
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #2ee59d; box-shadow: 0 0 10px #2ee59d;
+    animation: blinkDot 2s infinite;
+  }
+  @keyframes blinkDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* 상단 SOXL 100~500 액자 원터치 이동 스트립 */
+  #frame-quick-strip {
+    position: fixed; top: 62px; left: 50%; transform: translateX(-50%);
+    z-index: 19; display: flex; align-items: center; gap: 6px;
+    background: rgba(7, 15, 13, 0.82); border: 1px solid rgba(234, 184, 92, 0.35);
+    padding: 5px 10px; border-radius: 999px; backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    max-width: 96vw; overflow-x: auto;
+  }
+  .fq-label {
+    font-size: 11px; color: var(--gold); font-weight: 800; padding: 0 6px; white-space: nowrap;
+  }
+  .fq-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.28);
+    color: #e9f2ee; padding: 5px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
+    transition: all 0.18s;
+  }
+  .fq-btn:hover, .fq-btn.active {
+    background: linear-gradient(135deg, #2ee59d, #eab85c);
+    color: #07120e; border-color: transparent;
+    box-shadow: 0 0 14px rgba(46, 229, 157, 0.4);
+  }
+
+  /* 조작 힌트 배너 */
+  #walk-hint {
+    position: fixed; top: 110px; left: 50%; transform: translateX(-50%);
+    z-index: 15; pointer-events: none;
+    background: rgba(8, 16, 14, 0.78); border: 1px solid rgba(234, 184, 92, 0.3);
+    padding: 6px 16px; border-radius: 999px; font-size: 12px; color: #d8e6df;
+    backdrop-filter: blur(8px); transition: opacity 0.4s; white-space: nowrap;
+  }
+
+  /* 좌측 하단 야수의 심장 스크롤 휠 (만트라 각인) */
+  #mantra-wheel-box {
+    position: fixed; left: 20px; bottom: 92px; z-index: 20;
+    width: min(390px, calc(100vw - 40px));
+    background: var(--glass-dark); border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 18px 20px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.55);
+    transition: all 0.35s ease;
+  }
+  #mantra-wheel-box.minimized {
+    width: 240px; padding: 10px 14px; cursor: pointer;
+  }
+  #mantra-wheel-box.minimized .vw-body { display: none; }
+  .vw-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  #mantra-wheel-box.minimized .vw-header { margin-bottom: 0; }
+  .vw-badge {
+    font-size: 11px; font-weight: 800; color: var(--bull-green);
+    letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;
+  }
+  .vw-ref { font-size: 11px; color: var(--gold); font-weight: 700; }
+  .vw-text {
+    font-family: 'Noto Serif KR', serif; font-size: 14.5px; line-height: 1.72;
+    color: rgba(255, 255, 255, 0.24); margin: 10px 0 12px;
+    min-height: 68px; word-break: keep-all;
+  }
+  .vw-char.lit {
+    color: #fff6dc;
+    text-shadow: 0 0 10px rgba(46, 229, 157, 0.65);
+  }
+  .vw-progress-track {
+    width: 100%; height: 5px; background: rgba(255,255,255,0.1);
+    border-radius: 99px; overflow: hidden; margin-bottom: 8px;
+  }
+  .vw-progress-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #2ee59d, #eab85c);
+    transition: width 0.12s ease;
+  }
+  .vw-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--text-muted);
+  }
+  .vw-next-btn {
+    background: rgba(234, 184, 92, 0.16); border: 1px solid rgba(234, 184, 92, 0.4);
+    color: var(--gold-light); padding: 3px 10px; border-radius: 99px;
+    font-size: 11px; cursor: pointer; font-weight: 700;
+  }
+
+  /* 우측 실시간 주주 응원/멘탈케어 보드 */
+  #cheer-feed {
+    position: fixed; right: 20px; top: 112px; z-index: 18;
+    width: 280px; max-height: 310px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 8px;
+    pointer-events: auto;
+  }
+  #cheer-feed::-webkit-scrollbar { width: 4px; }
+  #cheer-feed::-webkit-scrollbar-thumb { background: rgba(234, 184, 92, 0.35); border-radius: 99px; }
+  .cheer-card {
+    background: rgba(9, 18, 15, 0.82);
+    border: 1px solid rgba(234, 184, 92, 0.28);
+    border-left: 3px solid var(--bull-green);
+    border-radius: 12px; padding: 10px 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.38);
+    animation: slideInRight 0.35s ease;
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .cheer-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 4px;
+  }
+  .cheer-card-body {
+    font-size: 12.5px; line-height: 1.5; color: #eef5f1; word-break: keep-all;
+    margin-bottom: 6px;
+  }
+  .cheer-like-btn {
+    background: rgba(46, 229, 157, 0.14); border: 1px solid rgba(46, 229, 157, 0.38);
+    color: #8affcf; border-radius: 99px; padding: 2px 9px;
+    font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  }
+  .cheer-like-btn:hover { background: rgba(46, 229, 157, 0.28); transform: scale(1.04); }
+
+  /* 하단 5대 인터랙션 독 (Dock) */
+  #bottom-dock {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    z-index: 30; display: flex; align-items: center; gap: 8px;
+    background: rgba(8, 16, 14, 0.9);
+    border: 1px solid rgba(234, 184, 92, 0.42);
+    padding: 8px 12px; border-radius: 999px;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.65);
+    max-width: 96vw; overflow-x: auto;
+  }
+  .dock-btn {
+    background: transparent; border: 1px solid transparent;
+    color: var(--text-cream); padding: 9px 15px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  .dock-btn:hover {
+    background: rgba(234, 184, 92, 0.15); border-color: rgba(234, 184, 92, 0.35);
+  }
+  .dock-btn.active {
+    background: linear-gradient(135deg, #2ee59d 0%, #eab85c 100%);
+    color: #07120e; font-weight: 900;
+    box-shadow: 0 4px 16px rgba(46, 229, 157, 0.4);
+  }
+  .key-badge {
+    font-size: 10px; padding: 1px 6px; border-radius: 6px;
+    background: rgba(255,255,255,0.14); color: var(--gold-light);
+  }
+  .dock-btn.active .key-badge {
+    background: rgba(0,0,0,0.22); color: #07120e;
+  }
+
+  /* 팝업 모달 공통 */
+  .modal-card {
+    position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%) translateY(20px);
+    z-index: 40; width: min(500px, calc(100vw - 28px));
+    background: rgba(9, 18, 15, 0.95);
+    border: 1px solid rgba(234, 184, 92, 0.5);
+    border-radius: 22px; padding: 22px;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.75);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .modal-card.open {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(234, 184, 92, 0.2);
+  }
+  .modal-title {
+    font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 800; color: var(--gold-light);
+  }
+  .modal-close {
+    background: rgba(255,255,255,0.08); border: none; color: #fff;
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px;
+  }
+
+  /* 불꽃 점화 / 주주 한줄 응원 입력 */
+  .candle-input {
+    width: 100%; height: 82px; border-radius: 12px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.35);
+    color: #fff; padding: 12px; font-size: 13.5px; resize: none; outline: none;
+    margin-bottom: 12px; font-family: inherit;
+  }
+  .candle-submit {
+    width: 100%; padding: 12px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, #2ee59d, #eab85c);
+    color: #07120e; font-weight: 900; font-size: 14px; cursor: pointer;
+  }
+
+  /* 액자 도슨트 모달 */
+  .docent-preview-wrap {
+    position: relative; width: 100%; height: 210px; border-radius: 14px;
+    overflow: hidden; border: 1px solid rgba(234, 184, 92, 0.45);
+    margin-bottom: 12px; background: #050a08; cursor: zoom-in;
+  }
+  .docent-preview-wrap img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .docent-zoom-badge {
+    position: absolute; right: 10px; bottom: 10px;
+    background: rgba(7, 14, 12, 0.86); border: 1px solid var(--gold);
+    color: var(--gold-light); font-size: 11px; font-weight: 800;
+    padding: 5px 11px; border-radius: 99px;
+  }
+  .docent-tabs {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px;
+  }
+  .docent-tab {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(234, 184, 92, 0.25);
+    color: #d6e4de; padding: 5px 11px; border-radius: 99px;
+    font-size: 11.5px; font-weight: 800; cursor: pointer; white-space: nowrap;
+  }
+  .docent-tab.active {
+    background: var(--gold); color: #09120f; border-color: var(--gold);
+  }
+  .docent-desc {
+    font-size: 13px; line-height: 1.68; color: #e2ece7; margin-bottom: 10px; word-break: keep-all;
+  }
+  .docent-quote {
+    font-family: 'Noto Serif KR', serif; font-size: 12.5px; color: var(--bull-green);
+    background: rgba(46, 229, 157, 0.08); border-left: 3px solid var(--bull-green);
+    padding: 8px 12px; border-radius: 6px; margin-bottom: 12px;
+  }
+  .docent-actions {
+    display: flex; gap: 8px;
+  }
+  .docent-btn {
+    flex: 1; padding: 10px; border-radius: 10px; font-size: 12.5px; font-weight: 800;
+    cursor: pointer; border: 1px solid rgba(234, 184, 92, 0.45);
+    background: rgba(234, 184, 92, 0.15); color: var(--gold-light);
+  }
+  .docent-btn.primary {
+    background: linear-gradient(135deg, #2ee59d, #eab85c);
+    color: #07120e; border: none;
+  }
+
+  /* 레버리지 민족 음악 & 앰비언트 믹서 */
+  .track-list {
+    display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px;
+  }
+  .track-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 13px; border-radius: 12px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(234, 184, 92, 0.24);
+    color: #eef5f1; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    text-align: left; transition: all 0.18s;
+  }
+  .track-btn:hover { border-color: var(--gold); background: rgba(234, 184, 92, 0.12); }
+  .track-btn.playing {
+    border-color: var(--bull-green);
+    background: rgba(46, 229, 157, 0.16);
+    color: #9effd6;
+  }
+  .mixer-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; font-size: 12.5px; color: #d5e3dd;
+  }
+  .mixer-row input[type="range"] {
+    width: 58%; accent-color: var(--bull-green); cursor: pointer;
+  }
+  .file-upload-label {
+    display: block; text-align: center; padding: 10px; border-radius: 10px;
+    background: rgba(234, 184, 92, 0.14); border: 1px dashed rgba(234, 184, 92, 0.55);
+    color: var(--gold-light); font-size: 12px; font-weight: 800; cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* 풀스크린 초고해상도 액자 줌 라이트박스 */
+  #zoom-lightbox {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(4, 9, 8, 0.95);
+    display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #zoom-lightbox.open { opacity: 1; visibility: visible; pointer-events: auto; }
+  .zl-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px; border-bottom: 1px solid rgba(234, 184, 92, 0.25);
+    background: rgba(7, 14, 12, 0.9);
+  }
+  .zl-title { font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 800; color: var(--gold-light); }
+  .zl-controls { display: flex; align-items: center; gap: 8px; }
+  .zl-btn {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(234, 184, 92, 0.35);
+    color: #fff; padding: 6px 13px; border-radius: 99px; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .zl-viewport {
+    flex: 1; overflow: hidden; position: relative;
+    display: flex; align-items: center; justify-content: center; cursor: grab;
+  }
+  .zl-viewport:active { cursor: grabbing; }
+  #zl-image {
+    max-width: 88vw; max-height: 80vh; border-radius: 10px;
+    border: 2px solid var(--gold);
+    box-shadow: 0 20px 70px rgba(0,0,0,0.85);
+    transition: transform 0.08s ease-out;
+  }
+
+  /* 토스트 알림 */
+  #toast-msg {
+    position: fixed; top: 148px; left: 50%; transform: translateX(-50%) translateY(-10px);
+    z-index: 150; background: rgba(11, 28, 22, 0.94);
+    border: 1px solid var(--bull-green); color: #b5ffe0;
+    padding: 9px 20px; border-radius: 999px; font-size: 13px; font-weight: 800;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+    opacity: 0; visibility: hidden; transition: all 0.25s; pointer-events: none;
+  }
+  #toast-msg.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 768px) {
+    #cheer-feed { display: none; }
+    #mantra-wheel-box { left: 12px; right: 12px; width: auto; bottom: 84px; padding: 13px 15px; }
+    .dock-btn span.label-txt { display: none; }
+    .dock-btn { padding: 10px 14px; font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 입장 부트 스크린 -->
+<div id="boot-screen">
+  <div class="boot-emblem">🏥</div>
+  <div class="boot-sub">DIREXION DAILY SEMICONDUCTOR BULL 3X · MENTAL CARE SANATORIUM</div>
+  <h1 class="boot-title">SOXL 멘탈케어 요양소</h1>
+  <p class="boot-desc">
+    벽면을 가득 채운 <strong>SOXL 100 · 200 · 300 · 400 · 500</strong> 기념 액자 앞 벤치에 앉아
+    컴퓨터에 보관된 <strong>「레버리지 민족 (Midnight Bull Run)」</strong> 사운드와 함께 흔들리는 멘탈을 요양하세요.
+  </p>
+  <div class="boot-frames-preview">
+    <span class="boot-frame-pill">🖼️ SOXL 100</span>
+    <span class="boot-frame-pill">🖼️ SOXL 200</span>
+    <span class="boot-frame-pill">🖼️ SOXL 300</span>
+    <span class="boot-frame-pill">🖼️ SOXL 400</span>
+    <span class="boot-frame-pill">👑 SOXL 500</span>
+  </div>
+  <div class="boot-nick-wrap">
+    <span>주주 닉네임</span>
+    <input type="text" id="boot-nick-input" class="boot-nick-input" maxlength="16" value="레버리지 민족" />
+  </div>
+  <button type="button" class="boot-enter-btn" id="boot-enter-btn">
+    🏥 SOXL 멘탈케어 요양소 입장하기 (레버리지 민족 음악 재생)
+  </button>
+</div>
+
+<!-- 3D 캔버스 & 아바타 이름표 레이어 -->
+<div id="canvas-container"></div>
+<div id="avatar-labels"></div>
+
+<!-- 상단 HUD 바 -->
+<div id="top-bar">
+  <div class="hud-group">
+    <a href="./index.html" class="glass-pill" title="어쩐지저녁의 SOXX 시황 데스크로 돌아가기">
+      <span>📈</span>
+      <span>어쩐지저녁의 SOXX 홈</span>
+    </a>
+    <div class="glass-pill">
+      <span class="status-dot"></span>
+      <span id="online-count-txt">🏥 SOXL 멘탈케어 요양소 · 실시간 주주 5명 요양 중</span>
+    </div>
+    <button type="button" class="glass-pill" id="btn-change-nick" title="내 주주 닉네임 변경">
+      <span>🪪</span>
+      <span id="my-nick-label">레버리지 민족</span>
+    </button>
+    <button type="button" class="glass-pill" id="btn-share-safe-url" onclick="copySafeShareUrl()" title="개인 경로 노출 없는 공식 웹 주소 복사" style="border-color:rgba(46,229,157,0.65);color:#9effd6;">
+      <span>🔗</span>
+      <span>공유링크 복사</span>
+    </button>
+  </div>
+
+  <div class="hud-group">
+    <button type="button" class="glass-pill" id="btn-now-playing" onclick="togglePanel('sound')">
+      <span>🎵</span>
+      <span id="now-playing-label">레버리지 민족 (Midnight Bull Run)</span>
+    </button>
+    <button type="button" class="glass-pill" id="btn-light-mode" title="요양소 조명 분위기 전환">
+      <span id="light-mode-label">🌙 애프터장 골든 요양소</span>
+    </button>
+    <button type="button" class="glass-pill" id="btn-toggle-npc" title="동반 요양 주주(NPC) 표시 전환">
+      <span id="npc-toggle-label">👥 동반 주주 ON</span>
+    </button>
+  </div>
+</div>
+
+<!-- 상단 SOXL 100 ~ 500 원터치 액자 이동 바 -->
+<div id="frame-quick-strip">
+  <span class="fq-label">🖼️ 벽면 액자 바로가기</span>
+  <button type="button" class="fq-btn" onclick="walkToFrame(0)">SOXL 100</button>
+  <button type="button" class="fq-btn" onclick="walkToFrame(1)">SOXL 200</button>
+  <button type="button" class="fq-btn" onclick="walkToFrame(2)">SOXL 300</button>
+  <button type="button" class="fq-btn" onclick="walkToFrame(3)">SOXL 400</button>
+  <button type="button" class="fq-btn" onclick="walkToFrame(4)">👑 SOXL 500</button>
+  <button type="button" class="fq-btn" onclick="walkToFrame(5)">주주 클럽</button>
+  <button type="button" class="fq-btn" onclick="walkToFrame(6)">100→500 로드맵</button>
+</div>
+
+<!-- 이동 안내 힌트 -->
+<div id="walk-hint">
+  💡 바닥 클릭 또는 <strong>WASD / 방향키</strong>로 걸어 다니고, 벽면의 <strong>SOXL 100 ~ 500 액자</strong>를 클릭하면 확대 감상합니다.
+</div>
+
+<!-- 토스트 알림 -->
+<div id="toast-msg">알림</div>
+
+<!-- 좌측 하단: 야수의 심장 마인드셋 스크롤 휠 -->
+<div id="mantra-wheel-box">
+  <div class="vw-header" onclick="toggleWheelMinimize()" style="cursor:pointer;">
+    <span class="vw-badge">💎 야수의 심장 멘탈 코어 (마우스 휠을 굴려보세요)</span>
+    <span class="vw-ref" id="vw-ref">SOXL 마인드셋 제1장</span>
+  </div>
+  <div class="vw-body">
+    <div class="vw-text" id="vw-text"></div>
+    <div class="vw-progress-track">
+      <div class="vw-progress-bar" id="vw-bar"></div>
+    </div>
+    <div class="vw-footer">
+      <span id="vw-count">멘탈 회복 지수 0% · 완료 0회</span>
+      <button type="button" class="vw-next-btn" onclick="nextMantra(event)">다음 격언 ↻</button>
+    </div>
+  </div>
+</div>
+
+<!-- 우측 상단: 주주 멘탈케어 & 불꽃 기원 피드 -->
+<div id="cheer-feed"></div>
+
+<!-- 모달 1: 불꽃 켜기 & 주주 응원 남기기 -->
+<div class="modal-card" id="modal-candle">
+  <div class="modal-head">
+    <span class="modal-title">🕯️ SOXL 불마켓 기원 불꽃 켜기</span>
+    <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
+  </div>
+  <p style="font-size:12.5px; color:#b8ccc3; margin-bottom:10px; line-height:1.5;">
+    중앙 황금 웨이퍼 분수대에 불꽃을 밝히고, 함께 버티는 레버리지 민족 주주들과 목표가 응원 메시지를 나눕니다.
+  </p>
+  <textarea id="candle-input" class="candle-input" placeholder="예: 흔들리지 않고 SOXL 500 액자 앞까지 끝까지 함께 갑니다! 레버리지 민족 화이팅!"></textarea>
+  <button type="button" class="candle-submit" onclick="submitCandleNote()">🔥 황금 불꽃 점화 & 메시지 게시</button>
+</div>
+
+<!-- 모달 2: SOXL 100~500 액자 도슨트 & 고해상도 줌 -->
+<div class="modal-card" id="modal-docent">
+  <div class="modal-head">
+    <span class="modal-title" id="docent-title">🖼️ SOXL 100 기념 액자</span>
+    <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
+  </div>
+  <div class="docent-tabs" id="docent-tabs"></div>
+  <div class="docent-preview-wrap" onclick="openZoomLightbox()">
+    <img id="docent-img" src="./assets/frames/soxl_100.png" alt="SOXL Frame Preview" />
+    <span class="docent-zoom-badge">🔍 클릭하여 초고해상도 전체화면 확대</span>
+  </div>
+  <p class="docent-desc" id="docent-desc"></p>
+  <div class="docent-quote" id="docent-quote"></div>
+  <div class="docent-actions">
+    <button type="button" class="docent-btn" onclick="walkToCurrentDocentFrame()">🚶 이 액자 앞 벤치로 이동</button>
+    <button type="button" class="docent-btn primary" onclick="openZoomLightbox()">🔍 전체화면 초고화질 감상</button>
+  </div>
+</div>
+
+<!-- 모달 3: 레버리지 민족 음악 & 치유 사운드 믹서 -->
+<div class="modal-card" id="modal-sound">
+  <div class="modal-head">
+    <span class="modal-title">🎵 레버리지 민족 · 멘탈케어 사운드 믹서</span>
+    <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
+  </div>
+  <div class="track-list" id="track-list">
+    <button type="button" class="track-btn playing" data-track="0" onclick="selectBgmTrack(0)">
+      <span>🔥 1. 레버리지 민족 (Midnight Bull Run · 원곡 신스웨이브)</span>
+      <span>PLAY</span>
+    </button>
+    <button type="button" class="track-btn" data-track="1" onclick="selectBgmTrack(1)">
+      <span>🎙️ 2. 레버리지 민족 찬가 (SOXL 100~500 보컬 에디션)</span>
+      <span>PLAY</span>
+    </button>
+    <button type="button" class="track-btn" data-track="2" onclick="selectBgmTrack(2)">
+      <span>🌙 3. 나스닥 애프터장 로파이 나이트 드라이브 (Lo-Fi Synth)</span>
+      <span>PLAY</span>
+    </button>
+    <button type="button" class="track-btn" data-track="3" onclick="selectBgmTrack(3)">
+      <span>⚡ 4. 실리콘밸리 3X 퀀트 펄스 (Deep Tech Electronic)</span>
+      <span>PLAY</span>
+    </button>
+  </div>
+
+  <div class="mixer-row">
+    <span>🎵 배경음악 (BGM) 볼륨</span>
+    <input type="range" id="vol-bgm" min="0" max="100" value="78" oninput="updateVolumes()" />
+  </div>
+  <div class="mixer-row">
+    <span>💧 중앙 웨이퍼 분수 물소리</span>
+    <input type="range" id="vol-water" min="0" max="100" value="32" oninput="updateVolumes()" />
+  </div>
+  <div class="mixer-row">
+    <span>✨ 3X 황금 공명 패드음</span>
+    <input type="range" id="vol-pad" min="0" max="100" value="25" oninput="updateVolumes()" />
+  </div>
+
+  <label class="file-upload-label">
+    📂 내 컴퓨터에서 다른 MP3/오디오 파일 직접 불러오기
+    <input type="file" id="custom-audio-input" accept="audio/*" style="display:none;" onchange="loadCustomAudioFile(event)" />
+  </label>
+</div>
+
+<!-- 풀스크린 초고화질 액자 줌 라이트박스 -->
+<div id="zoom-lightbox">
+  <div class="zl-top">
+    <div class="zl-title" id="zl-title">SOXL 100</div>
+    <div class="zl-controls">
+      <button type="button" class="zl-btn" onclick="adjustZoom(-0.25)">➖ 축소</button>
+      <span id="zl-scale-txt" style="font-size:12px; font-weight:800; color:var(--gold); min-width:52px; text-align:center;">100%</span>
+      <button type="button" class="zl-btn" onclick="adjustZoom(0.25)">➕ 확대</button>
+      <button type="button" class="zl-btn" onclick="resetZoom()">1:1 초기화</button>
+      <a id="zl-download" class="zl-btn" href="./assets/frames/soxl_100.png" download style="text-decoration:none; background:rgba(46,229,157,0.2); border-color:var(--bull-green);">💾 액자 이미지 저장</a>
+      <button type="button" class="zl-btn" onclick="closeZoomLightbox()" style="background:rgba(255,90,90,0.25);">✕ 닫기</button>
+    </div>
+  </div>
+  <div class="zl-viewport" id="zl-viewport">
+    <img id="zl-image" src="./assets/frames/soxl_100.png" alt="SOXL High-Res Artwork" />
+  </div>
+</div>
+
+<!-- 하단 5대 인터랙션 독 -->
+<div id="bottom-dock">
+  <button type="button" class="dock-btn" id="dock-sit" onclick="triggerSitAction()">
+    <span>🪑</span><span class="label-txt">벤치 착석</span><span class="key-badge">1</span>
+  </button>
+  <button type="button" class="dock-btn" id="dock-wheel" onclick="triggerWheelFocus()">
+    <span>💎</span><span class="label-txt">야수의 심장 휠</span><span class="key-badge">2</span>
+  </button>
+  <button type="button" class="dock-btn" id="dock-candle" onclick="togglePanel('candle')">
+    <span>🕯️</span><span class="label-txt">불꽃 기원</span><span class="key-badge">3</span>
+  </button>
+  <button type="button" class="dock-btn" id="dock-docent" onclick="togglePanel('docent')">
+    <span>🖼️</span><span class="label-txt">SOXL 100~500 액자</span><span class="key-badge">4</span>
+  </button>
+  <button type="button" class="dock-btn" id="dock-sound" onclick="togglePanel('sound')">
+    <span>🎵</span><span class="label-txt">레버리지 민족 음악</span><span class="key-badge">5</span>
+  </button>
+</div>
+
+<!-- Three.js & MQTT 라이브러리 (로컬 독립 에셋 + CDN 폴백) -->
+<script src="./assets/js/three.min.js" onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';document.head.appendChild(s);"></script>
+<script src="./assets/js/mqtt.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/mqtt@5.3.4/dist/mqtt.min.js';document.head.appendChild(s);"></script>
+
+<script>
+// ============================================================================
+// 1. SOXL 100 · 200 · 300 · 400 · 500 벽면 액자 데이터 및 마인드셋 격언
+// ============================================================================
+const SOXL_FRAMES = [
+  {
+    id: 0,
+    code: 'SOXL 100',
+    price: '$100',
+    badge: 'STAGE I · THE AWAKENING',
+    title: 'SOXL 100 — 백불의 귀환 · 의심을 확신으로 바꾼 첫 성벽',
+    subtitle: '변동성의 안개를 뚫고 마침내 세 자릿수($100) 고지를 탈환한 레버리지 민족의 첫 번째 기념비',
+    quote: '“모두가 역배열과 상장폐지를 말할 때, 분할매수로 씨앗을 심은 자들이 맞이하는 첫 번째 봄”',
+    img: './assets/frames/soxl_100.png',
+    pos: { x: -14.42, y: 4.9, z: -4.2 },
+    rotY: Math.PI / 2,
+    size: { w: 6.2, h: 4.1 },
+    benchPos: { x: -10.2, z: -4.2, rotY: Math.PI / 2 },
+    accent: '#38d69a',
+    bgTop: '#0a1c17', bgBot: '#050d0b',
+    candles: [22, 18, 25, 31, 28, 39, 46, 42, 58, 67, 74, 88, 100]
+  },
+  {
+    id: 1,
+    code: 'SOXL 200',
+    price: '$200',
+    badge: 'STAGE II · THE BREAKOUT',
+    title: 'SOXL 200 — 이백불 돌파 · 파도를 넘어선 야수의 심장',
+    subtitle: '수십 번의 흔들기와 조정장을 견뎌낸 진정한 장기 보유자만이 마주하는 대세 상승장',
+    quote: '“단기 노이즈에 일희일비하지 마라. AI 반도체의 거대한 물결은 이미 200불 너머를 향하고 있다”',
+    img: './assets/frames/soxl_200.png',
+    pos: { x: -8.6, y: 4.9, z: -14.42 },
+    rotY: 0,
+    size: { w: 6.0, h: 4.0 },
+    benchPos: { x: -8.6, z: -10.2, rotY: 0 },
+    accent: '#48bcff',
+    bgTop: '#0c1826', bgBot: '#060b14',
+    candles: [60, 75, 68, 92, 105, 98, 122, 138, 130, 156, 174, 186, 200]
+  },
+  {
+    id: 2,
+    code: 'SOXL 300',
+    price: '$300',
+    badge: 'STAGE III · TRIPLE CROWN',
+    title: 'SOXL 300 — 삼백불 등정 · 3배 레버리지 양의 복리가 만개하다',
+    subtitle: '일일 복리 효과(Daily Compounding)가 연속 상승 추세와 결합하여 계좌의 차원을 바꾸는 황금 구간',
+    quote: '“하락장에서의 고통이 3배였다면, 슈퍼사이클 본궤도에서의 보상 또한 3배의 복리로 돌아온다”',
+    img: './assets/frames/soxl_300.png',
+    pos: { x: 0.0, y: 5.05, z: -14.42 },
+    rotY: 0,
+    size: { w: 6.6, h: 4.3 },
+    benchPos: { x: 0.0, z: -10.2, rotY: 0 },
+    accent: '#ba84ff',
+    bgTop: '#1a142a', bgBot: '#090612',
+    candles: [120, 140, 155, 148, 175, 198, 212, 205, 236, 258, 272, 288, 300]
+  },
+  {
+    id: 3,
+    code: 'SOXL 400',
+    price: '$400',
+    badge: 'STAGE IV · BEYOND GRAVITY',
+    title: 'SOXL 400 — 사백불 신세계 · 글로벌 AI 인프라 패권의 정점',
+    subtitle: '데이터센터, HBM, 자율주행, 로보틱스까지 실리콘 제국이 완성되는 초격차의 영역',
+    quote: '“공포에 던진 자들은 차트 아래에서 우러러보고, 원칙을 지킨 레버리지 민족은 400불의 능선을 걷는다”',
+    img: './assets/frames/soxl_400.png',
+    pos: { x: 8.6, y: 4.9, z: -14.42 },
+    rotY: 0,
+    size: { w: 6.0, h: 4.0 },
+    benchPos: { x: 8.6, z: -10.2, rotY: 0 },
+    accent: '#ffa448',
+    bgTop: '#24160e', bgBot: '#0f0906',
+    candles: [190, 215, 240, 232, 265, 290, 310, 302, 335, 358, 375, 390, 400]
+  },
+  {
+    id: 4,
+    code: 'SOXL 500',
+    price: '$500',
+    badge: 'STAGE V · LEGENDS OF LEVERAGE',
+    title: 'SOXL 500 — 오백불 신화 · 레버리지 민족 명예의 전당',
+    subtitle: '끝까지 살아남은 자가 가장 강한 자다 — SOXL $500 시대를 열어젖힌 불멸의 주주 헌정 기념비',
+    quote: '“흔들리는 날마다 이 액자 앞에 서라. 우리의 목적지는 언제나 SOXL 500, 그 찬란한 정상이다”',
+    img: './assets/frames/soxl_500.png',
+    pos: { x: 14.42, y: 5.05, z: -4.2 },
+    rotY: -Math.PI / 2,
+    size: { w: 6.6, h: 4.3 },
+    benchPos: { x: 10.2, z: -4.2, rotY: -Math.PI / 2 },
+    accent: '#ffd75a',
+    bgTop: '#281d08', bgBot: '#0e0a04',
+    candles: [250, 280, 310, 335, 360, 390, 415, 440, 460, 475, 490, 496, 500]
+  },
+  {
+    id: 5,
+    code: 'SOXL CLUB',
+    price: '3X WEALTH',
+    badge: 'SEMICONDUCTOR INVESTORS COMMUNITY',
+    title: 'SOXL 주주 클럽 — 반도체에 진심인 사람들, 여기 모여라!',
+    subtitle: '더 깊이, 더 넓게 함께! 좋은 정보가 더 큰 생각을 만듭니다.',
+    quote: '“혼자 버티면 외로운 변동성이지만, 레버리지 민족이 함께 모이면 역사가 된다”',
+    img: './assets/frames/soxl_shareholder.png',
+    pos: { x: -14.42, y: 4.8, z: 5.6 },
+    rotY: Math.PI / 2,
+    size: { w: 5.4, h: 3.8 },
+    benchPos: { x: -10.2, z: 5.6, rotY: Math.PI / 2 },
+    accent: '#38bdf8',
+    bgTop: '#081828', bgBot: '#040a12',
+    candles: [40, 60, 85, 110, 150, 195, 240, 300, 360, 420, 500]
+  },
+  {
+    id: 6,
+    code: '100→500 MAP',
+    price: '$100~$500',
+    badge: 'THE LEVERAGE NATION MASTER ROADMAP',
+    title: '레버리지 민족 5대 이정표 마스터 로드맵 (SOXL 100 → 500)',
+    subtitle: '백불의 귀환부터 오백불 명예의 전당까지 5단계 슈퍼사이클 마스터피스',
+    quote: '“폭락장은 영원하지 않고, 반도체의 진보는 멈추지 않는다. 흔들릴 때마다 이 다섯 개의 액자를 올려다보라.”',
+    img: './assets/frames/soxl_roadmap.png',
+    pos: { x: 14.42, y: 4.8, z: 5.6 },
+    rotY: -Math.PI / 2,
+    size: { w: 5.8, h: 3.8 },
+    benchPos: { x: 10.2, z: 5.6, rotY: -Math.PI / 2 },
+    accent: '#eab85c',
+    bgTop: '#161f28', bgBot: '#080d12',
+    candles: [100, 150, 200, 250, 300, 350, 400, 450, 500]
+  }
+];
+
+const BGM_TRACKS = [
+  {
+    title: '레버리지 민족 (Midnight Bull Run · 신스웨이브)',
+    src: './assets/audio/leverage_nation_bull_run.mp3?v=2'
+  },
+  {
+    title: '레버리지 민족 찬가 (SOXL 100~500 보컬판)',
+    src: './assets/audio/leverage_nation_anthem.mp3?v=2'
+  },
+  {
+    title: '나스닥 애프터장 로파이 드라이브 (Lo-Fi Synth)',
+    src: './assets/audio/mental_care_lounge.mp3?v=2'
+  },
+  {
+    title: '실리콘밸리 3X 퀀트 펄스 (Deep Tech Beat)',
+    src: './assets/audio/wall_street_prestige.mp3?v=2'
+  }
+];
+
+const MENTAL_MANTRAS = [
+  {
+    ref: '레버리지 민족 제1장 · 야수의 심장',
+    text: '모두가 공포에 질려 투매할 때 분할로 씨앗을 심은 자만이 SOXL 100과 500의 찬란한 양봉을 거둔다.'
+  },
+  {
+    ref: '레버리지 민족 제2장 · 3배 복리의 법칙',
+    text: '조정장은 레버리지 민족의 인내심을 시험하는 관문일 뿐, AI 반도체 슈퍼사이클의 거대한 파도는 멈추지 않는다.'
+  },
+  {
+    ref: '레버리지 민족 제3장 · 명예의 전당',
+    text: '오늘의 흔들림에 계좌를 닫지 마라. 끝까지 살아남은 자가 벽면의 SOXL 500 액자 앞에서 마지막에 웃는다.'
+  },
+  {
+    ref: '레버리지 민족 제4장 · 멘탈케어 원칙',
+    text: '급등에 추격하지 않고 급락에 절망하지 않으며, 나의 원칙과 현금 비중으로 변동성을 내 편으로 만든다.'
+  }
+];
+
+const INITIAL_NOTES = [
+  { id: 'n1', author: '필라델피아 파수꾼', text: '벽면에 걸린 SOXL 100 200 300 400 500 액자 보니까 가슴이 웅장해집니다! 모두 성투하세요!', likes: 38, time: '방금 전' },
+  { id: 'n2', author: '서학개미 야수', text: '레버리지 민족 음악 들으면서 중앙 분수대 벤치에 앉아 있으니까 하락장 스트레스가 싹 녹네요 ㅎㅎ', likes: 29, time: '2분 전' },
+  { id: 'n3', author: 'SOXL 500 존버단', text: '흔들릴 때마다 SOXL 멘탈케어 요양소 와서 SOXL 500 액자 보며 멘탈 잡습니다. 끝까지 살아남읍시다!', likes: 54, time: '5분 전' },
+  { id: 'n4', author: '요양소 원장', text: 'SOXL 멘탈케어 요양소에 입소하신 주주분들을 환영합니다. 원하시는 액자를 클릭하면 크게 감상하실 수 있습니다.', likes: 42, time: '8분 전' }
+];
+
+// ============================================================================
+// 2. 전역 상태 변수
+// ============================================================================
+let myId = 'soxl_' + Math.random().toString(36).substring(2, 9);
+let myNick = localStorage.getItem('soxl_mc_nick') || '레버리지 민족';
+document.getElementById('boot-nick-input').value = myNick;
+document.getElementById('my-nick-label').textContent = myNick;
+
+let scene, camera, renderer, clock;
+let myAvatar = null;
+let myState = {
+  x: 0, z: 9.8, rotY: Math.PI,
+  targetX: 0, targetZ: 9.8,
+  sitting: false, benchIdx: -1,
+  bubble: '', bubbleUntil: 0
+};
+let camAngle = 0;
+let camPitch = 0.34;
+let camDist = 9.2;
+let isDragging = false, dragMoved = false, prevMouse = { x: 0, y: 0 };
+let keysPressed = {};
+
+let benches = [];
+let frameMeshes = [];
+let candleFlames = [];
+let litCandleCount = 5;
+let coreWaferMesh = null;
+let particleSystem = null;
+let targetRing = null;
+let ambientLight, mainSpot, hemiLight;
+let lightModeIdx = 0;
+
+let currentDocentIdx = 0;
+let currentMantraIdx = 0;
+let mantraCharIdx = 0;
+let mantraCompleteCount = parseInt(localStorage.getItem('soxl_mc_mantra_cnt') || '0', 10);
+
+let showNPCs = true;
+let npcs = [];
+let remotePeers = {};
+let mqttClient = null;
+let bcChannel = null;
+
+// 오디오 엔진
+let bgmAudio = new Audio();
+bgmAudio.loop = true;
+bgmAudio.volume = 0.78;
+let currentTrackIdx = 0;
+let audioCtx = null;
+let waterGain = null, padGain = null;
+
+// ============================================================================
+// 3. 고해상도 캔버스 텍스처 생성기 (file:// 프로토콜 CORS 100% 무결점 보장)
+// ============================================================================
+function createHighResFrameTexture(frameData) {
+  const c = document.createElement('canvas');
+  c.width = 1280;
+  c.height = 840;
+  const ctx = c.getContext('2d');
+
+  // 배경 그라디언트
+  const grad = ctx.createLinearGradient(0, 0, 0, c.height);
+  grad.addColorStop(0, frameData.bgTop);
+  grad.addColorStop(1, frameData.bgBot);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  // 웨이퍼 그리드 라인
+  ctx.strokeStyle = 'rgba(234, 184, 92, 0.08)';
+  ctx.lineWidth = 1;
+  for (let x = 60; x < c.width; x += 64) {
+    ctx.beginPath(); ctx.moveTo(x, 40); ctx.lineTo(x, c.height - 40); ctx.stroke();
+  }
+  for (let y = 60; y < c.height; y += 64) {
+    ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(c.width - 40, y); ctx.stroke();
+  }
+
+  // 우상향 캔들차트 렌더링
+  const candles = frameData.candles;
+  const cMin = Math.min(...candles) * 0.85;
+  const cMax = Math.max(...candles) * 1.05;
+  const x0 = 110, x1 = c.width - 110;
+  const y0 = 200, y1 = 590;
+  const stepX = (x1 - x0) / (candles.length - 1);
+
+  ctx.beginPath();
+  candles.forEach((val, idx) => {
+    const cx = x0 + idx * stepX;
+    const norm = (val - cMin) / (cMax - cMin);
+    const cy = y1 - norm * (y1 - y0);
+    if (idx === 0) ctx.moveTo(cx, cy);
+    else ctx.lineTo(cx, cy);
+  });
+  ctx.strokeStyle = 'rgba(234, 184, 92, 0.85)';
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  candles.forEach((val, idx) => {
+    const cx = x0 + idx * stepX;
+    const norm = (val - cMin) / (cMax - cMin);
+    const cy = y1 - norm * (y1 - y0);
+    const prev = idx > 0 ? candles[idx - 1] : val * 0.92;
+    const pNorm = (prev - cMin) / (cMax - cMin);
+    const py = y1 - pNorm * (y1 - y0);
+    const isUp = val >= prev;
+
+    ctx.strokeStyle = 'rgba(234, 184, 92, 0.7)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, Math.min(cy, py) - 16);
+    ctx.lineTo(cx, Math.max(cy, py) + 14);
+    ctx.stroke();
+
+    const topY = Math.min(cy, py) - (Math.abs(cy - py) < 12 ? 12 : 0);
+    const botY = Math.max(cy, py);
+    ctx.fillStyle = isUp ? frameData.accent : '#f05f5f';
+    ctx.fillRect(cx - 13, topY, 26, Math.max(12, botY - topY));
+  });
+
+  // 골드 외곽 프레임
+  ctx.strokeStyle = '#eab85c';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(22, 22, c.width - 44, c.height - 44);
+  ctx.strokeStyle = 'rgba(234, 184, 92, 0.45)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(36, 36, c.width - 72, c.height - 72);
+
+  // 상단 배지
+  ctx.fillStyle = 'rgba(234, 184, 92, 0.16)';
+  ctx.fillRect(76, 66, 420, 42);
+  ctx.strokeStyle = frameData.accent;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(76, 66, 420, 42);
+  ctx.fillStyle = '#ffe39f';
+  ctx.font = '800 21px Pretendard, sans-serif';
+  ctx.fillText(frameData.badge, 96, 94);
+
+  // 초대형 SOXL 100 / 200 / 300 / 400 / 500 타이틀
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+  ctx.font = '900 138px Pretendard, sans-serif';
+  ctx.fillText(frameData.code, 82, 256);
+  ctx.fillStyle = '#fff9eb';
+  ctx.fillText(frameData.code, 76, 250);
+
+  // 타겟 가격 골드 배지
+  ctx.fillStyle = '#eab85c';
+  ctx.fillRect(76, 290, 310, 74);
+  ctx.fillStyle = '#09120f';
+  ctx.font = '900 36px Pretendard, sans-serif';
+  ctx.fillText('TARGET ' + frameData.price, 98, 340);
+
+  // 우측 상단 3X 원형 엠블럼
+  const ex = c.width - 210, ey = 240, er = 102;
+  ctx.beginPath(); ctx.arc(ex, ey, er, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(10, 18, 16, 0.88)'; ctx.fill();
+  ctx.lineWidth = 4; ctx.strokeStyle = '#eab85c'; ctx.stroke();
+  ctx.fillStyle = frameData.accent;
+  ctx.font = '800 26px Pretendard, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('3X BULL', ex, ey - 38);
+  ctx.fillStyle = '#ffe39f';
+  ctx.font = '900 50px Pretendard, sans-serif';
+  ctx.fillText(frameData.price, ex, ey + 16);
+  ctx.fillStyle = '#c8dad3';
+  ctx.font = '700 17px Pretendard, sans-serif';
+  ctx.fillText('DIREXION SOXL', ex, ey + 56);
+  ctx.textAlign = 'left';
+
+  // 하단 설명 패널
+  ctx.fillStyle = 'rgba(6, 12, 10, 0.9)';
+  ctx.fillRect(68, 525, c.width - 136, 245);
+  ctx.strokeStyle = 'rgba(234, 184, 92, 0.65)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(68, 525, c.width - 136, 245);
+
+  ctx.fillStyle = '#ffe39f';
+  ctx.font = '800 33px "Noto Serif KR", serif';
+  ctx.fillText(frameData.title, 98, 582);
+
+  ctx.fillStyle = '#e3efea';
+  ctx.font = '500 21px Pretendard, sans-serif';
+  ctx.fillText(frameData.subtitle, 98, 634);
+
+  ctx.fillStyle = frameData.accent;
+  ctx.font = '700 20px "Noto Serif KR", serif';
+  ctx.fillText(frameData.quote, 98, 686);
+
+  ctx.fillStyle = '#93aba1';
+  ctx.font = '700 16px Pretendard, sans-serif';
+  ctx.fillText('SOXL 멘탈케어 요양소 · LEVERAGE NATION HALL OF FAME', 98, 742);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
+
+  // 추가: 실제 PNG 파일도 비동기 로드하여 텍스처에 덮어쓰기 (HTTP/HTTPS 환경에서 원본 PNG 표현)
+  const img = new Image();
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    tex.needsUpdate = true;
+  };
+  img.src = frameData.img;
+
+  return tex;
+}
+
+// 벽면 상단 골드 명패 텍스처
+function createPlaqueTexture(text) {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 96;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#0b1512';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.strokeStyle = '#eab85c';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(4, 4, c.width - 8, c.height - 8);
+  ctx.fillStyle = '#ffe39f';
+  ctx.font = '900 44px Pretendard, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, c.width / 2, c.height / 2 + 2);
+  const t = new THREE.CanvasTexture(c);
+  t.needsUpdate = true;
+  return t;
+}
+
+// ============================================================================
+// 4. Three.js 3D SOXL 멘탈케어 라운지 구축
+// ============================================================================
+function init3DSpace() {
+  const container = document.getElementById('canvas-container');
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x070f0c);
+  scene.fog = new THREE.FogExp2(0x070f0c, 0.018);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 120);
+  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  clock = new THREE.Clock();
+
+  // 조명 시스템
+  ambientLight = new THREE.AmbientLight(0xd9e8e0, 0.72);
+  scene.add(ambientLight);
+
+  hemiLight = new THREE.HemisphereLight(0xffe7b3, 0x0d211a, 0.68);
+  hemiLight.position.set(0, 15, 0);
+  scene.add(hemiLight);
+
+  mainSpot = new THREE.SpotLight(0xffdf9e, 1.45, 45, Math.PI / 3, 0.45, 1.2);
+  mainSpot.position.set(0, 13.5, 0);
+  mainSpot.castShadow = true;
+  scene.add(mainSpot);
+
+  buildGalleryArchitecture();
+  buildCentralWaferFountain();
+  buildWallFramesAndBenches();
+  buildIndoorTreesAndPillars();
+  buildTargetRippleRing();
+
+  // 내 아바타 생성
+  myAvatar = createAvatarMesh(0x2ee59d, 0xeab85c, true);
+  myAvatar.position.set(myState.x, 0, myState.z);
+  myAvatar.rotation.y = myState.rotY;
+  scene.add(myAvatar);
+
+  // 동반 주주 NPC 생성
+  initNPCShareholders();
+
+  // 이벤트 리스너
+  window.addEventListener('resize', onWindowResize);
+  setupPointerAndKeyboardControls();
+
+  animate();
+}
+
+function buildGalleryArchitecture() {
+  // 바닥 (다크 에메랄드 오닉스 타일 & 골드 인레이)
+  const floorCanvas = document.createElement('canvas');
+  floorCanvas.width = 1024; floorCanvas.height = 1024;
+  const fctx = floorCanvas.getContext('2d');
+  fctx.fillStyle = '#0c1814';
+  fctx.fillRect(0, 0, 1024, 1024);
+  fctx.strokeStyle = 'rgba(234, 184, 92, 0.16)';
+  fctx.lineWidth = 2;
+  for (let i = 0; i <= 1024; i += 128) {
+    fctx.beginPath(); fctx.moveTo(i, 0); fctx.lineTo(i, 1024); fctx.stroke();
+    fctx.beginPath(); fctx.moveTo(0, i); fctx.lineTo(1024, i); fctx.stroke();
+  }
+  const floorTex = new THREE.CanvasTexture(floorCanvas);
+  floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
+  floorTex.repeat.set(6, 6);
+
+  const floorGeo = new THREE.PlaneGeometry(30, 30);
+  const floorMat = new THREE.MeshStandardMaterial({
+    map: floorTex, roughness: 0.35, metalness: 0.2
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  floor.name = 'walkable_floor';
+  scene.add(floor);
+
+  // 중앙 골드 원형 카펫 링
+  const ringGeo = new THREE.RingGeometry(3.5, 3.75, 64);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0xeab85c, side: THREE.DoubleSide });
+  const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+  ringMesh.rotation.x = -Math.PI / 2;
+  ringMesh.position.y = 0.015;
+  scene.add(ringMesh);
+
+  const outerRingGeo = new THREE.RingGeometry(8.2, 8.32, 64);
+  const outerRing = new THREE.Mesh(outerRingGeo, ringMat);
+  outerRing.rotation.x = -Math.PI / 2;
+  outerRing.position.y = 0.015;
+  scene.add(outerRing);
+
+  // 4면 갤러리 벽면 (30m x 30m, 높이 10.5m)
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: 0x12221c, roughness: 0.65, metalness: 0.12
+  });
+  const trimMat = new THREE.MeshStandardMaterial({
+    color: 0xeab85c, roughness: 0.3, metalness: 0.75
+  });
+
+  const wallDefs = [
+    { x: 0, z: -14.8, ry: 0 },
+    { x: 0, z: 14.8, ry: Math.PI },
+    { x: -14.8, z: 0, ry: Math.PI / 2 },
+    { x: 14.8, z: 0, ry: -Math.PI / 2 }
+  ];
+  wallDefs.forEach(w => {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(30, 10.5, 0.4), wallMat);
+    wall.position.set(w.x, 5.25, w.z);
+    wall.rotation.y = w.ry;
+    wall.receiveShadow = true;
+    scene.add(wall);
+
+    // 상·하단 골드 몰딩
+    const botTrim = new THREE.Mesh(new THREE.BoxGeometry(30, 0.25, 0.5), trimMat);
+    botTrim.position.set(w.x, 0.125, w.z);
+    botTrim.rotation.y = w.ry;
+    scene.add(botTrim);
+
+    const topTrim = new THREE.Mesh(new THREE.BoxGeometry(30, 0.3, 0.55), trimMat);
+    topTrim.position.set(w.x, 9.8, w.z);
+    topTrim.rotation.y = w.ry;
+    scene.add(topTrim);
+  });
+
+  // 천장 스카이라이트 아트리움 링
+  const skyGeo = new THREE.RingGeometry(4.5, 11.5, 32);
+  const skyMat = new THREE.MeshBasicMaterial({
+    color: 0x1b382d, side: THREE.DoubleSide, transparent: true, opacity: 0.45
+  });
+  const sky = new THREE.Mesh(skyGeo, skyMat);
+  sky.rotation.x = Math.PI / 2;
+  sky.position.y = 10.4;
+  scene.add(sky);
+}
+
+// 중앙 3X 황금 반도체 웨이퍼 치유 분수대 & 12개의 불꽃
+function buildCentralWaferFountain() {
+  const group = new THREE.Group();
+
+  // 분수대 대리석 기단
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x162922, roughness: 0.3, metalness: 0.3 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, roughness: 0.22, metalness: 0.85 });
+
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.4, 0.75, 48), baseMat);
+  base.position.y = 0.375;
+  base.receiveShadow = true;
+  group.add(base);
+
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(3.15, 0.1, 16, 64), goldMat);
+  rim.rotation.x = Math.PI / 2;
+  rim.position.y = 0.76;
+  group.add(rim);
+
+  // 에메랄드 치유 수면
+  const waterMat = new THREE.MeshStandardMaterial({
+    color: 0x1dd18e, emissive: 0x0a4f36, emissiveIntensity: 0.5,
+    roughness: 0.15, metalness: 0.4, transparent: true, opacity: 0.88
+  });
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(2.95, 2.95, 0.68, 48), waterMat);
+  water.position.y = 0.38;
+  group.add(water);
+
+  // 중앙 피데스탈 & 회전하는 3X 황금 웨이퍼 코어
+  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.75, 1.8, 32), baseMat);
+  pillar.position.y = 0.9;
+  group.add(pillar);
+
+  coreWaferMesh = new THREE.Group();
+  coreWaferMesh.position.set(0, 2.55, 0);
+
+  const waferDisc = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.15, 1.15, 0.14, 48),
+    new THREE.MeshStandardMaterial({
+      color: 0xffd269, emissive: 0xb87d14, emissiveIntensity: 0.45,
+      roughness: 0.18, metalness: 0.9
+    })
+  );
+  waferDisc.rotation.z = Math.PI / 2;
+  coreWaferMesh.add(waferDisc);
+
+  const outerOrbit = new THREE.Mesh(
+    new THREE.TorusGeometry(1.42, 0.05, 16, 64),
+    new THREE.MeshBasicMaterial({ color: 0x2ee59d })
+  );
+  coreWaferMesh.add(outerOrbit);
+  group.add(coreWaferMesh);
+
+  // 분수대 테두리 12개 불마켓 기원 촛불
+  for (let i = 0; i < 12; i++) {
+    const ang = (i / 12) * Math.PI * 2;
+    const cx = Math.cos(ang) * 3.12;
+    const cz = Math.sin(ang) * 3.12;
+
+    const holder = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.13, 0.28, 16),
+      new THREE.MeshStandardMaterial({ color: 0xf5f0e1, roughness: 0.4 })
+    );
+    holder.position.set(cx, 0.88, cz);
+    group.add(holder);
+
+    const flame = new THREE.Mesh(
+      new THREE.SphereGeometry(0.11, 12, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffc845 })
+    );
+    flame.scale.set(0.8, 1.6, 0.8);
+    flame.position.set(cx, 1.12, cz);
+    flame.visible = i < litCandleCount;
+    group.add(flame);
+    candleFlames.push(flame);
+  }
+
+  // 상승 양봉 파티클 (초록 & 골드 입자)
+  const pCount = 140;
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(pCount * 3);
+  for (let i = 0; i < pCount; i++) {
+    const r = 0.4 + Math.random() * 2.4;
+    const a = Math.random() * Math.PI * 2;
+    pPos[i * 3] = Math.cos(a) * r;
+    pPos[i * 3 + 1] = 0.8 + Math.random() * 5.5;
+    pPos[i * 3 + 2] = Math.sin(a) * r;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const pMat = new THREE.PointsMaterial({
+    color: 0x52ffba, size: 0.11, transparent: true, opacity: 0.85
+  });
+  particleSystem = new THREE.Points(pGeo, pMat);
+  group.add(particleSystem);
+
+  scene.add(group);
+}
+
+// 벽면 SOXL 100·200·300·400·500 액자 + 각 액자 앞 벤치 + 중앙 라운지 벤치
+function buildWallFramesAndBenches() {
+  const goldFrameMat = new THREE.MeshStandardMaterial({
+    color: 0xeab85c, roughness: 0.25, metalness: 0.82
+  });
+
+  const docentTabsEl = document.getElementById('docent-tabs');
+  docentTabsEl.innerHTML = '';
+
+  SOXL_FRAMES.forEach((f, idx) => {
+    const fGroup = new THREE.Group();
+    fGroup.position.set(f.pos.x, f.pos.y, f.pos.z);
+    fGroup.rotation.y = f.rotY;
+
+    // 골드 액자 몰딩 베젤
+    const backing = new THREE.Mesh(
+      new THREE.BoxGeometry(f.size.w + 0.42, f.size.h + 0.42, 0.18),
+      goldFrameMat
+    );
+    backing.castShadow = true;
+    fGroup.add(backing);
+
+    // 캔버스 + PNG 하이브리드 텍스처
+    const artTex = createHighResFrameTexture(f);
+    const artMat = new THREE.MeshBasicMaterial({ map: artTex });
+    const artMesh = new THREE.Mesh(new THREE.PlaneGeometry(f.size.w, f.size.h), artMat);
+    artMesh.position.z = 0.11;
+    artMesh.userData = { frameIdx: idx };
+    fGroup.add(artMesh);
+    frameMeshes.push(artMesh);
+
+    // 액자 상단 골드 네임플레이트 (SOXL 100 ~ 500)
+    const plaqueTex = createPlaqueTexture(f.code + ' · ' + f.price);
+    const plaqueMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.5, 0.48),
+      new THREE.MeshBasicMaterial({ map: plaqueTex })
+    );
+    plaqueMesh.position.set(0, f.size.h / 2 + 0.56, 0.12);
+    fGroup.add(plaqueMesh);
+
+    // 액자 전용 갤러리 핀 조명
+    const spot = new THREE.PointLight(0xffe6a3, 0.65, 9);
+    spot.position.set(0, f.size.h / 2 + 0.9, 1.8);
+    fGroup.add(spot);
+
+    scene.add(fGroup);
+
+    // 각 액자 바로 앞 관람용 벤치 배치
+    createBench(f.benchPos.x, f.benchPos.z, f.benchPos.rotY, idx);
+
+    // 도슨트 모달 탭 생성
+    const tabBtn = document.createElement('button');
+    tabBtn.type = 'button';
+    tabBtn.className = 'docent-tab' + (idx === 0 ? ' active' : '');
+    tabBtn.textContent = f.code;
+    tabBtn.onclick = () => selectDocentFrame(idx);
+    docentTabsEl.appendChild(tabBtn);
+  });
+
+  // 중앙 황금 분수대 주변 8개 힐링 벤치 배치
+  for (let i = 0; i < 8; i++) {
+    const ang = (i / 8) * Math.PI * 2 + Math.PI / 8;
+    const bx = Math.cos(ang) * 5.6;
+    const bz = Math.sin(ang) * 5.6;
+    createBench(bx, bz, -ang + Math.PI / 2, -1);
+  }
+}
+
+function createBench(x, z, rotY, frameIdx) {
+  const bGroup = new THREE.Group();
+  bGroup.position.set(x, 0, z);
+  bGroup.rotation.y = rotY;
+
+  const woodMat = new THREE.MeshStandardMaterial({ color: 0x3b2618, roughness: 0.55 });
+  const cushionMat = new THREE.MeshStandardMaterial({ color: 0x16382c, roughness: 0.4 });
+  const goldLegMat = new THREE.MeshStandardMaterial({ color: 0xc99b42, metalness: 0.7, roughness: 0.3 });
+
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.12, 0.68), woodMat);
+  seat.position.y = 0.46;
+  seat.castShadow = true;
+  bGroup.add(seat);
+
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(1.96, 0.08, 0.58), cushionMat);
+  pad.position.y = 0.55;
+  bGroup.add(pad);
+
+  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.6), goldLegMat);
+  legL.position.set(-0.85, 0.225, 0);
+  bGroup.add(legL);
+
+  const legR = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.6), goldLegMat);
+  legR.position.set(0.85, 0.225, 0);
+  bGroup.add(legR);
+
+  scene.add(bGroup);
+  benches.push({ x, z, rotY, frameIdx, mesh: bGroup });
+}
+
+function buildIndoorTreesAndPillars() {
+  const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1c3028, roughness: 0.4, metalness: 0.25 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, roughness: 0.25, metalness: 0.8 });
+
+  const corners = [
+    [-12.8, -12.8], [12.8, -12.8], [-12.8, 12.8], [12.8, 12.8]
+  ];
+  corners.forEach(([cx, cz]) => {
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 10.2, 24), pillarMat);
+    col.position.set(cx, 5.1, cz);
+    col.castShadow = true;
+    scene.add(col);
+
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.07, 12, 32), goldMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(cx, 1.2, cz);
+    scene.add(ring);
+  });
+
+  // 라운지 실내 치유 화분 트리 4그루
+  const treeCoords = [
+    [-6.5, 6.5], [6.5, 6.5], [-6.5, -5.8], [6.5, -5.8]
+  ];
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3222, roughness: 0.8 });
+  const leafMat = new THREE.MeshStandardMaterial({ color: 0x1e5c42, roughness: 0.6 });
+
+  treeCoords.forEach(([tx, tz]) => {
+    const tGroup = new THREE.Group();
+    tGroup.position.set(tx, 0, tz);
+
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.5, 0.65, 20), pillarMat);
+    pot.position.y = 0.325;
+    tGroup.add(pot);
+
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 2.2, 12), trunkMat);
+    trunk.position.y = 1.4;
+    tGroup.add(trunk);
+
+    const crown1 = new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 16), leafMat);
+    crown1.position.set(0, 2.7, 0);
+    tGroup.add(crown1);
+
+    const crown2 = new THREE.Mesh(new THREE.SphereGeometry(0.78, 14, 14), leafMat);
+    crown2.position.set(0.45, 3.2, 0.25);
+    tGroup.add(crown2);
+
+    scene.add(tGroup);
+  });
+}
+
+function buildTargetRippleRing() {
+  const geo = new THREE.RingGeometry(0.32, 0.44, 32);
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0x2ee59d, side: THREE.DoubleSide, transparent: true, opacity: 0
+  });
+  targetRing = new THREE.Mesh(geo, mat);
+  targetRing.rotation.x = -Math.PI / 2;
+  targetRing.position.y = 0.03;
+  scene.add(targetRing);
+}
+
+// 아바타 생성
+function createAvatarMesh(suitColor, trimColor, isMe = false) {
+  const group = new THREE.Group();
+
+  const bodyMat = new THREE.MeshStandardMaterial({ color: suitColor, roughness: 0.4, metalness: 0.2 });
+  const headMat = new THREE.MeshStandardMaterial({ color: 0xf4d6bc, roughness: 0.5 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: trimColor, roughness: 0.25, metalness: 0.8 });
+
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, 0.95, 18), bodyMat);
+  torso.position.y = 0.62;
+  torso.castShadow = true;
+  torso.name = 'torso';
+  group.add(torso);
+
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.04, 10, 24), goldMat);
+  collar.rotation.x = Math.PI / 2;
+  collar.position.y = 1.08;
+  group.add(collar);
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 20), headMat);
+  head.position.y = 1.38;
+  head.castShadow = true;
+  head.name = 'head';
+  group.add(head);
+
+  if (isMe) {
+    const aura = new THREE.Mesh(
+      new THREE.RingGeometry(0.42, 0.5, 32),
+      new THREE.MeshBasicMaterial({ color: 0x2ee59d, side: THREE.DoubleSide })
+    );
+    aura.rotation.x = -Math.PI / 2;
+    aura.position.y = 0.02;
+    group.add(aura);
+  }
+
+  return group;
+}
+
+// ============================================================================
+// 5. 동반 주주 NPC & 실시간 멀티플레이어 (MQTT + BroadcastChannel)
+// ============================================================================
+function initNPCShareholders() {
+  const npcDefs = [
+    { name: 'SOXL 500 존버단', color: 0x3b82f6, benchIdx: 4, msg: 'SOXL 500 액자 앞에서 멘탈 요양 중!' },
+    { name: '필라델피아 파수꾼', color: 0xa855f7, benchIdx: 2, msg: '3배 양의 복리는 결국 승리합니다' },
+    { name: '서학개미 야수', color: 0xf59e0b, benchIdx: 0, msg: '백불 넘어 오백불까지 가즈아!' },
+    { name: '요양소 원장', color: 0x10b981, benchIdx: 7, msg: 'SOXL 멘탈케어 요양소에 오신 걸 환영합니다' }
+  ];
+
+  npcDefs.forEach((d, idx) => {
+    const mesh = createAvatarMesh(d.color, 0xeab85c, false);
+    const b = benches[d.benchIdx] || { x: (idx - 1.5) * 3, z: 4, rotY: 0 };
+    mesh.position.set(b.x, -0.14, b.z);
+    mesh.rotation.y = b.rotY;
+    scene.add(mesh);
+
+    const tagEl = document.createElement('div');
+    tagEl.className = 'avatar-tag';
+    tagEl.textContent = '🐂 ' + d.name;
+    document.getElementById('avatar-labels').appendChild(tagEl);
+
+    const bubbleEl = document.createElement('div');
+    bubbleEl.className = 'avatar-bubble';
+    bubbleEl.textContent = d.msg;
+    bubbleEl.style.display = 'none';
+    document.getElementById('avatar-labels').appendChild(bubbleEl);
+
+    npcs.push({ ...d, mesh, tagEl, bubbleEl, nextBubbleTime: 4 + idx * 5 });
+  });
+
+  // 내 이름표
+  const myTag = document.createElement('div');
+  myTag.id = 'my-avatar-tag';
+  myTag.className = 'avatar-tag is-me';
+  myTag.textContent = '👑 ' + myNick + ' (나)';
+  document.getElementById('avatar-labels').appendChild(myTag);
+
+  const myBub = document.createElement('div');
+  myBub.id = 'my-avatar-bubble';
+  myBub.className = 'avatar-bubble';
+  myBub.style.display = 'none';
+  document.getElementById('avatar-labels').appendChild(myBub);
+}
+
+function initMultiplayerSync() {
+  try {
+    bcChannel = new BroadcastChannel('soxl_mental_care_v1');
+    bcChannel.onmessage = (ev) => handleNetworkPacket(ev.data);
+  } catch (e) {}
+
+  if (typeof mqtt !== 'undefined') {
+    try {
+      mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+        clientId: myId, clean: true, connectTimeout: 4000
+      });
+      mqttClient.on('connect', () => {
+        mqttClient.subscribe('evening-soxx/soxl-mental-care/v1/presence');
+        broadcastMyState();
+      });
+      mqttClient.on('message', (topic, payload) => {
+        try {
+          handleNetworkPacket(JSON.parse(payload.toString()));
+        } catch (e) {}
+      });
+    } catch (e) {}
+  }
+
+  setInterval(broadcastMyState, 2000);
+}
+
+function broadcastMyState() {
+  const pkt = {
+    type: 'presence',
+    id: myId,
+    nick: myNick,
+    x: myState.x,
+    z: myState.z,
+    rotY: myState.rotY,
+    sitting: myState.sitting,
+    bubble: Date.now() < myState.bubbleUntil ? myState.bubble : '',
+    ts: Date.now()
+  };
+  if (bcChannel) {
+    try { bcChannel.postMessage(pkt); } catch (e) {}
+  }
+  if (mqttClient && mqttClient.connected) {
+    try {
+      mqttClient.publish('evening-soxx/soxl-mental-care/v1/presence', JSON.stringify(pkt));
+    } catch (e) {}
+  }
+}
+
+function handleNetworkPacket(pkt) {
+  if (!pkt || pkt.id === myId) return;
+  if (pkt.type === 'presence') {
+    let p = remotePeers[pkt.id];
+    if (!p) {
+      const mesh = createAvatarMesh(0x38bdf8, 0xeab85c, false);
+      scene.add(mesh);
+      const tagEl = document.createElement('div');
+      tagEl.className = 'avatar-tag';
+      document.getElementById('avatar-labels').appendChild(tagEl);
+      const bubbleEl = document.createElement('div');
+      bubbleEl.className = 'avatar-bubble';
+      bubbleEl.style.display = 'none';
+      document.getElementById('avatar-labels').appendChild(bubbleEl);
+      p = remotePeers[pkt.id] = { mesh, tagEl, bubbleEl };
+    }
+    p.nick = pkt.nick || 'SOXL 주주';
+    p.targetX = pkt.x;
+    p.targetZ = pkt.z;
+    p.rotY = pkt.rotY;
+    p.sitting = pkt.sitting;
+    p.lastSeen = Date.now();
+    p.tagEl.textContent = '📈 ' + p.nick;
+    if (pkt.bubble) {
+      p.bubbleEl.textContent = pkt.bubble;
+      p.bubbleEl.style.display = 'block';
+    } else {
+      p.bubbleEl.style.display = 'none';
+    }
+    updateOnlineCount();
+  } else if (pkt.type === 'candle_note' && pkt.note) {
+    prependNoteCard(pkt.note, false);
+  }
+}
+
+function updateOnlineCount() {
+  const now = Date.now();
+  let activePeers = 0;
+  Object.keys(remotePeers).forEach(k => {
+    if (now - remotePeers[k].lastSeen > 12000) {
+      scene.remove(remotePeers[k].mesh);
+      remotePeers[k].tagEl.remove();
+      remotePeers[k].bubbleEl.remove();
+      delete remotePeers[k];
+    } else {
+      activePeers++;
+    }
+  });
+  const total = 1 + (showNPCs ? npcs.length : 0) + activePeers;
+  document.getElementById('online-count-txt').textContent = `🏥 SOXL 멘탈케어 요양소 · 실시간 주주 ${total}명 요양 중`;
+}
+
+// ============================================================================
+// 6. 카메라 조작, 바닥 클릭 이동, 액자 클릭 도슨트 오픈
+// ============================================================================
+function setupPointerAndKeyboardControls() {
+  const dom = renderer.domElement;
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  dom.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    isDragging = true;
+    dragMoved = false;
+    prevMouse.x = e.clientX;
+    prevMouse.y = e.clientY;
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevMouse.x;
+    const dy = e.clientY - prevMouse.y;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
+    camAngle -= dx * 0.0065;
+    camPitch = Math.max(0.08, Math.min(1.15, camPitch + dy * 0.005));
+    prevMouse.x = e.clientX;
+    prevMouse.y = e.clientY;
+  });
+
+  window.addEventListener('pointerup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (dragMoved) return;
+
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+
+    // 1순위: 벽면 SOXL 100~500 액자 클릭 여부 확인
+    const hitFrames = raycaster.intersectObjects(frameMeshes, false);
+    if (hitFrames.length > 0) {
+      const fIdx = hitFrames[0].object.userData.frameIdx;
+      walkToFrame(fIdx);
+      selectDocentFrame(fIdx);
+      togglePanel('docent', true);
+      return;
+    }
+
+    // 2순위: 바닥 클릭 이동
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    for (const hit of intersects) {
+      if (hit.object.name === 'walkable_floor') {
+        const pt = hit.point;
+        const distCenter = Math.hypot(pt.x, pt.z);
+        if (distCenter < 3.55) continue; // 중앙 분수대 내부 충돌 방지
+        myState.sitting = false;
+        myState.targetX = Math.max(-13.2, Math.min(13.2, pt.x));
+        myState.targetZ = Math.max(-13.2, Math.min(13.2, pt.z));
+        targetRing.position.set(myState.targetX, 0.03, myState.targetZ);
+        targetRing.material.opacity = 0.95;
+        targetRing.scale.set(0.6, 0.6, 1);
+        document.getElementById('dock-sit').classList.remove('active');
+        break;
+      }
+    }
+  });
+
+  // 마우스 휠: 야수의 심장 휠 영역 밖이면 카메라 줌, 아니면 만트라 각인
+  window.addEventListener('wheel', (e) => {
+    if (document.getElementById('zoom-lightbox').classList.contains('open')) {
+      e.preventDefault();
+      adjustZoom(e.deltaY < 0 ? 0.2 : -0.2);
+      return;
+    }
+    const wheelBox = document.getElementById('mantra-wheel-box');
+    if (wheelBox.matches(':hover')) {
+      advanceMantraWheel(1);
+    } else {
+      camDist = Math.max(4.5, Math.min(16.5, camDist + e.deltaY * 0.005));
+    }
+  }, { passive: false });
+
+  window.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    keysPressed[e.code] = true;
+    if (e.key === '1') triggerSitAction();
+    if (e.key === '2') triggerWheelFocus();
+    if (e.key === '3') togglePanel('candle');
+    if (e.key === '4') togglePanel('docent');
+    if (e.key === '5') togglePanel('sound');
+    if (e.key === 'Escape') {
+      closeAllModals();
+      closeZoomLightbox();
+    }
+  });
+  window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
+}
+
+// 특정 SOXL 100~500 액자 앞으로 즉시 걸어가기 & 카메라 포커싱
+function walkToFrame(frameIdx) {
+  const f = SOXL_FRAMES[frameIdx];
+  if (!f) return;
+  currentDocentIdx = frameIdx;
+
+  // 상단 퀵버튼 활성화 표시
+  document.querySelectorAll('#frame-quick-strip .fq-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active', idx === frameIdx);
+  });
+
+  // 해당 액자 앞 벤치로 이동 및 착석
+  const b = benches.find(item => item.frameIdx === frameIdx);
+  if (b) {
+    myState.targetX = b.x;
+    myState.targetZ = b.z;
+    myState.rotY = b.rotY + Math.PI;
+    myState.sitting = true;
+    document.getElementById('dock-sit').classList.add('active');
+  }
+
+  // 카메라가 해당 액자를 정면으로 바라보도록 부드럽게 회전
+  if (f.rotY === 0) camAngle = 0; // 북쪽 벽 (SOXL 200, 300, 400)
+  else if (f.rotY > 0) camAngle = Math.PI / 2; // 서쪽 벽 (SOXL 100, 주주클럽)
+  else camAngle = -Math.PI / 2; // 동쪽 벽 (SOXL 500, 로드맵)
+
+  camPitch = 0.24;
+  camDist = 7.4;
+
+  showToast(`🖼️ [${f.code}] 액자 앞 관람석으로 이동합니다.`);
+  selectDocentFrame(frameIdx);
+}
+
+function walkToCurrentDocentFrame() {
+  walkToFrame(currentDocentIdx);
+  closeAllModals();
+}
+
+// ============================================================================
+// 7. 5대 하단 독 기능 & 도슨트 / 줌 라이트박스 / 사운드 엔진
+// ============================================================================
+function triggerSitAction() {
+  if (myState.sitting) {
+    myState.sitting = false;
+    document.getElementById('dock-sit').classList.remove('active');
+    showToast('🚶 벤치에서 일어났습니다.');
+    return;
+  }
+  // 가장 가까운 벤치 찾기
+  let nearest = null, minDist = 999;
+  benches.forEach(b => {
+    const d = Math.hypot(b.x - myState.x, b.z - myState.z);
+    if (d < minDist) { minDist = d; nearest = b; }
+  });
+  if (nearest) {
+    myState.targetX = nearest.x;
+    myState.targetZ = nearest.z;
+    myState.rotY = nearest.rotY + Math.PI;
+    myState.sitting = true;
+    document.getElementById('dock-sit').classList.add('active');
+    if (nearest.frameIdx >= 0) {
+      const f = SOXL_FRAMES[nearest.frameIdx];
+      showToast(`🪑 [${f.code}] 액자 앞 벤치에 착석했습니다.`);
+    } else {
+      showToast('🪑 중앙 황금 웨이퍼 분수대 벤치에 착석했습니다.');
+    }
+  }
+}
+
+function triggerWheelFocus() {
+  const box = document.getElementById('mantra-wheel-box');
+  box.classList.remove('minimized');
+  advanceMantraWheel(3);
+  showToast('💎 마우스 휠을 굴려 야수의 심장 마인드셋을 각인하세요.');
+}
+
+function toggleWheelMinimize() {
+  document.getElementById('mantra-wheel-box').classList.toggle('minimized');
+}
+
+function renderMantraText() {
+  const m = MENTAL_MANTRAS[currentMantraIdx];
+  document.getElementById('vw-ref').textContent = m.ref;
+  const container = document.getElementById('vw-text');
+  container.innerHTML = '';
+  for (let i = 0; i < m.text.length; i++) {
+    const span = document.createElement('span');
+    span.className = 'vw-char' + (i < mantraCharIdx ? ' lit' : '');
+    span.textContent = m.text[i];
+    container.appendChild(span);
+  }
+  const pct = Math.min(100, Math.round((mantraCharIdx / m.text.length) * 100));
+  document.getElementById('vw-bar').style.width = pct + '%';
+  document.getElementById('vw-count').textContent = `멘탈 회복 지수 ${pct}% · 완독 ${mantraCompleteCount}회`;
+}
+
+function advanceMantraWheel(step = 2) {
+  const m = MENTAL_MANTRAS[currentMantraIdx];
+  mantraCharIdx += step;
+  if (mantraCharIdx >= m.text.length) {
+    mantraCharIdx = m.text.length;
+    mantraCompleteCount++;
+    localStorage.setItem('soxl_mc_mantra_cnt', String(mantraCompleteCount));
+    playBellChime();
+    myState.bubble = '💎 야수의 심장 멘탈 충전 완료!';
+    myState.bubbleUntil = Date.now() + 5000;
+    broadcastMyState();
+    setTimeout(() => {
+      currentMantraIdx = (currentMantraIdx + 1) % MENTAL_MANTRAS.length;
+      mantraCharIdx = 0;
+      renderMantraText();
+    }, 900);
+  }
+  renderMantraText();
+}
+
+function nextMantra(e) {
+  if (e) e.stopPropagation();
+  currentMantraIdx = (currentMantraIdx + 1) % MENTAL_MANTRAS.length;
+  mantraCharIdx = 0;
+  renderMantraText();
+}
+
+// 모달 열기/닫기
+function closeAllModals() {
+  ['candle', 'docent', 'sound'].forEach(k => {
+    document.getElementById('modal-' + k).classList.remove('open');
+    const btn = document.getElementById('dock-' + k);
+    if (btn) btn.classList.remove('active');
+  });
+}
+
+function togglePanel(name, forceOpen = false) {
+  const modal = document.getElementById('modal-' + name);
+  const isOpen = modal.classList.contains('open');
+  closeAllModals();
+  if (forceOpen || !isOpen) {
+    modal.classList.add('open');
+    const btn = document.getElementById('dock-' + name);
+    if (btn) btn.classList.add('active');
+    if (name === 'docent') selectDocentFrame(currentDocentIdx);
+  }
+}
+
+// 액자 도슨트 카드 업데이트
+function selectDocentFrame(idx) {
+  currentDocentIdx = idx;
+  const f = SOXL_FRAMES[idx];
+  document.getElementById('docent-title').textContent = '🖼️ ' + f.title;
+  document.getElementById('docent-img').src = f.img;
+  document.getElementById('docent-desc').textContent = f.subtitle;
+  document.getElementById('docent-quote').textContent = f.quote;
+
+  document.querySelectorAll('#docent-tabs .docent-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+}
+
+// 풀스크린 초고화질 라이트박스 줌 뷰어
+let zlScale = 1, zlX = 0, zlY = 0, zlDragging = false, zlStart = { x: 0, y: 0 };
+
+function openZoomLightbox() {
+  const f = SOXL_FRAMES[currentDocentIdx];
+  document.getElementById('zl-title').textContent = f.title;
+  document.getElementById('zl-image').src = f.img;
+  document.getElementById('zl-download').href = f.img;
+  resetZoom();
+  document.getElementById('zoom-lightbox').classList.add('open');
+}
+
+function closeZoomLightbox() {
+  document.getElementById('zoom-lightbox').classList.remove('open');
+}
+
+function adjustZoom(delta) {
+  zlScale = Math.max(0.75, Math.min(3.5, zlScale + delta));
+  applyZoomTransform();
+}
+
+function resetZoom() {
+  zlScale = 1; zlX = 0; zlY = 0;
+  applyZoomTransform();
+}
+
+function applyZoomTransform() {
+  document.getElementById('zl-image').style.transform = `translate(${zlX}px, ${zlY}px) scale(${zlScale})`;
+  document.getElementById('zl-scale-txt').textContent = Math.round(zlScale * 100) + '%';
+}
+
+(function setupLightboxDrag() {
+  const vp = document.getElementById('zl-viewport');
+  vp.addEventListener('pointerdown', (e) => {
+    zlDragging = true;
+    zlStart.x = e.clientX - zlX;
+    zlStart.y = e.clientY - zlY;
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!zlDragging) return;
+    zlX = e.clientX - zlStart.x;
+    zlY = e.clientY - zlStart.y;
+    applyZoomTransform();
+  });
+  window.addEventListener('pointerup', () => { zlDragging = false; });
+})();
+
+// 불꽃 점화 & 주주 응원 메시지 게시
+function initNotesFeed() {
+  const saved = JSON.parse(localStorage.getItem('soxl_mc_notes') || 'null');
+  const list = saved && saved.length ? saved : INITIAL_NOTES;
+  const feed = document.getElementById('cheer-feed');
+  feed.innerHTML = '';
+  list.forEach(item => prependNoteCard(item, false));
+}
+
+function prependNoteCard(note, saveLocal = true) {
+  const feed = document.getElementById('cheer-feed');
+  const card = document.createElement('div');
+  card.className = 'cheer-card';
+  card.innerHTML = `
+    <div class="cheer-card-head">
+      <span>🐂 ${escapeHtml(note.author)}</span>
+      <span>${escapeHtml(note.time || '방금 전')}</span>
+    </div>
+    <div class="cheer-card-body">${escapeHtml(note.text)}</div>
+    <button type="button" class="cheer-like-btn" onclick="likeNote(this)">
+      🔥 가즈아 공감 <span>${note.likes || 1}</span>
+    </button>
+  `;
+  feed.prepend(card);
+
+  if (saveLocal) {
+    const saved = JSON.parse(localStorage.getItem('soxl_mc_notes') || 'null') || INITIAL_NOTES.slice();
+    saved.unshift(note);
+    localStorage.setItem('soxl_mc_notes', JSON.stringify(saved.slice(0, 25)));
+  }
+}
+
+function likeNote(btn) {
+  const span = btn.querySelector('span');
+  span.textContent = parseInt(span.textContent, 10) + 1;
+  playBellChime();
+}
+
+function submitCandleNote() {
+  const input = document.getElementById('candle-input');
+  const text = input.value.trim();
+  if (!text) {
+    showToast('응원 또는 목표가 다짐 한 줄을 입력해 주세요.');
+    return;
+  }
+  litCandleCount = Math.min(12, litCandleCount + 1);
+  candleFlames.forEach((fl, i) => { fl.visible = i < litCandleCount; });
+
+  // 중앙 분수대 앞으로 이동
+  myState.sitting = false;
+  myState.targetX = 0;
+  myState.targetZ = 4.2;
+  myState.rotY = Math.PI;
+  myState.bubble = '🔥 ' + text.slice(0, 24);
+  myState.bubbleUntil = Date.now() + 6000;
+
+  const newNote = {
+    id: 'n_' + Date.now(),
+    author: myNick,
+    text,
+    likes: 1,
+    time: '방금 전'
+  };
+  prependNoteCard(newNote, true);
+
+  if (bcChannel) {
+    try { bcChannel.postMessage({ type: 'candle_note', id: myId, note: newNote }); } catch (e) {}
+  }
+  if (mqttClient && mqttClient.connected) {
+    try {
+      mqttClient.publish('evening-soxx/soxl-mental-care/v1/presence', JSON.stringify({ type: 'candle_note', id: myId, note: newNote }));
+    } catch (e) {}
+  }
+
+  input.value = '';
+  closeAllModals();
+  playBellChime();
+  showToast('🕯️ 중앙 웨이퍼 분수대에 황금 불꽃을 점화했습니다!');
+}
+
+// ============================================================================
+// 8. 레버리지 민족 BGM & Web Audio 힐링 사운드스케이프
+// ============================================================================
+function startAudioEngine() {
+  selectBgmTrack(0);
+
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+
+    // 1) 분수대 물소리 (핑크 노이즈 필터링)
+    const bufferSize = audioCtx.sampleRate * 2;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.015;
+      b6 = white * 0.115926;
+    }
+    const whiteNoise = audioCtx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 620;
+    filter.Q.value = 0.7;
+
+    waterGain = audioCtx.createGain();
+    waterGain.gain.value = 0.12;
+    whiteNoise.connect(filter);
+    filter.connect(waterGain);
+    waterGain.connect(audioCtx.destination);
+    whiteNoise.start();
+
+    // 2) 3X 황금 공명 웜 패드 (F#2 / C#3 / A#3 화음)
+    padGain = audioCtx.createGain();
+    padGain.gain.value = 0.04;
+    padGain.connect(audioCtx.destination);
+    [110, 164.81, 220].forEach(freq => {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc.connect(padGain);
+      osc.start();
+    });
+  } catch (e) {}
+}
+
+function selectBgmTrack(idx) {
+  currentTrackIdx = idx;
+  const tr = BGM_TRACKS[idx];
+  if (!tr) return;
+  bgmAudio.src = tr.src;
+  bgmAudio.play().catch(() => {});
+  document.getElementById('now-playing-label').textContent = tr.title;
+
+  document.querySelectorAll('#track-list .track-btn').forEach((btn, i) => {
+    btn.classList.toggle('playing', i === idx);
+    btn.querySelector('span:last-child').textContent = i === idx ? '🔊 재생중' : 'PLAY';
+  });
+}
+
+function loadCustomAudioFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  bgmAudio.src = url;
+  bgmAudio.play().catch(() => {});
+  const cleanName = file.name.replace(/\.[^.]+$/, '');
+  document.getElementById('now-playing-label').textContent = '🎧 ' + cleanName;
+  document.querySelectorAll('#track-list .track-btn').forEach(btn => {
+    btn.classList.remove('playing');
+    btn.querySelector('span:last-child').textContent = 'PLAY';
+  });
+  showToast(`🎵 내 컴퓨터 음원 [${cleanName}] 재생을 시작합니다!`);
+}
+
+function updateVolumes() {
+  const vBgm = document.getElementById('vol-bgm').value / 100;
+  const vWater = document.getElementById('vol-water').value / 100;
+  const vPad = document.getElementById('vol-pad').value / 100;
+  bgmAudio.volume = vBgm;
+  if (waterGain) waterGain.gain.value = vWater * 0.35;
+  if (padGain) padGain.gain.value = vPad * 0.12;
+}
+
+function playBellChime() {
+  if (!audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1318.5, audioCtx.currentTime + 0.18);
+    g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
+    osc.connect(g);
+    g.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 1.45);
+  } catch (e) {}
+}
+
+// ============================================================================
+// 9. 상단 HUD 조명 전환 / NPC 토글 / 닉네임 변경
+// ============================================================================
+document.getElementById('btn-light-mode').addEventListener('click', () => {
+  lightModeIdx = (lightModeIdx + 1) % 3;
+  const label = document.getElementById('light-mode-label');
+  if (lightModeIdx === 0) {
+    label.textContent = '🌙 애프터장 골든 요양소';
+    scene.background.setHex(0x070f0c);
+    scene.fog.color.setHex(0x070f0c);
+    ambientLight.intensity = 0.72;
+    mainSpot.color.setHex(0xffdf9e);
+  } else if (lightModeIdx === 1) {
+    label.textContent = '🚀 정규장 불마켓 에메랄드';
+    scene.background.setHex(0x051812);
+    scene.fog.color.setHex(0x051812);
+    ambientLight.intensity = 0.85;
+    mainSpot.color.setHex(0x4effb8);
+  } else {
+    label.textContent = '☀️ 프리장 모닝 요양소';
+    scene.background.setHex(0x162620);
+    scene.fog.color.setHex(0x162620);
+    ambientLight.intensity = 1.05;
+    mainSpot.color.setHex(0xfff4d6);
+  }
+});
+
+document.getElementById('btn-toggle-npc').addEventListener('click', () => {
+  showNPCs = !showNPCs;
+  document.getElementById('npc-toggle-label').textContent = showNPCs ? '👥 동반 주주 ON' : '👥 동반 주주 OFF';
+  npcs.forEach(n => {
+    n.mesh.visible = showNPCs;
+    n.tagEl.style.display = showNPCs ? 'block' : 'none';
+    if (!showNPCs) n.bubbleEl.style.display = 'none';
+  });
+  updateOnlineCount();
+});
+
+document.getElementById('btn-change-nick').addEventListener('click', () => {
+  const next = prompt('SOXL 멘탈케어 요양소에서 사용할 주주 닉네임을 입력하세요:', myNick);
+  if (next && next.trim()) {
+    myNick = next.trim().slice(0, 16);
+    localStorage.setItem('soxl_mc_nick', myNick);
+    document.getElementById('my-nick-label').textContent = myNick;
+    const myTag = document.getElementById('my-avatar-tag');
+    if (myTag) myTag.textContent = '👑 ' + myNick + ' (나)';
+    broadcastMyState();
+    showToast(`🪪 닉네임이 [${myNick}](으)로 변경되었습니다.`);
+  }
+});
+
+// ============================================================================
+// 10. 메인 애니메이션 루프
+// ============================================================================
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.1);
+  const elapsed = clock.getElapsedTime();
+
+  // 중앙 3X 황금 웨이퍼 회전 & 파티클 상승
+  if (coreWaferMesh) {
+    coreWaferMesh.rotation.y = elapsed * 0.75;
+    coreWaferMesh.position.y = 2.55 + Math.sin(elapsed * 2) * 0.12;
+  }
+  if (particleSystem) {
+    const pos = particleSystem.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      let y = pos.getY(i) + dt * 0.75;
+      if (y > 6.5) y = 0.8;
+      pos.setY(i, y);
+    }
+    pos.needsUpdate = true;
+  }
+
+  // 바닥 클릭 링 애니메이션
+  if (targetRing && targetRing.material.opacity > 0.01) {
+    targetRing.scale.x += dt * 1.4;
+    targetRing.scale.y += dt * 1.4;
+    targetRing.material.opacity = Math.max(0, targetRing.material.opacity - dt * 0.9);
+  }
+
+  // WASD / 방향키 이동 처리
+  const moveSpeed = 5.4;
+  let kx = 0, kz = 0;
+  if (keysPressed['KeyW'] || keysPressed['ArrowUp']) kz -= 1;
+  if (keysPressed['KeyS'] || keysPressed['ArrowDown']) kz += 1;
+  if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) kx -= 1;
+  if (keysPressed['KeyD'] || keysPressed['ArrowRight']) kx += 1;
+
+  if (kx !== 0 || kz !== 0) {
+    myState.sitting = false;
+    document.getElementById('dock-sit').classList.remove('active');
+    const len = Math.hypot(kx, kz);
+    kx /= len; kz /= len;
+    const sinA = Math.sin(camAngle), cosA = Math.cos(camAngle);
+    const wx = kx * cosA + kz * sinA;
+    const wz = -kx * sinA + kz * cosA;
+    const nx = Math.max(-13.2, Math.min(13.2, myState.x + wx * moveSpeed * dt));
+    const nz = Math.max(-13.2, Math.min(13.2, myState.z + wz * moveSpeed * dt));
+    if (Math.hypot(nx, nz) > 3.55) {
+      myState.x = myState.targetX = nx;
+      myState.z = myState.targetZ = nz;
+      myState.rotY = Math.atan2(wx, wz);
+    }
+  } else {
+    // 클릭 목표 지점으로 부드럽게 보간 이동
+    const dx = myState.targetX - myState.x;
+    const dz = myState.targetZ - myState.z;
+    const dist = Math.hypot(dx, dz);
+    if (dist > 0.06) {
+      const step = Math.min(dist, moveSpeed * dt);
+      myState.x += (dx / dist) * step;
+      myState.z += (dz / dist) * step;
+      if (!myState.sitting) myState.rotY = Math.atan2(dx, dz);
+    }
+  }
+
+  if (myAvatar) {
+    const walking = Math.hypot(myState.targetX - myState.x, myState.targetZ - myState.z) > 0.08 || kx !== 0 || kz !== 0;
+    const bob = walking ? Math.abs(Math.sin(elapsed * 10)) * 0.08 : 0;
+    const baseY = myState.sitting ? -0.14 : 0;
+    myAvatar.position.set(myState.x, baseY + bob, myState.z);
+    myAvatar.rotation.y = myState.rotY;
+
+    // 3인칭 오빗 카메라 추적
+    const camX = myState.x + Math.sin(camAngle) * Math.cos(camPitch) * camDist;
+    const camY = 1.6 + Math.sin(camPitch) * camDist;
+    const camZ = myState.z + Math.cos(camAngle) * Math.cos(camPitch) * camDist;
+    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.14);
+    camera.lookAt(myState.x, 1.55, myState.z);
+
+    // 내 이름표 위치 투영
+    projectLabel(myAvatar.position, document.getElementById('my-avatar-tag'), document.getElementById('my-avatar-bubble'), Date.now() < myState.bubbleUntil ? myState.bubble : '');
+  }
+
+  // NPC 말풍선 주기적 표시 및 투영
+  if (showNPCs) {
+    npcs.forEach(n => {
+      const showBub = (elapsed % 14) < 5.5;
+      projectLabel(n.mesh.position, n.tagEl, n.bubbleEl, showBub ? n.msg : '');
+    });
+  }
+
+  // 원격 접속 주주 위치 보간
+  Object.values(remotePeers).forEach(p => {
+    p.mesh.position.x += (p.targetX - p.mesh.position.x) * 0.15;
+    p.mesh.position.z += (p.targetZ - p.mesh.position.z) * 0.15;
+    p.mesh.position.y = p.sitting ? -0.14 : 0;
+    p.mesh.rotation.y = p.rotY || 0;
+    projectLabel(p.mesh.position, p.tagEl, p.bubbleEl, p.bubbleEl.style.display === 'block' ? p.bubbleEl.textContent : '');
+  });
+
+  renderer.render(scene, camera);
+}
+
+function projectLabel(pos3D, tagEl, bubbleEl, bubbleText) {
+  if (!tagEl) return;
+  const v = new THREE.Vector3(pos3D.x, pos3D.y + 1.85, pos3D.z);
+  v.project(camera);
+  if (v.z > 1) {
+    tagEl.style.opacity = '0';
+    if (bubbleEl) bubbleEl.style.display = 'none';
+    return;
+  }
+  const x = (v.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-(v.y * 0.5) + 0.5) * window.innerHeight;
+  tagEl.style.opacity = '1';
+  tagEl.style.left = x + 'px';
+  tagEl.style.top = y + 'px';
+
+  if (bubbleEl) {
+    if (bubbleText) {
+      bubbleEl.textContent = bubbleText;
+      bubbleEl.style.display = 'block';
+      bubbleEl.style.left = x + 'px';
+      bubbleEl.style.top = (y - 24) + 'px';
+    } else {
+      bubbleEl.style.display = 'none';
+    }
+  }
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+function copySafeShareUrl() {
+  const safeUrl = 'https://evening-soxx.github.io/soxl_mental_care.html';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(safeUrl).then(() => {
+      showToast('✅ 안전한 공식 웹 주소(https://evening-soxx.github.io/soxl_mental_care.html)가 복사되었습니다!');
+    }).catch(() => {
+      prompt('아래 공식 웹 주소를 복사해 공유하세요:', safeUrl);
+    });
+  } else {
+    prompt('아래 공식 웹 주소를 복사해 공유하세요:', safeUrl);
+  }
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+}
+
+// ============================================================================
+// 11. 초기 부트스트랩 실행
+// ============================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  init3DSpace();
+  renderMantraText();
+  initNotesFeed();
+  initMultiplayerSync();
+
+  document.getElementById('boot-enter-btn').addEventListener('click', () => {
+    const nickVal = document.getElementById('boot-nick-input').value.trim();
+    if (nickVal) {
+      myNick = nickVal.slice(0, 16);
+      localStorage.setItem('soxl_mc_nick', myNick);
+      document.getElementById('my-nick-label').textContent = myNick;
+      const myTag = document.getElementById('my-avatar-tag');
+      if (myTag) myTag.textContent = '👑 ' + myNick + ' (나)';
+    }
+    document.getElementById('boot-screen').classList.add('hidden');
+    startAudioEngine();
+    broadcastMyState();
+    showToast('🏥 SOXL 멘탈케어 요양소에 입장하셨습니다! 벽면의 SOXL 100~500 액자를 감상해 보세요.');
+  });
+});
+</script>
+</body>
+</html>
