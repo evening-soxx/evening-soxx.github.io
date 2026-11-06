@@ -145,102 +145,134 @@
     box-shadow: none;
   }
 
-  /* 상단 HUD 바 */
+  /* 상단 통합 홈페이지형 가로 헤더 바 (타원형 배제 · 겹침 0% · 정갈한 게시판 탭 스타일) */
   #top-bar {
-    position: fixed; top: 12px; left: 16px; right: 16px; z-index: 20;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 25;
+    min-height: 44px; padding: 6px 14px;
+    background: rgba(7, 15, 12, 0.94);
+    border-bottom: 1px solid rgba(234, 184, 92, 0.38);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     display: flex; align-items: center; justify-content: space-between;
-    pointer-events: none; gap: 8px; flex-wrap: wrap;
+    pointer-events: auto; gap: 6px;
+    flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none;
   }
+  #top-bar::-webkit-scrollbar { display: none; }
   .hud-group {
-    display: flex; align-items: center; gap: 7px; pointer-events: auto; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 5px; pointer-events: auto;
+    flex-wrap: nowrap; flex-shrink: 0;
   }
   .glass-pill {
-    background: var(--glass-dark);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    padding: 7px 14px; border-radius: 999px;
-    color: var(--text-cream); font-size: 12.5px; font-weight: 700;
-    display: flex; align-items: center; gap: 7px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
-    transition: all 0.2s ease;
+    background: rgba(16, 33, 27, 0.88);
+    border: 1px solid rgba(234, 184, 92, 0.34);
+    padding: 6px 11px; border-radius: 6px;
+    color: var(--text-cream); font-size: 12px; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap; flex-shrink: 0;
+    transition: all 0.18s ease;
   }
   button.glass-pill, a.glass-pill { cursor: pointer; text-decoration: none; }
-  button.glass-pill:hover, a.glass-pill:hover {
-    border-color: var(--gold); background: rgba(18, 36, 29, 0.94);
-    transform: translateY(-1px);
+  button.glass-pill:hover, a.glass-pill:hover, button.glass-pill.active-tab {
+    border-color: var(--gold); background: rgba(28, 58, 46, 0.96);
+    color: #fff6dc;
   }
   .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #2ee59d; box-shadow: 0 0 10px #2ee59d;
+    width: 7px; height: 7px; border-radius: 2px;
+    background: #2ee59d; box-shadow: 0 0 8px #2ee59d;
     animation: blinkDot 2s infinite;
   }
   @keyframes blinkDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-  /* 상단 성전 액자 & 강단 기도석 원터치 이동 스트립 */
+  /* 상단 제2열: 성전 액자 & 강단 기도석 가로 서브 메뉴바 (기본 접힘 · 상단바 바로 아래 정렬되어 절대 겹치지 않음) */
   #frame-quick-strip {
-    position: fixed; top: 58px; left: 50%; transform: translateX(-50%);
-    z-index: 19; display: flex; align-items: center; gap: 6px;
-    background: rgba(7, 15, 13, 0.86); border: 1px solid rgba(234, 184, 92, 0.38);
-    padding: 5px 11px; border-radius: 999px; backdrop-filter: blur(12px);
+    position: fixed; top: 44px; left: 0; right: 0; transform: none;
+    z-index: 24; display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: rgba(10, 22, 18, 0.94);
+    border-bottom: 1px solid rgba(234, 184, 92, 0.32);
+    padding: 6px 14px; border-radius: 0;
+    backdrop-filter: blur(14px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.48);
-    max-width: 96vw; overflow-x: auto;
+    max-width: 100vw; overflow-x: auto; scrollbar-width: none;
   }
+  #frame-quick-strip::-webkit-scrollbar { display: none; }
+  #frame-quick-strip.collapsed { display: none !important; }
   .fq-label {
     font-size: 11px; color: var(--gold); font-weight: 800; padding: 0 6px; white-space: nowrap;
   }
   .fq-btn {
     background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.28);
-    color: #e9f2ee; padding: 5px 11px; border-radius: 999px;
+    color: #e9f2ee; padding: 5px 11px; border-radius: 5px;
     font-size: 11.5px; font-weight: 800; cursor: pointer; white-space: nowrap;
     transition: all 0.18s;
   }
   .fq-btn:hover, .fq-btn.active {
     background: linear-gradient(135deg, #2ee59d, #eab85c);
     color: #06120e; border-color: transparent;
-    box-shadow: 0 0 14px rgba(46, 229, 157, 0.4);
   }
 
-  /* 상태 및 이동 안내 배너 */
+  /* 상태 및 이동 안내 배너 (처음 입장 시 숨김 · 동작 시에만 3초간 깔끔한 직사각형 알림바로 표시) */
   #walk-hint {
-    position: fixed; top: 102px; left: 50%; transform: translateX(-50%);
+    position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
     z-index: 15; pointer-events: none;
-    background: rgba(8, 17, 14, 0.82); border: 1px solid rgba(234, 184, 92, 0.32);
-    padding: 6px 16px; border-radius: 999px; font-size: 12px; color: #dcf0e8;
-    backdrop-filter: blur(8px); transition: opacity 0.4s; white-space: nowrap;
+    background: rgba(8, 17, 14, 0.92); border: 1px solid rgba(234, 184, 92, 0.42);
+    border-left: 3px solid var(--bull-green);
+    padding: 6px 14px; border-radius: 6px; font-size: 12px; color: #dcf0e8;
+    backdrop-filter: blur(8px); transition: opacity 0.35s ease; white-space: nowrap;
     max-width: 94vw; overflow: hidden; text-overflow: ellipsis;
+    opacity: 0;
   }
+  #walk-hint.visible-hint { opacity: 1; }
 
-  /* 좌측 하단: 야수의 심장 간구문 휠 + 실시간 기도원 채팅 */
+  /* 좌측 하단: 홈페이지 게시판 스타일 간구문 독경 + 실시간 주주 대화방 (처음 입장 시 1줄 가로 탭으로 접힘) */
   #left-sanctuary-stack {
-    position: fixed; left: 18px; bottom: 88px; z-index: 20;
-    width: min(375px, calc(100vw - 36px));
-    display: flex; flex-direction: column; gap: 10px;
+    position: fixed; left: 16px; bottom: 62px; z-index: 20;
+    width: min(440px, calc(100vw - 32px));
+    display: flex; flex-direction: column; gap: 6px;
     pointer-events: none;
+  }
+  #left-sanctuary-stack.both-min {
+    flex-direction: row;
+    width: auto;
+    max-width: calc(100vw - 32px);
   }
   .sanctuary-panel-box {
     pointer-events: auto;
-    background: var(--glass-dark); border: 1px solid var(--glass-border);
-    border-radius: 18px; padding: 14px 16px;
+    background: rgba(8, 17, 14, 0.94);
+    border: 1px solid rgba(234, 184, 92, 0.42);
+    border-top: 2px solid var(--gold);
+    border-radius: 8px; padding: 12px 14px;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 12px 36px rgba(0,0,0,0.55);
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.58);
+    transition: all 0.22s ease;
   }
   #mantra-wheel-box.minimized .vw-body { display: none; }
-  #mantra-wheel-box.minimized { padding: 10px 14px; }
+  #chat-box.minimized .chat-body { display: none; }
+  #mantra-wheel-box.minimized,
+  #chat-box.minimized {
+    padding: 7px 12px;
+    border-radius: 6px;
+    border-top: 1px solid rgba(234, 184, 92, 0.42);
+    background: rgba(8, 17, 14, 0.9);
+  }
   .vw-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 6px; cursor: pointer;
+    gap: 10px; margin-bottom: 8px; cursor: pointer;
+    padding-bottom: 6px; border-bottom: 1px solid rgba(234, 184, 92, 0.2);
   }
-  #mantra-wheel-box.minimized .vw-header { margin-bottom: 0; }
+  #mantra-wheel-box.minimized .vw-header,
+  #chat-box.minimized .vw-header {
+    margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+  }
   .vw-badge {
-    font-size: 11.5px; font-weight: 800; color: var(--bull-green);
-    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 800; color: var(--bull-green);
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
   }
-  .vw-ref { font-size: 11px; color: var(--gold); font-weight: 700; }
+  .vw-ref { font-size: 11px; color: var(--gold); font-weight: 700; white-space: nowrap; }
   .vw-text {
-    font-family: 'Noto Serif KR', serif; font-size: 13.8px; line-height: 1.68;
-    color: rgba(255, 255, 255, 0.25); margin: 8px 0 10px;
-    min-height: 58px; word-break: keep-all;
+    font-family: 'Noto Serif KR', serif; font-size: 13.5px; line-height: 1.65;
+    color: rgba(255, 255, 255, 0.28); margin: 6px 0 8px;
+    min-height: 52px; word-break: keep-all;
   }
   .vw-char.lit {
     color: #fff6dc;
@@ -248,7 +280,7 @@
   }
   .vw-progress-track {
     width: 100%; height: 5px; background: rgba(255,255,255,0.1);
-    border-radius: 99px; overflow: hidden; margin-bottom: 7px;
+    border-radius: 3px; overflow: hidden; margin-bottom: 7px;
   }
   .vw-progress-bar {
     height: 100%; width: 0%;
@@ -261,122 +293,124 @@
   }
   .vw-next-btn {
     background: rgba(234, 184, 92, 0.16); border: 1px solid rgba(234, 184, 92, 0.4);
-    color: var(--gold-light); padding: 3px 10px; border-radius: 99px;
+    color: var(--gold-light); padding: 4px 10px; border-radius: 5px;
     font-size: 11px; cursor: pointer; font-weight: 700;
   }
 
-  /* 실시간 기도원 채팅창 */
-  #chat-box.minimized .chat-body { display: none; }
-  #chat-box.minimized { padding: 9px 14px; }
+  /* 실시간 기도원 게시판형 채팅창 */
   .chat-log {
-    max-height: 105px; overflow-y: auto; font-size: 12px;
-    display: flex; flex-direction: column; gap: 5px;
+    max-height: 110px; overflow-y: auto; font-size: 12px;
+    display: flex; flex-direction: column; gap: 4px;
     margin-bottom: 8px; padding-right: 4px;
   }
   .chat-log::-webkit-scrollbar { width: 4px; }
-  .chat-log::-webkit-scrollbar-thumb { background: rgba(234,184,92,0.35); border-radius: 99px; }
-  .chat-msg { line-height: 1.45; color: #e5f0ec; word-break: keep-all; }
+  .chat-log::-webkit-scrollbar-thumb { background: rgba(234,184,92,0.35); border-radius: 3px; }
+  .chat-msg {
+    line-height: 1.45; color: #e5f0ec; word-break: keep-all;
+    padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.03);
+  }
   .chat-msg strong { color: var(--gold-light); margin-right: 5px; }
-  .chat-msg.sys { color: #8affcf; font-size: 11.5px; }
+  .chat-msg.sys { color: #8affcf; font-size: 11.5px; background: rgba(46,229,157,0.08); }
   .chat-input-row {
     display: flex; gap: 6px;
   }
   .chat-input {
     flex: 1; background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(234, 184, 92, 0.32);
-    border-radius: 99px; padding: 6px 12px;
+    border: 1px solid rgba(234, 184, 92, 0.35);
+    border-radius: 6px; padding: 6px 10px;
     color: #fff; font-size: 12px; outline: none;
   }
   .chat-send-btn {
     background: linear-gradient(135deg, #2ee59d, #eab85c);
-    color: #06120e; border: none; border-radius: 99px;
+    color: #06120e; border: none; border-radius: 6px;
     padding: 6px 13px; font-size: 12px; font-weight: 900; cursor: pointer;
   }
 
-  /* 우측 상단: 실시간 주주 간구 기도문 보드 */
+  /* 우측 상단: 실시간 주주 간구 기도문 게시판 (기본 접힘 · 상단바 버튼으로 열기/접기) */
   #cheer-feed {
-    position: fixed; right: 18px; top: 106px; z-index: 18;
-    width: 285px; max-height: 310px; overflow-y: auto;
-    display: flex; flex-direction: column; gap: 8px;
+    position: fixed; right: 16px; top: 52px; z-index: 18;
+    width: 300px; max-height: 320px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 6px;
     pointer-events: auto;
+    background: rgba(7, 15, 12, 0.94);
+    border: 1px solid rgba(234, 184, 92, 0.42);
+    border-top: 2px solid var(--bull-green);
+    border-radius: 8px; padding: 10px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
   }
+  #cheer-feed.collapsed { display: none !important; }
   #cheer-feed::-webkit-scrollbar { width: 4px; }
-  #cheer-feed::-webkit-scrollbar-thumb { background: rgba(234, 184, 92, 0.35); border-radius: 99px; }
+  #cheer-feed::-webkit-scrollbar-thumb { background: rgba(234, 184, 92, 0.35); border-radius: 3px; }
   .cheer-card {
-    background: rgba(8, 17, 14, 0.85);
-    border: 1px solid rgba(234, 184, 92, 0.3);
+    background: rgba(16, 33, 27, 0.85);
+    border: 1px solid rgba(234, 184, 92, 0.25);
     border-left: 3px solid var(--bull-green);
-    border-radius: 12px; padding: 10px 12px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.42);
-    animation: slideInRight 0.35s ease;
-  }
-  @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(16px); }
-    to { opacity: 1; transform: translateX(0); }
+    border-radius: 6px; padding: 8px 10px;
   }
   .cheer-card-head {
     display: flex; align-items: center; justify-content: space-between;
     font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 4px;
   }
   .cheer-card-body {
-    font-size: 12.5px; line-height: 1.5; color: #eef5f1; word-break: keep-all;
+    font-size: 12px; line-height: 1.48; color: #eef5f1; word-break: keep-all;
     margin-bottom: 6px;
   }
   .cheer-like-btn {
     background: rgba(46, 229, 157, 0.14); border: 1px solid rgba(46, 229, 157, 0.38);
-    color: #8affcf; border-radius: 99px; padding: 3px 10px;
+    color: #8affcf; border-radius: 5px; padding: 3px 9px;
     font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s;
   }
-  .cheer-like-btn:hover { background: rgba(46, 229, 157, 0.28); transform: scale(1.04); }
+  .cheer-like-btn:hover { background: rgba(46, 229, 157, 0.28); }
 
-  /* 우측 하단: 4대 기도원 제스처 퀵바 */
+  /* 우측 하단: 4대 기도원 제스처 가로 바 (기본 접힘 · 하단 독의 [🙌 제스처] 버튼으로 열기/접기) */
   #emote-bar {
-    position: fixed; right: 18px; bottom: 88px; z-index: 20;
-    display: flex; flex-direction: column; gap: 6px;
+    position: fixed; right: 16px; bottom: 62px; z-index: 20;
+    display: flex; flex-direction: row; gap: 5px;
+    background: rgba(7, 15, 12, 0.94);
+    border: 1px solid rgba(234, 184, 92, 0.42);
+    border-radius: 8px; padding: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.55);
     pointer-events: auto;
   }
+  #emote-bar.collapsed { display: none !important; }
   .emote-btn {
-    background: rgba(8, 17, 14, 0.88);
-    border: 1px solid rgba(234, 184, 92, 0.38);
-    color: #fff5db; padding: 7px 13px; border-radius: 999px;
+    background: rgba(16, 33, 27, 0.9);
+    border: 1px solid rgba(234, 184, 92, 0.32);
+    color: #fff5db; padding: 6px 11px; border-radius: 6px;
     font-size: 12px; font-weight: 800; cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
-    transition: all 0.18s;
+    display: inline-flex; align-items: center; gap: 5px;
+    white-space: nowrap; transition: all 0.18s;
   }
   .emote-btn:hover {
     border-color: var(--bull-green);
-    background: rgba(16, 38, 30, 0.95);
-    transform: translateX(-3px);
+    background: rgba(24, 52, 41, 0.96);
   }
 
-  /* 하단 6대 인터랙션 독 (Dock) */
+  /* 하단 통합 가로 툴바 독 (Dock - 타원형 배제, 홈페이지 하단 가로 제어바 스타일) */
   #bottom-dock {
-    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-    z-index: 30; display: flex; align-items: center; gap: 6px;
-    background: rgba(7, 15, 12, 0.92);
+    position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
+    z-index: 30; display: flex; align-items: center; gap: 5px;
+    background: rgba(7, 15, 12, 0.95);
     border: 1px solid rgba(234, 184, 92, 0.45);
-    padding: 7px 11px; border-radius: 999px;
+    padding: 5px 8px; border-radius: 8px;
     backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.68);
-    max-width: 96vw; overflow-x: auto;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.7);
+    max-width: 96vw; overflow-x: auto; scrollbar-width: none;
   }
+  #bottom-dock::-webkit-scrollbar { display: none; }
   .dock-btn {
-    background: transparent; border: 1px solid transparent;
-    color: var(--text-cream); padding: 8px 13px; border-radius: 999px;
-    font-size: 12.5px; font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; gap: 6px; white-space: nowrap;
-    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(234, 184, 92, 0.22);
+    color: var(--text-cream); padding: 7px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    transition: all 0.18s ease;
   }
   .dock-btn:hover {
-    background: rgba(234, 184, 92, 0.15); border-color: rgba(234, 184, 92, 0.35);
+    background: rgba(234, 184, 92, 0.16); border-color: rgba(234, 184, 92, 0.48);
   }
   .dock-btn.active {
     background: linear-gradient(135deg, #2ee59d 0%, #eab85c 100%);
-    color: #06120e; font-weight: 900;
-    box-shadow: 0 4px 16px rgba(46, 229, 157, 0.4);
+    color: #06120e; font-weight: 900; border-color: transparent;
   }
   .key-badge {
     font-size: 10px; padding: 1px 5px; border-radius: 5px;
@@ -571,10 +605,10 @@
 
   /* 토스트 알림 */
   #toast-msg {
-    position: fixed; top: 142px; left: 50%; transform: translateX(-50%) translateY(-10px);
-    z-index: 150; background: rgba(10, 28, 22, 0.95);
+    position: fixed; top: 94px; left: 50%; transform: translateX(-50%) translateY(-10px);
+    z-index: 150; background: rgba(8, 20, 16, 0.96);
     border: 1px solid var(--bull-green); color: #b5ffe0;
-    padding: 9px 20px; border-radius: 999px; font-size: 13px; font-weight: 800;
+    padding: 8px 16px; border-radius: 6px; font-size: 12.5px; font-weight: 800;
     box-shadow: 0 10px 28px rgba(0,0,0,0.55);
     opacity: 0; visibility: hidden; transition: all 0.25s; pointer-events: none;
     white-space: nowrap;
@@ -584,22 +618,24 @@
   @media (max-width: 820px), (hover: none) and (pointer: coarse) {
     /* 부트 화면 모바일 최적화 */
     #boot-screen { padding: 14px; overflow-y: auto; }
-    .boot-emblem { width: 54px; height: 54px; font-size: 26px; margin-bottom: 10px; border-radius: 16px; }
+    .boot-emblem { width: 54px; height: 54px; font-size: 26px; margin-bottom: 10px; border-radius: 10px; }
     .boot-sub { font-size: 9.5px; letter-spacing: 1.5px; margin-bottom: 4px; }
     .boot-title { font-size: 21px; margin-bottom: 8px; }
     .boot-desc { font-size: 11.5px; line-height: 1.5; margin-bottom: 12px; }
     .boot-frames-preview { gap: 5px; margin-bottom: 12px; }
-    .boot-frame-pill { font-size: 10px; padding: 3px 8px; }
+    .boot-frame-pill { font-size: 10px; padding: 3px 8px; border-radius: 6px; }
     .boot-nick-row { margin-bottom: 12px; padding: 5px 11px; }
     .boot-nick-row span { font-size: 11px; }
     .boot-nick-input { width: 120px; font-size: 12px; }
-    .boot-enter-btn { padding: 11px 18px; font-size: 12.5px; width: 100%; max-width: 280px; }
-    .boot-enter-quiet { padding: 8px 14px; font-size: 11px; }
+    .boot-enter-btn { padding: 11px 18px; font-size: 12.5px; width: 100%; max-width: 280px; border-radius: 8px; }
+    .boot-enter-quiet { padding: 8px 14px; font-size: 11px; border-radius: 8px; }
 
-    /* 상단 제1열: 초슬림 1줄 가로 스크롤 바 */
+    /* 상단 제1열: 홈페이지형 가로 헤더 바 */
     #top-bar {
-      top: max(6px, env(safe-area-inset-top));
-      left: 6px; right: 6px;
+      top: 0;
+      left: 0; right: 0;
+      min-height: 38px;
+      padding: max(4px, env(safe-area-inset-top)) 6px 4px 6px;
       flex-wrap: nowrap !important;
       overflow-x: auto; overflow-y: hidden;
       justify-content: flex-start;
@@ -614,45 +650,54 @@
       gap: 4px;
     }
     .glass-pill {
-      padding: 3.5px 8px;
-      font-size: 9.5px;
+      padding: 4px 8px;
+      font-size: 10px;
+      border-radius: 5px;
       gap: 4px;
       white-space: nowrap;
       flex-shrink: 0;
     }
     .pulse-dot { width: 6px; height: 6px; }
 
-    /* 상단 제2열: SOXL 100~500 성화 바로가기 1줄 초슬림 스트립 */
+    /* 상단 제2열: SOXL 100~500 성화 바로가기 가로 게시판 바 (기본 접힘) */
     #frame-quick-strip {
-      top: calc(max(6px, env(safe-area-inset-top)) + 28px);
-      left: 6px; right: 6px;
+      top: calc(max(4px, env(safe-area-inset-top)) + 34px);
+      left: 0; right: 0;
       transform: none;
       width: auto; max-width: none;
-      padding: 3px 6px;
+      padding: 4px 8px;
       gap: 4px;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
     }
     #frame-quick-strip::-webkit-scrollbar { display: none; }
-    .fq-label { font-size: 9.5px; padding: 0 4px; }
-    .fq-btn { padding: 3px 7px; font-size: 9.5px; }
+    .fq-label { font-size: 9.5px; padding: 0 6px 0 2px; }
+    .fq-btn { padding: 3.5px 8px; font-size: 9.5px; border-radius: 5px; }
 
-    /* 시야 가리는 중앙 배너 및 우측 피드 숨김 */
-    #walk-hint, #cheer-feed { display: none !important; }
+    /* 우측 간구 게시판 모바일 위치 */
+    #cheer-feed {
+      top: calc(max(4px, env(safe-area-inset-top)) + 38px);
+      right: 6px;
+      left: 6px;
+      width: auto;
+      max-height: 220px;
+    }
+    #walk-hint { display: none !important; }
     #toast-msg {
-      top: calc(max(6px, env(safe-area-inset-top)) + 58px);
+      top: calc(max(4px, env(safe-area-inset-top)) + 44px);
       font-size: 10.5px;
-      padding: 5px 12px;
+      padding: 6px 12px;
+      border-radius: 6px;
       max-width: 92vw;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* 좌하단 간구문 독경 & 대화방: 기본 접힘(1줄 캡슐 나란히 배치) */
+    /* 좌하단 간구문 독경 & 대화방: 기본 접힘(홈페이지 게시판 가로 탭 2개 나란히) */
     #left-sanctuary-stack {
       left: 6px; right: 6px;
       width: auto;
-      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 64px);
+      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 42px);
       gap: 4px;
     }
     #left-sanctuary-stack.both-min {
@@ -664,12 +709,12 @@
     }
     .sanctuary-panel-box {
       padding: 8px 10px;
-      border-radius: 12px;
+      border-radius: 6px;
     }
     .sanctuary-panel-box.minimized {
-      padding: 4.5px 9px;
-      border-radius: 999px;
-      background: rgba(8, 17, 14, 0.78);
+      padding: 6px 9px;
+      border-radius: 6px;
+      background: rgba(7, 16, 13, 0.92);
     }
     .sanctuary-panel-box.minimized .vw-ref { display: none; }
     .vw-badge {
@@ -682,27 +727,29 @@
     .vw-text { font-size: 11px; max-height: 48px; }
     .chat-log { height: 64px; }
     .chat-msg { font-size: 10.5px; }
-    .chat-input { padding: 5px 9px; font-size: 11px; }
-    .chat-send-btn { padding: 5px 10px; font-size: 11px; }
+    .chat-input { padding: 5px 9px; font-size: 11px; border-radius: 5px; }
+    .chat-send-btn { padding: 5px 10px; font-size: 11px; border-radius: 5px; }
 
-    /* 하단 제2열: 4대 기도 제스처 초슬림 1줄 그리드 */
+    /* 하단 제2열: 4대 기도 제스처 가로 바 (기본 접힘) */
     #emote-bar {
       left: 6px; right: 6px;
-      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 35px);
+      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 74px);
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 4px;
+      padding: 4px;
+      border-radius: 6px;
     }
     .emote-btn {
-      padding: 4px 2px;
+      padding: 5px 2px;
       font-size: 9.5px;
       justify-content: center;
       gap: 3px;
-      border-radius: 999px;
+      border-radius: 5px;
     }
     .emote-btn span.em-txt { display: inline; font-size: 9px; letter-spacing: -0.3px; }
 
-    /* 하단 제1열: 6대 기도원 액션 독 초슬림 1줄 고정 */
+    /* 하단 제1열: 기도원 액션 독 가로 게시판 바 */
     #bottom-dock {
       bottom: max(4px, env(safe-area-inset-bottom));
       left: 6px; right: 6px;
@@ -711,7 +758,7 @@
       padding: 3px 4px;
       gap: 2px;
       justify-content: space-between;
-      border-radius: 13px;
+      border-radius: 6px;
     }
     .dock-btn {
       flex: 1 1 0;
@@ -719,21 +766,22 @@
       padding: 5px 2px;
       font-size: 9.5px;
       gap: 2px;
-      border-radius: 9px;
+      border-radius: 5px;
       white-space: nowrap;
     }
-    .dock-btn span.label-txt { display: inline; font-size: 8.8px; letter-spacing: -0.4px; }
+    .dock-btn span.label-txt { display: inline; font-size: 8.6px; letter-spacing: -0.4px; }
     .key-badge { display: none; }
 
     /* 캐릭터 이름표 및 모달 팝업 모바일 최적화 */
-    .avatar-label { font-size: 9.5px; padding: 2px 6px; }
-    .avatar-bubble { font-size: 10px; padding: 3px 7px; bottom: 21px; }
+    .avatar-label { font-size: 9.5px; padding: 2px 6px; border-radius: 5px; }
+    .avatar-bubble { font-size: 10px; padding: 3px 7px; bottom: 21px; border-radius: 6px; }
     .modal-card {
       width: calc(100vw - 16px);
-      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 38px);
+      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 44px);
       padding: 14px;
       max-height: 64vh;
       overflow-y: auto;
+      border-radius: 8px;
     }
     .docent-preview-wrap { height: 155px; }
   }
@@ -777,7 +825,7 @@
 <div id="canvas-container"></div>
 <div id="avatar-labels"></div>
 
-<!-- 상단 HUD 바 -->
+<!-- 상단 홈페이지형 가로 헤더 바 -->
 <div id="top-bar">
   <div class="hud-group">
     <a href="./index.html" class="glass-pill" title="어쩐지저녁의 SOXX 시황 데스크로 돌아가기">
@@ -788,17 +836,19 @@
       <span class="status-dot"></span>
       <span id="online-count-txt">⛪ SOXL 멘탈케어 기도원 · 8명</span>
     </div>
-    <button type="button" class="glass-pill" id="btn-change-nick" title="내 기도원 닉네임 및 아바타 꾸미기">
-      <span>🪪</span>
-      <span id="my-nick-label">레버리지 민족</span>
+    <button type="button" class="glass-pill" id="btn-toggle-frame-strip" onclick="toggleFrameStrip()" title="성화 및 무릎기도석 빠른 이동 바 열기/접기" style="border-color:rgba(245,200,76,0.55);color:#ffe49e;">
+      <span id="frame-strip-toggle-txt">🧭 성화·기도석 이동 ▾</span>
     </button>
-    <button type="button" class="glass-pill" id="btn-share-safe-url" onclick="copySafeShareUrl()" title="공식 웹 주소 복사" style="border-color:rgba(46,229,157,0.65);color:#9effd6;">
-      <span>🔗</span>
-      <span>링크 복사</span>
+    <button type="button" class="glass-pill" id="btn-toggle-cheer-feed" onclick="toggleCheerFeed()" title="실시간 주주 촛불 간구 게시판 열기/접기">
+      <span id="cheer-feed-toggle-txt">🕯️ 간구 게시판 ▾</span>
     </button>
   </div>
 
   <div class="hud-group">
+    <button type="button" class="glass-pill" id="btn-change-nick" title="내 기도원 닉네임 및 아바타 꾸미기">
+      <span>🪪</span>
+      <span id="my-nick-label">레버리지 민족</span>
+    </button>
     <button type="button" class="glass-pill" id="btn-cam-preset" title="카메라 시점 전환">
       <span>🎥</span>
       <span id="cam-preset-label">시점: 본당 3인칭</span>
@@ -813,11 +863,15 @@
     <button type="button" class="glass-pill" id="btn-toggle-npc" title="동반 기도 주주(NPC) 표시 전환">
       <span id="npc-toggle-label">👥 동반 주주 ON</span>
     </button>
+    <button type="button" class="glass-pill" id="btn-share-safe-url" onclick="copySafeShareUrl()" title="공식 웹 주소 복사" style="border-color:rgba(46,229,157,0.65);color:#9effd6;">
+      <span>🔗</span>
+      <span>링크 복사</span>
+    </button>
   </div>
 </div>
 
-<!-- 상단 SOXL 100 ~ 500 성화 & 강단 무릎기도석 원터치 이동 바 -->
-<div id="frame-quick-strip">
+<!-- 상단 SOXL 100 ~ 500 성화 & 강단 무릎기도석 원터치 이동 바 (초기 접힘) -->
+<div id="frame-quick-strip" class="collapsed">
   <span class="fq-label">⛪ 성전 순례 이동</span>
   <button type="button" class="fq-btn" onclick="walkToKneelAltar()">🧎 강단 무릎기도석</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(0)">SOXL 100</button>
@@ -828,21 +882,20 @@
   <button type="button" class="fq-btn" onclick="walkToFrame(5)">주주 클럽</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(6)">100→500 로드맵</button>
   <button type="button" class="fq-btn" onclick="walkToGardenPond()">⛲ 야외 웨이퍼 연못</button>
+  <button type="button" class="fq-btn" onclick="toggleFrameStrip()" style="margin-left:auto;border-color:rgba(245,200,76,0.45);color:#ffe49e;">▲ 접기</button>
 </div>
 
-<!-- 이동 안내 및 기도 경과 상태 배너 -->
-<div id="walk-hint">
-  💡 본당 바닥·장의자·강단 앞 기도방석을 클릭하거나 <strong>WASD / 방향키</strong>로 이동하세요. 벽면 <strong>SOXL 100~500 성화</strong>를 누르면 크게 확대됩니다.
-</div>
+<!-- 이동 안내 및 기도 경과 상태 배너 (초기 접힘, 상태 변경 시 잠시 표시) -->
+<div id="walk-hint"></div>
 
 <!-- 토스트 알림 -->
 <div id="toast-msg">알림</div>
 
-<!-- 좌측 하단: 야수의 심장 간구문 스크롤 휠 + 실시간 기도원 채팅 -->
-<div id="left-sanctuary-stack">
-  <div class="sanctuary-panel-box" id="mantra-wheel-box">
+<!-- 좌측 하단: 야수의 심장 간구문 독경판 + 실시간 기도원 대화방 (초기 모두 접힘) -->
+<div id="left-sanctuary-stack" class="both-min">
+  <div class="sanctuary-panel-box minimized" id="mantra-wheel-box">
     <div class="vw-header" onclick="toggleWheelMinimize()">
-      <span class="vw-badge">📜 간구문 독경</span>
+      <span class="vw-badge" id="vw-badge-title">📜 간구문 독경 (열기 ▲)</span>
       <span class="vw-ref" id="vw-ref">레버리지 교리 제1장</span>
     </div>
     <div class="vw-body" onclick="advanceMantraWheel(6)">
@@ -857,9 +910,9 @@
     </div>
   </div>
 
-  <div class="sanctuary-panel-box" id="chat-box">
+  <div class="sanctuary-panel-box minimized" id="chat-box">
     <div class="vw-header" onclick="toggleChatMinimize()">
-      <span class="vw-badge">💬 실시간 주주 대화방</span>
+      <span class="vw-badge" id="chat-badge-title">💬 실시간 주주 대화방 (열기 ▲)</span>
       <span class="vw-ref">Enter로 입력</span>
     </div>
     <div class="chat-body">
@@ -872,11 +925,11 @@
   </div>
 </div>
 
-<!-- 우측 상단: 실시간 주주 촛불 간구 기도문 피드 -->
-<div id="cheer-feed"></div>
+<!-- 우측 상단: 실시간 주주 촛불 간구 기도문 게시판 (초기 접힘) -->
+<div id="cheer-feed" class="collapsed"></div>
 
-<!-- 우측 하단: 4대 기도원 제스처 버튼 -->
-<div id="emote-bar">
+<!-- 우측 하단: 4대 기도원 제스처 버튼 바 (초기 접힘) -->
+<div id="emote-bar" class="collapsed">
   <button type="button" class="emote-btn" onclick="triggerMyEmote('amen')" title="두 손 모아 간절히 양봉 간구">
     <span>🙏</span><span class="em-txt">양봉 간구</span>
   </button>
@@ -1053,13 +1106,16 @@
   </div>
 </div>
 
-<!-- 하단 6대 인터랙션 독 (Dock) -->
+<!-- 하단 인터랙션 독 (Dock) -->
 <div id="bottom-dock">
   <button type="button" class="dock-btn" id="dock-sit" onclick="toggleMySit()">
     <span>🪑</span><span class="label-txt" id="dock-sit-label">장의자 착석</span><span class="key-badge">1</span>
   </button>
   <button type="button" class="dock-btn" id="dock-kneel" onclick="toggleMyKneel()">
     <span>🧎</span><span class="label-txt" id="dock-kneel-label">무릎 기도</span><span class="key-badge">2</span>
+  </button>
+  <button type="button" class="dock-btn" id="dock-emote" onclick="toggleEmoteBar()">
+    <span>🙌</span><span class="label-txt" id="dock-emote-label">제스처 ▴</span>
   </button>
   <button type="button" class="dock-btn" id="dock-candle" onclick="togglePanel('candle')">
     <span>🕯️</span><span class="label-txt">촛불 간구문</span><span class="key-badge">3</span>
@@ -2976,7 +3032,13 @@ function startLightingCandleSequence(prayerText) {
 
 function setWalkHint(text) {
   const el = document.getElementById('walk-hint');
-  if (el) el.textContent = text;
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add('visible-hint');
+  clearTimeout(el._hintTimer);
+  el._hintTimer = setTimeout(() => {
+    el.classList.remove('visible-hint');
+  }, 2800);
 }
 // ============================================================================
 // 8. 실시간 멀티플레이어 (MQTT + BroadcastChannel) & 실시간 성전 채팅
@@ -3310,9 +3372,14 @@ function syncLeftStackState() {
   const stack = document.getElementById('left-sanctuary-stack');
   const wBox = document.getElementById('mantra-wheel-box');
   const cBox = document.getElementById('chat-box');
+  const wBadge = document.getElementById('vw-badge-title');
+  const cBadge = document.getElementById('chat-badge-title');
   if (!stack || !wBox || !cBox) return;
-  const bothMin = wBox.classList.contains('minimized') && cBox.classList.contains('minimized');
-  stack.classList.toggle('both-min', bothMin);
+  const wMin = wBox.classList.contains('minimized');
+  const cMin = cBox.classList.contains('minimized');
+  stack.classList.toggle('both-min', wMin && cMin);
+  if (wBadge) wBadge.textContent = wMin ? '📜 간구문 독경 (열기 ▲)' : '📜 간구문 독경 (접기 ▼)';
+  if (cBadge) cBadge.textContent = cMin ? '💬 실시간 주주 대화방 (열기 ▲)' : '💬 실시간 주주 대화방 (접기 ▼)';
 }
 
 function toggleWheelMinimize() {
@@ -3333,6 +3400,36 @@ function toggleChatMinimize() {
     wBox.classList.add('minimized');
   }
   syncLeftStackState();
+}
+
+function toggleFrameStrip() {
+  const strip = document.getElementById('frame-quick-strip');
+  const txt = document.getElementById('frame-strip-toggle-txt');
+  const btn = document.getElementById('btn-toggle-frame-strip');
+  if (!strip) return;
+  const isCol = strip.classList.toggle('collapsed');
+  if (txt) txt.textContent = isCol ? '🧭 성화·기도석 이동 ▾' : '🧭 성화·기도석 이동 ▴';
+  if (btn) btn.classList.toggle('active-pill', !isCol);
+}
+
+function toggleCheerFeed() {
+  const feed = document.getElementById('cheer-feed');
+  const txt = document.getElementById('cheer-feed-toggle-txt');
+  const btn = document.getElementById('btn-toggle-cheer-feed');
+  if (!feed) return;
+  const isCol = feed.classList.toggle('collapsed');
+  if (txt) txt.textContent = isCol ? '🕯️ 간구 게시판 ▾' : '🕯️ 간구 게시판 ▴';
+  if (btn) btn.classList.toggle('active-pill', !isCol);
+}
+
+function toggleEmoteBar() {
+  const bar = document.getElementById('emote-bar');
+  const lbl = document.getElementById('dock-emote-label');
+  const btn = document.getElementById('dock-emote');
+  if (!bar) return;
+  const isCol = bar.classList.toggle('collapsed');
+  if (lbl) lbl.textContent = isCol ? '제스처 ▴' : '제스처 ▾';
+  if (btn) btn.classList.toggle('active', !isCol);
 }
 
 function renderMantraText() {
@@ -3961,14 +4058,18 @@ function animate() {
     updateAvatarPose(av, dt, elapsed, isMoving);
   });
 
-  // 착석 / 무릎기도 경과 시간 표시
+  // 착석 / 무릎기도 경과 시간: 화면을 가리지 않고 하단 독 버튼에 깔끔히 표시
   if (myAvatar && (myAvatar.state === 'sitting' || myAvatar.state === 'kneeling') && sitStartTime) {
     const sec = Math.floor((Date.now() - sitStartTime) / 1000);
     const mm = String(Math.floor(sec / 60)).padStart(2, '0');
     const ss = String(sec % 60).padStart(2, '0');
-    const placeTxt = myAvatar.seat ? myAvatar.seat.label : '강단 대제단 앞';
-    const actTxt = myAvatar.state === 'kneeling' ? '🧎 두 무릎을 꿇고 간구 기도 중' : '🪑 장의자에 앉아 성전 묵상 중';
-    setWalkHint(`${actTxt} (${placeTxt}) · 기도 경과 시간 ${mm}:${ss}`);
+    if (myAvatar.state === 'kneeling') {
+      const kl = document.getElementById('dock-kneel-label');
+      if (kl) kl.textContent = `기도중 ${mm}:${ss}`;
+    } else {
+      const sl = document.getElementById('dock-sit-label');
+      if (sl) sl.textContent = `착석중 ${mm}:${ss}`;
+    }
   }
 
   // 카메라 오빗 추적
@@ -4070,12 +4171,12 @@ window.addEventListener('DOMContentLoaded', () => {
   if (isMobileViewport()) {
     camDist = 8.2;
     camPitch = 0.34;
-    const wBox = document.getElementById('mantra-wheel-box');
-    const cBox = document.getElementById('chat-box');
-    if (wBox) wBox.classList.add('minimized');
-    if (cBox) cBox.classList.add('minimized');
-    syncLeftStackState();
   }
+  const wBox = document.getElementById('mantra-wheel-box');
+  const cBox = document.getElementById('chat-box');
+  if (wBox) wBox.classList.add('minimized');
+  if (cBox) cBox.classList.add('minimized');
+  syncLeftStackState();
   init3DSpace();
   renderMantraText();
   initNotesFeed();
