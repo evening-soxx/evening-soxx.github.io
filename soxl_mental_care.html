@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SOXL 멘탈케어 요양소 — 레버리지 민족 3D 명예의 전당 (SOXL 100·200·300·400·500)</title>
-<meta name="description" content="어쩐지저녁의 SOXX — SOXL 100·200·300·400·500 액자가 걸린 3D SOXL 멘탈케어 요양소">
+<title>SOXL 기도원 — 레버리지 민족 3X 불마켓 대성전 (SOXL 100·200·300·400·500)</title>
+<meta name="description" content="어쩐지저녁의 SOXX — SOXL 100·200·300·400·500 성화 액자와 장의자·무릎기도석이 마련된 3D SOXL 기도원">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@300;400;500;600;700;800&display=swap');
 
   :root {
-    --bg-deep: #070d0b;
+    --bg-deep: #060d0a;
     --gold: #eab85c;
     --gold-light: #ffe39f;
     --bull-green: #2ee59d;
-    --glass-dark: rgba(9, 17, 15, 0.84);
-    --glass-border: rgba(234, 184, 92, 0.34);
+    --emerald-deep: #0d261e;
+    --glass-dark: rgba(8, 17, 14, 0.86);
+    --glass-border: rgba(234, 184, 92, 0.38);
     --text-cream: #f4f7f5;
     --text-muted: #9cb0a8;
   }
@@ -35,90 +36,101 @@
   #avatar-labels {
     position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden;
   }
-  .avatar-tag {
+  .avatar-label {
     position: absolute; transform: translate(-50%, -100%);
-    background: rgba(8, 16, 14, 0.82); border: 1px solid rgba(234, 184, 92, 0.42);
+    background: rgba(7, 16, 13, 0.84); border: 1px solid rgba(234, 184, 92, 0.45);
     color: #fff3d1; padding: 3px 10px; border-radius: 999px;
-    font-size: 11px; font-weight: 600; white-space: nowrap;
-    backdrop-filter: blur(6px); transition: opacity 0.2s;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.45);
+    font-size: 11.5px; font-weight: 700; white-space: nowrap;
+    display: flex; align-items: center; gap: 5px;
+    backdrop-filter: blur(6px); pointer-events: auto; cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+    transition: transform 0.15s, border-color 0.2s;
   }
-  .avatar-tag.is-me {
-    border-color: rgba(46, 229, 157, 0.9);
-    background: rgba(11, 34, 26, 0.92);
+  .avatar-label:hover {
+    transform: translate(-50%, -100%) scale(1.06);
+    border-color: var(--bull-green);
+  }
+  .avatar-label.is-me {
+    border-color: rgba(46, 229, 157, 0.92);
+    background: rgba(10, 34, 25, 0.92);
     color: #9effd6;
   }
   .avatar-bubble {
-    position: absolute; transform: translate(-50%, -100%);
-    background: rgba(234, 184, 92, 0.96); color: #0b1411;
-    padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 800;
-    white-space: nowrap; margin-top: -26px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.45);
-    animation: popBubble 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    position: absolute; left: 50%; bottom: calc(100% + 7px);
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(234, 184, 92, 0.97), rgba(46, 229, 157, 0.95));
+    color: #06120e; padding: 5px 12px; border-radius: 12px;
+    font-size: 12px; font-weight: 800; white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    animation: popBubble 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    pointer-events: none;
   }
   @keyframes popBubble {
-    from { transform: translate(-50%, -80%) scale(0.7); opacity: 0; }
-    to { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+    from { transform: translateX(-50%) translateY(6px) scale(0.75); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
   }
 
-  /* 입장 게이트 (부트 오버레이) */
+  /* 입장 부트 게이트 */
   #boot-screen {
     position: fixed; inset: 0; z-index: 200;
-    background: radial-gradient(circle at 50% 35%, #122820 0%, #070e0c 72%);
+    background: radial-gradient(circle at 50% 32%, #132c22 0%, #060c0a 74%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 24px; text-align: center;
-    transition: opacity 0.8s ease, visibility 0.8s ease;
+    transition: opacity 0.75s ease, visibility 0.75s ease;
   }
   #boot-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
   .boot-emblem {
-    width: 92px; height: 92px; border-radius: 50%;
+    width: 96px; height: 96px; border-radius: 50%;
     border: 2px solid var(--gold);
     display: flex; align-items: center; justify-content: center;
-    font-size: 38px; margin-bottom: 18px;
-    background: radial-gradient(circle, rgba(46, 229, 157, 0.22), rgba(234, 184, 92, 0.08));
-    box-shadow: 0 0 42px rgba(46, 229, 157, 0.28), inset 0 0 20px rgba(234, 184, 92, 0.25);
+    font-size: 40px; margin-bottom: 16px;
+    background: radial-gradient(circle, rgba(46, 229, 157, 0.24), rgba(234, 184, 92, 0.08));
+    box-shadow: 0 0 46px rgba(234, 184, 92, 0.32), inset 0 0 22px rgba(46, 229, 157, 0.25);
     animation: pulseGlow 2.8s infinite ease-in-out;
   }
   @keyframes pulseGlow {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 32px rgba(46, 229, 157, 0.25); }
-    50% { transform: scale(1.05); box-shadow: 0 0 58px rgba(234, 184, 92, 0.55); }
+    0%, 100% { transform: scale(1); box-shadow: 0 0 32px rgba(46, 229, 157, 0.28); }
+    50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(234, 184, 92, 0.6); }
   }
   .boot-sub {
-    color: var(--bull-green); font-size: 12px; letter-spacing: 3.5px;
+    color: var(--bull-green); font-size: 12px; letter-spacing: 3.2px;
     text-transform: uppercase; margin-bottom: 8px; font-weight: 800;
   }
   .boot-title {
-    font-family: 'Noto Serif KR', serif; font-size: clamp(26px, 4vw, 38px);
+    font-family: 'Noto Serif KR', serif; font-size: clamp(28px, 4.2vw, 42px);
     font-weight: 900; color: #fff8ea; margin-bottom: 12px;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    text-shadow: 0 4px 24px rgba(0,0,0,0.65);
   }
   .boot-desc {
-    max-width: 560px; color: var(--text-muted); font-size: 14px; line-height: 1.75;
-    margin-bottom: 22px;
+    max-width: 600px; color: var(--text-muted); font-size: 14px; line-height: 1.75;
+    margin-bottom: 20px; word-break: keep-all;
   }
   .boot-frames-preview {
-    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 22px;
   }
   .boot-frame-pill {
     padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 800;
-    background: rgba(234, 184, 92, 0.12); border: 1px solid rgba(234, 184, 92, 0.45);
-    color: var(--gold-light); letter-spacing: 0.5px;
+    background: rgba(234, 184, 92, 0.13); border: 1px solid rgba(234, 184, 92, 0.45);
+    color: var(--gold-light); letter-spacing: 0.4px;
   }
   .boot-nick-wrap {
     display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(234, 184, 92, 0.35);
-    padding: 6px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.4);
+    padding: 7px 16px; border-radius: 999px;
   }
-  .boot-nick-wrap span { font-size: 12px; color: var(--gold); font-weight: 700; }
+  .boot-nick-wrap span { font-size: 12px; color: var(--gold); font-weight: 800; }
   .boot-nick-input {
     background: transparent; border: none; outline: none; color: #fff;
-    font-size: 14px; font-weight: 700; width: 170px; text-align: center;
+    font-size: 14px; font-weight: 800; width: 170px; text-align: center;
+  }
+  .boot-btn-row {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
   }
   .boot-enter-btn {
-    padding: 15px 40px; border-radius: 999px;
+    padding: 15px 36px; border-radius: 999px;
     background: linear-gradient(135deg, #2ee59d 0%, #eab85c 100%);
-    color: #07120e; font-size: 16px; font-weight: 900; border: none;
-    cursor: pointer; letter-spacing: 0.5px;
+    color: #06120e; font-size: 15.5px; font-weight: 900; border: none;
+    cursor: pointer; letter-spacing: 0.4px;
     box-shadow: 0 10px 30px rgba(46, 229, 157, 0.35);
     transition: transform 0.2s, box-shadow 0.2s;
   }
@@ -126,29 +138,35 @@
     transform: translateY(-2px) scale(1.02);
     box-shadow: 0 14px 36px rgba(234, 184, 92, 0.55);
   }
+  .boot-enter-btn.quiet {
+    background: rgba(255,255,255,0.07);
+    color: var(--gold-light);
+    border: 1px solid rgba(234, 184, 92, 0.45);
+    box-shadow: none;
+  }
 
   /* 상단 HUD 바 */
   #top-bar {
-    position: fixed; top: 14px; left: 16px; right: 16px; z-index: 20;
+    position: fixed; top: 12px; left: 16px; right: 16px; z-index: 20;
     display: flex; align-items: center; justify-content: space-between;
-    pointer-events: none; gap: 10px; flex-wrap: wrap;
+    pointer-events: none; gap: 8px; flex-wrap: wrap;
   }
   .hud-group {
-    display: flex; align-items: center; gap: 8px; pointer-events: auto; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 7px; pointer-events: auto; flex-wrap: wrap;
   }
   .glass-pill {
     background: var(--glass-dark);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    padding: 8px 15px; border-radius: 999px;
-    color: var(--text-cream); font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; gap: 8px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.42);
-    transition: all 0.22s ease;
+    padding: 7px 14px; border-radius: 999px;
+    color: var(--text-cream); font-size: 12.5px; font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+    transition: all 0.2s ease;
   }
   button.glass-pill, a.glass-pill { cursor: pointer; text-decoration: none; }
   button.glass-pill:hover, a.glass-pill:hover {
-    border-color: var(--gold); background: rgba(22, 38, 32, 0.92);
+    border-color: var(--gold); background: rgba(18, 36, 29, 0.94);
     transform: translateY(-1px);
   }
   .status-dot {
@@ -158,13 +176,13 @@
   }
   @keyframes blinkDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-  /* 상단 SOXL 100~500 액자 원터치 이동 스트립 */
+  /* 상단 성전 액자 & 강단 기도석 원터치 이동 스트립 */
   #frame-quick-strip {
-    position: fixed; top: 62px; left: 50%; transform: translateX(-50%);
+    position: fixed; top: 58px; left: 50%; transform: translateX(-50%);
     z-index: 19; display: flex; align-items: center; gap: 6px;
-    background: rgba(7, 15, 13, 0.82); border: 1px solid rgba(234, 184, 92, 0.35);
-    padding: 5px 10px; border-radius: 999px; backdrop-filter: blur(12px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    background: rgba(7, 15, 13, 0.86); border: 1px solid rgba(234, 184, 92, 0.38);
+    padding: 5px 11px; border-radius: 999px; backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.48);
     max-width: 96vw; overflow-x: auto;
   }
   .fq-label {
@@ -172,53 +190,57 @@
   }
   .fq-btn {
     background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.28);
-    color: #e9f2ee; padding: 5px 12px; border-radius: 999px;
-    font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
+    color: #e9f2ee; padding: 5px 11px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 800; cursor: pointer; white-space: nowrap;
     transition: all 0.18s;
   }
   .fq-btn:hover, .fq-btn.active {
     background: linear-gradient(135deg, #2ee59d, #eab85c);
-    color: #07120e; border-color: transparent;
+    color: #06120e; border-color: transparent;
     box-shadow: 0 0 14px rgba(46, 229, 157, 0.4);
   }
 
-  /* 조작 힌트 배너 */
+  /* 상태 및 이동 안내 배너 */
   #walk-hint {
-    position: fixed; top: 110px; left: 50%; transform: translateX(-50%);
+    position: fixed; top: 102px; left: 50%; transform: translateX(-50%);
     z-index: 15; pointer-events: none;
-    background: rgba(8, 16, 14, 0.78); border: 1px solid rgba(234, 184, 92, 0.3);
-    padding: 6px 16px; border-radius: 999px; font-size: 12px; color: #d8e6df;
+    background: rgba(8, 17, 14, 0.82); border: 1px solid rgba(234, 184, 92, 0.32);
+    padding: 6px 16px; border-radius: 999px; font-size: 12px; color: #dcf0e8;
     backdrop-filter: blur(8px); transition: opacity 0.4s; white-space: nowrap;
+    max-width: 94vw; overflow: hidden; text-overflow: ellipsis;
   }
 
-  /* 좌측 하단 야수의 심장 스크롤 휠 (만트라 각인) */
-  #mantra-wheel-box {
-    position: fixed; left: 20px; bottom: 92px; z-index: 20;
-    width: min(390px, calc(100vw - 40px));
-    background: var(--glass-dark); border: 1px solid var(--glass-border);
-    border-radius: 20px; padding: 18px 20px;
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 14px 40px rgba(0,0,0,0.55);
-    transition: all 0.35s ease;
+  /* 좌측 하단: 야수의 심장 간구문 휠 + 실시간 기도원 채팅 */
+  #left-sanctuary-stack {
+    position: fixed; left: 18px; bottom: 88px; z-index: 20;
+    width: min(375px, calc(100vw - 36px));
+    display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none;
   }
-  #mantra-wheel-box.minimized {
-    width: 240px; padding: 10px 14px; cursor: pointer;
+  .sanctuary-panel-box {
+    pointer-events: auto;
+    background: var(--glass-dark); border: 1px solid var(--glass-border);
+    border-radius: 18px; padding: 14px 16px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.55);
+    transition: all 0.3s ease;
   }
   #mantra-wheel-box.minimized .vw-body { display: none; }
+  #mantra-wheel-box.minimized { padding: 10px 14px; }
   .vw-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 6px; cursor: pointer;
   }
   #mantra-wheel-box.minimized .vw-header { margin-bottom: 0; }
   .vw-badge {
-    font-size: 11px; font-weight: 800; color: var(--bull-green);
-    letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 800; color: var(--bull-green);
+    display: flex; align-items: center; gap: 6px;
   }
   .vw-ref { font-size: 11px; color: var(--gold); font-weight: 700; }
   .vw-text {
-    font-family: 'Noto Serif KR', serif; font-size: 14.5px; line-height: 1.72;
-    color: rgba(255, 255, 255, 0.24); margin: 10px 0 12px;
-    min-height: 68px; word-break: keep-all;
+    font-family: 'Noto Serif KR', serif; font-size: 13.8px; line-height: 1.68;
+    color: rgba(255, 255, 255, 0.25); margin: 8px 0 10px;
+    min-height: 58px; word-break: keep-all;
   }
   .vw-char.lit {
     color: #fff6dc;
@@ -226,7 +248,7 @@
   }
   .vw-progress-track {
     width: 100%; height: 5px; background: rgba(255,255,255,0.1);
-    border-radius: 99px; overflow: hidden; margin-bottom: 8px;
+    border-radius: 99px; overflow: hidden; margin-bottom: 7px;
   }
   .vw-progress-bar {
     height: 100%; width: 0%;
@@ -243,22 +265,50 @@
     font-size: 11px; cursor: pointer; font-weight: 700;
   }
 
-  /* 우측 실시간 주주 응원/멘탈케어 보드 */
+  /* 실시간 기도원 채팅창 */
+  #chat-box.minimized .chat-body { display: none; }
+  #chat-box.minimized { padding: 9px 14px; }
+  .chat-log {
+    max-height: 105px; overflow-y: auto; font-size: 12px;
+    display: flex; flex-direction: column; gap: 5px;
+    margin-bottom: 8px; padding-right: 4px;
+  }
+  .chat-log::-webkit-scrollbar { width: 4px; }
+  .chat-log::-webkit-scrollbar-thumb { background: rgba(234,184,92,0.35); border-radius: 99px; }
+  .chat-msg { line-height: 1.45; color: #e5f0ec; word-break: keep-all; }
+  .chat-msg strong { color: var(--gold-light); margin-right: 5px; }
+  .chat-msg.sys { color: #8affcf; font-size: 11.5px; }
+  .chat-input-row {
+    display: flex; gap: 6px;
+  }
+  .chat-input {
+    flex: 1; background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(234, 184, 92, 0.32);
+    border-radius: 99px; padding: 6px 12px;
+    color: #fff; font-size: 12px; outline: none;
+  }
+  .chat-send-btn {
+    background: linear-gradient(135deg, #2ee59d, #eab85c);
+    color: #06120e; border: none; border-radius: 99px;
+    padding: 6px 13px; font-size: 12px; font-weight: 900; cursor: pointer;
+  }
+
+  /* 우측 상단: 실시간 주주 간구 기도문 보드 */
   #cheer-feed {
-    position: fixed; right: 20px; top: 112px; z-index: 18;
-    width: 280px; max-height: 310px; overflow-y: auto;
+    position: fixed; right: 18px; top: 106px; z-index: 18;
+    width: 285px; max-height: 310px; overflow-y: auto;
     display: flex; flex-direction: column; gap: 8px;
     pointer-events: auto;
   }
   #cheer-feed::-webkit-scrollbar { width: 4px; }
   #cheer-feed::-webkit-scrollbar-thumb { background: rgba(234, 184, 92, 0.35); border-radius: 99px; }
   .cheer-card {
-    background: rgba(9, 18, 15, 0.82);
-    border: 1px solid rgba(234, 184, 92, 0.28);
+    background: rgba(8, 17, 14, 0.85);
+    border: 1px solid rgba(234, 184, 92, 0.3);
     border-left: 3px solid var(--bull-green);
     border-radius: 12px; padding: 10px 12px;
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.38);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.42);
     animation: slideInRight 0.35s ease;
   }
   @keyframes slideInRight {
@@ -275,27 +325,49 @@
   }
   .cheer-like-btn {
     background: rgba(46, 229, 157, 0.14); border: 1px solid rgba(46, 229, 157, 0.38);
-    color: #8affcf; border-radius: 99px; padding: 2px 9px;
+    color: #8affcf; border-radius: 99px; padding: 3px 10px;
     font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s;
   }
   .cheer-like-btn:hover { background: rgba(46, 229, 157, 0.28); transform: scale(1.04); }
 
-  /* 하단 5대 인터랙션 독 (Dock) */
+  /* 우측 하단: 4대 기도원 제스처 퀵바 */
+  #emote-bar {
+    position: fixed; right: 18px; bottom: 88px; z-index: 20;
+    display: flex; flex-direction: column; gap: 6px;
+    pointer-events: auto;
+  }
+  .emote-btn {
+    background: rgba(8, 17, 14, 0.88);
+    border: 1px solid rgba(234, 184, 92, 0.38);
+    color: #fff5db; padding: 7px 13px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    transition: all 0.18s;
+  }
+  .emote-btn:hover {
+    border-color: var(--bull-green);
+    background: rgba(16, 38, 30, 0.95);
+    transform: translateX(-3px);
+  }
+
+  /* 하단 6대 인터랙션 독 (Dock) */
   #bottom-dock {
-    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
-    z-index: 30; display: flex; align-items: center; gap: 8px;
-    background: rgba(8, 16, 14, 0.9);
-    border: 1px solid rgba(234, 184, 92, 0.42);
-    padding: 8px 12px; border-radius: 999px;
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 30; display: flex; align-items: center; gap: 6px;
+    background: rgba(7, 15, 12, 0.92);
+    border: 1px solid rgba(234, 184, 92, 0.45);
+    padding: 7px 11px; border-radius: 999px;
     backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.65);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.68);
     max-width: 96vw; overflow-x: auto;
   }
   .dock-btn {
     background: transparent; border: 1px solid transparent;
-    color: var(--text-cream); padding: 9px 15px; border-radius: 999px;
-    font-size: 13px; font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    color: var(--text-cream); padding: 8px 13px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
     transition: all 0.2s ease;
   }
   .dock-btn:hover {
@@ -303,28 +375,29 @@
   }
   .dock-btn.active {
     background: linear-gradient(135deg, #2ee59d 0%, #eab85c 100%);
-    color: #07120e; font-weight: 900;
+    color: #06120e; font-weight: 900;
     box-shadow: 0 4px 16px rgba(46, 229, 157, 0.4);
   }
   .key-badge {
-    font-size: 10px; padding: 1px 6px; border-radius: 6px;
+    font-size: 10px; padding: 1px 5px; border-radius: 5px;
     background: rgba(255,255,255,0.14); color: var(--gold-light);
   }
   .dock-btn.active .key-badge {
-    background: rgba(0,0,0,0.22); color: #07120e;
+    background: rgba(0,0,0,0.22); color: #06120e;
   }
 
   /* 팝업 모달 공통 */
   .modal-card {
-    position: fixed; left: 50%; bottom: 88px; transform: translateX(-50%) translateY(20px);
-    z-index: 40; width: min(500px, calc(100vw - 28px));
-    background: rgba(9, 18, 15, 0.95);
-    border: 1px solid rgba(234, 184, 92, 0.5);
-    border-radius: 22px; padding: 22px;
+    position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%) translateY(20px);
+    z-index: 40; width: min(510px, calc(100vw - 24px));
+    max-height: calc(100vh - 150px); overflow-y: auto;
+    background: rgba(8, 17, 14, 0.96);
+    border: 1px solid rgba(234, 184, 92, 0.52);
+    border-radius: 22px; padding: 20px;
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.75);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.78);
     opacity: 0; visibility: hidden; pointer-events: none;
-    transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .modal-card.open {
     opacity: 1; visibility: visible; pointer-events: auto;
@@ -332,33 +405,33 @@
   }
   .modal-head {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px; padding-bottom: 10px;
-    border-bottom: 1px solid rgba(234, 184, 92, 0.2);
+    margin-bottom: 12px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(234, 184, 92, 0.22);
   }
   .modal-title {
-    font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 800; color: var(--gold-light);
+    font-family: 'Noto Serif KR', serif; font-size: 16.5px; font-weight: 800; color: var(--gold-light);
   }
   .modal-close {
     background: rgba(255,255,255,0.08); border: none; color: #fff;
     width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px;
   }
 
-  /* 불꽃 점화 / 주주 한줄 응원 입력 */
+  /* 촛불 간구 기도 입력 */
   .candle-input {
-    width: 100%; height: 82px; border-radius: 12px;
+    width: 100%; height: 80px; border-radius: 12px;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.35);
-    color: #fff; padding: 12px; font-size: 13.5px; resize: none; outline: none;
+    color: #fff; padding: 12px; font-size: 13px; resize: none; outline: none;
     margin-bottom: 12px; font-family: inherit;
   }
   .candle-submit {
     width: 100%; padding: 12px; border-radius: 12px; border: none;
     background: linear-gradient(135deg, #2ee59d, #eab85c);
-    color: #07120e; font-weight: 900; font-size: 14px; cursor: pointer;
+    color: #06120e; font-weight: 900; font-size: 14px; cursor: pointer;
   }
 
   /* 액자 도슨트 모달 */
   .docent-preview-wrap {
-    position: relative; width: 100%; height: 210px; border-radius: 14px;
+    position: relative; width: 100%; height: 205px; border-radius: 14px;
     overflow: hidden; border: 1px solid rgba(234, 184, 92, 0.45);
     margin-bottom: 12px; background: #050a08; cursor: zoom-in;
   }
@@ -367,7 +440,7 @@
   }
   .docent-zoom-badge {
     position: absolute; right: 10px; bottom: 10px;
-    background: rgba(7, 14, 12, 0.86); border: 1px solid var(--gold);
+    background: rgba(7, 14, 12, 0.88); border: 1px solid var(--gold);
     color: var(--gold-light); font-size: 11px; font-weight: 800;
     padding: 5px 11px; border-radius: 99px;
   }
@@ -383,16 +456,14 @@
     background: var(--gold); color: #09120f; border-color: var(--gold);
   }
   .docent-desc {
-    font-size: 13px; line-height: 1.68; color: #e2ece7; margin-bottom: 10px; word-break: keep-all;
+    font-size: 13px; line-height: 1.65; color: #e2ece7; margin-bottom: 10px; word-break: keep-all;
   }
   .docent-quote {
     font-family: 'Noto Serif KR', serif; font-size: 12.5px; color: var(--bull-green);
     background: rgba(46, 229, 157, 0.08); border-left: 3px solid var(--bull-green);
     padding: 8px 12px; border-radius: 6px; margin-bottom: 12px;
   }
-  .docent-actions {
-    display: flex; gap: 8px;
-  }
+  .docent-actions { display: flex; gap: 8px; }
   .docent-btn {
     flex: 1; padding: 10px; border-radius: 10px; font-size: 12.5px; font-weight: 800;
     cursor: pointer; border: 1px solid rgba(234, 184, 92, 0.45);
@@ -400,7 +471,39 @@
   }
   .docent-btn.primary {
     background: linear-gradient(135deg, #2ee59d, #eab85c);
-    color: #07120e; border: none;
+    color: #06120e; border: none;
+  }
+
+  /* 아바타 커스터마이징 모달 */
+  .cust-row {
+    margin-bottom: 11px;
+  }
+  .cust-label {
+    font-size: 11.5px; font-weight: 800; color: var(--gold);
+    margin-bottom: 6px; display: block;
+  }
+  .cust-chips {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .cust-chip {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(234, 184, 92, 0.28);
+    color: #e4efe9; padding: 6px 11px; border-radius: 99px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cust-chip.active {
+    background: linear-gradient(135deg, #2ee59d, #eab85c);
+    color: #06120e; border-color: transparent; font-weight: 900;
+  }
+  .color-swatch {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3); cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .color-swatch.active {
+    border-color: #2ee59d; transform: scale(1.18);
+    box-shadow: 0 0 10px rgba(46,229,157,0.6);
   }
 
   /* 레버리지 민족 음악 & 앰비언트 믹서 */
@@ -434,10 +537,10 @@
     margin-top: 8px;
   }
 
-  /* 풀스크린 초고해상도 액자 줌 라이트박스 */
+  /* 풀스크린 초고화질 액자 줌 라이트박스 */
   #zoom-lightbox {
     position: fixed; inset: 0; z-index: 300;
-    background: rgba(4, 9, 8, 0.95);
+    background: rgba(4, 9, 8, 0.96);
     display: flex; flex-direction: column;
     opacity: 0; visibility: hidden; pointer-events: none;
     transition: opacity 0.25s ease;
@@ -446,10 +549,10 @@
   .zl-top {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 22px; border-bottom: 1px solid rgba(234, 184, 92, 0.25);
-    background: rgba(7, 14, 12, 0.9);
+    background: rgba(7, 14, 12, 0.92); flex-wrap: wrap; gap: 10px;
   }
   .zl-title { font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 800; color: var(--gold-light); }
-  .zl-controls { display: flex; align-items: center; gap: 8px; }
+  .zl-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .zl-btn {
     background: rgba(255,255,255,0.08); border: 1px solid rgba(234, 184, 92, 0.35);
     color: #fff; padding: 6px 13px; border-radius: 99px; font-size: 12px; font-weight: 700; cursor: pointer;
@@ -468,20 +571,23 @@
 
   /* 토스트 알림 */
   #toast-msg {
-    position: fixed; top: 148px; left: 50%; transform: translateX(-50%) translateY(-10px);
-    z-index: 150; background: rgba(11, 28, 22, 0.94);
+    position: fixed; top: 142px; left: 50%; transform: translateX(-50%) translateY(-10px);
+    z-index: 150; background: rgba(10, 28, 22, 0.95);
     border: 1px solid var(--bull-green); color: #b5ffe0;
     padding: 9px 20px; border-radius: 999px; font-size: 13px; font-weight: 800;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.55);
     opacity: 0; visibility: hidden; transition: all 0.25s; pointer-events: none;
+    white-space: nowrap;
   }
   #toast-msg.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
-  @media (max-width: 768px) {
+  @media (max-width: 820px) {
     #cheer-feed { display: none; }
-    #mantra-wheel-box { left: 12px; right: 12px; width: auto; bottom: 84px; padding: 13px 15px; }
+    #left-sanctuary-stack { left: 10px; right: 10px; width: auto; bottom: 80px; }
+    #emote-bar { right: 10px; bottom: 148px; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; }
+    .emote-btn span.em-txt { display: none; }
     .dock-btn span.label-txt { display: none; }
-    .dock-btn { padding: 10px 14px; font-size: 15px; }
+    .dock-btn { padding: 10px 13px; font-size: 15px; }
   }
 </style>
 </head>
@@ -489,27 +595,34 @@
 
 <!-- 입장 부트 스크린 -->
 <div id="boot-screen">
-  <div class="boot-emblem">🏥</div>
-  <div class="boot-sub">DIREXION DAILY SEMICONDUCTOR BULL 3X · MENTAL CARE SANATORIUM</div>
-  <h1 class="boot-title">SOXL 멘탈케어 요양소</h1>
+  <div class="boot-emblem">⛪</div>
+  <div class="boot-sub">DIREXION DAILY SEMICONDUCTOR BULL 3X · SANCTUARY &amp; PRAYER RETREAT</div>
+  <h1 class="boot-title">SOXL 기도원</h1>
   <p class="boot-desc">
-    벽면을 가득 채운 <strong>SOXL 100 · 200 · 300 · 400 · 500</strong> 기념 액자 앞 벤치에 앉아
-    컴퓨터에 보관된 <strong>「레버리지 민족 (Midnight Bull Run)」</strong> 사운드와 함께 흔들리는 멘탈을 요양하세요.
+    스테인드글라스 황금 빛줄기가 쏟아지는 <strong>SOXL 3X 불마켓 대성전</strong>에 오신 것을 환영합니다.<br>
+    성전 벽면의 <strong>SOXL 100 · 200 · 300 · 400 · 500</strong> 성화 앞 장의자에 앉거나,
+    강단 앞 <strong>무릎 기도석</strong>에 무릎을 꿇고 <strong>「레버리지 민족」</strong> 음악과 함께 간절한 상승 기도를 올려보세요.
   </p>
   <div class="boot-frames-preview">
-    <span class="boot-frame-pill">🖼️ SOXL 100</span>
-    <span class="boot-frame-pill">🖼️ SOXL 200</span>
-    <span class="boot-frame-pill">🖼️ SOXL 300</span>
-    <span class="boot-frame-pill">🖼️ SOXL 400</span>
-    <span class="boot-frame-pill">👑 SOXL 500</span>
+    <span class="boot-frame-pill">🖼️ SOXL 100 성화</span>
+    <span class="boot-frame-pill">🖼️ SOXL 200 성화</span>
+    <span class="boot-frame-pill">🖼️ SOXL 300 제단화</span>
+    <span class="boot-frame-pill">🖼️ SOXL 400 성화</span>
+    <span class="boot-frame-pill">👑 SOXL 500 대제단화</span>
+    <span class="boot-frame-pill">🧎 강단 무릎기도석</span>
   </div>
   <div class="boot-nick-wrap">
-    <span>주주 닉네임</span>
+    <span>기도원 입소자명</span>
     <input type="text" id="boot-nick-input" class="boot-nick-input" maxlength="16" value="레버리지 민족" />
   </div>
-  <button type="button" class="boot-enter-btn" id="boot-enter-btn">
-    🏥 SOXL 멘탈케어 요양소 입장하기 (레버리지 민족 음악 재생)
-  </button>
+  <div class="boot-btn-row">
+    <button type="button" class="boot-enter-btn" id="boot-enter-btn">
+      ⛪ SOXL 기도원 본당 입장하기 (레버리지 민족 음악 재생)
+    </button>
+    <button type="button" class="boot-enter-btn quiet" id="boot-enter-quiet-btn">
+      🤫 조용히 무음으로 본당 입장
+    </button>
+  </div>
 </div>
 
 <!-- 3D 캔버스 & 아바타 이름표 레이어 -->
@@ -525,35 +638,40 @@
     </a>
     <div class="glass-pill">
       <span class="status-dot"></span>
-      <span id="online-count-txt">🏥 SOXL 멘탈케어 요양소 · 실시간 주주 5명 요양 중</span>
+      <span id="online-count-txt">⛪ SOXL 기도원 · 현재 주주 8명 성전 기도 중</span>
     </div>
-    <button type="button" class="glass-pill" id="btn-change-nick" title="내 주주 닉네임 변경">
+    <button type="button" class="glass-pill" id="btn-change-nick" title="내 기도원 닉네임 및 아바타 꾸미기">
       <span>🪪</span>
       <span id="my-nick-label">레버리지 민족</span>
     </button>
-    <button type="button" class="glass-pill" id="btn-share-safe-url" onclick="copySafeShareUrl()" title="개인 경로 노출 없는 공식 웹 주소 복사" style="border-color:rgba(46,229,157,0.65);color:#9effd6;">
+    <button type="button" class="glass-pill" id="btn-share-safe-url" onclick="copySafeShareUrl()" title="공식 웹 주소 복사" style="border-color:rgba(46,229,157,0.65);color:#9effd6;">
       <span>🔗</span>
-      <span>공유링크 복사</span>
+      <span>기도원 링크 복사</span>
     </button>
   </div>
 
   <div class="hud-group">
+    <button type="button" class="glass-pill" id="btn-cam-preset" title="카메라 시점 전환">
+      <span>🎥</span>
+      <span id="cam-preset-label">시점: 본당 3인칭</span>
+    </button>
     <button type="button" class="glass-pill" id="btn-now-playing" onclick="togglePanel('sound')">
       <span>🎵</span>
       <span id="now-playing-label">레버리지 민족 (Midnight Bull Run)</span>
     </button>
-    <button type="button" class="glass-pill" id="btn-light-mode" title="요양소 조명 분위기 전환">
-      <span id="light-mode-label">🌙 애프터장 골든 요양소</span>
+    <button type="button" class="glass-pill" id="btn-light-mode" title="성전 조명 분위기 전환">
+      <span id="light-mode-label">🕯️ 철야 금빛 성전</span>
     </button>
-    <button type="button" class="glass-pill" id="btn-toggle-npc" title="동반 요양 주주(NPC) 표시 전환">
+    <button type="button" class="glass-pill" id="btn-toggle-npc" title="동반 기도 주주(NPC) 표시 전환">
       <span id="npc-toggle-label">👥 동반 주주 ON</span>
     </button>
   </div>
 </div>
 
-<!-- 상단 SOXL 100 ~ 500 원터치 액자 이동 바 -->
+<!-- 상단 SOXL 100 ~ 500 성화 & 강단 무릎기도석 원터치 이동 바 -->
 <div id="frame-quick-strip">
-  <span class="fq-label">🖼️ 벽면 액자 바로가기</span>
+  <span class="fq-label">⛪ 성전 순례 이동</span>
+  <button type="button" class="fq-btn" onclick="walkToKneelAltar()">🧎 강단 무릎기도석</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(0)">SOXL 100</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(1)">SOXL 200</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(2)">SOXL 300</button>
@@ -561,90 +679,191 @@
   <button type="button" class="fq-btn" onclick="walkToFrame(4)">👑 SOXL 500</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(5)">주주 클럽</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(6)">100→500 로드맵</button>
+  <button type="button" class="fq-btn" onclick="walkToGardenPond()">⛲ 야외 웨이퍼 연못</button>
 </div>
 
-<!-- 이동 안내 힌트 -->
+<!-- 이동 안내 및 기도 경과 상태 배너 -->
 <div id="walk-hint">
-  💡 바닥 클릭 또는 <strong>WASD / 방향키</strong>로 걸어 다니고, 벽면의 <strong>SOXL 100 ~ 500 액자</strong>를 클릭하면 확대 감상합니다.
+  💡 본당 바닥·장의자·강단 앞 기도방석을 클릭하거나 <strong>WASD / 방향키</strong>로 이동하세요. 벽면 <strong>SOXL 100~500 성화</strong>를 누르면 크게 확대됩니다.
 </div>
 
 <!-- 토스트 알림 -->
 <div id="toast-msg">알림</div>
 
-<!-- 좌측 하단: 야수의 심장 마인드셋 스크롤 휠 -->
-<div id="mantra-wheel-box">
-  <div class="vw-header" onclick="toggleWheelMinimize()" style="cursor:pointer;">
-    <span class="vw-badge">💎 야수의 심장 멘탈 코어 (마우스 휠을 굴려보세요)</span>
-    <span class="vw-ref" id="vw-ref">SOXL 마인드셋 제1장</span>
-  </div>
-  <div class="vw-body">
-    <div class="vw-text" id="vw-text"></div>
-    <div class="vw-progress-track">
-      <div class="vw-progress-bar" id="vw-bar"></div>
+<!-- 좌측 하단: 야수의 심장 간구문 스크롤 휠 + 실시간 기도원 채팅 -->
+<div id="left-sanctuary-stack">
+  <div class="sanctuary-panel-box" id="mantra-wheel-box">
+    <div class="vw-header" onclick="toggleWheelMinimize()">
+      <span class="vw-badge">📜 SOXL 기도원 간구문 독경 (휠을 굴려 각인)</span>
+      <span class="vw-ref" id="vw-ref">레버리지 교리 제1장</span>
     </div>
-    <div class="vw-footer">
-      <span id="vw-count">멘탈 회복 지수 0% · 완료 0회</span>
-      <button type="button" class="vw-next-btn" onclick="nextMantra(event)">다음 격언 ↻</button>
+    <div class="vw-body">
+      <div class="vw-text" id="vw-text"></div>
+      <div class="vw-progress-track">
+        <div class="vw-progress-bar" id="vw-bar"></div>
+      </div>
+      <div class="vw-footer">
+        <span id="vw-count">간구 성취율 0% · 독경 0독</span>
+        <button type="button" class="vw-next-btn" onclick="nextMantra(event)">다음 간구문 ↻</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sanctuary-panel-box" id="chat-box">
+    <div class="vw-header" onclick="document.getElementById('chat-box').classList.toggle('minimized')">
+      <span class="vw-badge">💬 성전 실시간 주주 대화방</span>
+      <span class="vw-ref">Enter로 입력</span>
+    </div>
+    <div class="chat-body">
+      <div class="chat-log" id="chat-log"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" class="chat-input" maxlength="80" placeholder="함께 기도하는 주주들에게 한마디..." />
+        <button type="button" class="chat-send-btn" onclick="sendChatMessage()">전송</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- 우측 상단: 주주 멘탈케어 & 불꽃 기원 피드 -->
+<!-- 우측 상단: 실시간 주주 촛불 간구 기도문 피드 -->
 <div id="cheer-feed"></div>
 
-<!-- 모달 1: 불꽃 켜기 & 주주 응원 남기기 -->
+<!-- 우측 하단: 4대 기도원 제스처 버튼 -->
+<div id="emote-bar">
+  <button type="button" class="emote-btn" onclick="triggerMyEmote('amen')" title="두 손 모아 간절히 양봉 간구">
+    <span>🙏</span><span class="em-txt">양봉 간구</span>
+  </button>
+  <button type="button" class="emote-btn" onclick="triggerMyEmote('praise')" title="두 팔 높이 들고 레버리지 만세">
+    <span>🙌</span><span class="em-txt">만세 삼창</span>
+  </button>
+  <button type="button" class="emote-btn" onclick="triggerMyEmote('wave')" title="동반 주주들에게 성투 손인사">
+    <span>📈</span><span class="em-txt">성투 인사</span>
+  </button>
+  <button type="button" class="emote-btn" onclick="triggerMyEmote('read')" title="황금 원장북 펴 들고 투자 원칙 독경">
+    <span>📖</span><span class="em-txt">원장 독경</span>
+  </button>
+</div>
+
+<!-- 모달 1: 강단 촛불 켜기 & 간구 기도문 올리기 -->
 <div class="modal-card" id="modal-candle">
   <div class="modal-head">
-    <span class="modal-title">🕯️ SOXL 불마켓 기원 불꽃 켜기</span>
+    <span class="modal-title">🕯️ 강단 불마켓 기원 촛불 점화 &amp; 간구문</span>
     <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
   </div>
   <p style="font-size:12.5px; color:#b8ccc3; margin-bottom:10px; line-height:1.5;">
-    중앙 황금 웨이퍼 분수대에 불꽃을 밝히고, 함께 버티는 레버리지 민족 주주들과 목표가 응원 메시지를 나눕니다.
+    내 캐릭터가 직접 강단 앞 황금 촛불 제단으로 걸어가 기원의 촛불을 밝히고, 두 손을 모아 간구 기도문을 올립니다.
   </p>
-  <textarea id="candle-input" class="candle-input" placeholder="예: 흔들리지 않고 SOXL 500 액자 앞까지 끝까지 함께 갑니다! 레버리지 민족 화이팅!"></textarea>
-  <button type="button" class="candle-submit" onclick="submitCandleNote()">🔥 황금 불꽃 점화 & 메시지 게시</button>
+  <textarea id="candle-input" class="candle-input" placeholder="예: 흔들리는 조정장 속에서도 야수의 심장을 지켜 주시고, SOXL 100을 넘어 500 대제단까지 무사히 당도하게 하소서!"></textarea>
+  <button type="button" class="candle-submit" onclick="submitCandleNote()">🕯️ 강단 촛불 점화 &amp; 간구문 올리기</button>
 </div>
 
-<!-- 모달 2: SOXL 100~500 액자 도슨트 & 고해상도 줌 -->
+<!-- 모달 2: SOXL 100~500 성화 액자 도슨트 & 고해상도 줌 -->
 <div class="modal-card" id="modal-docent">
   <div class="modal-head">
-    <span class="modal-title" id="docent-title">🖼️ SOXL 100 기념 액자</span>
+    <span class="modal-title" id="docent-title">🖼️ SOXL 100 성전 기념화</span>
     <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
   </div>
   <div class="docent-tabs" id="docent-tabs"></div>
   <div class="docent-preview-wrap" onclick="openZoomLightbox()">
-    <img id="docent-img" src="./assets/frames/soxl_100.png" alt="SOXL Frame Preview" />
+    <img id="docent-img" src="./assets/frames/soxl_100.png" alt="SOXL Sanctuary Artwork" />
     <span class="docent-zoom-badge">🔍 클릭하여 초고해상도 전체화면 확대</span>
   </div>
   <p class="docent-desc" id="docent-desc"></p>
   <div class="docent-quote" id="docent-quote"></div>
   <div class="docent-actions">
-    <button type="button" class="docent-btn" onclick="walkToCurrentDocentFrame()">🚶 이 액자 앞 벤치로 이동</button>
+    <button type="button" class="docent-btn" onclick="walkToCurrentDocentFrame()">🪑 이 성화 앞 장의자로 이동</button>
     <button type="button" class="docent-btn primary" onclick="openZoomLightbox()">🔍 전체화면 초고화질 감상</button>
   </div>
 </div>
 
-<!-- 모달 3: 레버리지 민족 음악 & 치유 사운드 믹서 -->
+<!-- 모달 3: 기도원 캐릭터 복장 & 소품 커스터마이저 -->
+<div class="modal-card" id="modal-avatar">
+  <div class="modal-head">
+    <span class="modal-title">👔 SOXL 기도원 입소자 복장 &amp; 소품 설정</span>
+    <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
+  </div>
+  <div class="cust-row">
+    <span class="cust-label">🪪 기도원 주주 호칭 (닉네임)</span>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="cust-name-input" class="chat-input" maxlength="16" style="border-radius:10px; padding:8px 12px;" />
+      <button type="button" class="chat-send-btn" style="border-radius:10px;" onclick="saveAvatarName()">변경</button>
+    </div>
+  </div>
+  <div class="cust-row">
+    <span class="cust-label">🧍 성별 및 체형</span>
+    <div class="cust-chips" id="cust-gender">
+      <button type="button" class="cust-chip" data-val="M" onclick="updateCustom('gender','M')">👨 남성 주주</button>
+      <button type="button" class="cust-chip" data-val="F" onclick="updateCustom('gender','F')">👩 여성 주주</button>
+    </div>
+  </div>
+  <div class="cust-row">
+    <span class="cust-label">💇 헤어 스타일</span>
+    <div class="cust-chips" id="cust-hair">
+      <button type="button" class="cust-chip" data-val="0" onclick="updateCustom('hairStyle',0)">스타일 1 (단정)</button>
+      <button type="button" class="cust-chip" data-val="1" onclick="updateCustom('hairStyle',1)">스타일 2 (웨이브/보브)</button>
+      <button type="button" class="cust-chip" data-val="2" onclick="updateCustom('hairStyle',2)">스타일 3 (볼륨/올림머리)</button>
+    </div>
+  </div>
+  <div class="cust-row">
+    <span class="cust-label">🧥 기도원 의상 종류</span>
+    <div class="cust-chips" id="cust-outfit">
+      <button type="button" class="cust-chip" data-val="suit" onclick="updateCustom('outfitType','suit')">👔 월스트리트 정장</button>
+      <button type="button" class="cust-chip" data-val="robe" onclick="updateCustom('outfitType','robe')">🥋 3X 불마켓 수도복(가운)</button>
+      <button type="button" class="cust-chip" data-val="casual" onclick="updateCustom('outfitType','casual')">🧥 실리콘밸리 캐주얼</button>
+    </div>
+  </div>
+  <div class="cust-row">
+    <span class="cust-label">🎨 의상 색상</span>
+    <div class="cust-chips" id="cust-color">
+      <div class="color-swatch" data-val="#143d2e" style="background:#143d2e;" onclick="updateCustom('outfitColor','#143d2e')" title="에메랄드 불"></div>
+      <div class="color-swatch" data-val="#1e2f4d" style="background:#1e2f4d;" onclick="updateCustom('outfitColor','#1e2f4d')" title="월스트리트 네이비"></div>
+      <div class="color-swatch" data-val="#25282e" style="background:#25282e;" onclick="updateCustom('outfitColor','#25282e')" title="다크 차콜"></div>
+      <div class="color-swatch" data-val="#5e1f28" style="background:#5e1f28;" onclick="updateCustom('outfitColor','#5e1f28')" title="크림슨 버건디"></div>
+      <div class="color-swatch" data-val="#8c6d3b" style="background:#8c6d3b;" onclick="updateCustom('outfitColor','#8c6d3b')" title="골드 브론즈"></div>
+      <div class="color-swatch" data-val="#e8e0cf" style="background:#e8e0cf;" onclick="updateCustom('outfitColor','#e8e0cf')" title="화이트 아이보리"></div>
+    </div>
+  </div>
+  <div class="cust-row">
+    <span class="cust-label">📘 손 소품</span>
+    <div class="cust-chips" id="cust-prop">
+      <button type="button" class="cust-chip" data-val="ledger" onclick="updateCustom('prop','ledger')">📕 황금 원장북</button>
+      <button type="button" class="cust-chip" data-val="candle" onclick="updateCustom('prop','candle')">🕯️ 기원 촛불</button>
+      <button type="button" class="cust-chip" data-val="bullstaff" onclick="updateCustom('prop','bullstaff')">🌿 양봉 올리브가지</button>
+      <button type="button" class="cust-chip" data-val="bag" onclick="updateCustom('prop','bag')">💼 트레이더 가방</button>
+      <button type="button" class="cust-chip" data-val="none" onclick="updateCustom('prop','none')">빈손</button>
+    </div>
+  </div>
+  <div class="cust-row" style="margin-bottom:0;">
+    <span class="cust-label">👑 머리/얼굴 장식</span>
+    <div class="cust-chips" id="cust-acc">
+      <button type="button" class="cust-chip" data-val="none" onclick="updateCustom('accessory','none')">없음</button>
+      <button type="button" class="cust-chip" data-val="glasses" onclick="updateCustom('accessory','glasses')">👓 퀀트 금테안경</button>
+      <button type="button" class="cust-chip" data-val="beret" onclick="updateCustom('accessory','beret')">🧢 트레이더 베레모</button>
+      <button type="button" class="cust-chip" data-val="crown" onclick="updateCustom('accessory','crown')">👑 SOXL 500 금관</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달 4: 레버리지 민족 음악 & 성전 사운드 믹서 -->
 <div class="modal-card" id="modal-sound">
   <div class="modal-head">
-    <span class="modal-title">🎵 레버리지 민족 · 멘탈케어 사운드 믹서</span>
+    <span class="modal-title">🎵 레버리지 민족 · 기도원 성전 사운드 믹서</span>
     <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
   </div>
   <div class="track-list" id="track-list">
     <button type="button" class="track-btn playing" data-track="0" onclick="selectBgmTrack(0)">
       <span>🔥 1. 레버리지 민족 (Midnight Bull Run · 원곡 신스웨이브)</span>
-      <span>PLAY</span>
+      <span>🔊 재생중</span>
     </button>
     <button type="button" class="track-btn" data-track="1" onclick="selectBgmTrack(1)">
       <span>🎙️ 2. 레버리지 민족 찬가 (SOXL 100~500 보컬 에디션)</span>
       <span>PLAY</span>
     </button>
     <button type="button" class="track-btn" data-track="2" onclick="selectBgmTrack(2)">
-      <span>🌙 3. 나스닥 애프터장 로파이 나이트 드라이브 (Lo-Fi Synth)</span>
+      <span>🌙 3. 나스닥 애프터장 로파이 기도원 (Lo-Fi Synth)</span>
       <span>PLAY</span>
     </button>
     <button type="button" class="track-btn" data-track="3" onclick="selectBgmTrack(3)">
-      <span>⚡ 4. 실리콘밸리 3X 퀀트 펄스 (Deep Tech Electronic)</span>
+      <span>⚡ 4. 실리콘밸리 3X 퀀트 대성전 (Deep Tech Electronic)</span>
       <span>PLAY</span>
     </button>
   </div>
@@ -654,12 +873,12 @@
     <input type="range" id="vol-bgm" min="0" max="100" value="78" oninput="updateVolumes()" />
   </div>
   <div class="mixer-row">
-    <span>💧 중앙 웨이퍼 분수 물소리</span>
-    <input type="range" id="vol-water" min="0" max="100" value="32" oninput="updateVolumes()" />
+    <span>⛲ 야외 웨이퍼 연못 물소리</span>
+    <input type="range" id="vol-water" min="0" max="100" value="28" oninput="updateVolumes()" />
   </div>
   <div class="mixer-row">
-    <span>✨ 3X 황금 공명 패드음</span>
-    <input type="range" id="vol-pad" min="0" max="100" value="25" oninput="updateVolumes()" />
+    <span>🎹 성전 파이프 오르간 공명음</span>
+    <input type="range" id="vol-pad" min="0" max="100" value="24" oninput="updateVolumes()" />
   </div>
 
   <label class="file-upload-label">
@@ -668,7 +887,7 @@
   </label>
 </div>
 
-<!-- 풀스크린 초고화질 액자 줌 라이트박스 -->
+<!-- 풀스크린 초고화질 성화 액자 줌 라이트박스 -->
 <div id="zoom-lightbox">
   <div class="zl-top">
     <div class="zl-title" id="zl-title">SOXL 100</div>
@@ -686,47 +905,50 @@
   </div>
 </div>
 
-<!-- 하단 5대 인터랙션 독 -->
+<!-- 하단 6대 인터랙션 독 (Dock) -->
 <div id="bottom-dock">
-  <button type="button" class="dock-btn" id="dock-sit" onclick="triggerSitAction()">
-    <span>🪑</span><span class="label-txt">벤치 착석</span><span class="key-badge">1</span>
+  <button type="button" class="dock-btn" id="dock-sit" onclick="toggleMySit()">
+    <span>🪑</span><span class="label-txt" id="dock-sit-label">장의자 착석</span><span class="key-badge">1</span>
   </button>
-  <button type="button" class="dock-btn" id="dock-wheel" onclick="triggerWheelFocus()">
-    <span>💎</span><span class="label-txt">야수의 심장 휠</span><span class="key-badge">2</span>
+  <button type="button" class="dock-btn" id="dock-kneel" onclick="toggleMyKneel()">
+    <span>🧎</span><span class="label-txt" id="dock-kneel-label">무릎 기도</span><span class="key-badge">2</span>
   </button>
   <button type="button" class="dock-btn" id="dock-candle" onclick="togglePanel('candle')">
-    <span>🕯️</span><span class="label-txt">불꽃 기원</span><span class="key-badge">3</span>
+    <span>🕯️</span><span class="label-txt">촛불 간구문</span><span class="key-badge">3</span>
   </button>
   <button type="button" class="dock-btn" id="dock-docent" onclick="togglePanel('docent')">
-    <span>🖼️</span><span class="label-txt">SOXL 100~500 액자</span><span class="key-badge">4</span>
+    <span>🖼️</span><span class="label-txt">100~500 성화</span><span class="key-badge">4</span>
+  </button>
+  <button type="button" class="dock-btn" id="dock-avatar" onclick="togglePanel('avatar')">
+    <span>👔</span><span class="label-txt">기도원 복장</span><span class="key-badge">5</span>
   </button>
   <button type="button" class="dock-btn" id="dock-sound" onclick="togglePanel('sound')">
-    <span>🎵</span><span class="label-txt">레버리지 민족 음악</span><span class="key-badge">5</span>
+    <span>🎵</span><span class="label-txt">레버리지 음악</span><span class="key-badge">6</span>
   </button>
 </div>
 
-<!-- Three.js & MQTT 라이브러리 (로컬 독립 에셋 + CDN 폴백) -->
+<!-- Three.js & MQTT 라이브러리 -->
 <script src="./assets/js/three.min.js" onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';document.head.appendChild(s);"></script>
 <script src="./assets/js/mqtt.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/mqtt@5.3.4/dist/mqtt.min.js';document.head.appendChild(s);"></script>
 
 <script>
 // ============================================================================
-// 1. SOXL 100 · 200 · 300 · 400 · 500 벽면 액자 데이터 및 마인드셋 격언
+// 1. SOXL 100 · 200 · 300 · 400 · 500 성전 액자 데이터 및 기도원 간구문
 // ============================================================================
 const SOXL_FRAMES = [
   {
     id: 0,
     code: 'SOXL 100',
     price: '$100',
-    badge: 'STAGE I · THE AWAKENING',
+    badge: 'SANCTUARY I · THE AWAKENING',
     title: 'SOXL 100 — 백불의 귀환 · 의심을 확신으로 바꾼 첫 성벽',
-    subtitle: '변동성의 안개를 뚫고 마침내 세 자릿수($100) 고지를 탈환한 레버리지 민족의 첫 번째 기념비',
+    subtitle: '변동성의 안개를 뚫고 마침내 세 자릿수($100) 고지를 탈환한 레버리지 민족의 첫 번째 성화',
     quote: '“모두가 역배열과 상장폐지를 말할 때, 분할매수로 씨앗을 심은 자들이 맞이하는 첫 번째 봄”',
     img: './assets/frames/soxl_100.png',
-    pos: { x: -14.42, y: 4.9, z: -4.2 },
+    pos: { x: -7.66, y: 3.1, z: -4.2 },
     rotY: Math.PI / 2,
-    size: { w: 6.2, h: 4.1 },
-    benchPos: { x: -10.2, z: -4.2, rotY: Math.PI / 2 },
+    size: { w: 3.5, h: 2.35 },
+    seatTarget: { x: -3.55, z: -3.6, lookAngle: Math.PI / 2 },
     accent: '#38d69a',
     bgTop: '#0a1c17', bgBot: '#050d0b',
     candles: [22, 18, 25, 31, 28, 39, 46, 42, 58, 67, 74, 88, 100]
@@ -735,15 +957,15 @@ const SOXL_FRAMES = [
     id: 1,
     code: 'SOXL 200',
     price: '$200',
-    badge: 'STAGE II · THE BREAKOUT',
+    badge: 'SANCTUARY II · THE BREAKOUT',
     title: 'SOXL 200 — 이백불 돌파 · 파도를 넘어선 야수의 심장',
     subtitle: '수십 번의 흔들기와 조정장을 견뎌낸 진정한 장기 보유자만이 마주하는 대세 상승장',
     quote: '“단기 노이즈에 일희일비하지 마라. AI 반도체의 거대한 물결은 이미 200불 너머를 향하고 있다”',
     img: './assets/frames/soxl_200.png',
-    pos: { x: -8.6, y: 4.9, z: -14.42 },
-    rotY: 0,
-    size: { w: 6.0, h: 4.0 },
-    benchPos: { x: -8.6, z: -10.2, rotY: 0 },
+    pos: { x: -7.66, y: 3.1, z: 1.2 },
+    rotY: Math.PI / 2,
+    size: { w: 3.5, h: 2.35 },
+    seatTarget: { x: -3.55, z: 1.2, lookAngle: Math.PI / 2 },
     accent: '#48bcff',
     bgTop: '#0c1826', bgBot: '#060b14',
     candles: [60, 75, 68, 92, 105, 98, 122, 138, 130, 156, 174, 186, 200]
@@ -752,15 +974,15 @@ const SOXL_FRAMES = [
     id: 2,
     code: 'SOXL 300',
     price: '$300',
-    badge: 'STAGE III · TRIPLE CROWN',
+    badge: 'SANCTUARY III · TRIPLE CROWN',
     title: 'SOXL 300 — 삼백불 등정 · 3배 레버리지 양의 복리가 만개하다',
-    subtitle: '일일 복리 효과(Daily Compounding)가 연속 상승 추세와 결합하여 계좌의 차원을 바꾸는 황금 구간',
+    subtitle: '일일 복리 효과(Daily Compounding)가 연속 상승 추세와 결합하여 계좌의 차원을 바꾸는 황금 제단화',
     quote: '“하락장에서의 고통이 3배였다면, 슈퍼사이클 본궤도에서의 보상 또한 3배의 복리로 돌아온다”',
     img: './assets/frames/soxl_300.png',
-    pos: { x: 0.0, y: 5.05, z: -14.42 },
+    pos: { x: -4.65, y: 4.15, z: -11.42 },
     rotY: 0,
-    size: { w: 6.6, h: 4.3 },
-    benchPos: { x: 0.0, z: -10.2, rotY: 0 },
+    size: { w: 4.1, h: 2.75 },
+    seatTarget: { x: -2.5, z: -3.6, lookAngle: 0 },
     accent: '#ba84ff',
     bgTop: '#1a142a', bgBot: '#090612',
     candles: [120, 140, 155, 148, 175, 198, 212, 205, 236, 258, 272, 288, 300]
@@ -769,15 +991,15 @@ const SOXL_FRAMES = [
     id: 3,
     code: 'SOXL 400',
     price: '$400',
-    badge: 'STAGE IV · BEYOND GRAVITY',
+    badge: 'SANCTUARY IV · BEYOND GRAVITY',
     title: 'SOXL 400 — 사백불 신세계 · 글로벌 AI 인프라 패권의 정점',
     subtitle: '데이터센터, HBM, 자율주행, 로보틱스까지 실리콘 제국이 완성되는 초격차의 영역',
     quote: '“공포에 던진 자들은 차트 아래에서 우러러보고, 원칙을 지킨 레버리지 민족은 400불의 능선을 걷는다”',
     img: './assets/frames/soxl_400.png',
-    pos: { x: 8.6, y: 4.9, z: -14.42 },
-    rotY: 0,
-    size: { w: 6.0, h: 4.0 },
-    benchPos: { x: 8.6, z: -10.2, rotY: 0 },
+    pos: { x: 7.66, y: 3.1, z: -4.2 },
+    rotY: -Math.PI / 2,
+    size: { w: 3.5, h: 2.35 },
+    seatTarget: { x: 3.55, z: -3.6, lookAngle: -Math.PI / 2 },
     accent: '#ffa448',
     bgTop: '#24160e', bgBot: '#0f0906',
     candles: [190, 215, 240, 232, 265, 290, 310, 302, 335, 358, 375, 390, 400]
@@ -786,15 +1008,15 @@ const SOXL_FRAMES = [
     id: 4,
     code: 'SOXL 500',
     price: '$500',
-    badge: 'STAGE V · LEGENDS OF LEVERAGE',
-    title: 'SOXL 500 — 오백불 신화 · 레버리지 민족 명예의 전당',
-    subtitle: '끝까지 살아남은 자가 가장 강한 자다 — SOXL $500 시대를 열어젖힌 불멸의 주주 헌정 기념비',
-    quote: '“흔들리는 날마다 이 액자 앞에 서라. 우리의 목적지는 언제나 SOXL 500, 그 찬란한 정상이다”',
+    badge: 'SANCTUARY V · LEGENDS OF LEVERAGE',
+    title: 'SOXL 500 — 오백불 신화 · SOXL 기도원 최고 대제단화',
+    subtitle: '끝까지 살아남은 자가 가장 강한 자다 — SOXL $500 시대를 열어젖힌 불멸의 주주 헌정 대제단화',
+    quote: '“흔들리는 날마다 이 대제단화 앞에 무릎을 꿇으라. 우리의 목적지는 언제나 SOXL 500, 그 찬란한 정상이다”',
     img: './assets/frames/soxl_500.png',
-    pos: { x: 14.42, y: 5.05, z: -4.2 },
-    rotY: -Math.PI / 2,
-    size: { w: 6.6, h: 4.3 },
-    benchPos: { x: 10.2, z: -4.2, rotY: -Math.PI / 2 },
+    pos: { x: 4.65, y: 4.15, z: -11.42 },
+    rotY: 0,
+    size: { w: 4.1, h: 2.75 },
+    seatTarget: { x: 2.5, z: -3.6, lookAngle: 0 },
     accent: '#ffd75a',
     bgTop: '#281d08', bgBot: '#0e0a04',
     candles: [250, 280, 310, 335, 360, 390, 415, 440, 460, 475, 490, 496, 500]
@@ -803,15 +1025,15 @@ const SOXL_FRAMES = [
     id: 5,
     code: 'SOXL CLUB',
     price: '3X WEALTH',
-    badge: 'SEMICONDUCTOR INVESTORS COMMUNITY',
+    badge: 'SEMICONDUCTOR INVESTORS SANCTUARY',
     title: 'SOXL 주주 클럽 — 반도체에 진심인 사람들, 여기 모여라!',
     subtitle: '더 깊이, 더 넓게 함께! 좋은 정보가 더 큰 생각을 만듭니다.',
-    quote: '“혼자 버티면 외로운 변동성이지만, 레버리지 민족이 함께 모이면 역사가 된다”',
+    quote: '“혼자 버티면 외로운 변동성이지만, 레버리지 민족이 기도원에 함께 모이면 역사가 된다”',
     img: './assets/frames/soxl_shareholder.png',
-    pos: { x: -14.42, y: 4.8, z: 5.6 },
+    pos: { x: -7.66, y: 3.1, z: 6.2 },
     rotY: Math.PI / 2,
-    size: { w: 5.4, h: 3.8 },
-    benchPos: { x: -10.2, z: 5.6, rotY: Math.PI / 2 },
+    size: { w: 3.4, h: 2.3 },
+    seatTarget: { x: -3.55, z: 6.0, lookAngle: Math.PI / 2 },
     accent: '#38bdf8',
     bgTop: '#081828', bgBot: '#040a12',
     candles: [40, 60, 85, 110, 150, 195, 240, 300, 360, 420, 500]
@@ -822,13 +1044,13 @@ const SOXL_FRAMES = [
     price: '$100~$500',
     badge: 'THE LEVERAGE NATION MASTER ROADMAP',
     title: '레버리지 민족 5대 이정표 마스터 로드맵 (SOXL 100 → 500)',
-    subtitle: '백불의 귀환부터 오백불 명예의 전당까지 5단계 슈퍼사이클 마스터피스',
-    quote: '“폭락장은 영원하지 않고, 반도체의 진보는 멈추지 않는다. 흔들릴 때마다 이 다섯 개의 액자를 올려다보라.”',
+    subtitle: '백불의 귀환부터 오백불 대성전까지 5단계 슈퍼사이클 마스터피스',
+    quote: '“폭락장은 영원하지 않고, 반도체의 진보는 멈추지 않는다. 흔들릴 때마다 이 다섯 개의 성화를 올려다보라.”',
     img: './assets/frames/soxl_roadmap.png',
-    pos: { x: 14.42, y: 4.8, z: 5.6 },
+    pos: { x: 7.66, y: 3.1, z: 1.2 },
     rotY: -Math.PI / 2,
-    size: { w: 5.8, h: 3.8 },
-    benchPos: { x: 10.2, z: 5.6, rotY: -Math.PI / 2 },
+    size: { w: 3.5, h: 2.35 },
+    seatTarget: { x: 3.55, z: 1.2, lookAngle: -Math.PI / 2 },
     accent: '#eab85c',
     bgTop: '#161f28', bgBot: '#080d12',
     candles: [100, 150, 200, 250, 300, 350, 400, 450, 500]
@@ -845,72 +1067,116 @@ const BGM_TRACKS = [
     src: './assets/audio/leverage_nation_anthem.mp3?v=2'
   },
   {
-    title: '나스닥 애프터장 로파이 드라이브 (Lo-Fi Synth)',
+    title: '나스닥 애프터장 로파이 기도원 (Lo-Fi Synth)',
     src: './assets/audio/mental_care_lounge.mp3?v=2'
   },
   {
-    title: '실리콘밸리 3X 퀀트 펄스 (Deep Tech Beat)',
+    title: '실리콘밸리 3X 퀀트 대성전 (Deep Tech Beat)',
     src: './assets/audio/wall_street_prestige.mp3?v=2'
   }
 ];
 
 const MENTAL_MANTRAS = [
   {
-    ref: '레버리지 민족 제1장 · 야수의 심장',
-    text: '모두가 공포에 질려 투매할 때 분할로 씨앗을 심은 자만이 SOXL 100과 500의 찬란한 양봉을 거둔다.'
+    ref: 'SOXL 기도원 제1장 · 야수의 심장',
+    text: '모두가 공포에 질려 투매할 때 분할로 씨앗을 심은 자만이 SOXL 100과 500의 찬란한 장대양봉을 거둔다.'
   },
   {
-    ref: '레버리지 민족 제2장 · 3배 복리의 법칙',
-    text: '조정장은 레버리지 민족의 인내심을 시험하는 관문일 뿐, AI 반도체 슈퍼사이클의 거대한 파도는 멈추지 않는다.'
+    ref: 'SOXL 기도원 제2장 · 3배 복리의 교리',
+    text: '조정장은 레버리지 민족의 인내심을 시험하는 관문일 뿐, AI 반도체 슈퍼사이클의 거대한 물결은 멈추지 않는다.'
   },
   {
-    ref: '레버리지 민족 제3장 · 명예의 전당',
-    text: '오늘의 흔들림에 계좌를 닫지 마라. 끝까지 살아남은 자가 벽면의 SOXL 500 액자 앞에서 마지막에 웃는다.'
+    ref: 'SOXL 기도원 제3장 · 대제단의 약속',
+    text: '오늘의 흔들림에 계좌를 닫지 마라. 끝까지 살아남은 자가 강단 위 SOXL 500 대제단화 앞에서 마지막에 웃는다.'
   },
   {
-    ref: '레버리지 민족 제4장 · 멘탈케어 원칙',
+    ref: 'SOXL 기도원 제4장 · 철야 기도의 원칙',
     text: '급등에 추격하지 않고 급락에 절망하지 않으며, 나의 원칙과 현금 비중으로 변동성을 내 편으로 만든다.'
   }
 ];
 
 const INITIAL_NOTES = [
-  { id: 'n1', author: '필라델피아 파수꾼', text: '벽면에 걸린 SOXL 100 200 300 400 500 액자 보니까 가슴이 웅장해집니다! 모두 성투하세요!', likes: 38, time: '방금 전' },
-  { id: 'n2', author: '서학개미 야수', text: '레버리지 민족 음악 들으면서 중앙 분수대 벤치에 앉아 있으니까 하락장 스트레스가 싹 녹네요 ㅎㅎ', likes: 29, time: '2분 전' },
-  { id: 'n3', author: 'SOXL 500 존버단', text: '흔들릴 때마다 SOXL 멘탈케어 요양소 와서 SOXL 500 액자 보며 멘탈 잡습니다. 끝까지 살아남읍시다!', likes: 54, time: '5분 전' },
-  { id: 'n4', author: '요양소 원장', text: 'SOXL 멘탈케어 요양소에 입소하신 주주분들을 환영합니다. 원하시는 액자를 클릭하면 크게 감상하실 수 있습니다.', likes: 42, time: '8분 전' }
+  { id: 'n1', author: 'SOXL 500 수석장로', text: '강단 앞 무릎 기도석에 무릎 꿇고 SOXL 300·500 제단화 올려다보니 가슴이 웅장해집니다! 모두 성투하세요!', likes: 52, time: '방금 전' },
+  { id: 'n2', author: '필라델피아 파수꾼', text: '레버리지 민족 찬가 들으면서 본당 장의자에 앉아 있으니까 조정장 스트레스가 싹 내려가네요 🙏', likes: 39, time: '2분 전' },
+  { id: 'n3', author: '서학개미 야수', text: '오늘 밤 나스닥 본장 시원한 장대양봉 기원하며 강단 촛불 제단에 불꽃 하나 밝히고 갑니다!', likes: 64, time: '5분 전' },
+  { id: 'n4', author: 'SOXL 기도원장', text: 'SOXL 기도원 대성전에 입소하신 주주분들을 환영합니다. 장의자에 앉거나 강단 앞 방석에서 무릎 기도를 올리실 수 있습니다.', likes: 48, time: '9분 전' }
 ];
-
 // ============================================================================
-// 2. 전역 상태 변수
+// 2. 전역 상태 변수 & 아바타 커스터마이징 로드
 // ============================================================================
 let myId = 'soxl_' + Math.random().toString(36).substring(2, 9);
-let myNick = localStorage.getItem('soxl_mc_nick') || '레버리지 민족';
-document.getElementById('boot-nick-input').value = myNick;
-document.getElementById('my-nick-label').textContent = myNick;
 
-let scene, camera, renderer, clock;
-let myAvatar = null;
-let myState = {
-  x: 0, z: 9.8, rotY: Math.PI,
-  targetX: 0, targetZ: 9.8,
-  sitting: false, benchIdx: -1,
-  bubble: '', bubbleUntil: 0
+const DEFAULT_CUSTOM = {
+  name: '레버리지 민족',
+  gender: 'M',
+  hairStyle: 0,
+  hairColor: '#1e1814',
+  outfitType: 'suit',
+  outfitColor: '#143d2e',
+  prop: 'ledger',
+  accessory: 'none'
 };
-let camAngle = 0;
-let camPitch = 0.34;
-let camDist = 9.2;
-let isDragging = false, dragMoved = false, prevMouse = { x: 0, y: 0 };
-let keysPressed = {};
 
-let benches = [];
+function loadMyCustom() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('soxl_sanctuary_avatar_v1') || 'null');
+    if (saved && typeof saved === 'object') {
+      return {
+        name: (saved.name && String(saved.name).trim()) ? String(saved.name).trim().slice(0, 16) : (localStorage.getItem('soxl_mc_nick') || DEFAULT_CUSTOM.name),
+        gender: saved.gender === 'F' ? 'F' : 'M',
+        hairStyle: [0, 1, 2].includes(Number(saved.hairStyle)) ? Number(saved.hairStyle) : 0,
+        hairColor: saved.hairColor || DEFAULT_CUSTOM.hairColor,
+        outfitType: ['suit', 'robe', 'casual'].includes(saved.outfitType) ? saved.outfitType : 'suit',
+        outfitColor: saved.outfitColor || DEFAULT_CUSTOM.outfitColor,
+        prop: ['ledger', 'candle', 'bullstaff', 'bag', 'none'].includes(saved.prop) ? saved.prop : 'ledger',
+        accessory: ['none', 'glasses', 'beret', 'crown'].includes(saved.accessory) ? saved.accessory : 'none'
+      };
+    }
+  } catch (e) {}
+  return { ...DEFAULT_CUSTOM, name: localStorage.getItem('soxl_mc_nick') || DEFAULT_CUSTOM.name };
+}
+
+function saveMyCustom() {
+  try {
+    localStorage.setItem('soxl_sanctuary_avatar_v1', JSON.stringify(myCustom));
+    localStorage.setItem('soxl_mc_nick', myCustom.name);
+  } catch (e) {}
+}
+
+let myCustom = loadMyCustom();
+document.getElementById('boot-nick-input').value = myCustom.name;
+document.getElementById('my-nick-label').textContent = myCustom.name;
+document.getElementById('cust-name-input').value = myCustom.name;
+
+let scene, camera, renderer, clock, worldGroup;
+let floorMesh, gardenMesh, runnerMesh, pathMesh;
+let myAvatar = null;
+let avatars = [];
+let seats = []; // { id, label, pos: THREE.Vector3, type: 'pew'|'kneel', lookAngle, occupiedBy }
 let frameMeshes = [];
 let candleFlames = [];
-let litCandleCount = 5;
-let coreWaferMesh = null;
+let candleLightL, candleLightR;
+let pondWaferCore = null;
 let particleSystem = null;
 let targetRing = null;
-let ambientLight, mainSpot, hemiLight;
+let rippleAge = 99;
+let ambientLight, mainSpot, hemiLight, altarHaloMesh;
 let lightModeIdx = 0;
+
+let camYaw = 0;
+let camPitch = 0.32;
+let camDist = 6.8;
+let camPresetIdx = 0;
+const CAM_PRESETS = [
+  { name: '시점: 본당 3인칭', dist: 6.8, pitch: 0.32 },
+  { name: '시점: 강단 정면', dist: 4.0, pitch: 0.16 },
+  { name: '시점: 대성전 조망', dist: 12.8, pitch: 0.50 },
+  { name: '시점: 1인칭 집중기도', dist: 2.3, pitch: 0.12 }
+];
+
+let isDragging = false, dragMoved = false, prevMouse = { x: 0, y: 0 };
+let keysPressed = {};
+let sitStartTime = null;
 
 let currentDocentIdx = 0;
 let currentMantraIdx = 0;
@@ -918,7 +1184,6 @@ let mantraCharIdx = 0;
 let mantraCompleteCount = parseInt(localStorage.getItem('soxl_mc_mantra_cnt') || '0', 10);
 
 let showNPCs = true;
-let npcs = [];
 let remotePeers = {};
 let mqttClient = null;
 let bcChannel = null;
@@ -932,22 +1197,95 @@ let audioCtx = null;
 let waterGain = null, padGain = null;
 
 // ============================================================================
-// 3. 고해상도 캔버스 텍스처 생성기 (file:// 프로토콜 CORS 100% 무결점 보장)
+// 3. 절차적(Procedural) 캔버스 텍스처 생성기 (CORS 0% 보장)
 // ============================================================================
+function createWoodFloorTexture() {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#2d2016';
+  ctx.fillRect(0, 0, 512, 512);
+  for (let y = 0; y < 512; y += 32) {
+    ctx.fillStyle = (y / 32) % 2 === 0 ? '#332419' : '#281c13';
+    ctx.fillRect(0, y, 512, 30);
+    ctx.fillStyle = '#1a110b';
+    ctx.fillRect(0, y + 30, 512, 2);
+    for (let x = 0; x < 512; x += 128) {
+      const offset = ((y / 32) % 2) * 64;
+      ctx.fillRect((x + offset) % 512, y, 2, 32);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(6, 8);
+  return tex;
+}
+
+// SOXL 불마켓 & 반도체 웨이퍼 스테인드글라스 아치 창문 텍스처
+function createBullStainedGlassTexture(idx = 0) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 512;
+  const ctx = c.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#ffe28a');
+  grad.addColorStop(0.45, idx % 2 === 0 ? '#1fd18a' : '#eab85c');
+  grad.addColorStop(1, '#0c3b2e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 512);
+
+  // 고딕 스테인드글라스 납선 격자
+  ctx.strokeStyle = '#121a16';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(8, 8, 240, 496);
+  for (let y = 110; y < 480; y += 110) {
+    ctx.beginPath(); ctx.moveTo(8, y); ctx.lineTo(248, y); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(128, 8); ctx.lineTo(128, 504); ctx.stroke();
+
+  // 상단 황금 웨이퍼 로제트 원형 문양
+  ctx.fillStyle = 'rgba(255, 248, 210, 0.88)';
+  ctx.beginPath(); ctx.arc(128, 135, 52, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = 5; ctx.strokeStyle = '#1a241e'; ctx.stroke();
+
+  // 중앙 3개의 상승 양봉 캔들 문양
+  const bars = [
+    { x: 68, y: 270, h: 90, col: '#2ee59d' },
+    { x: 114, y: 230, h: 130, col: '#ffd86b' },
+    { x: 160, y: 195, h: 165, col: '#2ee59d' }
+  ];
+  bars.forEach(b => {
+    ctx.strokeStyle = '#fff5cc';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(b.x + 14, b.y - 22); ctx.lineTo(b.x + 14, b.y + b.h + 18); ctx.stroke();
+    ctx.fillStyle = b.col;
+    ctx.fillRect(b.x, b.y, 28, b.h);
+    ctx.strokeStyle = '#121a16';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(b.x, b.y, 28, b.h);
+  });
+
+  // 하단 타겟 텍스트
+  const labels = ['SOXL 100', 'SOXL 200', 'SOXL 300', 'SOXL 500'];
+  ctx.fillStyle = '#fff8e7';
+  ctx.font = '900 28px Pretendard, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(labels[idx % labels.length], 128, 455);
+
+  return new THREE.CanvasTexture(c);
+}
+
 function createHighResFrameTexture(frameData) {
   const c = document.createElement('canvas');
   c.width = 1280;
   c.height = 840;
   const ctx = c.getContext('2d');
 
-  // 배경 그라디언트
   const grad = ctx.createLinearGradient(0, 0, 0, c.height);
   grad.addColorStop(0, frameData.bgTop);
   grad.addColorStop(1, frameData.bgBot);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, c.width, c.height);
 
-  // 웨이퍼 그리드 라인
   ctx.strokeStyle = 'rgba(234, 184, 92, 0.08)';
   ctx.lineWidth = 1;
   for (let x = 60; x < c.width; x += 64) {
@@ -957,7 +1295,6 @@ function createHighResFrameTexture(frameData) {
     ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(c.width - 40, y); ctx.stroke();
   }
 
-  // 우상향 캔들차트 렌더링
   const candles = frameData.candles;
   const cMin = Math.min(...candles) * 0.85;
   const cMax = Math.max(...candles) * 1.05;
@@ -999,7 +1336,6 @@ function createHighResFrameTexture(frameData) {
     ctx.fillRect(cx - 13, topY, 26, Math.max(12, botY - topY));
   });
 
-  // 골드 외곽 프레임
   ctx.strokeStyle = '#eab85c';
   ctx.lineWidth = 6;
   ctx.strokeRect(22, 22, c.width - 44, c.height - 44);
@@ -1007,31 +1343,27 @@ function createHighResFrameTexture(frameData) {
   ctx.lineWidth = 2;
   ctx.strokeRect(36, 36, c.width - 72, c.height - 72);
 
-  // 상단 배지
   ctx.fillStyle = 'rgba(234, 184, 92, 0.16)';
-  ctx.fillRect(76, 66, 420, 42);
+  ctx.fillRect(76, 66, 440, 42);
   ctx.strokeStyle = frameData.accent;
   ctx.lineWidth = 2;
-  ctx.strokeRect(76, 66, 420, 42);
+  ctx.strokeRect(76, 66, 440, 42);
   ctx.fillStyle = '#ffe39f';
   ctx.font = '800 21px Pretendard, sans-serif';
   ctx.fillText(frameData.badge, 96, 94);
 
-  // 초대형 SOXL 100 / 200 / 300 / 400 / 500 타이틀
   ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
   ctx.font = '900 138px Pretendard, sans-serif';
   ctx.fillText(frameData.code, 82, 256);
   ctx.fillStyle = '#fff9eb';
   ctx.fillText(frameData.code, 76, 250);
 
-  // 타겟 가격 골드 배지
   ctx.fillStyle = '#eab85c';
   ctx.fillRect(76, 290, 310, 74);
   ctx.fillStyle = '#09120f';
   ctx.font = '900 36px Pretendard, sans-serif';
   ctx.fillText('TARGET ' + frameData.price, 98, 340);
 
-  // 우측 상단 3X 원형 엠블럼
   const ex = c.width - 210, ey = 240, er = 102;
   ctx.beginPath(); ctx.arc(ex, ey, er, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(10, 18, 16, 0.88)'; ctx.fill();
@@ -1045,10 +1377,9 @@ function createHighResFrameTexture(frameData) {
   ctx.fillText(frameData.price, ex, ey + 16);
   ctx.fillStyle = '#c8dad3';
   ctx.font = '700 17px Pretendard, sans-serif';
-  ctx.fillText('DIREXION SOXL', ex, ey + 56);
+  ctx.fillText('SOXL SANCTUARY', ex, ey + 56);
   ctx.textAlign = 'left';
 
-  // 하단 설명 패널
   ctx.fillStyle = 'rgba(6, 12, 10, 0.9)';
   ctx.fillRect(68, 525, c.width - 136, 245);
   ctx.strokeStyle = 'rgba(234, 184, 92, 0.65)';
@@ -1056,7 +1387,7 @@ function createHighResFrameTexture(frameData) {
   ctx.strokeRect(68, 525, c.width - 136, 245);
 
   ctx.fillStyle = '#ffe39f';
-  ctx.font = '800 33px "Noto Serif KR", serif';
+  ctx.font = '800 32px "Noto Serif KR", serif';
   ctx.fillText(frameData.title, 98, 582);
 
   ctx.fillStyle = '#e3efea';
@@ -1069,13 +1400,12 @@ function createHighResFrameTexture(frameData) {
 
   ctx.fillStyle = '#93aba1';
   ctx.font = '700 16px Pretendard, sans-serif';
-  ctx.fillText('SOXL 멘탈케어 요양소 · LEVERAGE NATION HALL OF FAME', 98, 742);
+  ctx.fillText('SOXL 기도원 · LEVERAGE NATION 3X BULL SANCTUARY', 98, 742);
 
   const tex = new THREE.CanvasTexture(c);
   tex.anisotropy = 4;
   tex.needsUpdate = true;
 
-  // 추가: 실제 PNG 파일도 비동기 로드하여 텍스처에 덮어쓰기 (HTTP/HTTPS 환경에서 원본 PNG 표현)
   const img = new Image();
   img.onload = () => {
     ctx.drawImage(img, 0, 0, c.width, c.height);
@@ -1086,18 +1416,17 @@ function createHighResFrameTexture(frameData) {
   return tex;
 }
 
-// 벽면 상단 골드 명패 텍스처
 function createPlaqueTexture(text) {
   const c = document.createElement('canvas');
   c.width = 512; c.height = 96;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#0b1512';
+  ctx.fillStyle = '#091411';
   ctx.fillRect(0, 0, c.width, c.height);
   ctx.strokeStyle = '#eab85c';
   ctx.lineWidth = 6;
   ctx.strokeRect(4, 4, c.width - 8, c.height - 8);
   ctx.fillStyle = '#ffe39f';
-  ctx.font = '900 44px Pretendard, sans-serif';
+  ctx.font = '900 42px Pretendard, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, c.width / 2, c.height / 2 + 2);
@@ -1107,15 +1436,15 @@ function createPlaqueTexture(text) {
 }
 
 // ============================================================================
-// 4. Three.js 3D SOXL 멘탈케어 라운지 구축
+// 4. Three.js 3D 『SOXL 기도원 대성전』 구축 (본당 + 강단 + 장의자 + 무릎기도석 + 야외정원)
 // ============================================================================
 function init3DSpace() {
   const container = document.getElementById('canvas-container');
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x070f0c);
-  scene.fog = new THREE.FogExp2(0x070f0c, 0.018);
+  scene.background = new THREE.Color(0x0b1612);
+  scene.fog = new THREE.FogExp2(0x0b1612, 0.017);
 
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 120);
+  camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 130);
   renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1124,226 +1453,561 @@ function init3DSpace() {
   container.appendChild(renderer.domElement);
 
   clock = new THREE.Clock();
+  worldGroup = new THREE.Group();
+  scene.add(worldGroup);
 
   // 조명 시스템
-  ambientLight = new THREE.AmbientLight(0xd9e8e0, 0.72);
+  ambientLight = new THREE.AmbientLight(0xdbece4, 0.74);
   scene.add(ambientLight);
 
-  hemiLight = new THREE.HemisphereLight(0xffe7b3, 0x0d211a, 0.68);
-  hemiLight.position.set(0, 15, 0);
+  hemiLight = new THREE.HemisphereLight(0xffe7b3, 0x0c2119, 0.68);
+  hemiLight.position.set(0, 16, 0);
   scene.add(hemiLight);
 
-  mainSpot = new THREE.SpotLight(0xffdf9e, 1.45, 45, Math.PI / 3, 0.45, 1.2);
-  mainSpot.position.set(0, 13.5, 0);
+  mainSpot = new THREE.SpotLight(0xffe29e, 1.5, 42, Math.PI / 3, 0.48, 1.2);
+  mainSpot.position.set(0, 12.5, -3.5);
+  mainSpot.target.position.set(0, 1.5, -10.0);
   mainSpot.castShadow = true;
   scene.add(mainSpot);
+  scene.add(mainSpot.target);
 
-  buildGalleryArchitecture();
-  buildCentralWaferFountain();
-  buildWallFramesAndBenches();
-  buildIndoorTreesAndPillars();
+  candleLightL = new THREE.PointLight(0xffb448, 1.15, 9.5);
+  candleLightL.position.set(-2.9, 1.9, -7.2);
+  scene.add(candleLightL);
+
+  candleLightR = new THREE.PointLight(0xffb448, 1.15, 9.5);
+  candleLightR.position.set(2.9, 1.9, -7.2);
+  scene.add(candleLightR);
+
+  buildOutdoorGardenAndWaferPond();
+  buildSanctuaryArchitecture();
+  buildAltarAndBullSpire();
+  buildPewsAndKneelers();
+  buildCandleAltars();
+  buildSanctuaryFrames();
   buildTargetRippleRing();
 
   // 내 아바타 생성
-  myAvatar = createAvatarMesh(0x2ee59d, 0xeab85c, true);
-  myAvatar.position.set(myState.x, 0, myState.z);
-  myAvatar.rotation.y = myState.rotY;
-  scene.add(myAvatar);
+  myAvatar = createAvatar({
+    id: myId,
+    name: `${myCustom.name} (나)`,
+    custom: myCustom,
+    isMe: true,
+    x: 0,
+    z: 8.2
+  });
 
-  // 동반 주주 NPC 생성
+  // 동반 기도 주주(NPC) 배치 (장의자 착석 & 강단 앞 무릎기도!)
   initNPCShareholders();
 
-  // 이벤트 리스너
   window.addEventListener('resize', onWindowResize);
   setupPointerAndKeyboardControls();
 
   animate();
 }
 
-function buildGalleryArchitecture() {
-  // 바닥 (다크 에메랄드 오닉스 타일 & 골드 인레이)
-  const floorCanvas = document.createElement('canvas');
-  floorCanvas.width = 1024; floorCanvas.height = 1024;
-  const fctx = floorCanvas.getContext('2d');
-  fctx.fillStyle = '#0c1814';
-  fctx.fillRect(0, 0, 1024, 1024);
-  fctx.strokeStyle = 'rgba(234, 184, 92, 0.16)';
-  fctx.lineWidth = 2;
-  for (let i = 0; i <= 1024; i += 128) {
-    fctx.beginPath(); fctx.moveTo(i, 0); fctx.lineTo(i, 1024); fctx.stroke();
-    fctx.beginPath(); fctx.moveTo(0, i); fctx.lineTo(1024, i); fctx.stroke();
-  }
-  const floorTex = new THREE.CanvasTexture(floorCanvas);
-  floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
-  floorTex.repeat.set(6, 6);
+// 4-1. 야외 실리콘밸리 달빛 정원 & 회전하는 3X 황금 웨이퍼 분수 연못
+function buildOutdoorGardenAndWaferPond() {
+  gardenMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(90, 90),
+    new THREE.MeshStandardMaterial({ color: 0x102119, roughness: 0.94 })
+  );
+  gardenMesh.rotation.x = -Math.PI / 2;
+  gardenMesh.position.y = -0.05;
+  gardenMesh.receiveShadow = true;
+  worldGroup.add(gardenMesh);
 
-  const floorGeo = new THREE.PlaneGeometry(30, 30);
-  const floorMat = new THREE.MeshStandardMaterial({
-    map: floorTex, roughness: 0.35, metalness: 0.2
-  });
-  const floor = new THREE.Mesh(floorGeo, floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  floor.name = 'walkable_floor';
-  scene.add(floor);
+  // 성전 입구(z=12)에서 야외 정원(z=29)까지 이어지는 대리석 산책로
+  pathMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.8, 18),
+    new THREE.MeshStandardMaterial({ color: 0x3b4d44, roughness: 0.82 })
+  );
+  pathMesh.rotation.x = -Math.PI / 2;
+  pathMesh.position.set(0, -0.02, 20.5);
+  pathMesh.receiveShadow = true;
+  worldGroup.add(pathMesh);
 
-  // 중앙 골드 원형 카펫 링
-  const ringGeo = new THREE.RingGeometry(3.5, 3.75, 64);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0xeab85c, side: THREE.DoubleSide });
-  const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-  ringMesh.rotation.x = -Math.PI / 2;
-  ringMesh.position.y = 0.015;
-  scene.add(ringMesh);
+  // 좌측 야외 『3X 황금 웨이퍼 치유 연못』 (x=-9.2, z=19.2)
+  const pondGroup = new THREE.Group();
+  pondGroup.position.set(-9.2, 0, 19.2);
 
-  const outerRingGeo = new THREE.RingGeometry(8.2, 8.32, 64);
-  const outerRing = new THREE.Mesh(outerRingGeo, ringMat);
-  outerRing.rotation.x = -Math.PI / 2;
-  outerRing.position.y = 0.015;
-  scene.add(outerRing);
+  const pondRim = new THREE.Mesh(
+    new THREE.CylinderGeometry(4.3, 4.6, 0.45, 40),
+    new THREE.MeshStandardMaterial({ color: 0x1d332a, roughness: 0.4, metalness: 0.3 })
+  );
+  pondRim.position.y = 0.22;
+  pondGroup.add(pondRim);
 
-  // 4면 갤러리 벽면 (30m x 30m, 높이 10.5m)
-  const wallMat = new THREE.MeshStandardMaterial({
-    color: 0x12221c, roughness: 0.65, metalness: 0.12
-  });
-  const trimMat = new THREE.MeshStandardMaterial({
-    color: 0xeab85c, roughness: 0.3, metalness: 0.75
-  });
+  const goldRing = new THREE.Mesh(
+    new THREE.TorusGeometry(4.35, 0.09, 14, 48),
+    new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.85, roughness: 0.2 })
+  );
+  goldRing.rotation.x = Math.PI / 2;
+  goldRing.position.y = 0.46;
+  pondGroup.add(goldRing);
 
-  const wallDefs = [
-    { x: 0, z: -14.8, ry: 0 },
-    { x: 0, z: 14.8, ry: Math.PI },
-    { x: -14.8, z: 0, ry: Math.PI / 2 },
-    { x: 14.8, z: 0, ry: -Math.PI / 2 }
-  ];
-  wallDefs.forEach(w => {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(30, 10.5, 0.4), wallMat);
-    wall.position.set(w.x, 5.25, w.z);
-    wall.rotation.y = w.ry;
-    wall.receiveShadow = true;
-    scene.add(wall);
-
-    // 상·하단 골드 몰딩
-    const botTrim = new THREE.Mesh(new THREE.BoxGeometry(30, 0.25, 0.5), trimMat);
-    botTrim.position.set(w.x, 0.125, w.z);
-    botTrim.rotation.y = w.ry;
-    scene.add(botTrim);
-
-    const topTrim = new THREE.Mesh(new THREE.BoxGeometry(30, 0.3, 0.55), trimMat);
-    topTrim.position.set(w.x, 9.8, w.z);
-    topTrim.rotation.y = w.ry;
-    scene.add(topTrim);
-  });
-
-  // 천장 스카이라이트 아트리움 링
-  const skyGeo = new THREE.RingGeometry(4.5, 11.5, 32);
-  const skyMat = new THREE.MeshBasicMaterial({
-    color: 0x1b382d, side: THREE.DoubleSide, transparent: true, opacity: 0.45
-  });
-  const sky = new THREE.Mesh(skyGeo, skyMat);
-  sky.rotation.x = Math.PI / 2;
-  sky.position.y = 10.4;
-  scene.add(sky);
-}
-
-// 중앙 3X 황금 반도체 웨이퍼 치유 분수대 & 12개의 불꽃
-function buildCentralWaferFountain() {
-  const group = new THREE.Group();
-
-  // 분수대 대리석 기단
-  const baseMat = new THREE.MeshStandardMaterial({ color: 0x162922, roughness: 0.3, metalness: 0.3 });
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, roughness: 0.22, metalness: 0.85 });
-
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.4, 0.75, 48), baseMat);
-  base.position.y = 0.375;
-  base.receiveShadow = true;
-  group.add(base);
-
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(3.15, 0.1, 16, 64), goldMat);
-  rim.rotation.x = Math.PI / 2;
-  rim.position.y = 0.76;
-  group.add(rim);
-
-  // 에메랄드 치유 수면
-  const waterMat = new THREE.MeshStandardMaterial({
-    color: 0x1dd18e, emissive: 0x0a4f36, emissiveIntensity: 0.5,
-    roughness: 0.15, metalness: 0.4, transparent: true, opacity: 0.88
-  });
-  const water = new THREE.Mesh(new THREE.CylinderGeometry(2.95, 2.95, 0.68, 48), waterMat);
-  water.position.y = 0.38;
-  group.add(water);
-
-  // 중앙 피데스탈 & 회전하는 3X 황금 웨이퍼 코어
-  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.75, 1.8, 32), baseMat);
-  pillar.position.y = 0.9;
-  group.add(pillar);
-
-  coreWaferMesh = new THREE.Group();
-  coreWaferMesh.position.set(0, 2.55, 0);
-
-  const waferDisc = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.15, 1.15, 0.14, 48),
+  const pondWater = new THREE.Mesh(
+    new THREE.CylinderGeometry(4.15, 4.15, 0.38, 40),
     new THREE.MeshStandardMaterial({
-      color: 0xffd269, emissive: 0xb87d14, emissiveIntensity: 0.45,
-      roughness: 0.18, metalness: 0.9
+      color: 0x1dd18e, emissive: 0x0a4f36, emissiveIntensity: 0.55,
+      roughness: 0.15, metalness: 0.4, transparent: true, opacity: 0.88
     })
   );
-  waferDisc.rotation.z = Math.PI / 2;
-  coreWaferMesh.add(waferDisc);
+  pondWater.position.y = 0.22;
+  pondGroup.add(pondWater);
 
-  const outerOrbit = new THREE.Mesh(
-    new THREE.TorusGeometry(1.42, 0.05, 16, 64),
+  // 연못 중앙 회전하는 3X 황금 웨이퍼 코어
+  pondWaferCore = new THREE.Group();
+  pondWaferCore.position.set(0, 1.65, 0);
+  const waferDisc = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.05, 1.05, 0.12, 36),
+    new THREE.MeshStandardMaterial({ color: 0xffd269, emissive: 0xb87d14, emissiveIntensity: 0.5, metalness: 0.9, roughness: 0.2 })
+  );
+  waferDisc.rotation.z = Math.PI / 2;
+  pondWaferCore.add(waferDisc);
+  const orbitRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.32, 0.045, 12, 48),
     new THREE.MeshBasicMaterial({ color: 0x2ee59d })
   );
-  coreWaferMesh.add(outerOrbit);
-  group.add(coreWaferMesh);
+  pondWaferCore.add(orbitRing);
+  pondGroup.add(pondWaferCore);
 
-  // 분수대 테두리 12개 불마켓 기원 촛불
-  for (let i = 0; i < 12; i++) {
-    const ang = (i / 12) * Math.PI * 2;
-    const cx = Math.cos(ang) * 3.12;
-    const cz = Math.sin(ang) * 3.12;
+  const pondLight = new THREE.PointLight(0x2ee59d, 1.1, 14);
+  pondLight.position.set(0, 2.2, 0);
+  pondGroup.add(pondLight);
+  worldGroup.add(pondGroup);
 
-    const holder = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.11, 0.13, 0.28, 16),
-      new THREE.MeshStandardMaterial({ color: 0xf5f0e1, roughness: 0.4 })
-    );
-    holder.position.set(cx, 0.88, cz);
-    group.add(holder);
+  // 야외 정원 상록수 12그루 & 골드 가로등 6기
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3d2817, roughness: 0.85 });
+  const leafMat = new THREE.MeshStandardMaterial({ color: 0x1c4d38, roughness: 0.75 });
+  const treeCoords = [
+    [-11, 13], [-14.5, 17], [-14.5, 24], [-7, 26],
+    [7, 14], [12, 16], [14, 21], [11, 26],
+    [-11, -3], [11, -3], [-11, 6], [11, 6]
+  ];
+  treeCoords.forEach(([tx, tz], i) => {
+    const tGroup = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 2.2, 10), trunkMat);
+    trunk.position.y = 1.1;
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(1.3 + (i % 2) * 0.25, 14, 12), leafMat);
+    crown.position.set(0, 2.65, 0);
+    crown.scale.y = 0.82;
+    tGroup.add(trunk, crown);
+    tGroup.position.set(tx, 0, tz);
+    worldGroup.add(tGroup);
+  });
 
-    const flame = new THREE.Mesh(
-      new THREE.SphereGeometry(0.11, 12, 12),
-      new THREE.MeshBasicMaterial({ color: 0xffc845 })
-    );
-    flame.scale.set(0.8, 1.6, 0.8);
-    flame.position.set(cx, 1.12, cz);
-    flame.visible = i < litCandleCount;
-    group.add(flame);
-    candleFlames.push(flame);
+  const goldLampMat = new THREE.MeshStandardMaterial({ color: 0xc99b42, metalness: 0.7, roughness: 0.3 });
+  for (const lz of [14, 19, 24]) {
+    for (const lx of [-2.5, 2.5]) {
+      const lamp = new THREE.Group();
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 2.4, 10), goldLampMat);
+      pole.position.y = 1.2;
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffe28a }));
+      bulb.position.y = 2.45;
+      lamp.add(pole, bulb);
+      lamp.position.set(lx, 0, lz);
+      worldGroup.add(lamp);
+    }
+  }
+}
+
+// 4-2. 본당 교회당 건축 (헤링본 마룻바닥, 에메랄드&골드 러너, 아치 서까래, 스테인드글라스, 샹들리에)
+function buildSanctuaryArchitecture() {
+  // 본당 원목 마룻바닥 (16.4m x 24m)
+  floorMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(16.4, 24),
+    new THREE.MeshStandardMaterial({
+      map: createWoodFloorTexture(),
+      roughness: 0.58,
+      metalness: 0.1
+    })
+  );
+  floorMesh.rotation.x = -Math.PI / 2;
+  floorMesh.receiveShadow = true;
+  worldGroup.add(floorMesh);
+
+  // 중앙 딥 에메랄드 벨벳 & 골드 테두리 성전 카펫 러너 (Aisle Runner)
+  runnerMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.2, 21.5),
+    new THREE.MeshStandardMaterial({ color: 0x0f3d2c, roughness: 0.82 })
+  );
+  runnerMesh.rotation.x = -Math.PI / 2;
+  runnerMesh.position.set(0, 0.012, 0.6);
+  runnerMesh.receiveShadow = true;
+  worldGroup.add(runnerMesh);
+
+  const goldBorderMat = new THREE.MeshBasicMaterial({ color: 0xeab85c, side: THREE.DoubleSide });
+  for (const bx of [-1.06, 1.06]) {
+    const border = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 21.5), goldBorderMat);
+    border.rotation.x = -Math.PI / 2;
+    border.position.set(bx, 0.015, 0.6);
+    worldGroup.add(border);
   }
 
-  // 상승 양봉 파티클 (초록 & 골드 입자)
-  const pCount = 140;
+  // 성전 벽체 (전면 강단 벽 + 좌우 스테인드글라스 벽) - 중후한 다크 에메랄드 스톤 & 골드 몰딩
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x162821, roughness: 0.78 });
+  const frontWall = new THREE.Mesh(new THREE.BoxGeometry(16.6, 9.8, 0.5), wallMat);
+  frontWall.position.set(0, 4.9, -11.8);
+  frontWall.receiveShadow = true;
+  worldGroup.add(frontWall);
+
+  const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 8.8, 24), wallMat);
+  leftWall.position.set(-8.05, 4.4, 0);
+  const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 8.8, 24), wallMat);
+  rightWall.position.set(8.05, 4.4, 0);
+  worldGroup.add(leftWall, rightWall);
+
+  // 고딕 원목·골드 기둥 & 천장 대들보(Vaulted Beams) + 3기의 황금 웨이퍼 샹들리에
+  const beamMat = new THREE.MeshStandardMaterial({ color: 0x2b1d12, roughness: 0.65 });
+  const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, metalness: 0.75, roughness: 0.25 });
+
+  for (let z = -10; z <= 10; z += 5) {
+    const colL = new THREE.Mesh(new THREE.BoxGeometry(0.48, 8.8, 0.48), beamMat);
+    colL.position.set(-7.68, 4.4, z);
+    const colR = new THREE.Mesh(new THREE.BoxGeometry(0.48, 8.8, 0.48), beamMat);
+    colR.position.set(7.68, 4.4, z);
+    const roofBeam = new THREE.Mesh(new THREE.BoxGeometry(16.0, 0.4, 0.4), beamMat);
+    roofBeam.position.set(0, 8.4, z);
+    const goldStrip = new THREE.Mesh(new THREE.BoxGeometry(15.8, 0.08, 0.44), goldTrimMat);
+    goldStrip.position.set(0, 8.2, z);
+    worldGroup.add(colL, colR, roofBeam, goldStrip);
+  }
+
+  // 성전 중앙 천장 황금 웨이퍼 샹들리에 3기 (z = -5, 0, 5)
+  [-5, 0, 5].forEach(cz => {
+    const chGroup = new THREE.Group();
+    chGroup.position.set(0, 7.2, cz);
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.4, 8), goldTrimMat);
+    rod.position.y = 1.2;
+    const wheel = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.06, 12, 36), goldTrimMat);
+    wheel.rotation.x = Math.PI / 2;
+    chGroup.add(rod, wheel);
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const bulb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.08, 10, 10),
+        new THREE.MeshBasicMaterial({ color: 0xffe49c })
+      );
+      bulb.position.set(Math.cos(a) * 1.15, 0.12, Math.sin(a) * 1.15);
+      chGroup.add(bulb);
+    }
+    worldGroup.add(chGroup);
+  });
+
+  // 좌우 스테인드글라스 창문 8개 & 볼류메트릭 황금·에메랄드 빛줄기(God Rays)
+  const windowZPositions = [-7.2, -2.2, 2.8, 7.8];
+  windowZPositions.forEach((wz, idx) => {
+    const glassTex = createBullStainedGlassTexture(idx);
+    const glassMat = new THREE.MeshBasicMaterial({ map: glassTex });
+    const winGeo = new THREE.PlaneGeometry(1.65, 3.6);
+
+    const winL = new THREE.Mesh(winGeo, glassMat);
+    winL.position.set(-7.75, 4.6, wz);
+    winL.rotation.y = Math.PI / 2;
+
+    const winR = new THREE.Mesh(winGeo, glassMat);
+    winR.position.set(7.75, 4.6, wz);
+    winR.rotation.y = -Math.PI / 2;
+
+    worldGroup.add(winL, winR);
+
+    // 창문에서 실내 장의자로 쏟아지는 경건한 황금·에메랄드 햇살 기둥(God Ray)
+    const rayGeo = new THREE.CylinderGeometry(0.6, 1.4, 7.6, 16, 1, true);
+    const rayMat = new THREE.MeshBasicMaterial({
+      color: idx % 2 === 0 ? 0xffe291 : 0x52ffba,
+      transparent: true, opacity: 0.075,
+      side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending
+    });
+    const rayL = new THREE.Mesh(rayGeo, rayMat);
+    rayL.position.set(-5.1, 2.6, wz);
+    rayL.rotation.z = -0.62;
+    const rayR = new THREE.Mesh(rayGeo, rayMat);
+    rayR.position.set(5.1, 2.6, wz);
+    rayR.rotation.z = 0.62;
+    worldGroup.add(rayL, rayR);
+  });
+}
+
+// 4-3. 전면 2단 성단(Chancel) & 『3X 황금 불마켓 삼위일체 첨탑』 & 황금 원장 강대상 & 파이프 오르간
+function buildAltarAndBullSpire() {
+  const stageMat = new THREE.MeshStandardMaterial({ color: 0x3b2618, roughness: 0.52 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.82, roughness: 0.22 });
+  const emeraldGlowMat = new THREE.MeshStandardMaterial({
+    color: 0x2ee59d, emissive: 0x148f5c, emissiveIntensity: 0.75, metalness: 0.4, roughness: 0.25
+  });
+  const goldGlowMat = new THREE.MeshStandardMaterial({
+    color: 0xffe28a, emissive: 0xd4942a, emissiveIntensity: 0.82, metalness: 0.6, roughness: 0.2
+  });
+
+  // 2단 성단(Stage)
+  const stage1 = new THREE.Mesh(new THREE.BoxGeometry(14.0, 0.36, 5.2), stageMat);
+  stage1.position.set(0, 0.18, -9.2);
+  stage1.receiveShadow = true; stage1.castShadow = true;
+  worldGroup.add(stage1);
+
+  const stage2 = new THREE.Mesh(new THREE.BoxGeometry(8.8, 0.36, 3.4), stageMat);
+  stage2.position.set(0, 0.54, -9.8);
+  stage2.receiveShadow = true; stage2.castShadow = true;
+  worldGroup.add(stage2);
+
+  // 전면 중앙 대제단 아치 패널
+  const altarPanel = new THREE.Mesh(
+    new THREE.BoxGeometry(3.8, 9.0, 0.2),
+    new THREE.MeshStandardMaterial({ color: 0x0d1f18, roughness: 0.5 })
+  );
+  altarPanel.position.set(0, 4.6, -11.5);
+  worldGroup.add(altarPanel);
+
+  const altarBorder = new THREE.Mesh(new THREE.BoxGeometry(4.0, 9.1, 0.14), goldMat);
+  altarBorder.position.set(0, 4.6, -11.55);
+  worldGroup.add(altarBorder);
+
+  // ★ 성전 중심 상징물: 『3X 황금 불마켓 삼위일체 양봉 첨탑 & 반도체 웨이퍼 후광 (The 3X Bull Spire & Wafer Halo)』
+  const spireGroup = new THREE.Group();
+  spireGroup.position.set(0, 5.75, -11.28);
+
+  // 배경 회전 황금 웨이퍼 후광(Halo)
+  altarHaloMesh = new THREE.Group();
+  const haloOuter = new THREE.Mesh(new THREE.TorusGeometry(1.45, 0.07, 16, 64), goldGlowMat);
+  const haloInner = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.04, 12, 48), emeraldGlowMat);
+  altarHaloMesh.add(haloOuter, haloInner);
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.85, 0.03), goldMat);
+    spoke.rotation.z = a;
+    altarHaloMesh.add(spoke);
+  }
+  spireGroup.add(altarHaloMesh);
+
+  // 3개의 상승 양봉 기둥 (좌: $100, 중앙: $500 최고봉, 우: $300)
+  const candleBars = [
+    { x: -0.62, y: -0.25, h: 1.55, w: 0.34, mat: emeraldGlowMat },
+    { x: 0.0,   y: 0.15,  h: 2.55, w: 0.42, mat: goldGlowMat },
+    { x: 0.62,  y: -0.05, h: 1.95, w: 0.34, mat: emeraldGlowMat }
+  ];
+  candleBars.forEach(b => {
+    const body = new THREE.Mesh(new THREE.BoxGeometry(b.w, b.h, 0.24), b.mat);
+    body.position.set(b.x, b.y, 0.08);
+    const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, b.h + 0.75, 10), goldGlowMat);
+    wick.position.set(b.x, b.y, 0.08);
+    spireGroup.add(body, wick);
+  });
+  worldGroup.add(spireGroup);
+
+  // 강단 정중앙 『SOXL 황금 원장 강대상 (Golden Ledger Pulpit)』
+  const pulpitGroup = new THREE.Group();
+  const pulpitBody = new THREE.Mesh(
+    new THREE.BoxGeometry(1.38, 1.28, 0.88),
+    new THREE.MeshStandardMaterial({ color: 0x2b1c11, roughness: 0.48 })
+  );
+  pulpitBody.position.y = 0.64;
+  pulpitBody.castShadow = true;
+  const pulpitGoldFront = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.85, 0.91), goldMat);
+  pulpitGoldFront.position.y = 0.64;
+  const pulpitTop = new THREE.Mesh(
+    new THREE.BoxGeometry(1.56, 0.12, 1.08),
+    new THREE.MeshStandardMaterial({ color: 0x452d1c, roughness: 0.42 })
+  );
+  pulpitTop.position.y = 1.3;
+  pulpitTop.rotation.x = 0.18;
+  // 펼쳐진 황금 투자 원장
+  const ledgerMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(0.68, 0.06, 0.48),
+    new THREE.MeshStandardMaterial({ color: 0xffe7a3, roughness: 0.4, metalness: 0.3 })
+  );
+  ledgerMesh.position.set(0, 1.38, 0.05);
+  ledgerMesh.rotation.x = 0.18;
+  pulpitGroup.add(pulpitBody, pulpitGoldFront, pulpitTop, ledgerMesh);
+  pulpitGroup.position.set(0, 0.72, -9.15);
+  worldGroup.add(pulpitGroup);
+
+  // 강단 좌측: 그랜드 피아노 & 황금 양봉 파이프 오르간
+  const pianoGroup = new THREE.Group();
+  const pianoMat = new THREE.MeshStandardMaterial({ color: 0x141816, roughness: 0.22, metalness: 0.3 });
+  const pianoBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.45, 1.5), pianoMat);
+  pianoBody.position.y = 0.9;
+  pianoBody.castShadow = true;
+  const pianoKeys = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.28), new THREE.MeshStandardMaterial({ color: 0xfaf6ed }));
+  pianoKeys.position.set(0, 0.85, 0.72);
+  pianoGroup.add(pianoBody, pianoKeys);
+  for (const [lx, lz] of [[-0.75, 0.6], [0.75, 0.6], [0, -0.6]]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, 0.7, 10), goldMat);
+    leg.position.set(lx, 0.35, lz);
+    pianoGroup.add(leg);
+  }
+  pianoGroup.position.set(-4.7, 0.36, -9.2);
+  pianoGroup.rotation.y = 0.35;
+  worldGroup.add(pianoGroup);
+}
+
+// 4-4. 본당 원목 장의자(Pew) 10개 + 강단 앞 무릎 기도 난간 & 기도 방석 6개 + 야외 정원 벤치 4개
+function buildPewsAndKneelers() {
+  const pewMat = new THREE.MeshStandardMaterial({ color: 0x422b18, roughness: 0.52 });
+  const emeraldPadMat = new THREE.MeshStandardMaterial({ color: 0x134e39, roughness: 0.78 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, metalness: 0.7, roughness: 0.3 });
+
+  const rowZList = [-3.6, -1.2, 1.2, 3.6, 6.0];
+  rowZList.forEach((rz, rIdx) => {
+    for (const side of [-1, 1]) {
+      const px = side * 3.55;
+      const pewGroup = new THREE.Group();
+
+      const seatBench = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.12, 0.68), pewMat);
+      seatBench.position.y = 0.48;
+      seatBench.castShadow = true; seatBench.receiveShadow = true;
+
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.06, 0.56), emeraldPadMat);
+      pad.position.set(0, 0.56, 0.02);
+
+      const backRest = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.68, 0.12), pewMat);
+      backRest.position.set(0, 0.84, 0.3);
+      backRest.rotation.x = -0.1;
+      backRest.castShadow = true;
+
+      const topGoldTrim = new THREE.Mesh(new THREE.BoxGeometry(4.22, 0.04, 0.14), goldMat);
+      topGoldTrim.position.set(0, 1.19, 0.33);
+
+      for (const ex of [-2.05, 2.05]) {
+        const arm = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.95, 0.76), pewMat);
+        arm.position.set(ex, 0.475, 0.02);
+        arm.castShadow = true;
+        pewGroup.add(arm);
+      }
+
+      pewGroup.add(seatBench, pad, backRest, topGoldTrim);
+      pewGroup.position.set(px, 0, rz);
+      worldGroup.add(pewGroup);
+
+      for (const offset of [-1.05, 1.05]) {
+        seats.push({
+          id: `pew_${rIdx}_${side}_${offset}`,
+          label: `본당 ${rIdx + 1}열 ${side < 0 ? '좌측' : '우측'} 장의자`,
+          pos: new THREE.Vector3(px + offset, 0, rz - 0.08),
+          type: 'pew',
+          lookAngle: 0,
+          occupiedBy: null
+        });
+      }
+    }
+  });
+
+  // 강단 앞 무릎 기도 난간(Altar Kneeler Rail) & 에메랄드·골드 무릎 기도석 6개
+  for (const side of [-1, 1]) {
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 0.22), pewMat);
+    rail.position.set(side * 2.1, 0.68, -6.45);
+    const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.68, 10), goldMat);
+    post1.position.set(side * 0.65, 0.34, -6.45);
+    const post2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.68, 10), goldMat);
+    post2.position.set(side * 3.55, 0.34, -6.45);
+    worldGroup.add(rail, post1, post2);
+  }
+
+  const kneelXList = [-3.2, -1.95, -0.7, 0.7, 1.95, 3.2];
+  kneelXList.forEach((kx, kIdx) => {
+    const kGroup = new THREE.Group();
+    const kBase = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.08, 0.56), goldMat);
+    kBase.position.y = 0.04;
+    const kPad = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.1, 0.50), emeraldPadMat);
+    kPad.position.y = 0.11;
+    kGroup.add(kBase, kPad);
+    kGroup.position.set(kx, 0, -5.95);
+    worldGroup.add(kGroup);
+
+    seats.push({
+      id: `kneel_${kIdx}`,
+      label: `강단 앞 제${kIdx + 1}무릎기도석`,
+      pos: new THREE.Vector3(kx, 0, -5.95),
+      type: 'kneel',
+      lookAngle: 0,
+      occupiedBy: null
+    });
+  });
+
+  // 야외 웨이퍼 치유 연못가 & 달빛 정원 벤치 4석
+  const gardenBenches = [
+    { x: -4.2, z: 18.0, rot: -Math.PI / 2, label: '야외 웨이퍼 연못가 제1벤치' },
+    { x: -4.2, z: 21.5, rot: -Math.PI / 2, label: '야외 웨이퍼 연못가 제2벤치' },
+    { x: 4.5, z: 17.5, rot: Math.PI / 2, label: '야외 달빛 정원 제1벤치' },
+    { x: 4.5, z: 22.0, rot: Math.PI / 2, label: '야외 달빛 정원 제2벤치' }
+  ];
+  gardenBenches.forEach((gb, idx) => {
+    const bMesh = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.45, 0.65), pewMat);
+    bMesh.position.set(gb.x, 0.225, gb.z);
+    bMesh.rotation.y = gb.rot;
+    bMesh.castShadow = true; bMesh.receiveShadow = true;
+    worldGroup.add(bMesh);
+    seats.push({
+      id: `garden_bench_${idx}`,
+      label: gb.label,
+      pos: new THREE.Vector3(gb.x, 0, gb.z),
+      type: 'pew',
+      lookAngle: gb.rot,
+      occupiedBy: null
+    });
+  });
+}
+
+// 4-5. 강단 좌·우 불마켓 기원 황금 촛불 제단 (각 12구, 총 24개 불꽃)
+function buildCandleAltars() {
+  function createStand(cx, cz) {
+    const standGroup = new THREE.Group();
+    const tableMat = new THREE.MeshStandardMaterial({ color: 0x261a10, roughness: 0.48 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.75, roughness: 0.25 });
+
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.08, 1.18, 0.92, 24), tableMat);
+    base.position.y = 0.46;
+    base.castShadow = true;
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 0.08, 24), brassMat);
+    rim.position.y = 0.94;
+    standGroup.add(base, rim);
+
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const r = i % 2 === 0 ? 0.76 : 0.44;
+      const x = Math.cos(angle) * r;
+      const z = Math.sin(angle) * r;
+
+      const cup = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.06, 0.05, 0.15, 10),
+        new THREE.MeshStandardMaterial({ color: 0xfff8e6, roughness: 0.4 })
+      );
+      cup.position.set(x, 1.04, z);
+
+      const flame = new THREE.Mesh(
+        new THREE.SphereGeometry(0.052, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0xffc642 })
+      );
+      flame.scale.set(0.8, 1.65, 0.8);
+      flame.position.set(x, 1.17, z);
+      candleFlames.push({ mesh: flame, baseY: 1.17, phase: Math.random() * 10 });
+
+      standGroup.add(cup, flame);
+    }
+
+    standGroup.position.set(cx, 0, cz);
+    worldGroup.add(standGroup);
+  }
+  createStand(-2.9, -7.3);
+  createStand(2.9, -7.3);
+
+  // 성전 내에 은은하게 피어오르는 황금·에메랄드 기도 입자
+  const pCount = 120;
   const pGeo = new THREE.BufferGeometry();
   const pPos = new Float32Array(pCount * 3);
   for (let i = 0; i < pCount; i++) {
-    const r = 0.4 + Math.random() * 2.4;
-    const a = Math.random() * Math.PI * 2;
-    pPos[i * 3] = Math.cos(a) * r;
-    pPos[i * 3 + 1] = 0.8 + Math.random() * 5.5;
-    pPos[i * 3 + 2] = Math.sin(a) * r;
+    pPos[i * 3] = (Math.random() - 0.5) * 13;
+    pPos[i * 3 + 1] = 0.6 + Math.random() * 6.5;
+    pPos[i * 3 + 2] = -10.5 + Math.random() * 18;
   }
   pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  const pMat = new THREE.PointsMaterial({
-    color: 0x52ffba, size: 0.11, transparent: true, opacity: 0.85
-  });
+  const pMat = new THREE.PointsMaterial({ color: 0xffe28a, size: 0.085, transparent: true, opacity: 0.72 });
   particleSystem = new THREE.Points(pGeo, pMat);
-  group.add(particleSystem);
-
-  scene.add(group);
+  worldGroup.add(particleSystem);
 }
 
-// 벽면 SOXL 100·200·300·400·500 액자 + 각 액자 앞 벤치 + 중앙 라운지 벤치
-function buildWallFramesAndBenches() {
+// 4-6. 성전 벽면 및 제단 좌우의 7대 SOXL 100~500 기념 성화 액자 구축
+function buildSanctuaryFrames() {
   const goldFrameMat = new THREE.MeshStandardMaterial({
     color: 0xeab85c, roughness: 0.25, metalness: 0.82
   });
@@ -1356,43 +2020,35 @@ function buildWallFramesAndBenches() {
     fGroup.position.set(f.pos.x, f.pos.y, f.pos.z);
     fGroup.rotation.y = f.rotY;
 
-    // 골드 액자 몰딩 베젤
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(f.size.w + 0.42, f.size.h + 0.42, 0.18),
+      new THREE.BoxGeometry(f.size.w + 0.28, f.size.h + 0.28, 0.14),
       goldFrameMat
     );
     backing.castShadow = true;
     fGroup.add(backing);
 
-    // 캔버스 + PNG 하이브리드 텍스처
     const artTex = createHighResFrameTexture(f);
     const artMat = new THREE.MeshBasicMaterial({ map: artTex });
     const artMesh = new THREE.Mesh(new THREE.PlaneGeometry(f.size.w, f.size.h), artMat);
-    artMesh.position.z = 0.11;
+    artMesh.position.z = 0.08;
     artMesh.userData = { frameIdx: idx };
     fGroup.add(artMesh);
     frameMeshes.push(artMesh);
 
-    // 액자 상단 골드 네임플레이트 (SOXL 100 ~ 500)
     const plaqueTex = createPlaqueTexture(f.code + ' · ' + f.price);
     const plaqueMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.5, 0.48),
+      new THREE.PlaneGeometry(1.85, 0.36),
       new THREE.MeshBasicMaterial({ map: plaqueTex })
     );
-    plaqueMesh.position.set(0, f.size.h / 2 + 0.56, 0.12);
+    plaqueMesh.position.set(0, f.size.h / 2 + 0.36, 0.09);
     fGroup.add(plaqueMesh);
 
-    // 액자 전용 갤러리 핀 조명
-    const spot = new THREE.PointLight(0xffe6a3, 0.65, 9);
-    spot.position.set(0, f.size.h / 2 + 0.9, 1.8);
+    const spot = new THREE.PointLight(0xffe6a3, 0.55, 7);
+    spot.position.set(0, f.size.h / 2 + 0.6, 1.3);
     fGroup.add(spot);
 
-    scene.add(fGroup);
+    worldGroup.add(fGroup);
 
-    // 각 액자 바로 앞 관람용 벤치 배치
-    createBench(f.benchPos.x, f.benchPos.z, f.benchPos.rotY, idx);
-
-    // 도슨트 모달 탭 생성
     const tabBtn = document.createElement('button');
     tabBtn.type = 'button';
     tabBtn.className = 'docent-tab' + (idx === 0 ? ' active' : '');
@@ -1400,191 +2056,783 @@ function buildWallFramesAndBenches() {
     tabBtn.onclick = () => selectDocentFrame(idx);
     docentTabsEl.appendChild(tabBtn);
   });
-
-  // 중앙 황금 분수대 주변 8개 힐링 벤치 배치
-  for (let i = 0; i < 8; i++) {
-    const ang = (i / 8) * Math.PI * 2 + Math.PI / 8;
-    const bx = Math.cos(ang) * 5.6;
-    const bz = Math.sin(ang) * 5.6;
-    createBench(bx, bz, -ang + Math.PI / 2, -1);
-  }
-}
-
-function createBench(x, z, rotY, frameIdx) {
-  const bGroup = new THREE.Group();
-  bGroup.position.set(x, 0, z);
-  bGroup.rotation.y = rotY;
-
-  const woodMat = new THREE.MeshStandardMaterial({ color: 0x3b2618, roughness: 0.55 });
-  const cushionMat = new THREE.MeshStandardMaterial({ color: 0x16382c, roughness: 0.4 });
-  const goldLegMat = new THREE.MeshStandardMaterial({ color: 0xc99b42, metalness: 0.7, roughness: 0.3 });
-
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.12, 0.68), woodMat);
-  seat.position.y = 0.46;
-  seat.castShadow = true;
-  bGroup.add(seat);
-
-  const pad = new THREE.Mesh(new THREE.BoxGeometry(1.96, 0.08, 0.58), cushionMat);
-  pad.position.y = 0.55;
-  bGroup.add(pad);
-
-  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.6), goldLegMat);
-  legL.position.set(-0.85, 0.225, 0);
-  bGroup.add(legL);
-
-  const legR = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.45, 0.6), goldLegMat);
-  legR.position.set(0.85, 0.225, 0);
-  bGroup.add(legR);
-
-  scene.add(bGroup);
-  benches.push({ x, z, rotY, frameIdx, mesh: bGroup });
-}
-
-function buildIndoorTreesAndPillars() {
-  const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1c3028, roughness: 0.4, metalness: 0.25 });
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, roughness: 0.25, metalness: 0.8 });
-
-  const corners = [
-    [-12.8, -12.8], [12.8, -12.8], [-12.8, 12.8], [12.8, 12.8]
-  ];
-  corners.forEach(([cx, cz]) => {
-    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 10.2, 24), pillarMat);
-    col.position.set(cx, 5.1, cz);
-    col.castShadow = true;
-    scene.add(col);
-
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.07, 12, 32), goldMat);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.set(cx, 1.2, cz);
-    scene.add(ring);
-  });
-
-  // 라운지 실내 치유 화분 트리 4그루
-  const treeCoords = [
-    [-6.5, 6.5], [6.5, 6.5], [-6.5, -5.8], [6.5, -5.8]
-  ];
-  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3222, roughness: 0.8 });
-  const leafMat = new THREE.MeshStandardMaterial({ color: 0x1e5c42, roughness: 0.6 });
-
-  treeCoords.forEach(([tx, tz]) => {
-    const tGroup = new THREE.Group();
-    tGroup.position.set(tx, 0, tz);
-
-    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.5, 0.65, 20), pillarMat);
-    pot.position.y = 0.325;
-    tGroup.add(pot);
-
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 2.2, 12), trunkMat);
-    trunk.position.y = 1.4;
-    tGroup.add(trunk);
-
-    const crown1 = new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 16), leafMat);
-    crown1.position.set(0, 2.7, 0);
-    tGroup.add(crown1);
-
-    const crown2 = new THREE.Mesh(new THREE.SphereGeometry(0.78, 14, 14), leafMat);
-    crown2.position.set(0.45, 3.2, 0.25);
-    tGroup.add(crown2);
-
-    scene.add(tGroup);
-  });
 }
 
 function buildTargetRippleRing() {
-  const geo = new THREE.RingGeometry(0.32, 0.44, 32);
+  const geo = new THREE.RingGeometry(0.18, 0.30, 32);
   const mat = new THREE.MeshBasicMaterial({
     color: 0x2ee59d, side: THREE.DoubleSide, transparent: true, opacity: 0
   });
   targetRing = new THREE.Mesh(geo, mat);
   targetRing.rotation.x = -Math.PI / 2;
   targetRing.position.y = 0.03;
-  scene.add(targetRing);
+  worldGroup.add(targetRing);
+}
+// ============================================================================
+// 5. 다관절 3D 사람 아바타 생성 엔진 (걷기 / 장의자 착석 / 강단 무릎기도 / 4대 제스처)
+// ============================================================================
+function createPropMesh(propType) {
+  const pGroup = new THREE.Group();
+  if (propType === 'ledger') {
+    const cover = new THREE.Mesh(
+      new THREE.BoxGeometry(0.16, 0.21, 0.045),
+      new THREE.MeshStandardMaterial({ color: 0x124030, roughness: 0.45 })
+    );
+    const pages = new THREE.Mesh(
+      new THREE.BoxGeometry(0.148, 0.198, 0.036),
+      new THREE.MeshStandardMaterial({ color: 0xfbf5e6, roughness: 0.7 })
+    );
+    pages.position.x = 0.004;
+    const emblem = new THREE.Mesh(
+      new THREE.BoxGeometry(0.055, 0.09, 0.048),
+      new THREE.MeshBasicMaterial({ color: 0xffd269 })
+    );
+    pGroup.add(cover, pages, emblem);
+  } else if (propType === 'candle') {
+    const base = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.045, 0.055, 0.05, 12),
+      new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.7, roughness: 0.3 })
+    );
+    const wax = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.03, 0.032, 0.13, 12),
+      new THREE.MeshStandardMaterial({ color: 0xfff8e8, roughness: 0.45 })
+    );
+    wax.position.y = 0.08;
+    const flame = new THREE.Mesh(
+      new THREE.SphereGeometry(0.028, 10, 10),
+      new THREE.MeshBasicMaterial({ color: 0xffc642 })
+    );
+    flame.scale.set(0.8, 1.65, 0.8);
+    flame.position.y = 0.165;
+    pGroup.add(base, wax, flame);
+  } else if (propType === 'bullstaff') {
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x2ee59d, roughness: 0.5, side: THREE.DoubleSide });
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.015, 0.42, 8), stemMat);
+    stem.position.y = 0.16;
+    pGroup.add(stem);
+    for (let i = 0; i < 7; i++) {
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.012, 0.032), stemMat);
+      leaf.position.set((i % 2 === 0 ? 1 : -1) * 0.055, 0.08 + i * 0.042, 0);
+      leaf.rotation.z = (i % 2 === 0 ? -0.35 : 0.35);
+      pGroup.add(leaf);
+    }
+  } else if (propType === 'bag') {
+    const bagBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.075, 0.22, 0.29),
+      new THREE.MeshStandardMaterial({ color: 0x3b2818, roughness: 0.55 })
+    );
+    bagBody.position.y = -0.12;
+    const handle = new THREE.Mesh(
+      new THREE.TorusGeometry(0.045, 0.01, 8, 14, Math.PI),
+      new THREE.MeshStandardMaterial({ color: 0x22160d, roughness: 0.5 })
+    );
+    handle.rotation.y = Math.PI / 2;
+    handle.position.y = -0.01;
+    const clasp = new THREE.Mesh(
+      new THREE.BoxGeometry(0.082, 0.028, 0.04),
+      new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.7, roughness: 0.3 })
+    );
+    clasp.position.y = -0.05;
+    pGroup.add(bagBody, handle, clasp);
+  }
+  return pGroup;
 }
 
-// 아바타 생성
-function createAvatarMesh(suitColor, trimColor, isMe = false) {
-  const group = new THREE.Group();
+function buildHumanRig(cfg, isMe) {
+  const gender = cfg.gender === 'F' ? 'F' : 'M';
+  const hairStyle = Number(cfg.hairStyle) || 0;
+  const hairColor = cfg.hairColor || '#1e1814';
+  const outfitType = cfg.outfitType || 'suit';
+  const outfitColor = cfg.outfitColor || '#143d2e';
+  const propType = cfg.prop || 'none';
+  const accType = cfg.accessory || 'none';
 
-  const bodyMat = new THREE.MeshStandardMaterial({ color: suitColor, roughness: 0.4, metalness: 0.2 });
-  const headMat = new THREE.MeshStandardMaterial({ color: 0xf4d6bc, roughness: 0.5 });
-  const goldMat = new THREE.MeshStandardMaterial({ color: trimColor, roughness: 0.25, metalness: 0.8 });
+  const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5d8be, roughness: 0.62 });
+  const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.78 });
+  const mainClothMat = new THREE.MeshStandardMaterial({ color: outfitColor, roughness: 0.7 });
+  const pantsMat = new THREE.MeshStandardMaterial({
+    color: outfitType === 'suit' ? (gender === 'M' ? 0x1c2220 : outfitColor) : 0x262d2a,
+    roughness: 0.78
+  });
+  const shoeMat = new THREE.MeshStandardMaterial({ color: gender === 'F' ? 0x362217 : 0x181412, roughness: 0.5 });
+  const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xfbf8f1, roughness: 0.65 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.55, roughness: 0.3 });
 
-  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, 0.95, 18), bodyMat);
-  torso.position.y = 0.62;
-  torso.castShadow = true;
-  torso.name = 'torso';
-  group.add(torso);
+  const root = new THREE.Group();
 
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.04, 10, 24), goldMat);
-  collar.rotation.x = Math.PI / 2;
-  collar.position.y = 1.08;
-  group.add(collar);
-
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 20), headMat);
-  head.position.y = 1.38;
-  head.castShadow = true;
-  head.name = 'head';
-  group.add(head);
+  const shadow = new THREE.Mesh(
+    new THREE.CircleGeometry(0.32, 24),
+    new THREE.MeshBasicMaterial({ color: 0x050a08, transparent: true, opacity: 0.42, depthWrite: false })
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.y = 0.012;
+  root.add(shadow);
 
   if (isMe) {
-    const aura = new THREE.Mesh(
-      new THREE.RingGeometry(0.42, 0.5, 32),
-      new THREE.MeshBasicMaterial({ color: 0x2ee59d, side: THREE.DoubleSide })
+    const meRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.36, 0.44, 32),
+      new THREE.MeshBasicMaterial({ color: 0x2ee59d, side: THREE.DoubleSide, transparent: true, opacity: 0.88, depthWrite: false })
     );
-    aura.rotation.x = -Math.PI / 2;
-    aura.position.y = 0.02;
-    group.add(aura);
+    meRing.rotation.x = -Math.PI / 2;
+    meRing.position.y = 0.018;
+    root.add(meRing);
   }
 
-  return group;
+  const pelvis = new THREE.Group();
+  root.add(pelvis);
+
+  function makeLeg(side) {
+    const hipGroup = new THREE.Group();
+    hipGroup.position.set(side * 0.105, 0.56, 0);
+
+    const thighMat = (gender === 'F' && outfitType !== 'casual') ? skinMat : pantsMat;
+    const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.058, 0.28, 12), thighMat);
+    thigh.position.y = -0.14;
+    thigh.castShadow = true;
+    hipGroup.add(thigh);
+
+    const kneeBall = new THREE.Mesh(new THREE.SphereGeometry(0.056, 10, 10), thighMat);
+    kneeBall.position.y = -0.28;
+    hipGroup.add(kneeBall);
+
+    const shinGroup = new THREE.Group();
+    shinGroup.position.set(0, -0.28, 0);
+
+    const shin = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.055, 0.045, 0.25, 12),
+      (gender === 'F' && outfitType === 'suit') ? skinMat : pantsMat
+    );
+    shin.position.y = -0.125;
+    shin.castShadow = true;
+    shinGroup.add(shin);
+
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.095, 0.065, 0.17), shoeMat);
+    shoe.position.set(0, -0.25, -0.035);
+    shoe.castShadow = true;
+    shinGroup.add(shoe);
+
+    hipGroup.add(shinGroup);
+    pelvis.add(hipGroup);
+    return { hip: hipGroup, shin: shinGroup };
+  }
+
+  const leftLeg = makeLeg(-1);
+  const rightLeg = makeLeg(1);
+
+  const torso = new THREE.Group();
+  torso.position.set(0, 0.56, 0);
+  pelvis.add(torso);
+
+  const hipBox = new THREE.Mesh(
+    new THREE.CylinderGeometry(gender === 'F' ? 0.155 : 0.165, gender === 'F' ? 0.165 : 0.16, 0.12, 16),
+    (gender === 'F' || outfitType === 'robe') ? mainClothMat : pantsMat
+  );
+  hipBox.position.y = 0.02;
+  torso.add(hipBox);
+
+  let skirtMesh = null;
+  if (outfitType === 'robe' || (gender === 'F' && outfitType === 'suit')) {
+    const skirtLen = outfitType === 'robe' ? 0.36 : 0.24;
+    const skirtTop = gender === 'F' ? 0.145 : 0.165;
+    const skirtBot = outfitType === 'robe' ? 0.25 : 0.22;
+    skirtMesh = new THREE.Mesh(new THREE.CylinderGeometry(skirtTop, skirtBot, skirtLen, 18), mainClothMat);
+    skirtMesh.position.y = -skirtLen / 2 + 0.04;
+    skirtMesh.castShadow = true;
+    torso.add(skirtMesh);
+  }
+
+  const topR = gender === 'M' ? 0.205 : 0.172;
+  const botR = gender === 'M' ? 0.162 : 0.142;
+  const chest = new THREE.Mesh(new THREE.CylinderGeometry(topR, botR, 0.42, 18), mainClothMat);
+  chest.position.y = 0.24;
+  chest.scale.z = 0.78;
+  chest.castShadow = true;
+  torso.add(chest);
+
+  if (outfitType === 'suit') {
+    const shirtV = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.16, 0.04), whiteShirtMat);
+    shirtV.position.set(0, 0.36, -0.135);
+    torso.add(shirtV);
+    if (gender === 'M') {
+      const tie = new THREE.Mesh(
+        new THREE.BoxGeometry(0.036, 0.18, 0.045),
+        new THREE.MeshStandardMaterial({ color: 0xeab85c, roughness: 0.4 })
+      );
+      tie.position.set(0, 0.31, -0.142);
+      torso.add(tie);
+    } else {
+      const brooch = new THREE.Mesh(new THREE.SphereGeometry(0.025, 10, 10), goldMat);
+      brooch.position.set(0, 0.36, -0.155);
+      torso.add(brooch);
+    }
+  } else if (outfitType === 'robe') {
+    const stoleCollar = new THREE.Mesh(new THREE.CylinderGeometry(topR + 0.008, topR + 0.015, 0.08, 18), goldMat);
+    stoleCollar.scale.z = 0.8;
+    stoleCollar.position.y = 0.41;
+    const stoleL = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.36, 0.02), goldMat);
+    stoleL.position.set(-0.065, 0.24, -0.15);
+    const stoleR = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.36, 0.02), goldMat);
+    stoleR.position.set(0.065, 0.24, -0.15);
+    torso.add(stoleCollar, stoleL, stoleR);
+  } else {
+    const innerTee = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.38, 0.03), whiteShirtMat);
+    innerTee.position.set(0, 0.24, -0.135);
+    torso.add(innerTee);
+  }
+
+  const lapLedger = createPropMesh('ledger');
+  lapLedger.position.set(0, 0.06, -0.22);
+  lapLedger.rotation.x = Math.PI / 2 - 0.25;
+  lapLedger.visible = false;
+  torso.add(lapLedger);
+
+  const shoulderX = gender === 'M' ? 0.235 : 0.20;
+  function makeArm(side) {
+    const shoulderGroup = new THREE.Group();
+    shoulderGroup.position.set(side * shoulderX, 0.41, 0);
+
+    const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.056, 12, 12), mainClothMat);
+    shoulderGroup.add(shoulderCap);
+
+    const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.044, 0.20, 12), mainClothMat);
+    upperArm.position.y = -0.10;
+    upperArm.castShadow = true;
+    shoulderGroup.add(upperArm);
+
+    const forearmGroup = new THREE.Group();
+    forearmGroup.position.set(0, -0.20, 0);
+
+    const elbowBall = new THREE.Mesh(new THREE.SphereGeometry(0.044, 10, 10), mainClothMat);
+    forearmGroup.add(elbowBall);
+
+    const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.043, 0.038, 0.17, 12), mainClothMat);
+    forearm.position.y = -0.085;
+    forearm.castShadow = true;
+    forearmGroup.add(forearm);
+
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.046, 12, 12), skinMat);
+    hand.position.set(0, -0.185, 0);
+    forearmGroup.add(hand);
+
+    shoulderGroup.add(forearmGroup);
+    torso.add(shoulderGroup);
+    return { arm: shoulderGroup, forearm: forearmGroup, hand };
+  }
+
+  const leftArm = makeArm(-1);
+  const rightArm = makeArm(1);
+
+  let handPropMesh = null;
+  if (propType !== 'none') {
+    handPropMesh = createPropMesh(propType);
+    if (propType === 'ledger') {
+      handPropMesh.position.set(-0.04, -0.19, -0.06);
+      handPropMesh.rotation.set(0.3, 0.4, 0);
+    } else if (propType === 'candle') {
+      handPropMesh.position.set(-0.02, -0.19, -0.08);
+      handPropMesh.rotation.x = -0.65;
+    } else if (propType === 'bullstaff') {
+      handPropMesh.position.set(0, -0.19, -0.06);
+      handPropMesh.rotation.x = -0.45;
+    } else if (propType === 'bag') {
+      handPropMesh.position.set(0.03, -0.19, 0);
+    }
+    rightArm.forearm.add(handPropMesh);
+  }
+
+  const readLedgerMesh = createPropMesh('ledger');
+  readLedgerMesh.position.set(-0.08, -0.18, -0.08);
+  readLedgerMesh.rotation.set(0.5, 0.2, 0);
+  readLedgerMesh.visible = false;
+  rightArm.forearm.add(readLedgerMesh);
+
+  const headGroup = new THREE.Group();
+  headGroup.position.set(0, 0.45, 0);
+  torso.add(headGroup);
+
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.065, 0.09, 12), skinMat);
+  neck.position.y = 0.04;
+  headGroup.add(neck);
+
+  const headBall = new THREE.Mesh(new THREE.SphereGeometry(0.195, 22, 20), skinMat);
+  headBall.position.y = 0.21;
+  headBall.scale.set(0.96, 1.04, 0.95);
+  headBall.castShadow = true;
+  headGroup.add(headBall);
+
+  for (const s of [-1, 1]) {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.038, 10, 10), skinMat);
+    ear.position.set(s * 0.185, 0.20, 0);
+    ear.scale.set(0.55, 0.9, 0.7);
+    headGroup.add(ear);
+  }
+
+  const eyeDarkMat = new THREE.MeshStandardMaterial({ color: 0x1a1410, roughness: 0.25 });
+  const blushMat = new THREE.MeshBasicMaterial({ color: 0xeb9888, transparent: true, opacity: 0.42 });
+  const eyes = [];
+  for (const s of [-1, 1]) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 12), eyeDarkMat);
+    eye.position.set(s * 0.068, 0.22, -0.175);
+    eye.scale.set(1.0, 1.15, 0.5);
+    headGroup.add(eye);
+    eyes.push(eye);
+
+    const blush = new THREE.Mesh(new THREE.CircleGeometry(0.032, 12), blushMat);
+    blush.position.set(s * 0.105, 0.175, -0.172);
+    blush.rotation.y = Math.PI + s * 0.35;
+    headGroup.add(blush);
+  }
+
+  const hairGroup = new THREE.Group();
+  headGroup.add(hairGroup);
+
+  const cap = new THREE.Mesh(
+    new THREE.SphereGeometry(0.206, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.58),
+    hairMat
+  );
+  cap.position.y = 0.22;
+  cap.rotation.x = 0.18;
+  hairGroup.add(cap);
+
+  if (gender === 'M') {
+    if (hairStyle === 0) {
+      const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.075, 0.09), hairMat);
+      fringe.position.set(0.02, 0.34, -0.145);
+      fringe.rotation.z = -0.08;
+      hairGroup.add(fringe);
+    } else if (hairStyle === 1) {
+      const partL = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 10), hairMat);
+      partL.position.set(-0.075, 0.33, -0.12);
+      partL.scale.set(1.1, 0.65, 0.9);
+      const partR = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 10), hairMat);
+      partR.position.set(0.075, 0.33, -0.12);
+      partR.scale.set(1.1, 0.65, 0.9);
+      hairGroup.add(partL, partR);
+    } else {
+      const topVol = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 12), hairMat);
+      topVol.position.set(0, 0.34, -0.04);
+      topVol.scale.set(1.05, 0.6, 1.12);
+      hairGroup.add(topVol);
+    }
+  } else {
+    const bangs = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 10), hairMat);
+    bangs.position.set(0, 0.33, -0.105);
+    bangs.scale.set(1.18, 0.52, 0.75);
+    hairGroup.add(bangs);
+
+    if (hairStyle === 0) {
+      const backLong = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.34, 0.12), hairMat);
+      backLong.position.set(0, 0.09, 0.13);
+      backLong.rotation.x = 0.08;
+      const sideL = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.035, 0.28, 10), hairMat);
+      sideL.position.set(-0.165, 0.11, -0.02);
+      const sideR = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.035, 0.28, 10), hairMat);
+      sideR.position.set(0.165, 0.11, -0.02);
+      hairGroup.add(backLong, sideL, sideR);
+    } else if (hairStyle === 1) {
+      for (const s of [-1, 1]) {
+        const bobSide = new THREE.Mesh(new THREE.SphereGeometry(0.12, 14, 12), hairMat);
+        bobSide.position.set(s * 0.135, 0.16, 0.02);
+        bobSide.scale.set(0.68, 1.25, 1.15);
+        hairGroup.add(bobSide);
+      }
+      const bobBack = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 12), hairMat);
+      bobBack.position.set(0, 0.16, 0.08);
+      bobBack.scale.set(1.08, 1.0, 0.75);
+      hairGroup.add(bobBack);
+    } else {
+      const bun = new THREE.Mesh(new THREE.SphereGeometry(0.095, 14, 14), hairMat);
+      bun.position.set(0, 0.14, 0.21);
+      const bunRing = new THREE.Mesh(new THREE.TorusGeometry(0.078, 0.016, 8, 18), goldMat);
+      bunRing.position.set(0, 0.14, 0.18);
+      hairGroup.add(bun, bunRing);
+    }
+  }
+
+  if (accType === 'glasses') {
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.7, roughness: 0.25 });
+    for (const s of [-1, 1]) {
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.006, 8, 18), glassMat);
+      rim.position.set(s * 0.068, 0.22, -0.186);
+      headGroup.add(rim);
+    }
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.008, 0.008), glassMat);
+    bridge.position.set(0, 0.225, -0.186);
+    headGroup.add(bridge);
+  } else if (accType === 'beret') {
+    const beretMat = new THREE.MeshStandardMaterial({ color: 0x164a37, roughness: 0.8 });
+    const beret = new THREE.Mesh(new THREE.SphereGeometry(0.21, 18, 12), beretMat);
+    beret.position.set(0.02, 0.39, 0.01);
+    beret.scale.set(1.08, 0.36, 1.05);
+    beret.rotation.z = -0.14;
+    headGroup.add(beret);
+  } else if (accType === 'crown') {
+    const wreath = new THREE.Mesh(new THREE.TorusGeometry(0.195, 0.02, 8, 24), goldMat);
+    wreath.rotation.x = Math.PI / 2 - 0.12;
+    wreath.position.set(0, 0.35, 0);
+    headGroup.add(wreath);
+  }
+
+  return {
+    root, pelvis, torso, headGroup, eyes,
+    legL: leftLeg.hip, shinL: leftLeg.shin,
+    legR: rightLeg.hip, shinR: rightLeg.shin,
+    armL: leftArm.arm, forearmL: leftArm.forearm,
+    armR: rightArm.arm, forearmR: rightArm.forearm,
+    skirtMesh, lapLedger, handPropMesh, readLedgerMesh
+  };
 }
 
-// ============================================================================
-// 5. 동반 주주 NPC & 실시간 멀티플레이어 (MQTT + BroadcastChannel)
-// ============================================================================
-function initNPCShareholders() {
-  const npcDefs = [
-    { name: 'SOXL 500 존버단', color: 0x3b82f6, benchIdx: 4, msg: 'SOXL 500 액자 앞에서 멘탈 요양 중!' },
-    { name: '필라델피아 파수꾼', color: 0xa855f7, benchIdx: 2, msg: '3배 양의 복리는 결국 승리합니다' },
-    { name: '서학개미 야수', color: 0xf59e0b, benchIdx: 0, msg: '백불 넘어 오백불까지 가즈아!' },
-    { name: '요양소 원장', color: 0x10b981, benchIdx: 7, msg: 'SOXL 멘탈케어 요양소에 오신 걸 환영합니다' }
-  ];
+function createAvatar({ id, name, custom = {}, isMe = false, x = 0, z = 8 }) {
+  const group = new THREE.Group();
+  group.position.set(x, 0, z);
+  worldGroup.add(group);
 
-  npcDefs.forEach((d, idx) => {
-    const mesh = createAvatarMesh(d.color, 0xeab85c, false);
-    const b = benches[d.benchIdx] || { x: (idx - 1.5) * 3, z: 4, rotY: 0 };
-    mesh.position.set(b.x, -0.14, b.z);
-    mesh.rotation.y = b.rotY;
-    scene.add(mesh);
+  const cfg = {
+    gender: custom.gender || 'M',
+    hairStyle: custom.hairStyle ?? 0,
+    hairColor: custom.hairColor || '#1e1814',
+    outfitType: custom.outfitType || 'suit',
+    outfitColor: custom.outfitColor || '#143d2e',
+    prop: custom.prop || 'none',
+    accessory: custom.accessory || 'none'
+  };
 
-    const tagEl = document.createElement('div');
-    tagEl.className = 'avatar-tag';
-    tagEl.textContent = '🐂 ' + d.name;
-    document.getElementById('avatar-labels').appendChild(tagEl);
+  const rig = buildHumanRig(cfg, isMe);
+  group.add(rig.root);
 
-    const bubbleEl = document.createElement('div');
-    bubbleEl.className = 'avatar-bubble';
-    bubbleEl.textContent = d.msg;
-    bubbleEl.style.display = 'none';
-    document.getElementById('avatar-labels').appendChild(bubbleEl);
+  const labelEl = document.createElement('div');
+  labelEl.className = 'avatar-label' + (isMe ? ' is-me' : '');
+  const badge = isMe ? '👑' : (cfg.gender === 'F' ? '👩' : '👨');
+  labelEl.innerHTML = `<span class="gender-span">${badge}</span><span class="name-span">${escapeHtml(name)}</span>`;
+  document.getElementById('avatar-labels').appendChild(labelEl);
 
-    npcs.push({ ...d, mesh, tagEl, bubbleEl, nextBubbleTime: 4 + idx * 5 });
+  const av = {
+    id, name, isMe, custom: cfg, group, rig, labelEl,
+    targetPos: new THREE.Vector3(x, 0, z),
+    state: 'standing', // 'standing' | 'walking' | 'walking_to_seat' | 'walking_to_candle' | 'sitting' | 'kneeling' | 'bowing'
+    seat: null,
+    emote: null,
+    emoteTimer: 0,
+    walkPhase: Math.random() * 10,
+    bowTimer: 0,
+    bubbleTimer: null
+  };
+
+  labelEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isMe) {
+      triggerMyEmote('wave');
+    } else {
+      showAvatarBubble(av, '🙏 SOXL 500까지 함께 성투합시다!');
+      triggerAvatarEmote(myAvatar, 'wave', `📈 ${av.name} 님께 성투 인사!`);
+      playBellChime();
+    }
   });
 
-  // 내 이름표
-  const myTag = document.createElement('div');
-  myTag.id = 'my-avatar-tag';
-  myTag.className = 'avatar-tag is-me';
-  myTag.textContent = '👑 ' + myNick + ' (나)';
-  document.getElementById('avatar-labels').appendChild(myTag);
-
-  const myBub = document.createElement('div');
-  myBub.id = 'my-avatar-bubble';
-  myBub.className = 'avatar-bubble';
-  myBub.style.display = 'none';
-  document.getElementById('avatar-labels').appendChild(myBub);
+  avatars.push(av);
+  return av;
 }
 
+function rebuildAvatarRig(av, newCustom) {
+  av.custom = { ...av.custom, ...newCustom };
+  if (av.rig && av.rig.root) {
+    av.group.remove(av.rig.root);
+  }
+  av.rig = buildHumanRig(av.custom, av.isMe);
+  av.group.add(av.rig.root);
+  const gSpan = av.labelEl.querySelector('.gender-span');
+  if (gSpan) gSpan.textContent = av.isMe ? '👑' : (av.custom.gender === 'F' ? '👩' : '👨');
+}
+
+function showAvatarBubble(av, message, duration = 4500) {
+  if (!av || !av.labelEl) return;
+  const old = av.labelEl.querySelector('.avatar-bubble');
+  if (old) old.remove();
+  const b = document.createElement('div');
+  b.className = 'avatar-bubble';
+  b.textContent = message;
+  av.labelEl.appendChild(b);
+  if (av.bubbleTimer) clearTimeout(av.bubbleTimer);
+  av.bubbleTimer = setTimeout(() => b.remove(), duration);
+}
+
+// ============================================================================
+// 6. 동반 기도 주주 NPC 7명 배치 (장의자 착석 & 강단 앞 무릎기도)
+// ============================================================================
+function initNPCShareholders() {
+  const npcConfigs = [
+    { name: 'SOXL 500 수석장로', seatIdx: 22, msg: '🧎 강단 앞 무릎기도석에서 SOXL 500 간절히 간구합니다!', custom: { gender: 'M', hairStyle: 2, hairColor: '#2a221b', outfitType: 'robe', outfitColor: '#143d2e', prop: 'none', accessory: 'crown' } },
+    { name: '나스닥 철야기도단', seatIdx: 21, msg: '🧎 오늘 밤 나스닥·필라델피아 반도체 지수 장대양봉 주소서!', custom: { gender: 'F', hairStyle: 2, hairColor: '#1e1814', outfitType: 'robe', outfitColor: '#8c6d3b', prop: 'none', accessory: 'none' } },
+    { name: '필라델피아 파수꾼', seatIdx: 1, msg: '3배 양의 복리는 인내하는 자에게 반드시 임합니다 🙏', custom: { gender: 'M', hairStyle: 0, hairColor: '#141416', outfitType: 'suit', outfitColor: '#1e2f4d', prop: 'ledger', accessory: 'glasses' } },
+    { name: '서학개미 야수', seatIdx: 6, msg: '벽면 SOXL 100~500 성화 볼 때마다 멘탈이 꽉 잡히네요!', custom: { gender: 'M', hairStyle: 1, hairColor: '#3b281a', outfitType: 'casual', outfitColor: '#25282e', prop: 'bullstaff', accessory: 'beret' } },
+    { name: '반도체 총무', seatIdx: 9, msg: '레버리지 민족 음악 들으며 장의자에서 힐링 중입니다 🎵', custom: { gender: 'F', hairStyle: 0, hairColor: '#241a14', outfitType: 'suit', outfitColor: '#e8e0cf', prop: 'ledger', accessory: 'none' } },
+    { name: '3X 복리 전도사', seatIdx: 14, msg: '분할매수 원칙 지키며 오백불 대성전까지 함께 갑시다!', custom: { gender: 'M', hairStyle: 1, hairColor: '#8e969d', outfitType: 'suit', outfitColor: '#5e1f28', prop: 'bag', accessory: 'glasses' } },
+    { name: 'SOXL 기도원장', seatIdx: 17, msg: 'SOXL 기도원 본당에 입소하신 주주분들을 진심으로 환영합니다 ⛪', custom: { gender: 'F', hairStyle: 1, hairColor: '#3b2618', outfitType: 'suit', outfitColor: '#143d2e', prop: 'candle', accessory: 'none' } }
+  ];
+
+  npcConfigs.forEach((cfg, idx) => {
+    const seat = seats[cfg.seatIdx];
+    const npc = createAvatar({
+      id: `npc_${idx}`,
+      name: cfg.name,
+      custom: cfg.custom,
+      isMe: false,
+      x: seat ? seat.pos.x : (idx - 3) * 1.5,
+      z: seat ? seat.pos.z : 2
+    });
+    npc.npcMsg = cfg.msg;
+    if (seat) {
+      seat.occupiedBy = npc;
+      npc.seat = seat;
+      npc.state = seat.type === 'kneel' ? 'kneeling' : 'sitting';
+      npc.group.rotation.y = seat.lookAngle || 0;
+    }
+  });
+}
+
+// ============================================================================
+// 7. 장의자 착석(1), 무릎 기도(2), 촛불 점화(3), 성화 순례 이동 & 제스처
+// ============================================================================
+function syncDockPostureButtons() {
+  if (!myAvatar) return;
+  const isSitting = myAvatar.state === 'sitting' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'pew');
+  const isKneeling = myAvatar.state === 'kneeling' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'kneel');
+  const sitBtn = document.getElementById('dock-sit');
+  const kneelBtn = document.getElementById('dock-kneel');
+  if (sitBtn) {
+    sitBtn.classList.toggle('active', isSitting);
+    document.getElementById('dock-sit-label').textContent = isSitting ? '일어나기' : '장의자 착석';
+  }
+  if (kneelBtn) {
+    kneelBtn.classList.toggle('active', isKneeling);
+    document.getElementById('dock-kneel-label').textContent = isKneeling ? '일어나기' : '무릎 기도';
+  }
+}
+
+function unseatAvatar(av) {
+  if (!av) return;
+  if (av.seat) {
+    av.seat.occupiedBy = null;
+    av.seat = null;
+  }
+  av.state = 'standing';
+  av.emote = null;
+  if (av.isMe) {
+    sitStartTime = null;
+    syncDockPostureButtons();
+  }
+}
+
+function sitAvatarAtSeat(av, seat) {
+  unseatAvatar(av);
+  av.targetPos.copy(seat.pos);
+  av.seat = seat;
+  seat.occupiedBy = av;
+  av.state = 'walking_to_seat';
+  if (av.isMe) {
+    syncDockPostureButtons();
+    setWalkHint(seat.type === 'kneel'
+      ? `🧎 [${seat.label}]로 나아가 두 무릎을 꿇고 상승 기도를 올립니다...`
+      : `🪑 [${seat.label}]로 걸어가 착석합니다...`);
+    broadcastMyState();
+  }
+}
+
+// [1] 장의자 착석 토글
+function toggleMySit() {
+  if (!myAvatar) return;
+  if (myAvatar.state === 'sitting' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'pew')) {
+    unseatAvatar(myAvatar);
+    myAvatar.targetPos.set(myAvatar.group.position.x, 0, myAvatar.group.position.z + 0.55);
+    setWalkHint('🚶 장의자에서 일어났습니다. 성전 바닥이나 성화 액자를 클릭해 보세요.');
+    showToast('🚶 장의자에서 일어났습니다.');
+    broadcastMyState();
+    return;
+  }
+  let bestSeat = null, minDist = Infinity;
+  for (const s of seats) {
+    if (s.type !== 'pew') continue;
+    if (s.occupiedBy && s.occupiedBy !== myAvatar) continue;
+    const d = myAvatar.group.position.distanceTo(s.pos);
+    if (d < minDist) { minDist = d; bestSeat = s; }
+  }
+  if (bestSeat) {
+    sitAvatarAtSeat(myAvatar, bestSeat);
+    showToast(`🪑 [${bestSeat.label}]에 착석합니다.`);
+  }
+}
+
+// [2] 무릎 기도 토글 (강단 앞 무릎 기도석 또는 현재 자리에서 즉시 무릎 꿇기)
+function toggleMyKneel() {
+  if (!myAvatar) return;
+  if (myAvatar.state === 'kneeling' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'kneel')) {
+    unseatAvatar(myAvatar);
+    setWalkHint('🚶 무릎 기도를 마치고 자리에서 일어났습니다.');
+    showToast('🚶 무릎 기도를 마치고 일어났습니다.');
+    broadcastMyState();
+    return;
+  }
+  let bestKneel = null, minDist = Infinity;
+  for (const s of seats) {
+    if (s.type !== 'kneel') continue;
+    if (s.occupiedBy && s.occupiedBy !== myAvatar) continue;
+    const d = myAvatar.group.position.distanceTo(s.pos);
+    if (d < minDist) { minDist = d; bestKneel = s; }
+  }
+  if (bestKneel && minDist <= 8.5) {
+    sitAvatarAtSeat(myAvatar, bestKneel);
+    showToast(`🧎 [${bestKneel.label}]로 나아가 두 무릎을 꿇고 간구합니다.`);
+  } else {
+    if (myAvatar.seat) {
+      myAvatar.group.position.z += 0.45;
+      myAvatar.targetPos.copy(myAvatar.group.position);
+    }
+    unseatAvatar(myAvatar);
+    myAvatar.state = 'kneeling';
+    myAvatar.group.rotation.y = 0;
+    sitStartTime = Date.now();
+    syncDockPostureButtons();
+    playBellChime();
+    showAvatarBubble(myAvatar, '🧎 강단 향해 무릎 꿇고 SOXL 상승을 간구합니다!');
+    setWalkHint('🧎 두 무릎을 꿇고 두 손을 모아 강단 위 SOXL 500 대제단을 향해 기도 중입니다.');
+    broadcastMyState('kneel', '🧎 무릎 꿇고 SOXL 상승을 간구합니다!');
+  }
+}
+
+// 상단 퀵버튼: 강단 무릎기도석으로 즉시 이동
+function walkToKneelAltar() {
+  let bestKneel = null, minDist = Infinity;
+  for (const s of seats) {
+    if (s.type !== 'kneel') continue;
+    if (s.occupiedBy && s.occupiedBy !== myAvatar) continue;
+    const d = Math.abs(s.pos.x);
+    if (d < minDist) { minDist = d; bestKneel = s; }
+  }
+  if (bestKneel) {
+    camYaw = 0;
+    camPitch = 0.22;
+    camDist = 5.4;
+    sitAvatarAtSeat(myAvatar, bestKneel);
+    showToast(`🧎 강단 앞 [${bestKneel.label}]로 이동하여 무릎 기도를 올립니다.`);
+  }
+}
+
+// 상단 퀵버튼: 야외 웨이퍼 치유 연못으로 이동
+function walkToGardenPond() {
+  const pondBench = seats.find(s => s.id.startsWith('garden_bench_') && (!s.occupiedBy || s.occupiedBy === myAvatar));
+  if (pondBench) {
+    camYaw = -Math.PI / 2;
+    camPitch = 0.28;
+    camDist = 6.5;
+    sitAvatarAtSeat(myAvatar, pondBench);
+    showToast('⛲ 야외 3X 황금 웨이퍼 치유 연못 벤치로 이동합니다.');
+  } else {
+    unseatAvatar(myAvatar);
+    myAvatar.targetPos.set(-4.5, 0, 19.2);
+    myAvatar.state = 'walking';
+    showToast('⛲ 야외 3X 황금 웨이퍼 치유 연못으로 이동합니다.');
+  }
+}
+
+// 특정 SOXL 100~500 성화 앞으로 걸어가기 & 카메라 포커싱
+function walkToFrame(frameIdx) {
+  const f = SOXL_FRAMES[frameIdx];
+  if (!f) return;
+  currentDocentIdx = frameIdx;
+
+  document.querySelectorAll('#frame-quick-strip .fq-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active', idx === frameIdx + 1);
+  });
+
+  // 해당 성화와 가장 가까운 장의자 찾기
+  let targetSeat = null, minDist = Infinity;
+  const targetPt = new THREE.Vector3(f.seatTarget.x, 0, f.seatTarget.z);
+  seats.forEach(s => {
+    if (s.type === 'pew' && (!s.occupiedBy || s.occupiedBy === myAvatar)) {
+      const d = s.pos.distanceTo(targetPt);
+      if (d < minDist) { minDist = d; targetSeat = s; }
+    }
+  });
+
+  if (targetSeat) {
+    sitAvatarAtSeat(myAvatar, targetSeat);
+  } else {
+    unseatAvatar(myAvatar);
+    myAvatar.targetPos.copy(targetPt);
+    myAvatar.state = 'walking';
+  }
+
+  if (f.rotY === 0) camYaw = 0;
+  else if (f.rotY > 0) camYaw = Math.PI / 2;
+  else camYaw = -Math.PI / 2;
+
+  camPitch = 0.22;
+  camDist = 5.8;
+
+  showToast(`🖼️ [${f.code}] 성화 앞 좌석으로 이동합니다.`);
+  selectDocentFrame(frameIdx);
+}
+
+function walkToCurrentDocentFrame() {
+  walkToFrame(currentDocentIdx);
+  closeAllModals();
+}
+
+// 4대 기도원 제스처 액션
+const EMOTE_META = {
+  amen:   { dur: 3.2, msg: '🙏 제발 장대양봉 주소서! SOXL 500 성취 아멘!', banner: '🙏 두 손을 가슴에 모으고 간절히 장대양봉을 간구합니다.' },
+  praise: { dur: 3.6, msg: '🙌 레버리지 민족 만세! SOXL 500 가즈아!', banner: '🙌 두 팔을 높이 들고 레버리지 민족 만세를 외칩니다!' },
+  wave:   { dur: 3.0, msg: '📈 흔들리지 마세요! 끝까지 함께 성투합시다!', banner: '📈 함께 기도하는 주주들에게 성투 손인사를 건넵니다.' },
+  read:   { dur: 4.2, msg: '📖 공포에 분할매수하고 환희에 복리를 거둔다!', banner: '📖 황금 투자 원장을 두 손으로 펴 들고 야수의 심장 교리를 독경합니다.' }
+};
+
+function triggerAvatarEmote(av, emoteKey, customMsg = null) {
+  if (!av) return;
+  const meta = EMOTE_META[emoteKey] || EMOTE_META.wave;
+  const msg = customMsg || meta.msg;
+  av.emote = emoteKey;
+  av.emoteTimer = meta.dur;
+  showAvatarBubble(av, msg, meta.dur * 1000);
+
+  if (av.isMe) {
+    playBellChime();
+    setWalkHint(meta.banner);
+    broadcastMyState(emoteKey, msg);
+    if (emoteKey === 'wave' || emoteKey === 'praise') {
+      setTimeout(() => {
+        const activeNpcs = avatars.filter(a => a.id.startsWith('npc_') && a.group.visible);
+        if (activeNpcs.length > 0) {
+          const responder = activeNpcs[Math.floor(Math.random() * activeNpcs.length)];
+          const reply = emoteKey === 'praise' ? '🙌 SOXL 500 가즈아!!' : '📈 반갑습니다! 끝까지 성투해요!';
+          triggerAvatarEmote(responder, emoteKey === 'praise' ? 'amen' : 'wave', reply);
+        }
+      }, 650);
+    }
+  }
+}
+
+function triggerMyEmote(emoteKey) {
+  triggerAvatarEmote(myAvatar, emoteKey);
+}
+
+// 강단 촛불 제단 점화 시퀀스
+function startLightingCandleSequence(prayerText) {
+  unseatAvatar(myAvatar);
+  const standPos = new THREE.Vector3(Math.random() < 0.5 ? -2.2 : 2.2, 0, -6.35);
+  myAvatar.targetPos.copy(standPos);
+  myAvatar.state = 'walking_to_candle';
+  myAvatar.pendingPrayer = prayerText;
+  setWalkHint('🕯️ 강단 앞 황금 촛불 제단으로 걸어가 기원의 불꽃을 밝힙니다...');
+}
+
+function setWalkHint(text) {
+  const el = document.getElementById('walk-hint');
+  if (el) el.textContent = text;
+}
+// ============================================================================
+// 8. 실시간 멀티플레이어 (MQTT + BroadcastChannel) & 실시간 성전 채팅
+// ============================================================================
 function initMultiplayerSync() {
   try {
     bcChannel = new BroadcastChannel('soxl_mental_care_v1');
@@ -1608,19 +2856,22 @@ function initMultiplayerSync() {
     } catch (e) {}
   }
 
-  setInterval(broadcastMyState, 2000);
+  setInterval(() => broadcastMyState(), 2200);
 }
 
-function broadcastMyState() {
+function broadcastMyState(emoteKey = null, bubbleMsg = null) {
+  if (!myAvatar) return;
   const pkt = {
     type: 'presence',
     id: myId,
-    nick: myNick,
-    x: myState.x,
-    z: myState.z,
-    rotY: myState.rotY,
-    sitting: myState.sitting,
-    bubble: Date.now() < myState.bubbleUntil ? myState.bubble : '',
+    nick: myCustom.name,
+    custom: myCustom,
+    x: +(myAvatar.group.position.x.toFixed(2)),
+    z: +(myAvatar.group.position.z.toFixed(2)),
+    rotY: +(myAvatar.group.rotation.y.toFixed(2)),
+    state: myAvatar.state,
+    emote: emoteKey || myAvatar.emote,
+    bubble: bubbleMsg || '',
     ts: Date.now()
   };
   if (bcChannel) {
@@ -1638,33 +2889,48 @@ function handleNetworkPacket(pkt) {
   if (pkt.type === 'presence') {
     let p = remotePeers[pkt.id];
     if (!p) {
-      const mesh = createAvatarMesh(0x38bdf8, 0xeab85c, false);
-      scene.add(mesh);
-      const tagEl = document.createElement('div');
-      tagEl.className = 'avatar-tag';
-      document.getElementById('avatar-labels').appendChild(tagEl);
-      const bubbleEl = document.createElement('div');
-      bubbleEl.className = 'avatar-bubble';
-      bubbleEl.style.display = 'none';
-      document.getElementById('avatar-labels').appendChild(bubbleEl);
-      p = remotePeers[pkt.id] = { mesh, tagEl, bubbleEl };
+      const av = createAvatar({
+        id: pkt.id,
+        name: pkt.nick || 'SOXL 주주',
+        custom: pkt.custom || {},
+        isMe: false,
+        x: pkt.x || 0,
+        z: pkt.z || 6
+      });
+      p = remotePeers[pkt.id] = { av, lastSeen: Date.now(), customHash: JSON.stringify(pkt.custom || {}) };
     }
-    p.nick = pkt.nick || 'SOXL 주주';
-    p.targetX = pkt.x;
-    p.targetZ = pkt.z;
-    p.rotY = pkt.rotY;
-    p.sitting = pkt.sitting;
     p.lastSeen = Date.now();
-    p.tagEl.textContent = '📈 ' + p.nick;
-    if (pkt.bubble) {
-      p.bubbleEl.textContent = pkt.bubble;
-      p.bubbleEl.style.display = 'block';
+    p.av.name = pkt.nick || 'SOXL 주주';
+    const nameSpan = p.av.labelEl.querySelector('.name-span');
+    if (nameSpan) nameSpan.textContent = p.av.name;
+
+    const nextHash = JSON.stringify(pkt.custom || {});
+    if (pkt.custom && nextHash !== p.customHash) {
+      p.customHash = nextHash;
+      rebuildAvatarRig(p.av, pkt.custom);
+    }
+
+    p.av.targetPos.set(pkt.x || 0, 0, pkt.z || 6);
+    if (pkt.state === 'sitting' || pkt.state === 'kneeling') {
+      p.av.state = pkt.state;
+      p.av.group.rotation.y = pkt.rotY || 0;
+    } else if (p.av.group.position.distanceTo(p.av.targetPos) > 0.12) {
+      p.av.state = 'walking';
     } else {
-      p.bubbleEl.style.display = 'none';
+      p.av.state = 'standing';
+      p.av.group.rotation.y = pkt.rotY || 0;
+    }
+
+    if (pkt.emote) {
+      triggerAvatarEmote(p.av, pkt.emote, pkt.bubble || null);
+    } else if (pkt.bubble) {
+      showAvatarBubble(p.av, pkt.bubble);
     }
     updateOnlineCount();
   } else if (pkt.type === 'candle_note' && pkt.note) {
     prependNoteCard(pkt.note, false);
+  } else if (pkt.type === 'chat' && pkt.text) {
+    appendChatMessage(pkt.nick || 'SOXL 주주', pkt.text, false);
   }
 }
 
@@ -1672,21 +2938,59 @@ function updateOnlineCount() {
   const now = Date.now();
   let activePeers = 0;
   Object.keys(remotePeers).forEach(k => {
-    if (now - remotePeers[k].lastSeen > 12000) {
-      scene.remove(remotePeers[k].mesh);
-      remotePeers[k].tagEl.remove();
-      remotePeers[k].bubbleEl.remove();
+    if (now - remotePeers[k].lastSeen > 14000) {
+      const av = remotePeers[k].av;
+      worldGroup.remove(av.group);
+      av.labelEl.remove();
+      avatars = avatars.filter(a => a !== av);
       delete remotePeers[k];
     } else {
       activePeers++;
     }
   });
-  const total = 1 + (showNPCs ? npcs.length : 0) + activePeers;
-  document.getElementById('online-count-txt').textContent = `🏥 SOXL 멘탈케어 요양소 · 실시간 주주 ${total}명 요양 중`;
+  const npcCount = showNPCs ? avatars.filter(a => a.id.startsWith('npc_')).length : 0;
+  const total = 1 + npcCount + activePeers;
+  document.getElementById('online-count-txt').textContent = `⛪ SOXL 기도원 · 현재 주주 ${total}명 성전 기도 중`;
+}
+
+// 실시간 채팅방
+function initChatLog() {
+  appendChatMessage('시스템', '⛪ SOXL 기도원 대성전에 입장하셨습니다. 장의자에 앉거나 강단 앞 무릎기도석에서 상승 기도를 올려보세요.', true);
+  appendChatMessage('SOXL 500 수석장로', '오늘도 흔들리지 않고 강단 앞 기도석 지킵니다. 모두 성투하세요!', false);
+  appendChatMessage('필라델피아 파수꾼', '벽면 SOXL 100~500 성화 클릭하면 초고화질로 확대됩니다 👍', false);
+}
+
+function appendChatMessage(author, text, isSys = false) {
+  const log = document.getElementById('chat-log');
+  if (!log) return;
+  const div = document.createElement('div');
+  div.className = 'chat-msg' + (isSys ? ' sys' : '');
+  if (isSys) {
+    div.textContent = text;
+  } else {
+    div.innerHTML = `<strong>${escapeHtml(author)}:</strong><span>${escapeHtml(text)}</span>`;
+  }
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const txt = input.value.trim();
+  if (!txt) return;
+  input.value = '';
+  appendChatMessage(myCustom.name, txt, false);
+  showAvatarBubble(myAvatar, txt);
+
+  const pkt = { type: 'chat', id: myId, nick: myCustom.name, text: txt, ts: Date.now() };
+  if (bcChannel) { try { bcChannel.postMessage(pkt); } catch (e) {} }
+  if (mqttClient && mqttClient.connected) {
+    try { mqttClient.publish('evening-soxx/soxl-mental-care/v1/presence', JSON.stringify(pkt)); } catch (e) {}
+  }
 }
 
 // ============================================================================
-// 6. 카메라 조작, 바닥 클릭 이동, 액자 클릭 도슨트 오픈
+// 9. 카메라 조작, 바닥/장의자/무릎기도석 클릭 이동, 성화 클릭 도슨트 오픈
 // ============================================================================
 function setupPointerAndKeyboardControls() {
   const dom = renderer.domElement;
@@ -1706,7 +3010,7 @@ function setupPointerAndKeyboardControls() {
     const dx = e.clientX - prevMouse.x;
     const dy = e.clientY - prevMouse.y;
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
-    camAngle -= dx * 0.0065;
+    camYaw -= dx * 0.0065;
     camPitch = Math.max(0.08, Math.min(1.15, camPitch + dy * 0.005));
     prevMouse.x = e.clientX;
     prevMouse.y = e.clientY;
@@ -1715,13 +3019,13 @@ function setupPointerAndKeyboardControls() {
   window.addEventListener('pointerup', (e) => {
     if (!isDragging) return;
     isDragging = false;
-    if (dragMoved) return;
+    if (dragMoved || e.target !== dom) return;
 
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
 
-    // 1순위: 벽면 SOXL 100~500 액자 클릭 여부 확인
+    // 1순위: 성전 벽면 SOXL 100~500 성화 액자 클릭 확인
     const hitFrames = raycaster.intersectObjects(frameMeshes, false);
     if (hitFrames.length > 0) {
       const fIdx = hitFrames[0].object.userData.frameIdx;
@@ -1731,26 +3035,38 @@ function setupPointerAndKeyboardControls() {
       return;
     }
 
-    // 2순위: 바닥 클릭 이동
-    const intersects = raycaster.intersectObjects(scene.children, true);
-    for (const hit of intersects) {
-      if (hit.object.name === 'walkable_floor') {
-        const pt = hit.point;
-        const distCenter = Math.hypot(pt.x, pt.z);
-        if (distCenter < 3.55) continue; // 중앙 분수대 내부 충돌 방지
-        myState.sitting = false;
-        myState.targetX = Math.max(-13.2, Math.min(13.2, pt.x));
-        myState.targetZ = Math.max(-13.2, Math.min(13.2, pt.z));
-        targetRing.position.set(myState.targetX, 0.03, myState.targetZ);
-        targetRing.material.opacity = 0.95;
-        targetRing.scale.set(0.6, 0.6, 1);
-        document.getElementById('dock-sit').classList.remove('active');
-        break;
+    // 2순위: 본당 마룻바닥, 성전 카펫 러너, 야외 정원 및 산책로 클릭 이동
+    const hits = raycaster.intersectObjects([floorMesh, gardenMesh, runnerMesh, pathMesh]);
+    if (hits.length > 0) {
+      const pt = hits[0].point;
+      let cx = Math.max(-16.0, Math.min(16.0, pt.x));
+      let cz = Math.max(-7.5, Math.min(26.0, pt.z));
+
+      // 야외 웨이퍼 치유 연못(x:-9.2, z:19.2, 반경 4.3) 내부 충돌 방지
+      const pondCenter = new THREE.Vector2(-9.2, 19.2);
+      const click2D = new THREE.Vector2(cx, cz);
+      if (click2D.distanceTo(pondCenter) < 4.5) {
+        const dir = click2D.sub(pondCenter).normalize().multiplyScalar(4.7);
+        click2D.copy(pondCenter).add(dir);
       }
+
+      // 클릭 지점 근처(0.95m 이내)에 빈 장의자나 무릎기도석이 있으면 즉시 착석/무릎기도!
+      for (const s of seats) {
+        if ((!s.occupiedBy || s.occupiedBy === myAvatar) && s.pos.distanceTo(new THREE.Vector3(click2D.x, 0, click2D.y)) < 0.95) {
+          sitAvatarAtSeat(myAvatar, s);
+          return;
+        }
+      }
+
+      unseatAvatar(myAvatar);
+      myAvatar.targetPos.set(click2D.x, 0, click2D.y);
+      myAvatar.state = 'walking';
+
+      targetRing.position.set(click2D.x, 0.03, click2D.y);
+      rippleAge = 0;
     }
   });
 
-  // 마우스 휠: 야수의 심장 휠 영역 밖이면 카메라 줌, 아니면 만트라 각인
   window.addEventListener('wheel', (e) => {
     if (document.getElementById('zoom-lightbox').classList.contains('open')) {
       e.preventDefault();
@@ -1758,21 +3074,38 @@ function setupPointerAndKeyboardControls() {
       return;
     }
     const wheelBox = document.getElementById('mantra-wheel-box');
-    if (wheelBox.matches(':hover')) {
-      advanceMantraWheel(1);
-    } else {
-      camDist = Math.max(4.5, Math.min(16.5, camDist + e.deltaY * 0.005));
+    if (wheelBox && wheelBox.matches(':hover')) {
+      e.preventDefault();
+      advanceMantraWheel(2);
+    } else if (e.target === dom) {
+      e.preventDefault();
+      camDist = Math.max(1.8, Math.min(24.0, camDist + e.deltaY * 0.005));
     }
   }, { passive: false });
 
   window.addEventListener('keydown', (e) => {
-    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    const tag = document.activeElement ? document.activeElement.tagName : '';
+    if (['INPUT', 'TEXTAREA'].includes(tag)) {
+      if (e.key === 'Enter' && document.activeElement.id === 'chat-input') {
+        e.preventDefault();
+        sendChatMessage();
+      } else if (e.key === 'Escape') {
+        document.activeElement.blur();
+      }
+      return;
+    }
     keysPressed[e.code] = true;
-    if (e.key === '1') triggerSitAction();
-    if (e.key === '2') triggerWheelFocus();
+    if (e.key === 'Enter') {
+      const ci = document.getElementById('chat-input');
+      if (ci) { e.preventDefault(); ci.focus(); }
+      return;
+    }
+    if (e.key === '1') toggleMySit();
+    if (e.key === '2') toggleMyKneel();
     if (e.key === '3') togglePanel('candle');
     if (e.key === '4') togglePanel('docent');
-    if (e.key === '5') togglePanel('sound');
+    if (e.key === '5') togglePanel('avatar');
+    if (e.key === '6') togglePanel('sound');
     if (e.key === 'Escape') {
       closeAllModals();
       closeZoomLightbox();
@@ -1781,80 +3114,42 @@ function setupPointerAndKeyboardControls() {
   window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
 }
 
-// 특정 SOXL 100~500 액자 앞으로 즉시 걸어가기 & 카메라 포커싱
-function walkToFrame(frameIdx) {
-  const f = SOXL_FRAMES[frameIdx];
-  if (!f) return;
-  currentDocentIdx = frameIdx;
-
-  // 상단 퀵버튼 활성화 표시
-  document.querySelectorAll('#frame-quick-strip .fq-btn').forEach((btn, idx) => {
-    btn.classList.toggle('active', idx === frameIdx);
-  });
-
-  // 해당 액자 앞 벤치로 이동 및 착석
-  const b = benches.find(item => item.frameIdx === frameIdx);
-  if (b) {
-    myState.targetX = b.x;
-    myState.targetZ = b.z;
-    myState.rotY = b.rotY + Math.PI;
-    myState.sitting = true;
-    document.getElementById('dock-sit').classList.add('active');
-  }
-
-  // 카메라가 해당 액자를 정면으로 바라보도록 부드럽게 회전
-  if (f.rotY === 0) camAngle = 0; // 북쪽 벽 (SOXL 200, 300, 400)
-  else if (f.rotY > 0) camAngle = Math.PI / 2; // 서쪽 벽 (SOXL 100, 주주클럽)
-  else camAngle = -Math.PI / 2; // 동쪽 벽 (SOXL 500, 로드맵)
-
-  camPitch = 0.24;
-  camDist = 7.4;
-
-  showToast(`🖼️ [${f.code}] 액자 앞 관람석으로 이동합니다.`);
-  selectDocentFrame(frameIdx);
-}
-
-function walkToCurrentDocentFrame() {
-  walkToFrame(currentDocentIdx);
-  closeAllModals();
-}
-
 // ============================================================================
-// 7. 5대 하단 독 기능 & 도슨트 / 줌 라이트박스 / 사운드 엔진
+// 10. 아바타 복장 커스터마이저 & 간구문 스크롤 휠 & 도슨트 / 줌 라이트박스
 // ============================================================================
-function triggerSitAction() {
-  if (myState.sitting) {
-    myState.sitting = false;
-    document.getElementById('dock-sit').classList.remove('active');
-    showToast('🚶 벤치에서 일어났습니다.');
-    return;
-  }
-  // 가장 가까운 벤치 찾기
-  let nearest = null, minDist = 999;
-  benches.forEach(b => {
-    const d = Math.hypot(b.x - myState.x, b.z - myState.z);
-    if (d < minDist) { minDist = d; nearest = b; }
-  });
-  if (nearest) {
-    myState.targetX = nearest.x;
-    myState.targetZ = nearest.z;
-    myState.rotY = nearest.rotY + Math.PI;
-    myState.sitting = true;
-    document.getElementById('dock-sit').classList.add('active');
-    if (nearest.frameIdx >= 0) {
-      const f = SOXL_FRAMES[nearest.frameIdx];
-      showToast(`🪑 [${f.code}] 액자 앞 벤치에 착석했습니다.`);
-    } else {
-      showToast('🪑 중앙 황금 웨이퍼 분수대 벤치에 착석했습니다.');
-    }
+function syncCustomizerUI() {
+  document.getElementById('cust-name-input').value = myCustom.name;
+  document.querySelectorAll('#cust-gender .cust-chip').forEach(b => b.classList.toggle('active', b.dataset.val === myCustom.gender));
+  document.querySelectorAll('#cust-hair .cust-chip').forEach(b => b.classList.toggle('active', Number(b.dataset.val) === Number(myCustom.hairStyle)));
+  document.querySelectorAll('#cust-outfit .cust-chip').forEach(b => b.classList.toggle('active', b.dataset.val === myCustom.outfitType));
+  document.querySelectorAll('#cust-color .color-swatch').forEach(b => b.classList.toggle('active', b.dataset.val === myCustom.outfitColor));
+  document.querySelectorAll('#cust-prop .cust-chip').forEach(b => b.classList.toggle('active', b.dataset.val === myCustom.prop));
+  document.querySelectorAll('#cust-acc .cust-chip').forEach(b => b.classList.toggle('active', b.dataset.val === myCustom.accessory));
+}
+
+function updateCustom(key, val) {
+  myCustom[key] = val;
+  saveMyCustom();
+  syncCustomizerUI();
+  if (myAvatar) {
+    rebuildAvatarRig(myAvatar, myCustom);
+    broadcastMyState();
   }
 }
 
-function triggerWheelFocus() {
-  const box = document.getElementById('mantra-wheel-box');
-  box.classList.remove('minimized');
-  advanceMantraWheel(3);
-  showToast('💎 마우스 휠을 굴려 야수의 심장 마인드셋을 각인하세요.');
+function saveAvatarName() {
+  const next = document.getElementById('cust-name-input').value.trim();
+  if (!next) return;
+  myCustom.name = next.slice(0, 16);
+  saveMyCustom();
+  document.getElementById('my-nick-label').textContent = myCustom.name;
+  if (myAvatar) {
+    myAvatar.name = `${myCustom.name} (나)`;
+    const nSpan = myAvatar.labelEl.querySelector('.name-span');
+    if (nSpan) nSpan.textContent = myAvatar.name;
+    broadcastMyState();
+  }
+  showToast(`🪪 기도원 호칭이 [${myCustom.name}](으)로 변경되었습니다.`);
 }
 
 function toggleWheelMinimize() {
@@ -1874,7 +3169,7 @@ function renderMantraText() {
   }
   const pct = Math.min(100, Math.round((mantraCharIdx / m.text.length) * 100));
   document.getElementById('vw-bar').style.width = pct + '%';
-  document.getElementById('vw-count').textContent = `멘탈 회복 지수 ${pct}% · 완독 ${mantraCompleteCount}회`;
+  document.getElementById('vw-count').textContent = `간구 성취율 ${pct}% · 독경 ${mantraCompleteCount}독`;
 }
 
 function advanceMantraWheel(step = 2) {
@@ -1885,14 +3180,13 @@ function advanceMantraWheel(step = 2) {
     mantraCompleteCount++;
     localStorage.setItem('soxl_mc_mantra_cnt', String(mantraCompleteCount));
     playBellChime();
-    myState.bubble = '💎 야수의 심장 멘탈 충전 완료!';
-    myState.bubbleUntil = Date.now() + 5000;
-    broadcastMyState();
+    showAvatarBubble(myAvatar, `📜 ${m.ref} 독경 성취!`);
+    broadcastMyState(null, `📜 ${m.ref} 독경 성취!`);
     setTimeout(() => {
       currentMantraIdx = (currentMantraIdx + 1) % MENTAL_MANTRAS.length;
       mantraCharIdx = 0;
       renderMantraText();
-    }, 900);
+    }, 850);
   }
   renderMantraText();
 }
@@ -1904,10 +3198,10 @@ function nextMantra(e) {
   renderMantraText();
 }
 
-// 모달 열기/닫기
 function closeAllModals() {
-  ['candle', 'docent', 'sound'].forEach(k => {
-    document.getElementById('modal-' + k).classList.remove('open');
+  ['candle', 'docent', 'avatar', 'sound'].forEach(k => {
+    const m = document.getElementById('modal-' + k);
+    if (m) m.classList.remove('open');
     const btn = document.getElementById('dock-' + k);
     if (btn) btn.classList.remove('active');
   });
@@ -1915,6 +3209,7 @@ function closeAllModals() {
 
 function togglePanel(name, forceOpen = false) {
   const modal = document.getElementById('modal-' + name);
+  if (!modal) return;
   const isOpen = modal.classList.contains('open');
   closeAllModals();
   if (forceOpen || !isOpen) {
@@ -1922,10 +3217,10 @@ function togglePanel(name, forceOpen = false) {
     const btn = document.getElementById('dock-' + name);
     if (btn) btn.classList.add('active');
     if (name === 'docent') selectDocentFrame(currentDocentIdx);
+    if (name === 'avatar') syncCustomizerUI();
   }
 }
 
-// 액자 도슨트 카드 업데이트
 function selectDocentFrame(idx) {
   currentDocentIdx = idx;
   const f = SOXL_FRAMES[idx];
@@ -1939,7 +3234,6 @@ function selectDocentFrame(idx) {
   });
 }
 
-// 풀스크린 초고화질 라이트박스 줌 뷰어
 let zlScale = 1, zlX = 0, zlY = 0, zlDragging = false, zlStart = { x: 0, y: 0 };
 
 function openZoomLightbox() {
@@ -1986,7 +3280,9 @@ function applyZoomTransform() {
   window.addEventListener('pointerup', () => { zlDragging = false; });
 })();
 
-// 불꽃 점화 & 주주 응원 메시지 게시
+// ============================================================================
+// 11. 강단 촛불 간구 기도문 보드 & 오디오 엔진
+// ============================================================================
 function initNotesFeed() {
   const saved = JSON.parse(localStorage.getItem('soxl_mc_notes') || 'null');
   const list = saved && saved.length ? saved : INITIAL_NOTES;
@@ -2001,12 +3297,12 @@ function prependNoteCard(note, saveLocal = true) {
   card.className = 'cheer-card';
   card.innerHTML = `
     <div class="cheer-card-head">
-      <span>🐂 ${escapeHtml(note.author)}</span>
+      <span>🕯️ ${escapeHtml(note.author)}</span>
       <span>${escapeHtml(note.time || '방금 전')}</span>
     </div>
     <div class="cheer-card-body">${escapeHtml(note.text)}</div>
     <button type="button" class="cheer-like-btn" onclick="likeNote(this)">
-      🔥 가즈아 공감 <span>${note.likes || 1}</span>
+      🙏 성투 아멘 <span>${note.likes || 1}</span>
     </button>
   `;
   feed.prepend(card);
@@ -2028,55 +3324,23 @@ function submitCandleNote() {
   const input = document.getElementById('candle-input');
   const text = input.value.trim();
   if (!text) {
-    showToast('응원 또는 목표가 다짐 한 줄을 입력해 주세요.');
+    showToast('강단 촛불 제단에 올릴 간구 기도문을 입력해 주세요.');
     return;
   }
-  litCandleCount = Math.min(12, litCandleCount + 1);
-  candleFlames.forEach((fl, i) => { fl.visible = i < litCandleCount; });
-
-  // 중앙 분수대 앞으로 이동
-  myState.sitting = false;
-  myState.targetX = 0;
-  myState.targetZ = 4.2;
-  myState.rotY = Math.PI;
-  myState.bubble = '🔥 ' + text.slice(0, 24);
-  myState.bubbleUntil = Date.now() + 6000;
-
-  const newNote = {
-    id: 'n_' + Date.now(),
-    author: myNick,
-    text,
-    likes: 1,
-    time: '방금 전'
-  };
-  prependNoteCard(newNote, true);
-
-  if (bcChannel) {
-    try { bcChannel.postMessage({ type: 'candle_note', id: myId, note: newNote }); } catch (e) {}
-  }
-  if (mqttClient && mqttClient.connected) {
-    try {
-      mqttClient.publish('evening-soxx/soxl-mental-care/v1/presence', JSON.stringify({ type: 'candle_note', id: myId, note: newNote }));
-    } catch (e) {}
-  }
-
   input.value = '';
   closeAllModals();
-  playBellChime();
-  showToast('🕯️ 중앙 웨이퍼 분수대에 황금 불꽃을 점화했습니다!');
+  startLightingCandleSequence(text);
 }
 
-// ============================================================================
-// 8. 레버리지 민족 BGM & Web Audio 힐링 사운드스케이프
-// ============================================================================
-function startAudioEngine() {
-  selectBgmTrack(0);
-
+function startAudioEngine(withMusic = true) {
+  if (withMusic) {
+    selectBgmTrack(0);
+  }
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
 
-    // 1) 분수대 물소리 (핑크 노이즈 필터링)
+    // 1) 야외 웨이퍼 치유 연못 물소리
     const bufferSize = audioCtx.sampleRate * 2;
     const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
@@ -2089,7 +3353,7 @@ function startAudioEngine() {
       b3 = 0.86650 * b3 + white * 0.3104856;
       b4 = 0.55000 * b4 + white * 0.5329522;
       b5 = -0.7616 * b5 - white * 0.0168980;
-      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.015;
+      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.014;
       b6 = white * 0.115926;
     }
     const whiteNoise = audioCtx.createBufferSource();
@@ -2098,19 +3362,19 @@ function startAudioEngine() {
 
     const filter = audioCtx.createBiquadFilter();
     filter.type = 'bandpass';
-    filter.frequency.value = 620;
+    filter.frequency.value = 600;
     filter.Q.value = 0.7;
 
     waterGain = audioCtx.createGain();
-    waterGain.gain.value = 0.12;
+    waterGain.gain.value = withMusic ? 0.10 : 0;
     whiteNoise.connect(filter);
     filter.connect(waterGain);
     waterGain.connect(audioCtx.destination);
     whiteNoise.start();
 
-    // 2) 3X 황금 공명 웜 패드 (F#2 / C#3 / A#3 화음)
+    // 2) 성전 파이프 오르간 공명 웜 패드
     padGain = audioCtx.createGain();
-    padGain.gain.value = 0.04;
+    padGain.gain.value = withMusic ? 0.035 : 0;
     padGain.connect(audioCtx.destination);
     [110, 164.81, 220].forEach(freq => {
       const osc = audioCtx.createOscillator();
@@ -2168,7 +3432,7 @@ function playBellChime() {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(880, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(1318.5, audioCtx.currentTime + 0.18);
-    g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    g.gain.setValueAtTime(0.11, audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
     osc.connect(g);
     g.connect(audioCtx.destination);
@@ -2178,185 +3442,393 @@ function playBellChime() {
 }
 
 // ============================================================================
-// 9. 상단 HUD 조명 전환 / NPC 토글 / 닉네임 변경
+// 12. 상단 HUD 조명 전환 / 시점 프리셋 / NPC 토글 / 닉네임 버튼
 // ============================================================================
 document.getElementById('btn-light-mode').addEventListener('click', () => {
   lightModeIdx = (lightModeIdx + 1) % 3;
   const label = document.getElementById('light-mode-label');
   if (lightModeIdx === 0) {
-    label.textContent = '🌙 애프터장 골든 요양소';
-    scene.background.setHex(0x070f0c);
-    scene.fog.color.setHex(0x070f0c);
-    ambientLight.intensity = 0.72;
-    mainSpot.color.setHex(0xffdf9e);
+    label.textContent = '🕯️ 철야 금빛 성전';
+    scene.background.setHex(0x0b1612);
+    scene.fog.color.setHex(0x0b1612);
+    ambientLight.intensity = 0.74;
+    mainSpot.color.setHex(0xffe29e);
   } else if (lightModeIdx === 1) {
-    label.textContent = '🚀 정규장 불마켓 에메랄드';
-    scene.background.setHex(0x051812);
-    scene.fog.color.setHex(0x051812);
-    ambientLight.intensity = 0.85;
+    label.textContent = '🚀 불마켓 에메랄드 성전';
+    scene.background.setHex(0x061c14);
+    scene.fog.color.setHex(0x061c14);
+    ambientLight.intensity = 0.88;
     mainSpot.color.setHex(0x4effb8);
   } else {
-    label.textContent = '☀️ 프리장 모닝 요양소';
-    scene.background.setHex(0x162620);
-    scene.fog.color.setHex(0x162620);
-    ambientLight.intensity = 1.05;
-    mainSpot.color.setHex(0xfff4d6);
+    label.textContent = '☀️ 새벽기도 모닝 성전';
+    scene.background.setHex(0x182b23);
+    scene.fog.color.setHex(0x182b23);
+    ambientLight.intensity = 1.08;
+    mainSpot.color.setHex(0xfff5dc);
   }
+});
+
+document.getElementById('btn-cam-preset').addEventListener('click', () => {
+  camPresetIdx = (camPresetIdx + 1) % CAM_PRESETS.length;
+  const p = CAM_PRESETS[camPresetIdx];
+  camDist = p.dist;
+  camPitch = p.pitch;
+  document.getElementById('cam-preset-label').textContent = p.name;
+  showToast(`🎥 ${p.name}(으)로 카메라 시점을 전환했습니다.`);
 });
 
 document.getElementById('btn-toggle-npc').addEventListener('click', () => {
   showNPCs = !showNPCs;
   document.getElementById('npc-toggle-label').textContent = showNPCs ? '👥 동반 주주 ON' : '👥 동반 주주 OFF';
-  npcs.forEach(n => {
-    n.mesh.visible = showNPCs;
-    n.tagEl.style.display = showNPCs ? 'block' : 'none';
-    if (!showNPCs) n.bubbleEl.style.display = 'none';
+  avatars.forEach(av => {
+    if (av.id.startsWith('npc_')) {
+      av.group.visible = showNPCs;
+      av.labelEl.style.display = showNPCs ? 'flex' : 'none';
+    }
   });
   updateOnlineCount();
 });
 
 document.getElementById('btn-change-nick').addEventListener('click', () => {
-  const next = prompt('SOXL 멘탈케어 요양소에서 사용할 주주 닉네임을 입력하세요:', myNick);
-  if (next && next.trim()) {
-    myNick = next.trim().slice(0, 16);
-    localStorage.setItem('soxl_mc_nick', myNick);
-    document.getElementById('my-nick-label').textContent = myNick;
-    const myTag = document.getElementById('my-avatar-tag');
-    if (myTag) myTag.textContent = '👑 ' + myNick + ' (나)';
-    broadcastMyState();
-    showToast(`🪪 닉네임이 [${myNick}](으)로 변경되었습니다.`);
-  }
+  togglePanel('avatar');
 });
 
 // ============================================================================
-// 10. 메인 애니메이션 루프
+// 13. 다관절 아바타 포즈 엔진 & 메인 애니메이션 루프
 // ============================================================================
+function updateAvatarPose(av, dt, elapsed, isMoving) {
+  const rig = av.rig;
+  if (!rig) return;
+
+  rig.eyes.forEach(e => { e.scale.y = 1.15; });
+  if (rig.lapLedger) rig.lapLedger.visible = false;
+  if (rig.readLedgerMesh) rig.readLedgerMesh.visible = false;
+  if (rig.handPropMesh) rig.handPropMesh.visible = true;
+  if (rig.skirtMesh) {
+    rig.skirtMesh.scale.set(1, 1, 1);
+    rig.skirtMesh.rotation.set(0, 0, 0);
+  }
+
+  if (isMoving) {
+    av.walkPhase += dt * 9.5;
+    const p = av.walkPhase;
+    const swing = Math.sin(p);
+    const bob = Math.abs(Math.cos(p * 2)) * 0.032;
+
+    rig.pelvis.position.set(0, bob, 0);
+    rig.legL.rotation.set(swing * 0.58, 0, 0);
+    rig.legR.rotation.set(-swing * 0.58, 0, 0);
+    rig.shinL.rotation.set(-Math.max(0, -Math.cos(p)) * 0.62 - 0.06, 0, 0);
+    rig.shinR.rotation.set(-Math.max(0, Math.cos(p)) * 0.62 - 0.06, 0, 0);
+
+    rig.torso.rotation.set(-0.04, -swing * 0.08, swing * 0.025);
+    rig.headGroup.rotation.set(Math.sin(p * 2) * 0.025, swing * 0.05, 0);
+
+    rig.armL.rotation.set(-swing * 0.46, 0, 0.06);
+    rig.forearmL.rotation.set(0.32 + Math.max(0, -swing) * 0.25, 0, 0);
+
+    if (av.custom.prop && av.custom.prop !== 'none') {
+      rig.armR.rotation.set(0.36 + swing * 0.14, -0.15, -0.08);
+      rig.forearmR.rotation.set(0.68, -0.1, 0);
+    } else {
+      rig.armR.rotation.set(swing * 0.46, 0, -0.06);
+      rig.forearmR.rotation.set(0.32 + Math.max(0, swing) * 0.25, 0, 0);
+    }
+    if (rig.skirtMesh) rig.skirtMesh.scale.set(1, 1, 1.12);
+  } else if (av.state === 'sitting') {
+    const breath = Math.sin(elapsed * 1.8 + av.walkPhase) * 0.015;
+    rig.pelvis.position.set(0, -0.09, 0.04);
+    rig.legL.rotation.set(1.48, 0.06, 0);
+    rig.legR.rotation.set(1.48, -0.06, 0);
+    rig.shinL.rotation.set(-1.48, 0, 0);
+    rig.shinR.rotation.set(-1.48, 0, 0);
+
+    if (rig.skirtMesh) {
+      rig.skirtMesh.scale.set(1.06, 0.78, 1.36);
+      rig.skirtMesh.rotation.x = 0.36;
+    }
+
+    rig.torso.rotation.set(-0.04 + breath * 0.5, 0, 0);
+    rig.headGroup.rotation.set(-0.12 + breath, 0, 0);
+
+    rig.armL.rotation.set(0.42, 0.22, 0.08);
+    rig.forearmL.rotation.set(0.88, 0.28, 0);
+    rig.armR.rotation.set(0.42, -0.22, -0.08);
+    rig.forearmR.rotation.set(0.88, -0.28, 0);
+
+    if (av.custom.prop === 'ledger') {
+      if (rig.lapLedger) rig.lapLedger.visible = true;
+      if (rig.handPropMesh) rig.handPropMesh.visible = false;
+    }
+  } else if (av.state === 'kneeling') {
+    const breath = Math.sin(elapsed * 1.6 + av.walkPhase) * 0.018;
+    rig.pelvis.position.set(0, -0.24 + breath * 0.3, -0.04);
+    rig.legL.rotation.set(0.18, 0.05, 0);
+    rig.legR.rotation.set(0.18, -0.05, 0);
+    rig.shinL.rotation.set(-1.62, 0, 0);
+    rig.shinR.rotation.set(-1.62, 0, 0);
+
+    if (rig.skirtMesh) {
+      rig.skirtMesh.scale.set(1.08, 0.75, 1.22);
+    }
+
+    rig.torso.rotation.set(-0.22 + breath * 0.6, 0, 0);
+    rig.headGroup.rotation.set(-0.34 + breath, 0, 0);
+    rig.eyes.forEach(e => { e.scale.y = 0.14; });
+
+    rig.armL.rotation.set(0.78, 0.42, 0.18);
+    rig.forearmL.rotation.set(1.28, 0.38, 0.22);
+    rig.armR.rotation.set(0.78, -0.42, -0.18);
+    rig.forearmR.rotation.set(1.28, -0.38, -0.22);
+    if (rig.handPropMesh) rig.handPropMesh.visible = false;
+  } else {
+    const breath = Math.sin(elapsed * 1.8 + av.walkPhase);
+    rig.pelvis.position.set(0, breath * 0.008, 0);
+    rig.legL.rotation.set(0, 0, 0);
+    rig.legR.rotation.set(0, 0, 0);
+    rig.shinL.rotation.set(0, 0, 0);
+    rig.shinR.rotation.set(0, 0, 0);
+
+    rig.torso.rotation.set(breath * 0.012, 0, 0);
+    rig.headGroup.rotation.set(breath * 0.018, Math.sin(elapsed * 0.6 + av.walkPhase) * 0.05, 0);
+
+    rig.armL.rotation.set(0.06, 0, 0.07);
+    rig.forearmL.rotation.set(0.22, 0.08, 0);
+    if (av.custom.prop && av.custom.prop !== 'none') {
+      rig.armR.rotation.set(0.38, -0.18, -0.08);
+      rig.forearmR.rotation.set(0.72, -0.15, 0);
+    } else {
+      rig.armR.rotation.set(0.06, 0, -0.07);
+      rig.forearmR.rotation.set(0.22, -0.08, 0);
+    }
+
+    if (av.state === 'bowing') {
+      rig.torso.rotation.x = -0.28;
+      rig.headGroup.rotation.x = -0.36;
+      rig.eyes.forEach(e => { e.scale.y = 0.14; });
+      rig.armL.rotation.set(0.68, 0.38, 0.14);
+      rig.forearmL.rotation.set(1.15, 0.3, 0);
+      rig.armR.rotation.set(0.68, -0.38, -0.14);
+      rig.forearmR.rotation.set(1.15, -0.3, 0);
+    }
+  }
+
+  if (av.emote) {
+    av.emoteTimer -= dt;
+    if (av.emoteTimer <= 0) {
+      av.emote = null;
+    } else if (av.emote === 'praise') {
+      const w = Math.sin(elapsed * 7.5) * 0.14;
+      rig.armL.rotation.set(2.65, 0, -0.25 + w);
+      rig.forearmL.rotation.set(0.25, 0, 0);
+      rig.armR.rotation.set(2.65, 0, 0.25 + w);
+      rig.forearmR.rotation.set(0.25, 0, 0);
+      rig.headGroup.rotation.set(0.16, w * 0.4, 0);
+    } else if (av.emote === 'wave') {
+      const w = Math.sin(elapsed * 11.0) * 0.32;
+      rig.armR.rotation.set(2.25, -0.2, 0.28 + w * 0.5);
+      rig.forearmR.rotation.set(0.45, 0, w);
+      rig.headGroup.rotation.set(0.04, 0, w * 0.12);
+    } else if (av.emote === 'amen') {
+      rig.torso.rotation.x -= 0.20;
+      rig.headGroup.rotation.x = -0.38;
+      rig.eyes.forEach(e => { e.scale.y = 0.14; });
+      rig.armL.rotation.set(0.75, 0.42, 0.16);
+      rig.forearmL.rotation.set(1.25, 0.35, 0.2);
+      rig.armR.rotation.set(0.75, -0.42, -0.16);
+      rig.forearmR.rotation.set(1.25, -0.35, -0.2);
+    } else if (av.emote === 'read') {
+      if (rig.readLedgerMesh) rig.readLedgerMesh.visible = true;
+      if (rig.handPropMesh) rig.handPropMesh.visible = false;
+      rig.armL.rotation.set(0.62, 0.32, 0.1);
+      rig.forearmL.rotation.set(0.95, 0.25, 0);
+      rig.armR.rotation.set(0.62, -0.32, -0.1);
+      rig.forearmR.rotation.set(0.95, -0.25, 0);
+      rig.headGroup.rotation.set(-0.24, Math.sin(elapsed * 2.5) * 0.12, 0);
+    }
+  }
+}
+
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   const elapsed = clock.getElapsedTime();
 
-  // 중앙 3X 황금 웨이퍼 회전 & 파티클 상승
-  if (coreWaferMesh) {
-    coreWaferMesh.rotation.y = elapsed * 0.75;
-    coreWaferMesh.position.y = 2.55 + Math.sin(elapsed * 2) * 0.12;
+  // 강단 웨이퍼 후광 & 야외 연못 3X 웨이퍼 코어 회전
+  if (altarHaloMesh) {
+    altarHaloMesh.rotation.z = elapsed * 0.25;
+  }
+  if (pondWaferCore) {
+    pondWaferCore.rotation.y = elapsed * 0.8;
+    pondWaferCore.position.y = 1.65 + Math.sin(elapsed * 2) * 0.1;
   }
   if (particleSystem) {
     const pos = particleSystem.geometry.attributes.position;
     for (let i = 0; i < pos.count; i++) {
-      let y = pos.getY(i) + dt * 0.75;
-      if (y > 6.5) y = 0.8;
+      let y = pos.getY(i) + dt * 0.45;
+      if (y > 7.5) y = 0.6;
       pos.setY(i, y);
     }
     pos.needsUpdate = true;
   }
 
-  // 바닥 클릭 링 애니메이션
-  if (targetRing && targetRing.material.opacity > 0.01) {
-    targetRing.scale.x += dt * 1.4;
-    targetRing.scale.y += dt * 1.4;
-    targetRing.material.opacity = Math.max(0, targetRing.material.opacity - dt * 0.9);
+  // 촛불 흔들림
+  candleFlames.forEach(cf => {
+    cf.mesh.position.y = cf.baseY + Math.sin(elapsed * 7 + cf.phase) * 0.012;
+    cf.mesh.scale.x = 0.8 + Math.sin(elapsed * 11 + cf.phase) * 0.12;
+  });
+  if (candleLightL && candleLightR) {
+    candleLightL.intensity = 1.1 + Math.sin(elapsed * 6) * 0.12;
+    candleLightR.intensity = 1.1 + Math.cos(elapsed * 5.5) * 0.12;
+  }
+
+  // 클릭 링 파동
+  if (rippleAge < 1.0 && targetRing) {
+    rippleAge += dt * 1.6;
+    const s = 1 + rippleAge * 3.2;
+    targetRing.scale.set(s, s, 1);
+    targetRing.material.opacity = Math.max(0, (1 - rippleAge) * 0.75);
   }
 
   // WASD / 방향키 이동 처리
-  const moveSpeed = 5.4;
   let kx = 0, kz = 0;
   if (keysPressed['KeyW'] || keysPressed['ArrowUp']) kz -= 1;
   if (keysPressed['KeyS'] || keysPressed['ArrowDown']) kz += 1;
   if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) kx -= 1;
   if (keysPressed['KeyD'] || keysPressed['ArrowRight']) kx += 1;
 
-  if (kx !== 0 || kz !== 0) {
-    myState.sitting = false;
-    document.getElementById('dock-sit').classList.remove('active');
+  let myKeyMoving = false;
+  if ((kx !== 0 || kz !== 0) && myAvatar) {
+    unseatAvatar(myAvatar);
+    myKeyMoving = true;
     const len = Math.hypot(kx, kz);
     kx /= len; kz /= len;
-    const sinA = Math.sin(camAngle), cosA = Math.cos(camAngle);
-    const wx = kx * cosA + kz * sinA;
-    const wz = -kx * sinA + kz * cosA;
-    const nx = Math.max(-13.2, Math.min(13.2, myState.x + wx * moveSpeed * dt));
-    const nz = Math.max(-13.2, Math.min(13.2, myState.z + wz * moveSpeed * dt));
-    if (Math.hypot(nx, nz) > 3.55) {
-      myState.x = myState.targetX = nx;
-      myState.z = myState.targetZ = nz;
-      myState.rotY = Math.atan2(wx, wz);
-    }
-  } else {
-    // 클릭 목표 지점으로 부드럽게 보간 이동
-    const dx = myState.targetX - myState.x;
-    const dz = myState.targetZ - myState.z;
-    const dist = Math.hypot(dx, dz);
-    if (dist > 0.06) {
-      const step = Math.min(dist, moveSpeed * dt);
-      myState.x += (dx / dist) * step;
-      myState.z += (dz / dist) * step;
-      if (!myState.sitting) myState.rotY = Math.atan2(dx, dz);
-    }
+    const speed = 3.6 * dt;
+    const forward = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
+    const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
+    myAvatar.group.position.addScaledVector(forward, kz * speed);
+    myAvatar.group.position.addScaledVector(right, kx * speed);
+    myAvatar.group.position.x = Math.max(-16.0, Math.min(16.0, myAvatar.group.position.x));
+    myAvatar.group.position.z = Math.max(-7.5, Math.min(26.0, myAvatar.group.position.z));
+    myAvatar.targetPos.copy(myAvatar.group.position);
+    myAvatar.group.rotation.y = Math.atan2(-kx, -kz) + camYaw;
   }
 
+  // 모든 아바타 이동 & 다관절 포즈 업데이트
+  avatars.forEach((av, idx) => {
+    let isMoving = (av === myAvatar && myKeyMoving);
+
+    if (av.state === 'walking' || av.state === 'walking_to_seat' || av.state === 'walking_to_candle') {
+      const diff = new THREE.Vector3().subVectors(av.targetPos, av.group.position);
+      diff.y = 0;
+      const dist = diff.length();
+      if (dist > 0.08) {
+        diff.normalize();
+        av.group.position.addScaledVector(diff, Math.min(dist, 3.2 * dt));
+        av.group.rotation.y = Math.atan2(-diff.x, -diff.z);
+        isMoving = true;
+      } else {
+        av.group.position.copy(av.targetPos);
+        if (av.state === 'walking_to_seat' && av.seat) {
+          av.state = av.seat.type === 'kneel' ? 'kneeling' : 'sitting';
+          av.group.rotation.y = av.seat.lookAngle || 0;
+          if (av.isMe) {
+            sitStartTime = Date.now();
+            syncDockPostureButtons();
+            playBellChime();
+            setWalkHint(av.state === 'kneeling'
+              ? `🧎 [${av.seat.label}]에서 두 무릎을 꿇고 SOXL 불마켓 상승을 간절히 간구합니다.`
+              : `🪑 [${av.seat.label}]에 앉아 성화를 바라보며 멘탈을 치유하고 있습니다.`);
+            broadcastMyState();
+          }
+        } else if (av.state === 'walking_to_candle') {
+          av.state = 'bowing';
+          av.bowTimer = 2.5;
+          av.group.rotation.y = 0;
+          playBellChime();
+          const prayerMsg = av.pendingPrayer || 'SOXL 500 대제단까지 흔들림 없이 성투하게 하소서!';
+          const newNote = {
+            id: 'n_' + Date.now(),
+            author: myCustom.name,
+            text: prayerMsg,
+            likes: 1,
+            time: '방금 전'
+          };
+          prependNoteCard(newNote, true);
+          showAvatarBubble(av, '🕯️ 불마켓 기원 촛불 점화!');
+          setWalkHint('🕯️ 강단 앞 황금 촛불 제단에 내 간구 기도의 불꽃이 밝게 타오릅니다.');
+          showToast('🕯️ 강단 촛불 제단에 황금 불꽃을 점화하고 간구문을 올렸습니다!');
+          if (bcChannel) { try { bcChannel.postMessage({ type: 'candle_note', id: myId, note: newNote }); } catch (e) {} }
+          if (mqttClient && mqttClient.connected) {
+            try { mqttClient.publish('evening-soxx/soxl-mental-care/v1/presence', JSON.stringify({ type: 'candle_note', id: myId, note: newNote })); } catch (e) {}
+          }
+        } else {
+          av.state = 'standing';
+        }
+      }
+    } else if (av.state === 'bowing') {
+      av.bowTimer -= dt;
+      if (av.bowTimer <= 0) av.state = 'standing';
+    }
+
+    // NPC 주기적 말풍선 표시
+    if (av.id.startsWith('npc_') && showNPCs && av.npcMsg) {
+      const cycle = (elapsed + idx * 3.7) % 18;
+      if (cycle < 0.05 && !av.labelEl.querySelector('.avatar-bubble')) {
+        showAvatarBubble(av, av.npcMsg, 4800);
+      }
+    }
+
+    updateAvatarPose(av, dt, elapsed, isMoving);
+  });
+
+  // 착석 / 무릎기도 경과 시간 표시
+  if (myAvatar && (myAvatar.state === 'sitting' || myAvatar.state === 'kneeling') && sitStartTime) {
+    const sec = Math.floor((Date.now() - sitStartTime) / 1000);
+    const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+    const ss = String(sec % 60).padStart(2, '0');
+    const placeTxt = myAvatar.seat ? myAvatar.seat.label : '강단 대제단 앞';
+    const actTxt = myAvatar.state === 'kneeling' ? '🧎 두 무릎을 꿇고 간구 기도 중' : '🪑 장의자에 앉아 성전 묵상 중';
+    setWalkHint(`${actTxt} (${placeTxt}) · 기도 경과 시간 ${mm}:${ss}`);
+  }
+
+  // 카메라 오빗 추적
   if (myAvatar) {
-    const walking = Math.hypot(myState.targetX - myState.x, myState.targetZ - myState.z) > 0.08 || kx !== 0 || kz !== 0;
-    const bob = walking ? Math.abs(Math.sin(elapsed * 10)) * 0.08 : 0;
-    const baseY = myState.sitting ? -0.14 : 0;
-    myAvatar.position.set(myState.x, baseY + bob, myState.z);
-    myAvatar.rotation.y = myState.rotY;
-
-    // 3인칭 오빗 카메라 추적
-    const camX = myState.x + Math.sin(camAngle) * Math.cos(camPitch) * camDist;
-    const camY = 1.6 + Math.sin(camPitch) * camDist;
-    const camZ = myState.z + Math.cos(camAngle) * Math.cos(camPitch) * camDist;
-    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.14);
-    camera.lookAt(myState.x, 1.55, myState.z);
-
-    // 내 이름표 위치 투영
-    projectLabel(myAvatar.position, document.getElementById('my-avatar-tag'), document.getElementById('my-avatar-bubble'), Date.now() < myState.bubbleUntil ? myState.bubble : '');
+    const lookTarget = new THREE.Vector3(
+      myAvatar.group.position.x * 0.72,
+      1.35,
+      myAvatar.group.position.z - 1.4
+    );
+    const desiredCamPos = new THREE.Vector3(
+      lookTarget.x + Math.sin(camYaw) * Math.cos(camPitch) * camDist,
+      lookTarget.y + Math.sin(camPitch) * camDist,
+      lookTarget.z + Math.cos(camYaw) * Math.cos(camPitch) * camDist
+    );
+    camera.position.lerp(desiredCamPos, 0.1);
+    camera.lookAt(lookTarget);
   }
 
-  // NPC 말풍선 주기적 표시 및 투영
-  if (showNPCs) {
-    npcs.forEach(n => {
-      const showBub = (elapsed % 14) < 5.5;
-      projectLabel(n.mesh.position, n.tagEl, n.bubbleEl, showBub ? n.msg : '');
-    });
-  }
-
-  // 원격 접속 주주 위치 보간
-  Object.values(remotePeers).forEach(p => {
-    p.mesh.position.x += (p.targetX - p.mesh.position.x) * 0.15;
-    p.mesh.position.z += (p.targetZ - p.mesh.position.z) * 0.15;
-    p.mesh.position.y = p.sitting ? -0.14 : 0;
-    p.mesh.rotation.y = p.rotY || 0;
-    projectLabel(p.mesh.position, p.tagEl, p.bubbleEl, p.bubbleEl.style.display === 'block' ? p.bubbleEl.textContent : '');
+  // 3D 아바타 머리 위 2D 이름표 투영
+  avatars.forEach(av => {
+    if (!av.group.visible) {
+      av.labelEl.style.display = 'none';
+      return;
+    }
+    const labelY = av.state === 'kneeling' ? 1.22 : (av.state === 'sitting' ? 1.38 : 1.62);
+    const headWorld = new THREE.Vector3(av.group.position.x, labelY, av.group.position.z);
+    headWorld.project(camera);
+    if (headWorld.z > 1) {
+      av.labelEl.style.display = 'none';
+    } else {
+      av.labelEl.style.display = 'flex';
+      const sx = (headWorld.x * 0.5 + 0.5) * window.innerWidth;
+      const sy = (-headWorld.y * 0.5 + 0.5) * window.innerHeight;
+      av.labelEl.style.left = `${sx}px`;
+      av.labelEl.style.top = `${sy}px`;
+    }
   });
 
   renderer.render(scene, camera);
-}
-
-function projectLabel(pos3D, tagEl, bubbleEl, bubbleText) {
-  if (!tagEl) return;
-  const v = new THREE.Vector3(pos3D.x, pos3D.y + 1.85, pos3D.z);
-  v.project(camera);
-  if (v.z > 1) {
-    tagEl.style.opacity = '0';
-    if (bubbleEl) bubbleEl.style.display = 'none';
-    return;
-  }
-  const x = (v.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-(v.y * 0.5) + 0.5) * window.innerHeight;
-  tagEl.style.opacity = '1';
-  tagEl.style.left = x + 'px';
-  tagEl.style.top = y + 'px';
-
-  if (bubbleEl) {
-    if (bubbleText) {
-      bubbleEl.textContent = bubbleText;
-      bubbleEl.style.display = 'block';
-      bubbleEl.style.left = x + 'px';
-      bubbleEl.style.top = (y - 24) + 'px';
-    } else {
-      bubbleEl.style.display = 'none';
-    }
-  }
 }
 
 function onWindowResize() {
@@ -2377,7 +3849,7 @@ function copySafeShareUrl() {
   const safeUrl = 'https://evening-soxx.github.io/soxl_mental_care.html';
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(safeUrl).then(() => {
-      showToast('✅ 안전한 공식 웹 주소(https://evening-soxx.github.io/soxl_mental_care.html)가 복사되었습니다!');
+      showToast('✅ SOXL 기도원 공식 웹 주소(https://evening-soxx.github.io/soxl_mental_care.html)가 복사되었습니다!');
     }).catch(() => {
       prompt('아래 공식 웹 주소를 복사해 공유하세요:', safeUrl);
     });
@@ -2393,28 +3865,38 @@ function escapeHtml(str) {
 }
 
 // ============================================================================
-// 11. 초기 부트스트랩 실행
+// 14. 초기 부트스트랩 실행
 // ============================================================================
+function enterSanctuary(withMusic) {
+  const nickVal = document.getElementById('boot-nick-input').value.trim();
+  if (nickVal) {
+    myCustom.name = nickVal.slice(0, 16);
+    saveMyCustom();
+    document.getElementById('my-nick-label').textContent = myCustom.name;
+    if (myAvatar) {
+      myAvatar.name = `${myCustom.name} (나)`;
+      const nSpan = myAvatar.labelEl.querySelector('.name-span');
+      if (nSpan) nSpan.textContent = myAvatar.name;
+    }
+  }
+  document.getElementById('boot-screen').classList.add('hidden');
+  startAudioEngine(withMusic);
+  initMultiplayerSync();
+  showToast(withMusic
+    ? `⛪ [${myCustom.name}] 님, SOXL 기도원 대성전에 입소하셨습니다! (레버리지 민족 음악 재생 중)`
+    : `⛪ [${myCustom.name}] 님, 조용한 무음 모드로 SOXL 기도원에 입소하셨습니다.`);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   init3DSpace();
   renderMantraText();
   initNotesFeed();
-  initMultiplayerSync();
+  initChatLog();
+  syncCustomizerUI();
+  selectDocentFrame(0);
 
-  document.getElementById('boot-enter-btn').addEventListener('click', () => {
-    const nickVal = document.getElementById('boot-nick-input').value.trim();
-    if (nickVal) {
-      myNick = nickVal.slice(0, 16);
-      localStorage.setItem('soxl_mc_nick', myNick);
-      document.getElementById('my-nick-label').textContent = myNick;
-      const myTag = document.getElementById('my-avatar-tag');
-      if (myTag) myTag.textContent = '👑 ' + myNick + ' (나)';
-    }
-    document.getElementById('boot-screen').classList.add('hidden');
-    startAudioEngine();
-    broadcastMyState();
-    showToast('🏥 SOXL 멘탈케어 요양소에 입장하셨습니다! 벽면의 SOXL 100~500 액자를 감상해 보세요.');
-  });
+  document.getElementById('boot-enter-btn').addEventListener('click', () => enterSanctuary(true));
+  document.getElementById('boot-enter-quiet-btn').addEventListener('click', () => enterSanctuary(false));
 });
 </script>
 </body>
