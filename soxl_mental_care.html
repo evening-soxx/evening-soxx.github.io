@@ -1087,10 +1087,10 @@
   <div class="cust-row">
     <span class="cust-label">📘 손 소품</span>
     <div class="cust-chips" id="cust-prop">
-      <button type="button" class="cust-chip" data-val="ledger" onclick="updateCustom('prop','ledger')">📕 황금 원장북</button>
-      <button type="button" class="cust-chip" data-val="candle" onclick="updateCustom('prop','candle')">🕯️ 기원 네온 샷</button>
-      <button type="button" class="cust-chip" data-val="bullstaff" onclick="updateCustom('prop','bullstaff')">🌿 양봉 올리브가지</button>
-      <button type="button" class="cust-chip" data-val="bag" onclick="updateCustom('prop','bag')">💼 트레이더 가방</button>
+      <button type="button" class="cust-chip" data-val="beer" onclick="updateCustom('prop','beer')">🍺 시원한 맥주병</button>
+      <button type="button" class="cust-chip" data-val="soju" onclick="updateCustom('prop','soju')">🟢 초록 소주병</button>
+      <button type="button" class="cust-chip" data-val="whiskey" onclick="updateCustom('prop','whiskey')">🥃 양주 위스키</button>
+      <button type="button" class="cust-chip" data-val="wine" onclick="updateCustom('prop','wine')">🍷 와인 글라스</button>
       <button type="button" class="cust-chip" data-val="none" onclick="updateCustom('prop','none')">빈손</button>
     </div>
   </div>
@@ -1410,7 +1410,7 @@ const DEFAULT_CUSTOM = {
   hairColor: '#1e1814',
   outfitType: 'suit',
   outfitColor: '#143d2e',
-  prop: 'ledger',
+  prop: 'beer',
   accessory: 'none'
 };
 
@@ -1425,7 +1425,7 @@ function loadMyCustom() {
         hairColor: saved.hairColor || DEFAULT_CUSTOM.hairColor,
         outfitType: ['suit', 'robe', 'casual'].includes(saved.outfitType) ? saved.outfitType : 'suit',
         outfitColor: saved.outfitColor || DEFAULT_CUSTOM.outfitColor,
-        prop: ['ledger', 'candle', 'bullstaff', 'bag', 'none'].includes(saved.prop) ? saved.prop : 'ledger',
+        prop: 'beer',
         accessory: ['none', 'glasses', 'beret', 'crown'].includes(saved.accessory) ? saved.accessory : 'none'
       };
     }
@@ -2531,21 +2531,57 @@ function buildTargetRippleRing() {
 // ============================================================================
 function createPropMesh(propType) {
   const pGroup = new THREE.Group();
-  if (propType === 'ledger') {
-    const cover = new THREE.Mesh(
-      new THREE.BoxGeometry(0.16, 0.21, 0.045),
-      new THREE.MeshStandardMaterial({ color: 0x124030, roughness: 0.45 })
-    );
-    const pages = new THREE.Mesh(
-      new THREE.BoxGeometry(0.148, 0.198, 0.036),
-      new THREE.MeshStandardMaterial({ color: 0xfbf5e6, roughness: 0.7 })
-    );
-    pages.position.x = 0.004;
-    const emblem = new THREE.Mesh(
-      new THREE.BoxGeometry(0.055, 0.09, 0.048),
-      new THREE.MeshBasicMaterial({ color: 0xffd269 })
-    );
-    pGroup.add(cover, pages, emblem);
+    if (propType === 'beer' || propType === 'ledger') {
+    // 🍺 [목사님 요청] 손에 든 성경책 100% 제거 -> 시원한 갈색 맥주병(Beer Bottle) 장착!
+    const bottleMat = new THREE.MeshStandardMaterial({
+      color: 0x78350f, // 앰버 브라운 맥주병
+      roughness: 0.12,
+      metalness: 0.25,
+      transparent: true,
+      opacity: 0.92
+    });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.22, 16), bottleMat);
+    body.position.y = 0.11;
+    const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(0.020, 0.045, 0.08, 16), bottleMat);
+    shoulder.position.y = 0.24;
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.020, 0.08, 16), bottleMat);
+    neck.position.y = 0.31;
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.025, 12), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.85 }));
+    cap.position.y = 0.36;
+    const label = new THREE.Mesh(new THREE.CylinderGeometry(0.046, 0.046, 0.09, 16), new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.3 }));
+    label.position.y = 0.11;
+    pGroup.add(body, shoulder, neck, cap, label);
+    pGroup.scale.set(1.25, 1.25, 1.25);
+  } else if (propType === 'soju') {
+    // 🟢 초록 소주병
+    const bMat = new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.15, transparent: true, opacity: 0.88 });
+    const bBody = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.22, 16), bMat);
+    bBody.position.y = 0.11;
+    const bNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.08, 12), bMat);
+    bNeck.position.y = 0.26;
+    const bCap = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.02, 12), new THREE.MeshStandardMaterial({ color: 0x10b981 }));
+    bCap.position.y = 0.31;
+    pGroup.add(bBody, bNeck, bCap);
+    pGroup.scale.set(1.2, 1.2, 1.2);
+  } else if (propType === 'whiskey') {
+    // 🥃 양주 위스키 보틀
+    const wMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.15, transparent: true, opacity: 0.88 });
+    const wBody = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.18, 0.09), wMat);
+    wBody.position.y = 0.09;
+    const wNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.08, 12), wMat);
+    wNeck.position.y = 0.22;
+    pGroup.add(wBody, wNeck);
+    pGroup.scale.set(1.2, 1.2, 1.2);
+  } else if (propType === 'wine') {
+    // 🍷 와인 글라스
+    const gMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.08 });
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.14, 8), gMat);
+    stem.position.y = 0.07;
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.15, transparent: true, opacity: 0.85 }));
+    bowl.position.y = 0.15;
+    bowl.scale.set(0.9, 1.2, 0.9);
+    pGroup.add(stem, bowl);
+    pGroup.scale.set(1.2, 1.2, 1.2);
   } else if (propType === 'candle') {
     const base = new THREE.Mesh(
       new THREE.CylinderGeometry(0.045, 0.055, 0.05, 12),
@@ -2754,7 +2790,7 @@ function buildHumanRig(cfg, isMe) {
     torso.add(innerTee);
   }
 
-  const lapLedger = createPropMesh('ledger');
+  const lapLedger = createPropMesh('beer');
   lapLedger.position.set(0, 0.06, -0.22);
   lapLedger.rotation.x = Math.PI / 2 - 0.25;
   lapLedger.visible = false;
@@ -2802,7 +2838,37 @@ function buildHumanRig(cfg, isMe) {
     if (propType === 'ledger') {
       handPropMesh.position.set(-0.04, -0.19, -0.06);
       handPropMesh.rotation.set(0.3, 0.4, 0);
-    } else if (propType === 'candle') {
+    } else if (propType === 'soju') {
+    // 🟢 초록 소주병
+    const bMat = new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.15, transparent: true, opacity: 0.88 });
+    const bBody = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.22, 16), bMat);
+    bBody.position.y = 0.11;
+    const bNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.08, 12), bMat);
+    bNeck.position.y = 0.26;
+    const bCap = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.02, 12), new THREE.MeshStandardMaterial({ color: 0x10b981 }));
+    bCap.position.y = 0.31;
+    pGroup.add(bBody, bNeck, bCap);
+    pGroup.scale.set(1.2, 1.2, 1.2);
+  } else if (propType === 'whiskey') {
+    // 🥃 양주 위스키 보틀
+    const wMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.15, transparent: true, opacity: 0.88 });
+    const wBody = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.18, 0.09), wMat);
+    wBody.position.y = 0.09;
+    const wNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.08, 12), wMat);
+    wNeck.position.y = 0.22;
+    pGroup.add(wBody, wNeck);
+    pGroup.scale.set(1.2, 1.2, 1.2);
+  } else if (propType === 'wine') {
+    // 🍷 와인 글라스
+    const gMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.08 });
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.14, 8), gMat);
+    stem.position.y = 0.07;
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.15, transparent: true, opacity: 0.85 }));
+    bowl.position.y = 0.15;
+    bowl.scale.set(0.9, 1.2, 0.9);
+    pGroup.add(stem, bowl);
+    pGroup.scale.set(1.2, 1.2, 1.2);
+  } else if (propType === 'candle') {
       handPropMesh.position.set(-0.02, -0.19, -0.08);
       handPropMesh.rotation.x = -0.65;
     } else if (propType === 'bullstaff') {
@@ -2814,7 +2880,7 @@ function buildHumanRig(cfg, isMe) {
     rightArm.forearm.add(handPropMesh);
   }
 
-  const readLedgerMesh = createPropMesh('ledger');
+  const readLedgerMesh = createPropMesh('beer');
   readLedgerMesh.position.set(-0.08, -0.18, -0.08);
   readLedgerMesh.rotation.set(0.5, 0.2, 0);
   readLedgerMesh.visible = false;
@@ -3075,13 +3141,13 @@ function showAvatarBubble(av, message, duration = 4500) {
 // ============================================================================
 function initNPCShareholders() {
   const npcConfigs = [
-    { name: 'SOXL 500 VVIP', seatIdx: 22, msg: '🧎 강단 앞 VIP룸에서 SOXL 500 간절히 응원 토크합니다!', custom: { gender: 'M', hairStyle: 2, hairColor: '#2a221b', outfitType: 'robe', outfitColor: '#143d2e', prop: 'none', accessory: 'crown' } },
+    { name: 'SOXL 500 VVIP', seatIdx: 22, msg: '🧎 강단 앞 VIP룸에서 SOXL 500 간절히 응원 토크합니다!', custom: { gender: 'M', hairStyle: 2, hairColor: '#2a221b', outfitType: 'robe', outfitColor: '#143d2e', prop: 'beer', accessory: 'crown' } },
     { name: '나스닥 댄싱머신', seatIdx: 21, msg: '🧎 오늘 밤 나스닥·필라델피아 반도체 지수 장대양봉 주소서!', custom: { gender: 'F', hairStyle: 2, hairColor: '#1e1814', outfitType: 'robe', outfitColor: '#8c6d3b', prop: 'none', accessory: 'none' } },
-    { name: '필라델피아 바텐더', seatIdx: 1, msg: '3배 양의 복리는 인내하는 자에게 반드시 임합니다 🙏', custom: { gender: 'M', hairStyle: 0, hairColor: '#141416', outfitType: 'suit', outfitColor: '#1e2f4d', prop: 'ledger', accessory: 'glasses' } },
-    { name: '서학개미 야수', seatIdx: 6, msg: '벽면 SOXL 100~500 VIP 갤러리 볼 때마다 멘탈이 꽉 잡히네요!', custom: { gender: 'M', hairStyle: 1, hairColor: '#3b281a', outfitType: 'casual', outfitColor: '#25282e', prop: 'bullstaff', accessory: 'beret' } },
-    { name: '반도체 총무', seatIdx: 9, msg: '레버리지 민족 음악 들으며 클럽 플로어에서 댄스 파티 중입니다 🕺 🎵', custom: { gender: 'F', hairStyle: 0, hairColor: '#241a14', outfitType: 'suit', outfitColor: '#e8e0cf', prop: 'ledger', accessory: 'none' } },
+    { name: '필라델피아 바텐더', seatIdx: 1, msg: '3배 양의 복리는 인내하는 자에게 반드시 임합니다 🙏', custom: { gender: 'M', hairStyle: 0, hairColor: '#141416', outfitType: 'suit', outfitColor: '#1e2f4d', prop: 'beer', accessory: 'glasses' } },
+    { name: '서학개미 야수', seatIdx: 6, msg: '벽면 SOXL 100~500 VIP 갤러리 볼 때마다 멘탈이 꽉 잡히네요!', custom: { gender: 'M', hairStyle: 1, hairColor: '#3b281a', outfitType: 'casual', outfitColor: '#25282e', prop: 'beer', accessory: 'beret' } },
+    { name: '반도체 총무', seatIdx: 9, msg: '레버리지 민족 음악 들으며 클럽 플로어에서 댄스 파티 중입니다 🕺 🎵', custom: { gender: 'F', hairStyle: 0, hairColor: '#241a14', outfitType: 'suit', outfitColor: '#e8e0cf', prop: 'beer', accessory: 'none' } },
     { name: '3배 레버리지 야수', seatIdx: 14, msg: '분할매수 원칙 지키며 오백불 대클럽까지 함께 갑시다!', custom: { gender: 'M', hairStyle: 1, hairColor: '#8e969d', outfitType: 'suit', outfitColor: '#5e1f28', prop: 'bag', accessory: 'glasses' } },
-    { name: '클럽 DJ 불마켓', seatIdx: 17, msg: 'SOXL 멘탈케어 클럽 본당에 입장하신 주주분들을 진심으로 환영합니다 ⛪', custom: { gender: 'F', hairStyle: 1, hairColor: '#3b2618', outfitType: 'suit', outfitColor: '#143d2e', prop: 'candle', accessory: 'none' } }
+    { name: '클럽 DJ 불마켓', seatIdx: 17, msg: 'SOXL 멘탈케어 클럽 본당에 입장하신 주주분들을 진심으로 환영합니다 ⛪', custom: { gender: 'F', hairStyle: 1, hairColor: '#3b2618', outfitType: 'suit', outfitColor: '#143d2e', prop: 'beer', accessory: 'none' } }
   ];
 
   npcConfigs.forEach((cfg, idx) => {
