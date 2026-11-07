@@ -74,13 +74,7 @@
   }
 
   /* 입장 부트 게이트 */
-  #boot-screen {
-    position: fixed; inset: 0; z-index: 200;
-    background: radial-gradient(circle at 50% 32%, #132c22 0%, #060c0a 74%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 24px; text-align: center;
-    transition: opacity 0.75s ease, visibility 0.75s ease;
-  }
+  #boot-screen { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
   #boot-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
   .boot-emblem {
     width: 96px; height: 96px; border-radius: 50%;
@@ -329,7 +323,7 @@
     padding: 6px 13px; font-size: 12px; font-weight: 900; cursor: pointer;
   }
 
-  /* 우측 상단: 실시간 주주 응원 토크 기도문 게시판 (기본 접힘 · 상단바 버튼으로 열기/접기) */
+  /* 우측 상단: 실시간 주주 주주 응원 토크 게시판 (기본 접힘 · 상단바 버튼으로 열기/접기) */
   #cheer-feed {
     position: fixed; right: 16px; top: 52px; z-index: 18;
     width: 300px; max-height: 320px; overflow-y: auto;
@@ -453,7 +447,7 @@
     width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px;
   }
 
-  /* 건배 릴레이 기도 입력 */
+  /* 건배 릴레이 응원 입력 */
   .candle-input {
     width: 100%; height: 80px; border-radius: 12px;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.35);
@@ -733,7 +727,7 @@
     .chat-input { padding: 5px 9px; font-size: 11px; border-radius: 5px; }
     .chat-send-btn { padding: 5px 10px; font-size: 11px; border-radius: 5px; }
 
-    /* 하단 제2열: 4대 기도 제스처 가로 바 (기본 접힘) */
+    /* 하단 제2열: 4대 댄스 제스처 가로 바 (기본 접힘) */
     #emote-bar {
       left: 6px; right: 6px;
       bottom: calc(max(4px, env(safe-area-inset-bottom)) + 74px);
@@ -803,11 +797,11 @@
     계단을 타고 <strong>2층 복층 VIP 라운지</strong>로 올라가 1층 플로어를 내려다보며 양주와 샴페인을 터뜨려보세요! 🚀🔥
   </p>
   <div class="boot-frames-preview">
-    <span class="boot-frame-pill">🖼️ SOXL 100 성화</span>
-    <span class="boot-frame-pill">🖼️ SOXL 200 성화</span>
+    <span class="boot-frame-pill">🖼️ SOXL 100 비전 프레임</span>
+    <span class="boot-frame-pill">🖼️ SOXL 200 비전 프레임</span>
     <span class="boot-frame-pill">🖼️ SOXL 300 제단화</span>
-    <span class="boot-frame-pill">🖼️ SOXL 400 성화</span>
-    <span class="boot-frame-pill">👑 SOXL 500 대제단화</span>
+    <span class="boot-frame-pill">🖼️ SOXL 400 비전 프레임</span>
+    <span class="boot-frame-pill">👑 SOXL 500 DJ 메인 부스화</span>
     <span class="boot-frame-pill">🍾 2층 VIP 룸</span><span class="boot-frame-pill">🍺 소주·맥주·양주·와인 바</span>
   </div>
   <div class="boot-nick-wrap">
@@ -839,7 +833,7 @@
       <span class="status-dot"></span>
       <span id="online-count-txt">🪩 SOXL 멘탈케어 클럽 &amp; 2층 VIP룸 · 12명</span>
     </div>
-    <button type="button" class="glass-pill" id="btn-toggle-frame-strip" onclick="toggleFrameStrip()" title="성화 및 VIP룸 빠른 이동 바 열기/접기" style="border-color:rgba(245,200,76,0.55);color:#ffe49e;">
+    <button type="button" class="glass-pill" id="btn-toggle-frame-strip" onclick="toggleFrameStrip()" title="비전 프레임 및 VIP룸 빠른 이동 바 열기/접기" style="border-color:rgba(245,200,76,0.55);color:#ffe49e;">
       <span id="frame-strip-toggle-txt">🧭 🍾 VIP룸·플로어 이동 ▾</span>
     </button>
     <button type="button" class="glass-pill" id="btn-toggle-cheer-feed" onclick="toggleCheerFeed()" title="실시간 주주 네온 샷 💬 떡상 토크 피드 열기/접기">
@@ -863,7 +857,7 @@
     <button type="button" class="glass-pill" id="btn-light-mode" title="클럽 조명 분위기 전환">
       <span id="light-mode-label">🕯️ ⚡ 사이키 레이저 ON</span>
     </button>
-    <button type="button" class="glass-pill" id="btn-toggle-npc" title="동반 기도 주주(NPC) 표시 전환">
+    <button type="button" class="glass-pill" id="btn-toggle-npc" title="동반 파티 주주(NPC) 표시 전환">
       <span id="npc-toggle-label">👥 동반 주주 ON</span>
     </button>
     <button type="button" class="glass-pill" id="btn-share-safe-url" onclick="copySafeShareUrl()" title="공식 웹 주소 복사" style="border-color:rgba(46,229,157,0.65);color:#9effd6;">
@@ -873,7 +867,7 @@
   </div>
 </div>
 
-<!-- 상단 SOXL 100 ~ 500 성화 & 2층 VIP룸 원터치 이동 바 (초기 접힘) -->
+<!-- 상단 SOXL 100 ~ 500 비전 프레임 & 2층 VIP룸 원터치 이동 바 (초기 접힘) -->
 <div id="frame-quick-strip" class="collapsed">
   <span class="fq-label">🧭 클럽 핫스팟 이동</span>
   <button type="button" class="fq-btn" onclick="walkToPoolParty()" style="border-color:#06b6d4;color:#67e8f9;">🏊 야외 풀파티장</button><button type="button" class="fq-btn" onclick="walkToVIPRoom()" style="border-color:#eab85c;color:#ffe39f;">🍾 2층 VIP 룸</button><button type="button" class="fq-btn" onclick="walkToBarCounter()" style="border-color:#2ee59d;color:#9effd6;">🍸 1층 주류 바</button><button type="button" class="fq-btn" onclick="walkToDanceFloor()" style="border-color:#ff477e;color:#ff9ebb;">🕺 댄스플로어</button>
@@ -888,7 +882,7 @@
   <button type="button" class="fq-btn" onclick="toggleFrameStrip()" style="margin-left:auto;border-color:rgba(245,200,76,0.45);color:#ffe49e;">▲ 접기</button>
 </div>
 
-<!-- 이동 안내 및 기도 경과 상태 배너 (초기 접힘, 상태 변경 시 잠시 표시) -->
+<!-- 이동 안내 및 파티 상태 배너 (초기 접힘, 상태 변경 시 잠시 표시) -->
 <div id="walk-hint"></div>
 
 <!-- 토스트 알림 -->
@@ -921,14 +915,14 @@
     <div class="chat-body">
       <div class="chat-log" id="chat-log"></div>
       <div class="chat-input-row">
-        <input type="text" id="chat-input" class="chat-input" maxlength="80" placeholder="함께 기도하는 주주들에게 한마디..." />
+        <input type="text" id="chat-input" class="chat-input" maxlength="80" placeholder="함께 파티를 즐기는 주주들에게 한마디..." />
         <button type="button" class="chat-send-btn" onclick="sendChatMessage()">전송</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 우측 상단: 실시간 주주 건배 릴레이 기도문 게시판 (초기 접힘) -->
+<!-- 우측 상단: 실시간 주주 건배 릴레이 응원 토크 게시판 (초기 접힘) -->
 <div id="cheer-feed" class="collapsed"></div>
 
 <!-- 우측 하단: 4대 클럽 제스처 버튼 바 (초기 접힘) -->
@@ -947,16 +941,16 @@
   </button>
 </div>
 
-<!-- 모달 1: 강단 네온 샷 켜기 & 응원 토크 기도문 올리기 -->
+<!-- 모달 1: 강단 네온 샷 켜기 & 주주 응원 토크 올리기 -->
 <div class="modal-card" id="modal-candle">
   <div class="modal-head">
     <span class="modal-title">🕯️ 강단 불마켓 기원 네온 샷 점화 &amp; 떡상 주문</span>
     <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
   </div>
   <p style="font-size:12.5px; color:#b8ccc3; margin-bottom:10px; line-height:1.5;">
-    내 캐릭터가 직접 강단 앞 황금 VIP 샴페인 바으로 걸어가 기원의 네온 샷을 밝히고, 두 손을 모아 응원 토크 기도문을 올립니다.
+    내 캐릭터가 직접 강단 앞 황금 VIP 샴페인 바으로 걸어가 기원의 네온 샷을 밝히고, 샴페인 잔을 높이 들고 주주 응원 토크을 올립니다.
   </p>
-  <textarea id="candle-input" class="candle-input" placeholder="예: 흔들리는 조정장 속에서도 야수의 심장을 지켜 주시고, SOXL 100을 넘어 500 대제단까지 무사히 당도하게 하소서!"></textarea>
+  <textarea id="candle-input" class="candle-input" placeholder="예: 흔들리는 조정장 속에서도 야수의 심장을 지켜 주시고, SOXL 100을 넘어 500 DJ 메인 부스까지 무사히 당도하게 하소서!"></textarea>
   <button type="button" class="candle-submit" onclick="submitCandleNote()">🕯️ 강단 네온 샷 점화 &amp; 떡상 주문 올리기</button>
 </div>
 
@@ -974,7 +968,7 @@
   <p class="docent-desc" id="docent-desc"></p>
   <div class="docent-quote" id="docent-quote"></div>
   <div class="docent-actions">
-    <button type="button" class="docent-btn" onclick="walkToCurrentDocentFrame()">🪑 이 성화 앞 소파로 이동</button>
+    <button type="button" class="docent-btn" onclick="walkToCurrentDocentFrame()">🪑 이 비전 프레임 앞 소파로 이동</button>
     <button type="button" class="docent-btn primary" onclick="openZoomLightbox()">🔍 전체화면 초고화질 감상</button>
   </div>
 </div>
@@ -982,7 +976,7 @@
 <!-- 모달 3: 클럽 캐릭터 복장 & 소품 커스터마이저 -->
 <div class="modal-card" id="modal-avatar">
   <div class="modal-head">
-    <span class="modal-title">👔 SOXL 멘탈케어 클럽 입소자 복장 &amp; 소품 설정</span>
+    <span class="modal-title">👔 SOXL 멘탈케어 클럽 파티 참석자 복장 &amp; 소품 설정</span>
     <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
   </div>
   <div class="cust-row">
@@ -1091,7 +1085,7 @@
   </label>
 </div>
 
-<!-- 풀스크린 초고화질 성화 액자 줌 라이트박스 -->
+<!-- 풀스크린 초고화질 비전 프레임 액자 줌 라이트박스 -->
 <div id="zoom-lightbox">
   <div class="zl-top">
     <div class="zl-title" id="zl-title">SOXL 100</div>
@@ -1165,7 +1159,7 @@ const SOXL_FRAMES = [
     price: '$100',
     badge: 'SANCTUARY I · THE AWAKENING',
     title: 'SOXL 100 — 백불의 귀환 · 의심을 확신으로 바꾼 첫 성벽',
-    subtitle: '변동성의 안개를 뚫고 마침내 세 자릿수($100) 고지를 탈환한 레버리지 민족의 첫 번째 성화',
+    subtitle: '변동성의 안개를 뚫고 마침내 세 자릿수($100) 고지를 탈환한 레버리지 민족의 첫 번째 비전 프레임',
     quote: '“모두가 역배열과 상장폐지를 말할 때, 분할매수로 씨앗을 심은 자들이 맞이하는 첫 번째 봄”',
     img: './assets/frames/soxl_100.png',
     pos: { x: -7.66, y: 3.1, z: -4.2 },
@@ -1232,9 +1226,9 @@ const SOXL_FRAMES = [
     code: 'SOXL 500',
     price: '$500',
     badge: 'SANCTUARY V · LEGENDS OF LEVERAGE',
-    title: 'SOXL 500 — 오백불 신화 · SOXL 멘탈케어 클럽 최고 대제단화',
-    subtitle: '끝까지 살아남은 자가 가장 강한 자다 — SOXL $500 시대를 열어젖힌 불멸의 주주 헌정 대제단화',
-    quote: '“흔들리는 날마다 이 대제단화 앞에 무릎을 꿇으라. 우리의 목적지는 언제나 SOXL 500, 그 찬란한 정상이다”',
+    title: 'SOXL 500 — 오백불 신화 · SOXL 멘탈케어 클럽 최고 DJ 메인 부스화',
+    subtitle: '끝까지 살아남은 자가 가장 강한 자다 — SOXL $500 시대를 열어젖힌 불멸의 주주 헌정 DJ 메인 부스화',
+    quote: '“흔들리는 날마다 이 DJ 메인 부스화 앞에 무릎을 꿇으라. 우리의 목적지는 언제나 SOXL 500, 그 찬란한 정상이다”',
     img: './assets/frames/soxl_500.png',
     pos: { x: 4.65, y: 4.15, z: -11.42 },
     rotY: 0,
@@ -1268,7 +1262,7 @@ const SOXL_FRAMES = [
     badge: 'THE LEVERAGE NATION MASTER ROADMAP',
     title: '레버리지 민족 5대 이정표 마스터 로드맵 (SOXL 100 → 500)',
     subtitle: '백불의 귀환부터 오백불 대클럽까지 5단계 슈퍼사이클 마스터피스',
-    quote: '“폭락장은 영원하지 않고, 반도체의 진보는 멈추지 않는다. 흔들릴 때마다 이 다섯 개의 성화를 올려다보라.”',
+    quote: '“폭락장은 영원하지 않고, 반도체의 진보는 멈추지 않는다. 흔들릴 때마다 이 다섯 개의 비전 프레임를 올려다보라.”',
     img: './assets/frames/soxl_roadmap.png',
     pos: { x: 7.66, y: 3.1, z: 1.2 },
     rotY: -Math.PI / 2,
@@ -1309,8 +1303,8 @@ const MENTAL_MANTRAS = [
     text: '조정장은 레버리지 민족의 인내심을 시험하는 관문일 뿐, AI 반도체 슈퍼사이클의 거대한 물결은 멈추지 않는다.'
   },
   {
-    ref: 'SOXL 멘탈케어 클럽 제3장 · 대제단의 약속',
-    text: '오늘의 흔들림에 계좌를 닫지 마라. 끝까지 살아남은 자가 강단 위 SOXL 500 대제단화 앞에서 마지막에 웃는다.'
+    ref: 'SOXL 멘탈케어 클럽 제3장 · DJ 메인 부스의 약속',
+    text: '오늘의 흔들림에 계좌를 닫지 마라. 끝까지 살아남은 자가 강단 위 SOXL 500 DJ 메인 부스화 앞에서 마지막에 웃는다.'
   },
   {
     ref: 'SOXL 멘탈케어 클럽 제4장 · 올나잇 파티의 원칙',
@@ -1322,7 +1316,7 @@ const INITIAL_NOTES = [
   { id: 'n1', author: 'SOXL 500 VVIP', text: '2층 VIP 룸에서 샴페인 터뜨리며 SOXL 300·500 제단화 올려다보니 가슴이 웅장해집니다! 모두 성투하세요!', likes: 52, time: '방금 전' },
   { id: 'n2', author: '필라델피아 바텐더', text: '레버리지 민족 찬가 들으면서 본당 소파에 앉아 있으니까 조정장 스트레스가 싹 내려가네요 🙏', likes: 39, time: '2분 전' },
   { id: 'n3', author: '서학개미 야수', text: '오늘 밤 나스닥 본장 시원한 장대양봉 기원하며 강단 VIP 샴페인 바에 불꽃 하나 밝히고 갑니다!', likes: 64, time: '5분 전' },
-  { id: 'n4', author: '클럽 DJ 불마켓', text: 'SOXL 멘탈케어 클럽 메인홀에 입소하신 주주분들을 환영합니다. 소파에 앉거나 강단 앞 방석에서 클럽 댄스를 올리실 수 있습니다.', likes: 48, time: '9분 전' }
+  { id: 'n4', author: '클럽 DJ 불마켓', text: 'SOXL 멘탈케어 클럽 메인홀에 입장하신 주주분들을 환영합니다. 소파에 앉거나 강단 앞 방석에서 클럽 댄스를 올리실 수 있습니다.', likes: 48, time: '9분 전' }
 ];
 // ============================================================================
 // 2. 전역 상태 변수 & 아바타 커스터마이징 로드
@@ -1394,7 +1388,7 @@ const CAM_PRESETS = [
   { name: '시점: 클럽 3인칭', dist: 6.8, pitch: 0.32 },
   { name: '시점: 강단 정면', dist: 4.0, pitch: 0.16 },
   { name: '시점: 대클럽 조망', dist: 12.8, pitch: 0.50 },
-  { name: '시점: 1인칭 집중기도', dist: 2.3, pitch: 0.12 }
+  { name: '시점: 1인칭 1인칭 시점', dist: 2.3, pitch: 0.12 }
 ];
 
 let isDragging = false, dragMoved = false, prevMouse = { x: 0, y: 0 };
@@ -1720,7 +1714,7 @@ function init3DSpace() {
     z: 8.2
   });
 
-  // 동반 기도 주주(NPC) 배치 (소파 착석 & 강단 앞 클럽댄스!)
+  // 동반 파티 주주(NPC) 배치 (소파 착석 & 강단 앞 클럽댄스!)
   initNPCShareholders();
 
   window.addEventListener('resize', onWindowResize);
@@ -1767,14 +1761,14 @@ function buildOutdoorGardenAndWaferPond() {
 
   // 풀장 화이트 대리석 데크 림
   const deckRimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3, metalness: 0.2 });
-  const poolDeck = new THREE.Mesh(new THREE.BoxGeometry(22.0, 0.45, 17.0), deckRimMat);
+  const poolDeck = new THREE.Mesh(new THREE.BoxGeometry(38.0, 0.55, 26.0), deckRimMat);
   poolDeck.position.y = 0.22;
   poolGroup.add(poolDeck);
 
   // 풀장 수조 내벽 (사파이어 블루 모자이크 타일)
   const poolBasin = new THREE.Mesh(
-    new THREE.BoxGeometry(19.2, 1.2, 14.2),
-    new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.4 })
+    new THREE.BoxGeometry(35.2, 1.8, 23.2),
+    new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 })
   );
   poolBasin.position.y = -0.35;
   poolGroup.add(poolBasin);
@@ -1789,7 +1783,7 @@ function buildOutdoorGardenAndWaferPond() {
     transparent: true,
     opacity: 0.85
   });
-  poolWaterMesh = new THREE.Mesh(new THREE.PlaneGeometry(19.0, 14.0), waterMat);
+  poolWaterMesh = new THREE.Mesh(new THREE.PlaneGeometry(34.8, 22.8), waterMat);
   poolWaterMesh.rotation.x = -Math.PI / 2;
   poolWaterMesh.position.y = 0.12;
   poolGroup.add(poolWaterMesh);
@@ -2847,7 +2841,7 @@ function showAvatarBubble(av, message, duration = 4500) {
 }
 
 // ============================================================================
-// 6. 동반 기도 주주 NPC 7명 배치 (소파 착석 & 강단 앞 클럽댄스)
+// 6. 동반 파티 주주 NPC 7명 배치 (소파 착석 & 강단 앞 클럽댄스)
 // ============================================================================
 function initNPCShareholders() {
   const npcConfigs = [
@@ -2857,7 +2851,7 @@ function initNPCShareholders() {
     { name: '서학개미 야수', seatIdx: 6, msg: '벽면 SOXL 100~500 VIP 갤러리 볼 때마다 멘탈이 꽉 잡히네요!', custom: { gender: 'M', hairStyle: 1, hairColor: '#3b281a', outfitType: 'casual', outfitColor: '#25282e', prop: 'bullstaff', accessory: 'beret' } },
     { name: '반도체 총무', seatIdx: 9, msg: '레버리지 민족 음악 들으며 클럽 플로어에서 댄스 파티 중입니다 🕺 🎵', custom: { gender: 'F', hairStyle: 0, hairColor: '#241a14', outfitType: 'suit', outfitColor: '#e8e0cf', prop: 'ledger', accessory: 'none' } },
     { name: '3배 레버리지 야수', seatIdx: 14, msg: '분할매수 원칙 지키며 오백불 대클럽까지 함께 갑시다!', custom: { gender: 'M', hairStyle: 1, hairColor: '#8e969d', outfitType: 'suit', outfitColor: '#5e1f28', prop: 'bag', accessory: 'glasses' } },
-    { name: '클럽 DJ 불마켓', seatIdx: 17, msg: 'SOXL 멘탈케어 클럽 본당에 입소하신 주주분들을 진심으로 환영합니다 ⛪', custom: { gender: 'F', hairStyle: 1, hairColor: '#3b2618', outfitType: 'suit', outfitColor: '#143d2e', prop: 'candle', accessory: 'none' } }
+    { name: '클럽 DJ 불마켓', seatIdx: 17, msg: 'SOXL 멘탈케어 클럽 본당에 입장하신 주주분들을 진심으로 환영합니다 ⛪', custom: { gender: 'F', hairStyle: 1, hairColor: '#3b2618', outfitType: 'suit', outfitColor: '#143d2e', prop: 'candle', accessory: 'none' } }
   ];
 
   npcConfigs.forEach((cfg, idx) => {
@@ -2881,7 +2875,7 @@ function initNPCShareholders() {
 }
 
 // ============================================================================
-// 7. 소파 착석(1), 클럽 댄스(2), 네온 샷 점화(3), 성화 순례 이동 & 제스처
+// 7. 소파 착석(1), 클럽 댄스(2), 네온 샷 점화(3), 비전 프레임 순례 이동 & 제스처
 // ============================================================================
 function syncDockPostureButtons() {
   if (!myAvatar) return;
@@ -2922,7 +2916,7 @@ function sitAvatarAtSeat(av, seat) {
   if (av.isMe) {
     syncDockPostureButtons();
     setWalkHint(seat.type === 'kneel'
-      ? `🧎 [${seat.label}]로 나아가 두 무릎을 꿇고 상승 기도를 올립니다...`
+      ? `🧎 [${seat.label}]로 나아가 스테이지 중앙에서 폭풍 테크노 댄스를 춥니다!...`
       : `🪑 [${seat.label}]로 걸어가 착석합니다...`);
     broadcastMyState();
   }
@@ -2934,7 +2928,7 @@ function toggleMySit() {
   if (myAvatar.state === 'sitting' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'pew')) {
     unseatAvatar(myAvatar);
     myAvatar.targetPos.set(myAvatar.group.position.x, 0, myAvatar.group.position.z + 0.55);
-    setWalkHint('🚶 라운지 소파에서 일어났습니다. 클럽 바닥이나 성화 액자를 클릭해 보세요.');
+    setWalkHint('🚶 라운지 소파에서 일어났습니다. 클럽 바닥이나 비전 프레임 액자를 클릭해 보세요.');
     showToast('🚶 라운지 소파에서 일어났습니다.');
     broadcastMyState();
     return;
@@ -2984,7 +2978,7 @@ function toggleMyKneel() {
     syncDockPostureButtons();
     playBellChime();
     showAvatarBubble(myAvatar, '🧎 강단 향해 무릎 꿇고 SOXL 상승을 응원 토크합니다!');
-    setWalkHint('🧎 두 무릎을 꿇고 두 손을 모아 강단 위 SOXL 500 대제단을 향해 기도 중입니다.');
+    setWalkHint('🍾 샴페인 잔을 높이 들고 SOXL 500 DJ 메인 부스를 향해 건배를 외칩니다!');
     broadcastMyState('kneel', '🧎 무릎 꿇고 SOXL 상승을 응원 토크합니다!');
   }
 }
@@ -3034,7 +3028,7 @@ function walkToFrame(frameIdx) {
     btn.classList.toggle('active', idx === frameIdx + 1);
   });
 
-  // 해당 성화와 가장 가까운 라운지 소파 찾기
+  // 해당 비전 프레임와 가장 가까운 라운지 소파 찾기
   let targetSeat = null, minDist = Infinity;
   const targetPt = new THREE.Vector3(f.seatTarget.x, 0, f.seatTarget.z);
   seats.forEach(s => {
@@ -3072,7 +3066,7 @@ function walkToCurrentDocentFrame() {
 const EMOTE_META = {
   amen:   { dur: 3.2, msg: '🙏 제발 장대양봉 주소서! SOXL 500 성취 치얼스 🥂!', banner: '🙏 두 손을 가슴에 모으고 간절히 장대양봉을 응원 토크합니다.' },
   praise: { dur: 3.6, msg: '🙌 레버리지 민족 만세! SOXL 500 가즈아!', banner: '🙌 두 팔을 높이 들고 레버리지 민족 만세를 외칩니다!' },
-  wave:   { dur: 3.0, msg: '📈 흔들리지 마세요! 끝까지 함께 성투합시다!', banner: '📈 함께 기도하는 주주들에게 성투 손인사를 건넵니다.' },
+  wave:   { dur: 3.0, msg: '📈 흔들리지 마세요! 끝까지 함께 성투합시다!', banner: '📈 함께 파티를 즐기는 주주들에게 성투 손인사를 건넵니다.' },
   read:   { dur: 4.2, msg: '📖 공포에 분할매수하고 환희에 복리를 거둔다!', banner: '📖 황금 투자 원장을 두 손으로 펴 들고 야수의 심장 교리를 외침합니다.' }
 };
 
@@ -3252,7 +3246,7 @@ function updateOnlineCount() {
 
 // 실시간 채팅방
 function initChatLog() {
-  appendChatMessage('시스템', '🪩 SOXL 멘탈케어 클럽 대클럽에 입장하셨습니다. 소파에 앉거나 강단 앞 VIP룸에서 상승 기도를 올려보세요.', true);
+  appendChatMessage('시스템', '🪩 SOXL 멘탈케어 클럽 대클럽에 입장하셨습니다. 소파에 앉거나 댄스플로어에서 테크노 댄스를 즐겨보세요.', true);
   appendChatMessage('SOXL 500 VVIP', '오늘도 흔들리지 않고 강단 앞 VIP룸 지킵니다. 모두 성투하세요!', false);
   appendChatMessage('필라델피아 바텐더', '벽면 SOXL 100~500 VIP 갤러리 클릭하면 초고화질로 확대됩니다 👍', false);
 }
@@ -3287,7 +3281,7 @@ function sendChatMessage() {
 }
 
 // ============================================================================
-// 9. 카메라 조작, 바닥/라운지 소파/VIP룸 클릭 이동, 성화 클릭 도슨트 오픈
+// 9. 카메라 조작, 바닥/라운지 소파/VIP룸 클릭 이동, 비전 프레임 클릭 도슨트 오픈
 // ============================================================================
 function setupPointerAndKeyboardControls() {
   const dom = renderer.domElement;
@@ -3650,7 +3644,7 @@ function applyZoomTransform() {
 })();
 
 // ============================================================================
-// 11. 강단 건배 릴레이 기도문 보드 & 오디오 엔진
+// 11. 강단 건배 릴레이 응원 토크 보드 & 오디오 엔진
 // ============================================================================
 function initNotesFeed() {
   const saved = JSON.parse(localStorage.getItem('soxl_mc_notes') || 'null');
@@ -3693,7 +3687,7 @@ function submitCandleNote() {
   const input = document.getElementById('candle-input');
   const text = input.value.trim();
   if (!text) {
-    showToast('강단 VIP 샴페인 바에 올릴 응원 토크 기도문을 입력해 주세요.');
+    showToast('강단 VIP 샴페인 바에 올릴 주주 응원 토크을 입력해 주세요.');
     return;
   }
   input.value = '';
@@ -3829,7 +3823,7 @@ document.getElementById('btn-light-mode').addEventListener('click', () => {
     ambientLight.intensity = 0.88;
     mainSpot.color.setHex(0x4effb8);
   } else {
-    label.textContent = '☀️ 새벽기도 모닝 클럽';
+    label.textContent = '☀️ 모닝 애프터 파티';
     scene.background.setHex(0x182b23);
     scene.fog.color.setHex(0x182b23);
     ambientLight.intensity = 1.08;
@@ -4040,22 +4034,22 @@ function animate() {
   if (mirrorBallGroup) {
     mirrorBallGroup.rotation.y = elapsed * 0.45;
   }
-  // ⚡ [목사님 요청] 초고속 와리가리 무빙 레이저 4조 (속도 4.5배 대폭 가속!)
+  // ⚡ [공식 요청] 초고속 와리가리 무빙 레이저 4조 (속도 대폭 가속 & 파파파팟 사이키!)
   if (movingLasers && movingLasers.length > 0) {
     movingLasers.forEach((ml, idx) => {
-      const speed = 9.8; // 초고속 와리가리
+      const speed = 16.5; // 와리가리 초고속 스위핑
       const t = elapsed * speed + ml.phase;
       // 8자 및 지그재그로 칼날처럼 휙휙 스위핑
-      const lx = Math.sin(t * 1.2) * 8.5;
-      const lz = Math.cos(t * 1.8) * 9.5;
+      const lx = Math.sin(t * 1.5) * 11.0;
+      const lz = Math.cos(t * 2.2) * 12.0;
       ml.spot.target.position.set(lx, 0.05, lz);
-      // 파파파팟 스트로브 펄스
-      const strobe = Math.sin(elapsed * 28.0 + idx * 3.14) > 0.3 ? 3.5 : 0.8;
+      // 파파파팟 초고속 스트로브 펄스 (초당 14회 점멸)
+      const strobe = Math.sin(elapsed * 45.0 + idx * 1.57) > 0.1 ? 4.5 : 0.3;
       ml.spot.intensity = strobe;
     });
   }
 
-  // ⚡ [목사님 요청] LED 댄스플로어 타일 초고속 파파파팟 점멸 (체커보드 네온 사이키)
+  // ⚡ [공식 요청] LED 댄스플로어 타일 초고속 파파파팟 점멸 (체커보드 네온 사이키)
   if (danceTiles && danceTiles.length > 0) {
     const strobeBeat = Math.floor(elapsed * 12.0); // 0.08초 단위 파파파팟 점멸
     const colors = [0xff007f, 0x00ffff, 0x2ee59d, 0xffd269, 0xa855f7];
@@ -4069,7 +4063,7 @@ function animate() {
     });
   }
 
-  // 🕺 [목사님 요청] 다채로운 댄스 액션: 테크노, 복고댄스, 점프, 취중댄스!
+  // 🕺 [공식 요청] 다채로운 댄스 액션: 테크노, 복고댄스, 점프, 취중댄스!
   if (myAvatar && myAvatar.isDancing) {
     const baseY = (myAvatar.group.position.y > 2.5 ? 4.8 : 0);
     const dMode = myAvatar.danceMode || 'techno';
@@ -4079,10 +4073,10 @@ function animate() {
       myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 18)) * 0.16;
       myAvatar.group.rotation.y += Math.sin(elapsed * 14) * 0.18;
       if (myAvatar.rig && myAvatar.rig.leftArm && myAvatar.rig.rightArm) {
-        myAvatar.rig.leftArm.upperArm.rotation.x = Math.sin(elapsed * 18) * 0.8 - 0.5;
-        myAvatar.rig.rightArm.upperArm.rotation.x = -Math.sin(elapsed * 18) * 0.8 - 0.5;
-        myAvatar.rig.leftArm.upperArm.rotation.z = 0.5;
-        myAvatar.rig.rightArm.upperArm.rotation.z = -0.5;
+        myAvatar.rig.leftArm.arm.rotation.x = Math.sin(elapsed * 18) * 0.8 - 0.5;
+        myAvatar.rig.rightArm.arm.rotation.x = -Math.sin(elapsed * 18) * 0.8 - 0.5;
+        myAvatar.rig.leftArm.arm.rotation.z = 0.5;
+        myAvatar.rig.rightArm.arm.rotation.z = -0.5;
       }
     } else if (dMode === 'retro') {
       // 🕺 복고 디스코 댄스: 존 트라볼타 토요일 밤의 열기 하늘 찌르기 & 골반 롤링!
@@ -4090,22 +4084,22 @@ function animate() {
       myAvatar.group.rotation.y += Math.sin(elapsed * 6) * 0.25;
       if (myAvatar.rig && myAvatar.rig.rightArm) {
         // 오른손 대각선 하늘 찌르기!
-        myAvatar.rig.rightArm.upperArm.rotation.x = -2.2 + Math.sin(elapsed * 8) * 0.4;
-        myAvatar.rig.rightArm.upperArm.rotation.z = -0.8;
+        myAvatar.rig.rightArm.arm.rotation.x = -2.2 + Math.sin(elapsed * 8) * 0.4;
+        myAvatar.rig.rightArm.arm.rotation.z = -0.8;
       }
       if (myAvatar.rig && myAvatar.rig.leftArm) {
         // 왼손 허리춤
-        myAvatar.rig.leftArm.upperArm.rotation.x = 0.2;
-        myAvatar.rig.leftArm.upperArm.rotation.z = 0.6;
+        myAvatar.rig.leftArm.arm.rotation.x = 0.2;
+        myAvatar.rig.leftArm.arm.rotation.z = 0.6;
       }
     } else if (dMode === 'jump') {
       // 🦘 하이 점프 댄스: 붕붕 날아오르는 신나는 점프 & 양팔 만세!
       myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 9)) * 0.72; // 0.72m 점프!
       if (myAvatar.rig && myAvatar.rig.leftArm && myAvatar.rig.rightArm) {
-        myAvatar.rig.leftArm.upperArm.rotation.x = -2.6;
-        myAvatar.rig.rightArm.upperArm.rotation.x = -2.6;
-        myAvatar.rig.leftArm.upperArm.rotation.z = 0.6;
-        myAvatar.rig.rightArm.upperArm.rotation.z = -0.6;
+        myAvatar.rig.leftArm.arm.rotation.x = -2.6;
+        myAvatar.rig.rightArm.arm.rotation.x = -2.6;
+        myAvatar.rig.leftArm.arm.rotation.z = 0.6;
+        myAvatar.rig.rightArm.arm.rotation.z = -0.6;
       }
     } else if (dMode === 'drunk') {
       // 🍻 취중 댄스: 술기운에 좌우로 비틀비틀 스윙!
@@ -4199,7 +4193,7 @@ function animate() {
             playBellChime();
             setWalkHint(av.state === 'kneeling'
               ? `🧎 [${av.seat.label}]에서 두 무릎을 꿇고 SOXL 불마켓 상승을 간절히 응원 토크합니다.`
-              : `🪑 [${av.seat.label}]에 앉아 성화를 바라보며 멘탈을 치유하고 있습니다.`);
+              : `🪑 [${av.seat.label}]에 앉아 비전 프레임를 바라보며 멘탈을 치유하고 있습니다.`);
             broadcastMyState();
           }
         } else if (av.state === 'walking_to_candle') {
@@ -4207,7 +4201,7 @@ function animate() {
           av.bowTimer = 2.5;
           av.group.rotation.y = 0;
           playBellChime();
-          const prayerMsg = av.pendingPrayer || 'SOXL 500 대제단까지 흔들림 없이 성투하게 하소서!';
+          const prayerMsg = av.pendingPrayer || 'SOXL 500 DJ 메인 부스까지 흔들림 없이 성투하게 하소서!';
           const newNote = {
             id: 'n_' + Date.now(),
             author: myCustom.name,
@@ -4217,7 +4211,7 @@ function animate() {
           };
           prependNoteCard(newNote, true);
           showAvatarBubble(av, '🕯️ 불마켓 기원 네온 샷 점화!');
-          setWalkHint('🕯️ 강단 앞 황금 VIP 샴페인 바에 내 응원 토크 기도의 불꽃이 밝게 타오릅니다.');
+          setWalkHint('🕯️ 강단 앞 황금 VIP 샴페인 바에 내 응원 토크 파티의 열기가 밝게 타오릅니다.');
           showToast('🕯️ 강단 VIP 샴페인 바에 황금 불꽃을 점화하고 떡상 주문을 올렸습니다!');
           if (bcChannel) { try { bcChannel.postMessage({ type: 'candle_note', id: myId, note: newNote }); } catch (e) {} }
           if (mqttClient && mqttClient.connected) {
@@ -4250,7 +4244,7 @@ function animate() {
     const ss = String(sec % 60).padStart(2, '0');
     if (myAvatar.state === 'kneeling') {
       const kl = document.getElementById('dock-kneel-label');
-      if (kl) kl.textContent = `기도중 ${mm}:${ss}`;
+      if (kl) kl.textContent = `파티중 ${mm}:${ss}`;
     } else {
       const sl = document.getElementById('dock-sit-label');
       if (sl) sl.textContent = `착석중 ${mm}:${ss}`;
@@ -4348,29 +4342,66 @@ function enterSanctuary(withMusic) {
   startAudioEngine(withMusic);
   initMultiplayerSync();
   showToast(withMusic
-    ? `⛪ [${myCustom.name}] 님, SOXL 멘탈케어 클럽 메인홀에 입소하셨습니다! (레버리지 민족 음악 재생 중)`
-    : `⛪ [${myCustom.name}] 님, 조용한 무음 모드로 SOXL 멘탈케어 클럽에 입소하셨습니다.`);
+    ? `⛪ [${myCustom.name}] 님, SOXL 멘탈케어 클럽 메인홀에 입장하셨습니다! (레버리지 민족 음악 재생 중)`
+    : `⛪ [${myCustom.name}] 님, 조용한 무음 모드로 SOXL 멘탈케어 클럽에 입장하셨습니다.`);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  if (isMobileViewport()) {
-    camDist = 8.2;
-    camPitch = 0.34;
-  }
-  const wBox = document.getElementById('mantra-wheel-box');
-  const cBox = document.getElementById('chat-box');
-  if (wBox) wBox.classList.add('minimized');
-  if (cBox) cBox.classList.add('minimized');
-  syncLeftStackState();
-  init3DSpace();
-  renderMantraText();
-  initNotesFeed();
-  initChatLog();
-  syncCustomizerUI();
-  selectDocentFrame(0);
+  try {
+    if (isMobileViewport()) {
+      camDist = 8.2;
+      camPitch = 0.34;
+    }
+  } catch(e) { console.warn(e); }
 
-  document.getElementById('boot-enter-btn').addEventListener('click', () => enterSanctuary(true));
-  document.getElementById('boot-enter-quiet-btn').addEventListener('click', () => enterSanctuary(false));
+  try {
+    const wBox = document.getElementById('mantra-wheel-box');
+    const cBox = document.getElementById('chat-box');
+    if (wBox) wBox.classList.add('minimized');
+    if (cBox) cBox.classList.add('minimized');
+    syncLeftStackState();
+  } catch(e) { console.warn(e); }
+
+  try { init3DSpace(); } catch(e) { console.error('init3DSpace error:', e); }
+  try { renderMantraText(); } catch(e) { console.warn(e); }
+  try { initNotesFeed(); } catch(e) { console.warn(e); }
+  try { initChatLog(); } catch(e) { console.warn(e); }
+  try { syncCustomizerUI(); } catch(e) { console.warn(e); }
+  try { selectDocentFrame(0); } catch(e) { console.warn(e); }
+
+  // 🚀 [원터치 다이렉트 직행] 팝업 없이 0.05초 만에 3D 클럽 씬으로 즉시 진입!
+  setTimeout(() => {
+    try {
+      enterSanctuary(true);
+    } catch(e) {
+      console.warn('enterSanctuary auto error:', e);
+      const bs = document.getElementById('boot-screen');
+      if (bs) bs.classList.add('hidden');
+    }
+  }, 50);
+
+  // 모바일/데스크톱 첫 터치 시 사운드 자동 언락
+  const unlockAudio = () => {
+    try {
+      if (window.audioCtx && window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
+      if (window.bgmAudio && window.bgmAudio.paused) {
+        window.bgmAudio.play().catch(() => {});
+      }
+    } catch(e) {}
+    window.removeEventListener('pointerdown', unlockAudio);
+    window.removeEventListener('touchstart', unlockAudio);
+    window.removeEventListener('click', unlockAudio);
+  };
+  window.addEventListener('pointerdown', unlockAudio, { passive: true });
+  window.addEventListener('touchstart', unlockAudio, { passive: true });
+  window.addEventListener('click', unlockAudio, { passive: true });
+
+  const btnEnter = document.getElementById('boot-enter-btn');
+  if (btnEnter) btnEnter.addEventListener('click', () => enterSanctuary(true));
+  const btnQuiet = document.getElementById('boot-enter-quiet-btn');
+  if (btnQuiet) btnQuiet.addEventListener('click', () => enterSanctuary(false));
 });
 
 // ============================================================================
@@ -4457,12 +4488,38 @@ function triggerDanceMode(mode) {
       myAvatar.isDancing = false;
       // 팔 각도 원상복구
       if (myAvatar.rig && myAvatar.rig.leftArm && myAvatar.rig.rightArm) {
-        myAvatar.rig.leftArm.upperArm.rotation.set(0,0,0);
-        myAvatar.rig.rightArm.upperArm.rotation.set(0,0,0);
+        myAvatar.rig.leftArm.arm.rotation.set(0,0,0);
+        myAvatar.rig.rightArm.arm.rotation.set(0,0,0);
         myAvatar.group.rotation.z = 0;
       }
     }
   }, 6000);
+}
+
+
+// 💇 [스타일 체인지] 모히칸, 빨간머리 메탈, 긴머리, 가죽자켓, 글리터 수트 즉각 변신!
+let currentStyleIdx = 0;
+const CLUB_STYLES = [
+  { name: '💥 네온 모히칸 & 가죽 라이더', hairStyle: 3, hairColor: '#00ffcc', outfitType: 'metal', outfitColor: '#111115', msg: '💥 네온 펑크 모히칸 & 스터드 가죽 라이더 장착!' },
+  { name: '🎸 빨간머리 메탈 락스타', hairStyle: 4, hairColor: '#ff0033', outfitType: 'metal', outfitColor: '#09090c', msg: '🎸 강렬한 빨간머리 메탈 샤기컷 & 블랙 레더 변신!' },
+  { name: '👩‍🎤 글램록 롱헤어 & 골드 글리터', hairStyle: 5, hairColor: '#eab85c', outfitType: 'glitter', outfitColor: '#eab85c', msg: '👩‍🎤 찰랑이는 글램록 롱헤어 & 번쩍이는 골드 글리터 수트!' },
+  { name: '🕶️ 사이버 네온 VIP 룩', hairStyle: 0, hairColor: '#1e1814', outfitType: 'neon', outfitColor: '#00ffff', msg: '🕶️ 사이버 네온 VIP 수트 & 블루 쉐이드 장착!' },
+  { name: '👑 럭셔리 샴페인 골드 정장', hairStyle: 1, hairColor: '#2b1d0c', outfitType: 'suit', outfitColor: '#143d2e', msg: '👑 샴페인 골드 타이 & 클래식 럭셔리 수트 착용!' }
+];
+
+function cycleAvatarStyle() {
+  if (!myAvatar) return;
+  currentStyleIdx = (currentStyleIdx + 1) % CLUB_STYLES.length;
+  const s = CLUB_STYLES[currentStyleIdx];
+  rebuildAvatarRig(myAvatar, {
+    hairStyle: s.hairStyle,
+    hairColor: s.hairColor,
+    outfitType: s.outfitType,
+    outfitColor: s.outfitColor
+  });
+  showAvatarBubble(myAvatar, s.msg);
+  showToastNotification(`💇 [스타일 체인지] ${s.name}`);
+  playGlassCheersSound();
 }
 
 function triggerClubDance() {
