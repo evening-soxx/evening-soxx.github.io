@@ -383,27 +383,36 @@
     background: rgba(24, 52, 41, 0.96);
   }
 
-  /* 하단 통합 가로 툴바 독 (Dock - 타원형 배제, 홈페이지 하단 가로 제어바 스타일) */
+  /* 하단 통합 가로 툴바 독 (Dock - 2단 스마트 컨트롤 허브) */
   #bottom-dock {
-    position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-    z-index: 30; display: flex; align-items: center; gap: 5px;
-    background: rgba(7, 15, 12, 0.95);
+    position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 30; display: flex; flex-direction: column; gap: 5px;
+    background: rgba(8, 14, 22, 0.95);
     border: 1px solid rgba(234, 184, 92, 0.45);
-    padding: 5px 8px; border-radius: 8px;
-    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 10px 32px rgba(0,0,0,0.7);
-    max-width: 96vw; overflow-x: auto; scrollbar-width: none;
+    padding: 6px 12px; border-radius: 12px;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.75);
+    width: auto; max-width: 95vw;
   }
-  #bottom-dock::-webkit-scrollbar { display: none; }
+  .dock-row {
+    display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: nowrap;
+  }
+  .dock-segment {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .dock-divider {
+    width: 1px; height: 18px; background: rgba(255,255,255,0.18); margin: 0 3px;
+  }
   .dock-btn {
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(234, 184, 92, 0.22);
-    color: var(--text-cream); padding: 7px 12px; border-radius: 6px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(234, 184, 92, 0.25);
+    color: var(--text-cream); padding: 6px 11px; border-radius: 7px;
     font-size: 12px; font-weight: 700; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
     transition: all 0.18s ease;
   }
   .dock-btn:hover {
-    background: rgba(234, 184, 92, 0.16); border-color: rgba(234, 184, 92, 0.48);
+    background: rgba(234, 184, 92, 0.22); border-color: rgba(234, 184, 92, 0.55);
+    transform: translateY(-1px);
   }
   .dock-btn.active {
     background: linear-gradient(135deg, #2ee59d 0%, #eab85c 100%);
@@ -746,27 +755,29 @@
     }
     .emote-btn span.em-txt { display: inline; font-size: 9px; letter-spacing: -0.3px; }
 
-    /* 하단 제1열: 클럽 액션 독 가로 게시판 바 */
+    /* 하단 제1열: 클럽 액션 독 스마트 2단 바 모바일 최적화 */
     #bottom-dock {
-      bottom: max(4px, env(safe-area-inset-bottom));
+      bottom: max(6px, env(safe-area-inset-bottom));
       left: 6px; right: 6px;
       transform: none;
       width: auto; max-width: none;
-      padding: 3px 4px;
-      gap: 2px;
-      justify-content: space-between;
-      border-radius: 6px;
+      padding: 5px 6px;
+      gap: 4px;
+      border-radius: 10px;
     }
+    .dock-row { gap: 3px; justify-content: space-between; width: 100%; }
+    .dock-segment { gap: 2px; flex: 1; justify-content: space-around; }
+    .dock-divider { height: 16px; margin: 0 1px; }
     .dock-btn {
       flex: 1 1 0;
       justify-content: center;
-      padding: 5px 2px;
-      font-size: 9.5px;
+      padding: 6px 3px;
+      font-size: 11px;
       gap: 2px;
-      border-radius: 5px;
+      border-radius: 6px;
       white-space: nowrap;
     }
-    .dock-btn span.label-txt { display: inline; font-size: 8.6px; letter-spacing: -0.4px; }
+    .dock-btn span.label-txt { display: inline; font-size: 10px; letter-spacing: -0.3px; font-weight: 700; }
     .key-badge { display: none; }
 
     /* 캐릭터 이름표 및 모달 팝업 모바일 최적화 */
@@ -895,34 +906,34 @@
     </a>
     <div class="glass-pill">
       <span class="status-dot"></span>
-      <span id="online-count-txt">🪩 SOXL 멘탈케어 클럽 &amp; 2층 VIP룸 · 12명</span>
+      <span id="online-count-txt">🪩 클럽 &amp; 풀파티 · 12명</span>
     </div>
     <button type="button" class="glass-pill" id="btn-toggle-frame-strip" onclick="toggleFrameStrip()" title="비전 프레임 및 VIP룸 빠른 이동 바 열기/접기" style="border-color:rgba(245,200,76,0.55);color:#ffe49e;">
-      <span id="frame-strip-toggle-txt">🧭 🍾 VIP룸·플로어 이동 ▾</span>
+      <span id="frame-strip-toggle-txt">🧭 핫스팟 이동 ▾</span>
     </button>
     <button type="button" class="glass-pill" id="btn-toggle-cheer-feed" onclick="toggleCheerFeed()" title="실시간 주주 네온 샷 💬 떡상 토크 피드 열기/접기">
-      <span id="cheer-feed-toggle-txt">🕯️ 💬 떡상 토크 피드 ▾</span>
+      <span id="cheer-feed-toggle-txt">💬 떡상 토크 ▾</span>
     </button>
   </div>
 
   <div class="hud-group">
     <button type="button" class="glass-pill" id="btn-change-nick" title="내 클럽 닉네임 및 아바타 꾸미기">
       <span>🪪</span>
-      <span id="my-nick-label">레버리지 민족</span>
+      <span id="my-nick-label">아바타 꾸미기</span>
     </button>
     <button type="button" class="glass-pill" id="btn-cam-preset" title="카메라 시점 전환">
       <span>🎥</span>
-      <span id="cam-preset-label">시점: 클럽 3인칭</span>
+      <span id="cam-preset-label">시점 전환</span>
     </button>
     <button type="button" class="glass-pill" id="btn-now-playing" onclick="togglePanel('sound')">
       <span>🎵</span>
-      <span id="now-playing-label">레버리지 민족</span>
+      <span id="now-playing-label">클럽 BGM</span>
     </button>
     <button type="button" class="glass-pill" id="btn-light-mode" title="클럽 조명 분위기 전환">
-      <span id="light-mode-label">🕯️ ⚡ 사이키 레이저 ON</span>
+      <span id="light-mode-label">⚡ 사이키 조명 ON</span>
     </button>
     <button type="button" class="glass-pill" id="btn-toggle-npc" title="동반 파티 주주(NPC) 표시 전환">
-      <span id="npc-toggle-label">👥 동반 주주 ON</span>
+      <span id="npc-toggle-label">👥 주주 ON</span>
     </button>
     <button type="button" class="glass-pill" id="btn-share-safe-url" onclick="copySafeShareUrl()" title="공식 웹 주소 복사" style="border-color:rgba(46,229,157,0.65);color:#9effd6;">
       <span>🔗</span>
@@ -957,7 +968,7 @@
   <div class="sanctuary-panel-box minimized" id="mantra-wheel-box">
     <div class="vw-header" onclick="toggleWheelMinimize()">
       <span class="vw-badge" id="vw-badge-title">📜 🔥 떡상 주문 (열기 ▲)</span>
-      <span class="vw-ref" id="vw-ref">레버리지 교리 제1장</span>
+      <span class="vw-ref" id="vw-ref">야수의 심장 제1원칙</span>
     </div>
     <div class="vw-body" onclick="advanceMantraWheel(6)">
       <div class="vw-text" id="vw-text"></div>
@@ -1058,30 +1069,40 @@
     </div>
   </div>
   <div class="cust-row">
-    <span class="cust-label">💇 헤어 스타일</span>
+    <span class="cust-label">💇 헤어 스타일 (6대 스타일)</span>
     <div class="cust-chips" id="cust-hair">
-      <button type="button" class="cust-chip" data-val="0" onclick="updateCustom('hairStyle',0)">스타일 1 (단정)</button>
-      <button type="button" class="cust-chip" data-val="1" onclick="updateCustom('hairStyle',1)">스타일 2 (웨이브/보브)</button>
+      <button type="button" class="cust-chip" data-val="0" onclick="updateCustom('hairStyle',0)">스타일 1 (댄디 단정)</button>
+      <button type="button" class="cust-chip" data-val="1" onclick="updateCustom('hairStyle',1)">스타일 2 (가르마 웨이브)</button>
       <button type="button" class="cust-chip" data-val="2" onclick="updateCustom('hairStyle',2)">스타일 3 (볼륨/올림머리)</button>
+      <button type="button" class="cust-chip" data-val="3" onclick="updateCustom('hairStyle',3)">💥 모히칸 (펑크 락)</button>
+      <button type="button" class="cust-chip" data-val="4" onclick="updateCustom('hairStyle',4)">🔴 레드 메탈 (샤기 락스타)</button>
+      <button type="button" class="cust-chip" data-val="5" onclick="updateCustom('hairStyle',5)">👩‍🎤 롱헤어 (글램록 긴머리)</button>
     </div>
   </div>
   <div class="cust-row">
-    <span class="cust-label">🧥 클럽 의상 종류</span>
+    <span class="cust-label">🧥 클럽 & 풀파티 의상 (8대 스타일)</span>
     <div class="cust-chips" id="cust-outfit">
+      <button type="button" class="cust-chip" data-val="swimwear" onclick="updateCustom('outfitType','swimwear')">🩳 풀파티 비치웨어</button>
+      <button type="button" class="cust-chip" data-val="resort" onclick="updateCustom('outfitType','resort')">🩱 럭셔리 리조트룩</button>
+      <button type="button" class="cust-chip" data-val="hawaiian" onclick="updateCustom('outfitType','hawaiian')">🌺 하와이안 셔츠</button>
+      <button type="button" class="cust-chip" data-val="metal" onclick="updateCustom('outfitType','metal')">🎸 락스타 가죽라이더</button>
+      <button type="button" class="cust-chip" data-val="glitter" onclick="updateCustom('outfitType','glitter')">✨ 골드 글리터 클럽</button>
+      <button type="button" class="cust-chip" data-val="neon" onclick="updateCustom('outfitType','neon')">🪩 사이버 네온 슈트</button>
       <button type="button" class="cust-chip" data-val="suit" onclick="updateCustom('outfitType','suit')">👔 월스트리트 정장</button>
-      <button type="button" class="cust-chip" data-val="robe" onclick="updateCustom('outfitType','robe')">🥋 3X 불마켓 수도복(가운)</button>
       <button type="button" class="cust-chip" data-val="casual" onclick="updateCustom('outfitType','casual')">🧥 실리콘밸리 캐주얼</button>
     </div>
   </div>
   <div class="cust-row">
     <span class="cust-label">🎨 의상 색상</span>
     <div class="cust-chips" id="cust-color">
+      <div class="color-swatch" data-val="#0284c7" style="background:#0284c7;" onclick="updateCustom('outfitColor','#0284c7')" title="오션 블루"></div>
+      <div class="color-swatch" data-val="#06b6d4" style="background:#06b6d4;" onclick="updateCustom('outfitColor','#06b6d4')" title="트로피컬 사이안"></div>
+      <div class="color-swatch" data-val="#f43f5e" style="background:#f43f5e;" onclick="updateCustom('outfitColor','#f43f5e')" title="네온 핑크"></div>
       <div class="color-swatch" data-val="#143d2e" style="background:#143d2e;" onclick="updateCustom('outfitColor','#143d2e')" title="에메랄드 불"></div>
       <div class="color-swatch" data-val="#1e2f4d" style="background:#1e2f4d;" onclick="updateCustom('outfitColor','#1e2f4d')" title="월스트리트 네이비"></div>
-      <div class="color-swatch" data-val="#25282e" style="background:#25282e;" onclick="updateCustom('outfitColor','#25282e')" title="다크 차콜"></div>
-      <div class="color-swatch" data-val="#5e1f28" style="background:#5e1f28;" onclick="updateCustom('outfitColor','#5e1f28')" title="크림슨 버건디"></div>
-      <div class="color-swatch" data-val="#8c6d3b" style="background:#8c6d3b;" onclick="updateCustom('outfitColor','#8c6d3b')" title="골드 브론즈"></div>
-      <div class="color-swatch" data-val="#e8e0cf" style="background:#e8e0cf;" onclick="updateCustom('outfitColor','#e8e0cf')" title="화이트 아이보리"></div>
+      <div class="color-swatch" data-val="#111115" style="background:#111115;" onclick="updateCustom('outfitColor','#111115')" title="다크 락블랙"></div>
+      <div class="color-swatch" data-val="#eab85c" style="background:#eab85c;" onclick="updateCustom('outfitColor','#eab85c')" title="골드 글리터"></div>
+      <div class="color-swatch" data-val="#f8fafc" style="background:#f8fafc;" onclick="updateCustom('outfitColor','#f8fafc')" title="화이트 아이보리"></div>
     </div>
   </div>
   <div class="cust-row">
@@ -1185,43 +1206,56 @@
 </div>
 
 <div id="bottom-dock">
-  <!-- 주류 4총사 인터랙션 버튼 -->
-  <button type="button" class="dock-btn" id="dock-soju" onclick="drinkAlcohol('soju')" title="초록색 소주 한 잔 털어넣기!">
-    <span>🟢</span><span class="label-txt">소주 원샷</span><span class="key-badge">1</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-beer" onclick="drinkAlcohol('beer')" title="시원한 생맥주 짠~ 치얼스!">
-    <span>🍺</span><span class="label-txt">생맥주 짠</span><span class="key-badge">2</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-whiskey" onclick="drinkAlcohol('whiskey')" title="고급 양주 위스키 오픈!">
-    <span>🥃</span><span class="label-txt">양주 오픈</span><span class="key-badge">3</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-wine" onclick="drinkAlcohol('wine')" title="우아한 레드 와인 음미!">
-    <span>🍷</span><span class="label-txt">와인 한 잔</span><span class="key-badge">4</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-dance-techno" onclick="triggerDanceMode('techno')" title="칼각 테크노 댄스! (단축키 T)" style="border-color:#00ffff; color:#88ffff;">
-    <span>⚡</span><span class="label-txt">테크노</span><span class="key-badge">T</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-dance-retro" onclick="triggerDanceMode('retro')" title="존 트라볼타 하늘 찌르기 복고 디스코! (단축키 R)" style="border-color:#ff007f; color:#ff88bb;">
-    <span>🕺</span><span class="label-txt">복고댄스</span><span class="key-badge">R</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-dance-jump" onclick="triggerDanceMode('jump')" title="신나게 붕붕 하이 점프! (단축키 J)" style="border-color:#ffd269; color:#ffe89e;">
-    <span>🦘</span><span class="label-txt">점프</span><span class="key-badge">J</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-pool" onclick="walkToPoolParty()" title="야외 초대형 럭셔리 풀파티장으로 워프! (단축키 P)" style="border-color:#06b6d4; color:#67e8f9;">
-    <span>🏊</span><span class="label-txt">풀파티장</span><span class="key-badge">P</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-vip" onclick="walkToVIPRoom()" title="2층 복층 VIP 라운지 룸으로 순간이동!" style="border-color:#eab85c; color:#ffe39f;">
-    <span>🍾</span><span class="label-txt">2층 VIP룸</span><span class="key-badge">6</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-floor" onclick="walkToDanceFloor()" title="1층 메인 댄스플로어로 이동!">
-    <span>🪩</span><span class="label-txt">1층 플로어</span><span class="key-badge">7</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-sit" onclick="toggleMySit()" title="주변 소파나 바 의자에 앉기">
-    <span>🪑</span><span class="label-txt" id="dock-sit-label">소파 착석</span><span class="key-badge">8</span>
-  </button>
-  <button type="button" class="dock-btn" id="dock-sound" onclick="togglePanel('sound')">
-    <span>🎵</span><span class="label-txt">클럽 BGM</span><span class="key-badge">9</span>
-  </button>
+  <!-- 1열: 주류 바 & 클럽 댄스 액션 -->
+  <div class="dock-row" id="dock-row-actions">
+    <div class="dock-segment">
+      <button type="button" class="dock-btn" id="dock-soju" onclick="drinkAlcohol('soju')" title="초록 소주 원샷!">
+        <span>🟢</span><span class="label-txt">소주</span><span class="key-badge">1</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-beer" onclick="drinkAlcohol('beer')" title="생맥주 짠~ 치얼스!">
+        <span>🍺</span><span class="label-txt">생맥</span><span class="key-badge">2</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-whiskey" onclick="drinkAlcohol('whiskey')" title="양주 위스키 오픈!">
+        <span>🥃</span><span class="label-txt">양주</span><span class="key-badge">3</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-wine" onclick="drinkAlcohol('wine')" title="와인 한 잔!">
+        <span>🍷</span><span class="label-txt">와인</span><span class="key-badge">4</span>
+      </button>
+    </div>
+    <div class="dock-divider"></div>
+    <div class="dock-segment">
+      <button type="button" class="dock-btn" id="dock-dance-techno" onclick="triggerDanceMode('techno')" title="칼각 테크노 댄스! (단축키 T)" style="border-color:#00ffff; color:#88ffff;">
+        <span>⚡</span><span class="label-txt">테크노</span><span class="key-badge">T</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-dance-retro" onclick="triggerDanceMode('retro')" title="복고 디스코! (단축키 R)" style="border-color:#ff007f; color:#ff88bb;">
+        <span>🕺</span><span class="label-txt">복고</span><span class="key-badge">R</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-dance-jump" onclick="triggerDanceMode('jump')" title="하이 점프! (단축키 J)" style="border-color:#ffd269; color:#ffe89e;">
+        <span>🦘</span><span class="label-txt">점프</span><span class="key-badge">J</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2열: 핫스팟 워프 & 클럽 편의 유틸 -->
+  <div class="dock-row" id="dock-row-nav">
+    <div class="dock-segment" style="flex:1; justify-content:center;">
+      <button type="button" class="dock-btn highlight-pool" id="dock-pool" onclick="walkToPoolParty()" title="야외 풀파티장으로 이동! (단축키 P)" style="border-color:#06b6d4; color:#67e8f9; font-weight:800; background:rgba(6,182,212,0.18);">
+        <span>🏊</span><span class="label-txt">야외 풀파티장</span><span class="key-badge">P</span>
+      </button>
+      <button type="button" class="dock-btn highlight-vip" id="dock-vip" onclick="walkToVIPRoom()" title="2층 VIP 스카이라운지로 이동!" style="border-color:#eab85c; color:#ffe39f;">
+        <span>🍾</span><span class="label-txt">2층 VIP룸</span><span class="key-badge">6</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-floor" onclick="walkToDanceFloor()" title="1층 플로어로 이동!">
+        <span>🪩</span><span class="label-txt">1층 플로어</span><span class="key-badge">7</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-sit" onclick="toggleMySit()" title="주변 소파나 바 의자에 앉기">
+        <span>🪑</span><span class="label-txt" id="dock-sit-label">소파 착석</span><span class="key-badge">8</span>
+      </button>
+      <button type="button" class="dock-btn" id="dock-sound" onclick="togglePanel('sound')" title="클럽 BGM 사운드 패널">
+        <span>🎵</span><span class="label-txt">BGM</span><span class="key-badge">9</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Three.js & MQTT 라이브러리 -->
@@ -1379,7 +1413,7 @@ const MENTAL_MANTRAS = [
     text: '모두가 공포에 질려 투매할 때 분할로 씨앗을 심은 자만이 SOXL 100과 500의 찬란한 장대양봉을 거둔다.'
   },
   {
-    ref: 'SOXL 멘탈케어 클럽 제2장 · 3배 복리의 교리',
+    ref: 'SOXL 멘탈케어 클럽 제2장 · 3배 복리의 황금법칙',
     text: '조정장은 레버리지 민족의 인내심을 시험하는 관문일 뿐, AI 반도체 슈퍼사이클의 거대한 물결은 멈추지 않는다.'
   },
   {
@@ -1421,9 +1455,9 @@ function loadMyCustom() {
       return {
         name: (saved.name && String(saved.name).trim()) ? String(saved.name).trim().slice(0, 16) : (localStorage.getItem('soxl_mc_nick') || DEFAULT_CUSTOM.name),
         gender: saved.gender === 'F' ? 'F' : 'M',
-        hairStyle: [0, 1, 2].includes(Number(saved.hairStyle)) ? Number(saved.hairStyle) : 0,
+        hairStyle: [0, 1, 2, 3, 4, 5].includes(Number(saved.hairStyle)) ? Number(saved.hairStyle) : 0,
         hairColor: saved.hairColor || DEFAULT_CUSTOM.hairColor,
-        outfitType: ['suit', 'robe', 'casual'].includes(saved.outfitType) ? saved.outfitType : 'suit',
+        outfitType: ['suit', 'robe', 'casual', 'swimwear', 'resort', 'hawaiian', 'metal', 'glitter', 'neon'].includes(saved.outfitType) ? saved.outfitType : 'suit',
         outfitColor: saved.outfitColor || DEFAULT_CUSTOM.outfitColor,
         prop: 'beer',
         accessory: ['none', 'glasses', 'beret', 'crown'].includes(saved.accessory) ? saved.accessory : 'none'
@@ -1464,6 +1498,11 @@ let camYaw = 0;
 let camPitch = 0.32;
 let camDist = 6.8;
 let camPresetIdx = 0;
+window.setCamAngles = function(yaw, pitch, dist) {
+  if (yaw !== undefined) camYaw = yaw;
+  if (pitch !== undefined) camPitch = pitch;
+  if (dist !== undefined) camDist = dist;
+};
 const CAM_PRESETS = [
   { name: '시점: 클럽 3인칭', dist: 6.8, pitch: 0.32 },
   { name: '시점: 강단 정면', dist: 4.0, pitch: 0.16 },
@@ -2173,9 +2212,63 @@ function buildSanctuaryArchitecture() {
   rightWall.position.set(12.0, 5.25, 0);
   worldGroup.add(leftWall, rightWall);
 
-  const backWall = new THREE.Mesh(new THREE.BoxGeometry(24.4, 10.5, 0.6), wallMat);
-  backWall.position.set(0, 5.25, 16.0);
-  worldGroup.add(backWall);
+  // 3-1. [공식 요청] 클럽 메인홀과 야외 풀파티장을 시원하게 직통 연결하는 그랜드 오픈 테라스 게이트!
+  // 좌측 벽체 (x = -8.5, 폭 7.4m)
+  const backWallL = new THREE.Mesh(new THREE.BoxGeometry(7.4, 10.5, 0.6), wallMat);
+  backWallL.position.set(-8.5, 5.25, 16.0);
+  // 우측 벽체 (x = 8.5, 폭 7.4m)
+  const backWallR = new THREE.Mesh(new THREE.BoxGeometry(7.4, 10.5, 0.6), wallMat);
+  backWallR.position.set(8.5, 5.25, 16.0);
+  worldGroup.add(backWallL, backWallR);
+
+  // 1층 게이트 상단 인방 프레임 (폭 9.6m, 높이 y = 4.5m)
+  const gateHeader = new THREE.Mesh(
+    new THREE.BoxGeometry(9.6, 0.5, 0.65),
+    new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.8, roughness: 0.2 })
+  );
+  gateHeader.position.set(0, 4.55, 16.0);
+
+  // 게이트 상단 사이안 네온 사이니지 (🌴 POOL PARTY & TERRACE DECK 🏊)
+  const gateNeonSign = new THREE.Mesh(
+    new THREE.BoxGeometry(8.6, 0.26, 0.08),
+    new THREE.MeshBasicMaterial({ color: 0x06b6d4 })
+  );
+  gateNeonSign.position.set(0, 4.55, 15.65);
+  worldGroup.add(gateHeader, gateNeonSign);
+
+  // 2층 남쪽 전면 파노라마 글래스 윈도우 (VIP룸에서 야외 인피니티 풀장이 시원하게 조망됨!)
+  const vipSouthGlass = new THREE.Mesh(
+    new THREE.BoxGeometry(9.6, 5.2, 0.08),
+    new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.20, roughness: 0.05, metalness: 0.1 })
+  );
+  vipSouthGlass.position.set(0, 7.4, 16.0);
+  worldGroup.add(vipSouthGlass);
+
+  // 3-2. [핵심] 클럽 메인홀 ➡️ 야외 풀파티장 직통 연결 초대형 와이드 오픈 테라스 데크
+  // 폭 12.0m x 깊이 10.0m x 두께 0.18m 티크우드 데크 (z: 13.0 ~ 23.0)
+  const terraceDeckGeo = new THREE.BoxGeometry(12.0, 0.18, 10.0);
+  const terraceDeckMat = new THREE.MeshStandardMaterial({ color: 0x221711, roughness: 0.45, metalness: 0.1 });
+  const openTerraceDeck = new THREE.Mesh(terraceDeckGeo, terraceDeckMat);
+  openTerraceDeck.position.set(0, 0.02, 18.0);
+  openTerraceDeck.receiveShadow = true;
+  worldGroup.add(openTerraceDeck);
+
+  // 테라스 양옆 은은한 네온 볼라드 조명 (x = ±5.4, z = 15, 17.5, 20)
+  for (const bx of [-5.4, 5.4]) {
+    for (const bz of [15.0, 17.5, 20.0]) {
+      const bollard = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.06, 0.06, 0.85, 12),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 })
+      );
+      bollard.position.set(bx, 0.42, bz);
+      const capLight = new THREE.Mesh(
+        new THREE.SphereGeometry(0.08, 10, 10),
+        new THREE.MeshBasicMaterial({ color: 0x00ffff })
+      );
+      capLight.position.set(bx, 0.85, bz);
+      worldGroup.add(bollard, capLight);
+    }
+  }
 
   // 4. 천장 중앙 초대형 회전 미러볼 (Disco Mirror Ball)
   mirrorBallGroup = new THREE.Group();
@@ -2644,25 +2737,40 @@ function buildHumanRig(cfg, isMe) {
   const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5d8be, roughness: 0.62 });
   const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.78 });
   const mainClothMat = new THREE.MeshStandardMaterial({ color: outfitColor, roughness: 0.7 });
-  // 클럽 & 락스타 복장 매질
+  // 클럽 & 풀파티 신규 복장 매질 (8대 스타일)
+  const isSwim = (outfitType === 'swimwear' || outfitType === 'resort');
   if (outfitType === 'metal') {
     mainClothMat.color.setHex(0x111115);
     mainClothMat.roughness = 0.25;
-    mainClothMat.metalness = 0.55; // 가죽 라이더 자켓 광택
+    mainClothMat.metalness = 0.55; // 락스타 가죽 라이더 자켓 광택
   } else if (outfitType === 'glitter') {
     mainClothMat.color.setHex(0xeab85c);
     mainClothMat.metalness = 0.95;
-    mainClothMat.roughness = 0.1; // 번쩍이는 골드 글리터
+    mainClothMat.roughness = 0.1; // 번쩍이는 골드 글리터 파티웨어
   } else if (outfitType === 'neon') {
     mainClothMat.color.setHex(0x00ffff);
     mainClothMat.emissive = new THREE.Color(0x0088aa);
-    mainClothMat.emissiveIntensity = 0.6; // 사이버펑크 네온
+    mainClothMat.emissiveIntensity = 0.65; // 사이버펑크 네온 발광
+  } else if (outfitType === 'swimwear') {
+    mainClothMat.color.setHex(0x0284c7); // 시원한 사파이어 블루 비치웨어
+    mainClothMat.roughness = 0.35;
+  } else if (outfitType === 'resort') {
+    mainClothMat.color.setHex(0xf8fafc); // 럭셔리 실크 아이보리 로브
+    mainClothMat.roughness = 0.25;
+    mainClothMat.metalness = 0.2;
+  } else if (outfitType === 'hawaiian') {
+    mainClothMat.color.setHex(0x0d9488); // 트로피컬 에메랄드 야자수 셔츠
+    mainClothMat.roughness = 0.6;
   }
 
   const pantsMat = new THREE.MeshStandardMaterial({
-    color: outfitType === 'metal' ? 0x09090c : (outfitType === 'suit' ? (gender === 'M' ? 0x1c2220 : outfitColor) : 0x1a212d),
+    color: outfitType === 'metal' ? 0x09090c :
+           (outfitType === 'swimwear' ? 0x0284c7 :
+           (outfitType === 'resort' ? 0xf8fafc :
+           (outfitType === 'hawaiian' ? 0xd97706 :
+           (outfitType === 'suit' ? (gender === 'M' ? 0x1c2220 : outfitColor) : 0x1a212d)))),
     roughness: outfitType === 'metal' ? 0.35 : 0.78,
-    metalness: outfitType === 'metal' ? 0.45 : 0.1
+    metalness: outfitType === 'metal' ? 0.45 : (outfitType === 'glitter' ? 0.7 : 0.1)
   });
   const shoeMat = new THREE.MeshStandardMaterial({ color: gender === 'F' ? 0x362217 : 0x181412, roughness: 0.5 });
   const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xfbf8f1, roughness: 0.65 });
@@ -2695,7 +2803,7 @@ function buildHumanRig(cfg, isMe) {
     const hipGroup = new THREE.Group();
     hipGroup.position.set(side * 0.105, 0.56, 0);
 
-    const thighMat = (gender === 'F' && outfitType !== 'casual') ? skinMat : pantsMat;
+    const thighMat = isSwim ? skinMat : ((gender === 'F' && outfitType !== 'casual') ? skinMat : pantsMat);
     const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.058, 0.28, 12), thighMat);
     thigh.position.y = -0.14;
     thigh.castShadow = true;
@@ -2710,7 +2818,7 @@ function buildHumanRig(cfg, isMe) {
 
     const shin = new THREE.Mesh(
       new THREE.CylinderGeometry(0.055, 0.045, 0.25, 12),
-      (gender === 'F' && outfitType === 'suit') ? skinMat : pantsMat
+      isSwim ? skinMat : ((gender === 'F' && outfitType === 'suit') ? skinMat : pantsMat)
     );
     shin.position.y = -0.125;
     shin.castShadow = true;
@@ -2801,10 +2909,11 @@ function buildHumanRig(cfg, isMe) {
     const shoulderGroup = new THREE.Group();
     shoulderGroup.position.set(side * shoulderX, 0.41, 0);
 
-    const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.056, 12, 12), mainClothMat);
+    const armMat = isSwim ? skinMat : mainClothMat;
+    const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.056, 12, 12), armMat);
     shoulderGroup.add(shoulderCap);
 
-    const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.044, 0.20, 12), mainClothMat);
+    const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.044, 0.20, 12), armMat);
     upperArm.position.y = -0.10;
     upperArm.castShadow = true;
     shoulderGroup.add(upperArm);
@@ -2812,10 +2921,10 @@ function buildHumanRig(cfg, isMe) {
     const forearmGroup = new THREE.Group();
     forearmGroup.position.set(0, -0.20, 0);
 
-    const elbowBall = new THREE.Mesh(new THREE.SphereGeometry(0.044, 10, 10), mainClothMat);
+    const elbowBall = new THREE.Mesh(new THREE.SphereGeometry(0.044, 10, 10), armMat);
     forearmGroup.add(elbowBall);
 
-    const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.043, 0.038, 0.17, 12), mainClothMat);
+    const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.043, 0.038, 0.17, 12), armMat);
     forearm.position.y = -0.085;
     forearm.castShadow = true;
     forearmGroup.add(forearm);
@@ -3426,7 +3535,7 @@ const EMOTE_META = {
   amen:   { dur: 3.2, msg: '🙏 제발 장대양봉 주소서! SOXL 500 성취 치얼스 🥂!', banner: '🙏 두 손을 가슴에 모으고 간절히 장대양봉을 응원 토크합니다.' },
   praise: { dur: 3.6, msg: '🙌 레버리지 민족 만세! SOXL 500 가즈아!', banner: '🙌 두 팔을 높이 들고 레버리지 민족 만세를 외칩니다!' },
   wave:   { dur: 3.0, msg: '📈 흔들리지 마세요! 끝까지 함께 성투합시다!', banner: '📈 함께 파티를 즐기는 주주들에게 성투 손인사를 건넵니다.' },
-  read:   { dur: 4.2, msg: '📖 공포에 분할매수하고 환희에 복리를 거둔다!', banner: '📖 황금 투자 원장을 두 손으로 펴 들고 야수의 심장 교리를 외침합니다.' }
+  read:   { dur: 4.2, msg: '📖 공포에 분할매수하고 환희에 복리를 거둔다!', banner: '📖 황금 투자 원장을 두 손으로 펴 들고 야수의 심장 다짐을 외칩니다.' }
 };
 
 function triggerAvatarEmote(av, emoteKey, customMsg = null) {
@@ -4699,9 +4808,9 @@ function animate() {
   // 카메라 오빗 추적
   if (myAvatar) {
     const lookTarget = new THREE.Vector3(
-      myAvatar.group.position.x * 0.72,
-      1.35,
-      myAvatar.group.position.z - 1.4
+      myAvatar.group.position.x,
+      myAvatar.group.position.y + 1.25,
+      myAvatar.group.position.z
     );
     const desiredCamPos = new THREE.Vector3(
       lookTarget.x + Math.sin(camYaw) * Math.cos(camPitch) * camDist,
