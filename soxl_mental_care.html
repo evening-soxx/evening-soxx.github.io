@@ -782,6 +782,70 @@
     }
     .docent-preview-wrap { height: 155px; }
   }
+
+/* 모바일 & 데스크톱 범용 화면 터치 십자 방향키 (D-PAD) */
+#virtual-dpad {
+  position: fixed;
+  left: 18px;
+  bottom: 84px;
+  width: 120px;
+  height: 120px;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dpad-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.dpad-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(234, 184, 92, 0.45);
+  color: #fce7f3;
+  font-size: 16px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transition: transform 0.08s, background 0.08s;
+  touch-action: manipulation;
+}
+.dpad-btn:active {
+  transform: scale(0.92);
+  background: rgba(234, 184, 92, 0.5);
+  border-color: #ffd269;
+}
+.dpad-center {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(8, 14, 26, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #94a3b8;
+}
+@media (max-width: 768px) {
+  #virtual-dpad {
+    bottom: 96px;
+    left: 12px;
+    transform: scale(0.95);
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1104,6 +1168,22 @@
 </div>
 
 <!-- 하단 인터랙션 독 (Dock) -->
+
+<!-- 모바일 터치 십자 방향키 (D-PAD) -->
+<div id="virtual-dpad" aria-label="이동 조이스틱">
+  <div class="dpad-row">
+    <button type="button" class="dpad-btn" id="dpad-up" title="앞으로 걷기">▲</button>
+  </div>
+  <div class="dpad-row">
+    <button type="button" class="dpad-btn" id="dpad-left" title="왼쪽으로 걷기">◀</button>
+    <div class="dpad-center">🎮</div>
+    <button type="button" class="dpad-btn" id="dpad-right" title="오른쪽으로 걷기">▶</button>
+  </div>
+  <div class="dpad-row">
+    <button type="button" class="dpad-btn" id="dpad-down" title="뒤로 걷기">▼</button>
+  </div>
+</div>
+
 <div id="bottom-dock">
   <!-- 주류 4총사 인터랙션 버튼 -->
   <button type="button" class="dock-btn" id="dock-soju" onclick="drinkAlcohol('soju')" title="초록색 소주 한 잔 털어넣기!">
@@ -1719,6 +1799,37 @@ function init3DSpace() {
 
   window.addEventListener('resize', onWindowResize);
   setupPointerAndKeyboardControls();
+  setupVirtualDPad();
+
+// 🎮 가상 D-PAD 터치/마우스 이동 이벤트 바인딩
+function setupVirtualDPad() {
+  const binds = [
+    { id: 'dpad-up', key: 'KeyW' },
+    { id: 'dpad-down', key: 'KeyS' },
+    { id: 'dpad-left', key: 'KeyA' },
+    { id: 'dpad-right', key: 'KeyD' }
+  ];
+
+  binds.forEach(({ id, key }) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const startPress = (e) => {
+      e.preventDefault();
+      keysPressed[key] = true;
+      if (myAvatar) myAvatar.isDancing = false;
+    };
+    const endPress = (e) => {
+      e.preventDefault();
+      keysPressed[key] = false;
+    };
+    btn.addEventListener('pointerdown', startPress);
+    btn.addEventListener('pointerup', endPress);
+    btn.addEventListener('pointerleave', endPress);
+    btn.addEventListener('touchstart', startPress, { passive: false });
+    btn.addEventListener('touchend', endPress, { passive: false });
+  });
+}
+
 
   animate();
 }
@@ -3407,10 +3518,15 @@ function setupPointerAndKeyboardControls() {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
+  let pointerDownTime = 0;
+  let pointerDownPos = { x: 0, y: 0 };
+
   dom.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
     isDragging = true;
     dragMoved = false;
+    pointerDownTime = Date.now();
+    pointerDownPos = { x: e.clientX, y: e.clientY };
     prevMouse.x = e.clientX;
     prevMouse.y = e.clientY;
     try { dom.setPointerCapture(e.pointerId); } catch(err){}
@@ -3420,7 +3536,8 @@ function setupPointerAndKeyboardControls() {
     if (!isDragging) return;
     const dx = e.clientX - prevMouse.x;
     const dy = e.clientY - prevMouse.y;
-    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
+    const totalDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+    if (totalDist > 16) dragMoved = true;
     camYaw -= dx * 0.014; /* 클럽 360도 시원한 시선 회전 */
     camPitch = Math.max(0.08, Math.min(1.15, camPitch + dy * 0.005));
     prevMouse.x = e.clientX;
@@ -3430,7 +3547,11 @@ function setupPointerAndKeyboardControls() {
   window.addEventListener('pointerup', (e) => {
     if (!isDragging) return;
     isDragging = false;
-    if (dragMoved || e.target !== dom) return;
+    const totalDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+    const pressDuration = Date.now() - pointerDownTime;
+    // 350ms 이하이거나 총 이동 거리가 18px 이하이면 무조건 탭(클릭)으로 인정!
+    const isTap = (!dragMoved) || (totalDist < 18) || (pressDuration < 350 && totalDist < 25);
+    if (!isTap) return;
 
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -3446,35 +3567,51 @@ function setupPointerAndKeyboardControls() {
       return;
     }
 
-    // 2순위: 본당 마룻바닥, 클럽 카펫 러너, 야외 정원 및 산책로 클릭 이동
-    const hits = raycaster.intersectObjects([floorMesh, gardenMesh, runnerMesh, pathMesh]);
+    // 2순위: 클럽 메인 마룻바닥, 댄스플로어, 풀장 데크, 수면, 야외 정원, 2층 VIP룸 바닥 클릭 이동
+    const floorTargets = [];
+    if (floorMesh) floorTargets.push(floorMesh);
+    if (gardenMesh) floorTargets.push(gardenMesh);
+    if (pathMesh) floorTargets.push(pathMesh);
+    if (typeof danceTiles !== 'undefined' && danceTiles && danceTiles.length > 0) {
+      floorTargets.push(...danceTiles);
+    }
+    if (typeof poolWaterMesh !== 'undefined' && poolWaterMesh) floorTargets.push(poolWaterMesh);
+    if (typeof poolDeck !== 'undefined' && poolDeck) floorTargets.push(poolDeck);
+    if (typeof vipFloorMesh !== 'undefined' && vipFloorMesh) floorTargets.push(vipFloorMesh);
+    if (typeof worldGroup !== 'undefined' && worldGroup) {
+      worldGroup.traverse(child => {
+        if (child.isMesh && (child.geometry instanceof THREE.PlaneGeometry || child.geometry instanceof THREE.BoxGeometry)) {
+          if (!floorTargets.includes(child)) floorTargets.push(child);
+        }
+      });
+    }
+
+    const hits = raycaster.intersectObjects(floorTargets, true);
     if (hits.length > 0) {
       const pt = hits[0].point;
-      let cx = Math.max(-16.0, Math.min(16.0, pt.x));
-      let cz = Math.max(-7.5, Math.min(26.0, pt.z));
+      let cx = Math.max(-22.0, Math.min(22.0, pt.x));
+      let cz = Math.max(-15.0, Math.min(48.0, pt.z)); // 36m 풀장 끝까지 전면 개방!
+      let cy = pt.y > 2.5 ? 4.8 : (cz > 22.0 ? 0.12 : 0); // 높이 자동 적응
 
-      // 야외 웨이퍼 치유 연못(x:-9.2, z:19.2, 반경 4.3) 내부 충돌 방지
-      const pondCenter = new THREE.Vector2(-9.2, 19.2);
-      const click2D = new THREE.Vector2(cx, cz);
-      if (click2D.distanceTo(pondCenter) < 4.5) {
-        const dir = click2D.sub(pondCenter).normalize().multiplyScalar(4.7);
-        click2D.copy(pondCenter).add(dir);
-      }
-
-      // 클릭 지점 근처(0.95m 이내)에 빈 라운지 소파나 VIP룸이 있으면 즉시 착석/클럽댄스!
+      // 클릭 지점 근처(0.95m 이내)에 빈 라운지 소파가 있으면 즉시 착석!
       for (const s of seats) {
-        if ((!s.occupiedBy || s.occupiedBy === myAvatar) && s.pos.distanceTo(new THREE.Vector3(click2D.x, 0, click2D.y)) < 0.95) {
+        if ((!s.occupiedBy || s.occupiedBy === myAvatar) && s.pos.distanceTo(new THREE.Vector3(cx, cy, cz)) < 0.95) {
           sitAvatarAtSeat(myAvatar, s);
           return;
         }
       }
 
       unseatAvatar(myAvatar);
-      myAvatar.targetPos.set(click2D.x, 0, click2D.y);
-      myAvatar.state = 'walking';
+      if (myAvatar) {
+        myAvatar.isDancing = false;
+        myAvatar.targetPos.set(cx, cy, cz);
+        myAvatar.state = 'walking';
+      }
 
-      targetRing.position.set(click2D.x, 0.03, click2D.y);
-      rippleAge = 0;
+      if (targetRing) {
+        targetRing.position.set(cx, cy + 0.03, cz);
+        rippleAge = 0;
+      }
     }
   });
 
@@ -4282,8 +4419,9 @@ function animate() {
     const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
     myAvatar.group.position.addScaledVector(forward, kz * speed);
     myAvatar.group.position.addScaledVector(right, kx * speed);
-    myAvatar.group.position.x = Math.max(-16.0, Math.min(16.0, myAvatar.group.position.x));
-    myAvatar.group.position.z = Math.max(-7.5, Math.min(26.0, myAvatar.group.position.z));
+    myAvatar.isDancing = false; // 이동 시 댄스 즉시 해제
+    myAvatar.group.position.x = Math.max(-22.0, Math.min(22.0, myAvatar.group.position.x));
+    myAvatar.group.position.z = Math.max(-15.0, Math.min(48.0, myAvatar.group.position.z));
     myAvatar.targetPos.copy(myAvatar.group.position);
     myAvatar.group.rotation.y = Math.atan2(-kx, -kz) + camYaw;
   }
@@ -4692,11 +4830,13 @@ function walkToBarCounter() {
 function walkToPoolParty() {
   if (!myAvatar) return;
   unseatAvatar(myAvatar);
-  // 풀장 데크 썬베드 쪽으로 이동
-  myAvatar.group.position.set(0, 0.24, 23.5);
+  myAvatar.isDancing = false;
+  // 풀장 한가운데 에메랄드 물속으로 직접 입수! (z = 29.5, y = 0.12)
+  myAvatar.group.position.set(0, 0.12, 29.5);
   myAvatar.targetPos.copy(myAvatar.group.position);
-  camPitch = 0.25;
-  camYaw = 0;
+  myAvatar.state = 'standing';
+  camPitch = 0.28;
+  camYaw = Math.PI; // 뒤돌아서 썬베드와 카바나를 바라보는 아름다운 뷰
   showAvatarBubble(myAvatar, '🏊‍♂️ 와~ 야외 럭셔리 풀파티장 도착! 물속으로 풍덩!');
   showToastNotification('🏊‍♂️ [야외 풀파티장] 초대형 인피니티 풀장에 도착했습니다! 시원하게 즐기세요!');
   playWaterSplashSound();
