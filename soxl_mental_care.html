@@ -1734,6 +1734,125 @@ let flamingoFloat = null;
 let donutFloat = null;
 let underwaterLights = [];
 
+
+// ============================================================================
+// 3D 주류 4총사 모델링 함수 (소주 · 생맥주 · 위스키 · 와인 세트)
+// ============================================================================
+
+function createSojuSet() {
+  const group = new THREE.Group();
+  const bottleMat = new THREE.MeshStandardMaterial({
+    color: 0x059669,
+    roughness: 0.15,
+    metalness: 0.1,
+    transparent: true,
+    opacity: 0.88
+  });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.32, 16), bottleMat);
+  body.position.y = 0.16;
+  const shoulder = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.08, 16), bottleMat);
+  shoulder.position.y = 0.36;
+  shoulder.rotation.x = Math.PI;
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.12, 12), bottleMat);
+  neck.position.y = 0.44;
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.035, 12), new THREE.MeshStandardMaterial({ color: 0x10b981 }));
+  cap.position.y = 0.51;
+  const label = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.082, 0.14, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 }));
+  label.position.y = 0.16;
+  group.add(body, shoulder, neck, cap, label);
+
+  const cupMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.1 });
+  const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.028, 0.065, 12), cupMat);
+  cup.position.set(0.14, 0.032, 0.05);
+  group.add(cup);
+
+  group.scale.set(1.1, 1.1, 1.1);
+  return group;
+}
+
+function createBeerSet() {
+  const group = new THREE.Group();
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.6, roughness: 0.1 });
+  const beerMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.25, roughness: 0.2 });
+  const foamMat = new THREE.MeshStandardMaterial({ color: 0xfffbeb, roughness: 0.9 });
+
+  const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.09, 0.30, 16), glassMat);
+  mug.position.y = 0.15;
+  const beerLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.092, 0.082, 0.24, 16), beerMat);
+  beerLiquid.position.y = 0.13;
+  const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.102, 0.096, 0.06, 16), foamMat);
+  foam.position.y = 0.28;
+
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.018, 8, 16, Math.PI), glassMat);
+  handle.position.set(0.11, 0.15, 0);
+  handle.rotation.z = -Math.PI / 2;
+
+  group.add(mug, beerLiquid, foam, handle);
+  group.scale.set(1.1, 1.1, 1.1);
+  return group;
+}
+
+function createWhiskeySet() {
+  const group = new THREE.Group();
+  const bottleMat = new THREE.MeshStandardMaterial({ color: 0x92400e, emissive: 0x78350f, emissiveIntensity: 0.2, roughness: 0.15, transparent: true, opacity: 0.85 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.2 });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.28, 0.16), bottleMat);
+  body.position.y = 0.14;
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.12, 12), bottleMat);
+  neck.position.y = 0.34;
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.04, 12), goldMat);
+  cap.position.y = 0.41;
+  const label = new THREE.Mesh(new THREE.PlaneGeometry(0.13, 0.14), goldMat);
+  label.position.set(0, 0.14, 0.082);
+
+  group.add(body, neck, cap, label);
+
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.1 });
+  const rockGlass = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.10, 12), glassMat);
+  rockGlass.position.set(0.18, 0.05, 0.06);
+  const ice = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.045, 0.045), glassMat);
+  ice.position.set(0.18, 0.05, 0.06);
+  ice.rotation.set(0.3, 0.4, 0.2);
+
+  group.add(rockGlass, ice);
+  group.scale.set(1.1, 1.1, 1.1);
+  return group;
+}
+
+function createWineSet() {
+  const group = new THREE.Group();
+  const bottleMat = new THREE.MeshStandardMaterial({ color: 0x4c0519, roughness: 0.15, transparent: true, opacity: 0.92 });
+  const foilMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, metalness: 0.6, roughness: 0.3 });
+
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.36, 16), bottleMat);
+  body.position.y = 0.18;
+  const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.075, 0.10, 16), bottleMat);
+  shoulder.position.y = 0.41;
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.14, 12), bottleMat);
+  neck.position.y = 0.53;
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.07, 12), foilMat);
+  cap.position.y = 0.57;
+
+  group.add(body, shoulder, neck, cap);
+
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.08 });
+  const wineGlass = new THREE.Group();
+  wineGlass.position.set(0.16, 0, 0.06);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.008, 12), glassMat);
+  base.position.y = 0.004;
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.11, 8), glassMat);
+  stem.position.y = 0.06;
+  const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.048, 12, 12), glassMat);
+  bowl.position.y = 0.13;
+  bowl.scale.set(0.9, 1.25, 0.9);
+  wineGlass.add(base, stem, bowl);
+
+  group.add(wineGlass);
+  group.scale.set(1.1, 1.1, 1.1);
+  return group;
+}
+
 function buildOutdoorGardenAndWaferPond() {
   // 1. 야외 잔디 & 티크우드 풀사이드 데크 (가로 45m x 세로 45m 대확장)
   gardenMesh = new THREE.Mesh(
