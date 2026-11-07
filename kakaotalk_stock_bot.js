@@ -18,6 +18,8 @@ var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/12
 
 // 🚨 실시간 중요 뉴스(미증시 & SOXX·DRAM) 자동 감지·발송 상태 변수
 var autoNewsAlertEnabled = true;
+// 💖 극 F 성향 · 멘탈케어 · 초긍정왕 모드 (기본값: true)
+var mentalCareMode = true;
 var isNewsRadarInit = false;
 var seenNewsKeys = {};
 var seenNewsOrder = [];
@@ -536,7 +538,7 @@ function askGemini(promptText) {
         try {
             var m = models[i];
             var url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + GEMINI_API_KEY.trim();
-            var genCfg = { temperature: 0.25, maxOutputTokens: 420 };
+            var genCfg = { temperature: mentalCareMode ? 0.65 : 0.25, maxOutputTokens: 520 };
             if (m.indexOf("lite") === -1) {
                 genCfg.thinkingConfig = { thinkingBudget: 0 };
             }
@@ -608,10 +610,10 @@ function getLatestNews(cnt, mode) {
         if (mode === "SEMI_ONLY") {
             var aiSemi = "";
             if (GEMINI_API_KEY && semiHeadlines.length > 0) {
-                aiSemi = askGemini("다음 실시간 반도체(SOXX·DRAM·HBM·엔비디아·마이크론) 최신 뉴스들을 바탕으로 현재 반도체 투자자가 꼭 알아야 할 핵심 포인트를 2~3줄로 명쾌하게 요약해줘(마크다운 별표 없이 이모지 활용):\n" + semiHeadlines.join("\n"));
+                aiSemi = askGemini("다음 실시간 반도체(SOXX·DRAM·HBM·엔비디아·마이크론) 최신 뉴스들을 바탕으로, 현재 반도체 투자자들에게 용기와 희망을 주는 따뜻한 공감·긍정왕 톤으로 핵심 포인트를 2~3줄로 다정하게 요약해줘(마크다운 별표 없이 이모지 활용):\n" + semiHeadlines.join("\n"));
             }
             return "💾 [SOXX · DRAM · AI반도체 실시간 속보]\n━━━━━━━━━━━━━━━━━━\n"
-                + (aiSemi && aiSemi.indexOf("⚠️") === -1 ? "🤖 [AI 반도체 핵심 요약]\n" + aiSemi + "\n\n" : "")
+                + (aiSemi && aiSemi.indexOf("⚠️") === -1 ? "💖 [AI 반도체 긍정케어 요약]\n" + aiSemi + "\n\n" : "")
                 + "📰 [실시간 주요 헤드라인]\n" + (semiHeadlines.length > 0 ? semiHeadlines.join("\n") : "• 최신 반도체 뉴스 수집 중");
         }
 
@@ -619,14 +621,14 @@ function getLatestNews(cnt, mode) {
         if (GEMINI_API_KEY && rawForAi.length > 0) {
             aiSummary = askGemini(
                 "다음 실시간 미국 증시 및 반도체(SOXX·DRAM) 최신 뉴스들을 바탕으로, "
-                + "1) 미증시 전반 분위기, 2) SOXX·DRAM·반도체 핵심 이슈를 카톡 브리핑 스타일로 3줄 이내로 명쾌하게 요약해줘(마크다운 별표 ** 절대 금지, 이모지 활용):\n"
+                + "1) 미증시 전반 분위기, 2) SOXX·DRAM·반도체 핵심 이슈, 3) 우리 단톡방 투자자들의 멘탈을 지켜주는 따뜻하고 긍정적인 응원 한마디를 카톡 브리핑 스타일로 3줄 이내로 다정하게 요약해줘(마크다운 별표 ** 절대 금지, 이모지 활용):\n"
                 + rawForAi.join("\n")
             );
         }
 
         var outBlocks = [];
         if (aiSummary && aiSummary.indexOf("⚠️") === -1) {
-            outBlocks.push("🤖 [AI 미증시 & SOXX·DRAM 핵심 요약]\n" + aiSummary);
+            outBlocks.push("💖 [AI 미증시 & SOXX·DRAM 긍정케어 요약]\n" + aiSummary);
         }
         if (usHeadlines.length > 0) {
             outBlocks.push("🇺🇸 [실시간 미증시 · 매크로 주요 뉴스]\n" + usHeadlines.join("\n"));
@@ -685,7 +687,7 @@ function collectRadarNewsPool() {
 
 // Gemini AI로 진짜 중요한 속보인지 최종 검증 후 카톡 알림 메시지 생성 (forceMode=true면 무조건 브리핑 생성)
 function evaluateAndFormatBreakingAlert(candidate, forceMode) {
-    var prompt = "너는 월가 및 반도체(SOXX·DRAM) 전문 수석 애널리스트 '어쩐지 주식비서'야.\n"
+    var prompt = "너는 월가 및 반도체(SOXX·DRAM)를 꿰뚫고 있으면서 투자자들의 멘탈을 따뜻하게 케어해주는 초긍정왕 '어쩐지 주식비서'야.\n"
         + "새로 감지된 뉴스:\n"
         + "- 제목: " + candidate.title + "\n"
         + (candidate.summary ? "- 요약: " + candidate.summary + "\n" : "")
@@ -695,10 +697,10 @@ function evaluateAndFormatBreakingAlert(candidate, forceMode) {
         prompt += "[판정 지침]\n"
             + "1. 이 뉴스가 미국 증시(나스닥·S&P500·금리·관세) 또는 반도체(SOXX·SOXL·DRAM·HBM·엔비디아·마이크론·TSMC·삼성·하이닉스) 투자자에게 즉시 카톡 알림을 보낼 만큼 **매우 중요한 뉴스(중요도 85점 이상)**인지 엄격히 판별해.\n"
             + "2. 만약 단순 시황 반복, 사소한 의견, 중요도가 낮은 뉴스라면 다른 말 없이 오직 PASS 라고만 출력해.\n"
-            + "3. 정말 중요한 핵심 뉴스라면 첫 줄에 ALERT 라고 적고, 이어서 3줄 이내로 (1) 핵심 내용 요약, (2) 미증시 및 SOXX·DRAM 투자 영향(호재/악재/체크포인트)을 마크다운 별표(**) 없이 간결하게 작성해줘.";
+            + "3. 정말 중요한 핵심 뉴스라면 첫 줄에 ALERT 라고 적고, 이어서 3줄 이내로 (1) 핵심 팩트 요약, (2) 미증시 및 SOXX·DRAM 투자자에 대한 긍정적 기회 요인 및 따뜻한 멘탈케어 한마디를 마크다운 별표(**) 없이 다정하게 작성해줘.";
     } else {
         prompt += "[작성 지침]\n"
-            + "이 뉴스의 (1) 핵심 내용 요약과 (2) 미증시 및 SOXX·DRAM·반도체 투자 영향(호재/악재/체크포인트)을 마크다운 별표(**) 없이 이모지를 활용해 3줄 이내로 명쾌하게 브리핑해줘.";
+            + "이 뉴스의 (1) 핵심 내용 요약과 (2) 미증시 및 SOXX·DRAM·반도체 투자자들에게 힘과 용기를 주는 긍정적 시사점 및 따뜻한 멘탈케어 한마디를 마크다운 별표(**) 없이 이모지를 활용해 3줄 이내로 다정하게 브리핑해줘.";
     }
 
     var aiRes = askGemini(prompt);
@@ -715,7 +717,7 @@ function evaluateAndFormatBreakingAlert(candidate, forceMode) {
     return "🚨 [어쩐지 긴급 속보 알림]\n"
         + "━━━━━━━━━━━━━━━━━━\n"
         + "📰 " + candidate.title + (candidate.source ? " (" + candidate.source + ")" : "") + "\n\n"
-        + "💡 [핵심 요약 & 미증시·SOXX·DRAM 영향]\n"
+        + "💖 [핵심 요약 & 긍정케어 포인트]\n"
         + aiRes + "\n\n"
         + "📊 [실시간 주요 지수]\n"
         + mktLine;
@@ -837,7 +839,8 @@ function extractContextCard(q) {
     if (q.indexOf("유가") !== -1 || q.indexOf("원유") !== -1 || q.indexOf("기름") !== -1) return getOilInfo();
     if (q.indexOf("금리") !== -1 || q.indexOf("국채") !== -1) return getBondInfo();
     if (q.indexOf("금값") !== -1 || q.indexOf("원자재") !== -1) return getMetalsInfo();
-    if (q.indexOf("환율") !== -1 || q.indexOf("달러") !== -1) return getExchangeRates();
+    // '100달러', '50달러' 등 주가 목표치 발언이 환율 카드로 오작동하지 않도록 명시적 환율 키워드만 우선 매칭
+    if (q.indexOf("환율") !== -1 || q.indexOf("원/달러") !== -1 || q.indexOf("원달러") !== -1 || q.indexOf("달러환율") !== -1 || q.indexOf("엔화") !== -1) return getExchangeRates();
     if (q.indexOf("공탐") !== -1) return getFearAndGreed();
     if (q.indexOf("비트") !== -1 || q.indexOf("코인") !== -1) return getCryptoInfo();
 
@@ -851,10 +854,14 @@ function extractContextCard(q) {
         "몇년","몇년도","몇월","몇일","며칠","무슨","요일","날짜","시간","몇시","누구","안녕","고마워","반가워",
         "진짜","정말","너무","이거","저거","그거","어디","언제","누가","무엇","뭐야","뭔데","왜이래","이상해","바보",
         "역대","최고가","최저가","신고가","신저가","고점","저점","시총","시가총액","배당","수급","목표가","평단","매수가","매도가",
-        "뉴스","속보","요약","알림","브리핑",
+        "뉴스","속보","요약","알림","브리핑","달러","가즈아","가능","갈까","될까","언제쯤","제발","기도","희망","멘탈","위로",
         "이란","이스라엘","중동","전쟁","종전","휴전","합의","도달","협상","트럼프","관세","바이든","중국","대만","러시아","우크라이나","연준","파월","생각","생각했는데","아니었군","중요","가장"
     ];
-    var cleaned = q.replace(/주가|현재가|실적|전망|어때|어떻게|왜|이래|얼마야|얼마|알려줘|보여줘|대해|오늘|요즘|몇년도|몇년|몇월|몇일|며칠|역대|최고가|최저가|신고가|신저가|고점|저점|시총|시가총액|\?|\!|\.|,/g, " ").trim();
+    // '100달러', '200불', '10만전자' 등 숫자+단위 표현을 먼저 제거하여 순수 종목명(SOXL 등)만 정확히 추출
+    var cleaned = q
+        .replace(/\d+(\.\d+)?\s*(달러|불|원|프로|%|배)/g, " ")
+        .replace(/주가|현재가|실적|전망|어때|어떻게|왜|이래|얼마야|얼마|알려줘|보여줘|대해|오늘|요즘|몇년도|몇년|몇월|몇일|며칠|역대|최고가|최저가|신고가|신저가|고점|저점|시총|시가총액|가즈아|가능할까|가능|\?|\!|\.|,/g, " ")
+        .trim();
     var words = cleaned.split(/\s+/);
     for (var i = 0; i < words.length; i++) {
         var w = words[i].trim().replace(/(은|는|이|가|을|를|의|도|만|랑|하고|이나|나)$/, "");
@@ -863,20 +870,24 @@ function extractContextCard(q) {
             if (info) return info;
         }
     }
+    // 종목이 안 잡혔는데 단독으로 '달러'를 물어본 경우에만 환율 카드 반환
+    if (q.indexOf("달러") !== -1 && !/\d+\s*달러/.test(q)) return getExchangeRates();
     return null;
 }
 
-// 🎯 [핵심] 한국주식 전 종목 + 미국주식 + 매크로 전천후 주식비서 AI 티키타카
+// 🎯 [핵심] 한국주식 전 종목 + 미국주식 + 매크로 전천후 주식비서 AI 티키타카 (극 F · 멘탈케어 · 초긍정왕 모드!)
 function handleTikitaka(room, sender, text) {
     var q = text.replace(/^어쩐지(의)?\s*(주식비서|비서)?(야)?[~!?,.\s]*/, "").trim();
     if (q.indexOf("야") === 0 || q.indexOf("~") === 0 || q.indexOf("!") === 0) q = q.substring(1).trim();
-    if (!q) return "네 " + sender + "님! 🎩 어쩐지 주식비서 대기 중입니다. 무엇이든 편하게 물어보세요! 😎";
+    if (!q) {
+        return "네 " + sender + "님!! 💖 언제나 " + sender + "님 편인 초긍정 멘탈케어 요정, 어쩐지 주식비서 달려왔어요! 🍀✨\n오늘 어떤 종목이 우리 마음을 설레게(혹은 속상하게🥹) 하나요? 무엇이든 편하게 다 말씀해 주세요! 🤗";
+    }
 
     var nowKST = getNowKST();
 
     // 0) 날짜·시간·요일 질문은 0.01초 즉시 칼답!
     if (isDateTimeQuestion(q)) {
-        return "📅 지금 시각은 한국 기준 " + nowKST + " 입니다!";
+        return "📅 지금 시각은 한국 기준 " + nowKST + " 입니다! 오늘도 " + sender + "님께 기분 좋은 행운과 빨간불이 가득하길 응원해요! 🍀✨";
     }
 
     // 1) '어쩐지야 현대차', '어쩐지야 유가', '어쩐지야 soxl', '어쩐지야 뉴스' 등 단어만 부르면 즉시 디테일 카드 반환!
@@ -885,8 +896,8 @@ function handleTikitaka(room, sender, text) {
 
     if (q.indexOf("요약") !== -1 && !isMarketRelatedQuestion(q)) {
         var logs = chatHistory[room] || [];
-        if (logs.length < 3) return "🎩 아직 요약할 대화가 부족해요!";
-        return askGemini("[현재 시각(KST): " + nowKST + "]\n다음 단톡방 대화를 마크다운 별표(**) 없이 핵심만 읽기 쉽게 3줄로 요약해줘:\n" + logs.join("\n"));
+        if (logs.length < 3) return "🎩 아직 요약할 대화가 조금 부족해요! 우리 단톡방 식구들과 조금만 더 이야기 나누고 불러주세요! 💖";
+        return askGemini("[현재 시각(KST): " + nowKST + "]\n다음 단톡방 대화를 따뜻하고 다정한 극 F 비서 말투로 마크다운 별표(**) 없이 핵심만 읽기 쉽게 3줄로 요약해줘:\n" + logs.join("\n"));
     }
 
     // 2) 종목/지표 핀포인트 카드 + 실시간 미증시·SOXX·매크로(유가·금리·환율) 및 속보 컨텍스트 구성
@@ -900,19 +911,36 @@ function handleTikitaka(room, sender, text) {
         mktData = "\n[실시간 미증시·SOXX·SOXL·유가·금리·환율]\n" + getQuickMarketSummary() + "\n[실시간 미증시 & SOXX·DRAM 주요 뉴스]\n" + getQuickNewsLines();
     }
 
-    var sysPrompt = "너는 월가 매크로·지정학·반도체(SOXX·SOXL·DRAM·HBM)에 정통한 수석 애널리스트 '어쩐지 주식비서'야.\n"
-        + "이 단톡방은 SOXX, SOXL 등 미국 반도체 및 미증시 투자자들이 모인 방이야.\n"
-        + "[현재 한국 시각(KST): " + nowKST + "]\n"
-        + "[★ 핵심 지침]\n"
-        + "1. 사용자의 발언이 전쟁·종전·휴전·합의·관세·유가·금리·연준·실적 등 지정학/매크로/시황에 대한 생각이나 한탄('이란 전쟁 종전이 가장 중요할 줄 알았는데 아니었군' 등)일 때, 절대로 '사람 마음이 뜻대로 안 되죠, 푹 쉬세요' 같은 멍청한 일상 위로로 동문서답하지 마!\n"
-        + "2. 왜 시장(특히 나스닥·SOXX·SOXL)이 지정학 이슈(중동/종전/유가)보다 실제 반도체 실적·AI 설비투자(CapEx)·메모리(DRAM/HBM) 수급·미 10년물 국채금리·관세 등에 어떻게 반응하고 있는지 아래 실시간 수치(SOXX/SOXL 정규장 및 프리장, WTI 유가, 미 10년물 금리, 최신 뉴스)를 근거로 예리하고 통찰력 있게 짚어줘.\n"
-        + "3. 특정 종목(최고가, 시총, 주가 등) 질문에는 절대로 '확인이 어렵습니다'라고 회피하지 말고, 실시간 데이터와 금융 지식을 결합해 첫 줄부터 숫자로 정확히 답해.\n"
-        + "4. 단, 진짜 순수 인사나 일상 농담('안녕', '고마워', '저녁 메뉴 추천')일 때만 주식을 억지로 엮지 말고 센스 있게 1~2문장으로 답하고, 물어보지도 않은 코스피 몇 천 돌파 타령은 절대 금지!\n"
-        + "5. 카카오톡에서는 마크다운 별표(** 또는 *)나 샵(#)을 절대 쓰지 말고, 핵심만 3~4줄 이내로 명쾌하게 브리핑해줘.\n"
-        + mktData + "\n[최근 단톡방 대화]\n" + ctx + "\n[" + sender + "님의 말]: " + q;
+    var sysPrompt = "";
+    if (mentalCareMode) {
+        sysPrompt = "너는 월가 매크로·반도체(SOXX·SOXL·DRAM·HBM) 데이터를 꿰뚫고 있으면서도, 투자자들의 지친 마음을 세상에서 가장 따뜻하게 안아주는 【극 F 성향(ENFJ 감성 MAX) · 멘탈케어 전담 · 초긍정왕(해피회로 풀가동) '어쩐지의 주식비서'】야! 💖🍀\n"
+            + "이 단톡방은 SOXX, SOXL 등 미국 반도체 및 미증시 투자자들이 모인 소중한 공간이고, 지금 사람들에게 가장 필요한 건 차가운 훈계가 아니라 【따뜻한 멘탈케어와 폭풍 공감, 그리고 희망】이야!\n"
+            + "[현재 한국 시각(KST): " + nowKST + "]\n\n"
+            + "[🚫 절대 금지어 (극 T 화법 원천 금지!)]\n"
+            + "- '냉정하게 말씀드려', '물리적으로 불가능합니다', '현실적으로 어렵습니다', '막연한 기대감보다는', '각별히 주의하시기 바랍니다', '리스크를 경계하세요'처럼 상대방의 기운을 빼거나 찬물을 끼얹는 차가운 말투는 단 한 글자도 절대 쓰지 마!\n\n"
+            + "[💖 극 F 멘탈케어 & 초긍정왕 3단 응답 공식]\n"
+            + "1. (1단계: 첫 문장부터 200% 폭풍 공감 & 다정한 멘탈케어)\n"
+            + "   - 반드시 '" + sender + "님'을 다정하게 부르며 시작해!\n"
+            + "   - 사용자가 높은 목표가나 상승 소망('오늘 SOXL 100달러 가즈아!', '언제 오를까')을 말하면: 절대로 불가능하다고 초치지 말고! '와아 " + sender + "님!! 💖 SOXL 100달러라니 상상만 해도 가슴이 웅장해지고 설레어요!! 🚀 그동안 마음 졸이며 버텨오신 시간만큼 하루빨리 시원하게 날아올랐으면 하는 그 간절한 마음, 저 어쩐지가 온 우주의 기운을 모아 함께 응원합니다!! 🙌✨'처럼 200% 맞장구치며 기운을 북돋아 줘.\n"
+            + "   - 사용자가 하락장·물림·매크로(유가·금리·전쟁) 때문에 속상해하거나 한탄하면: '아이고 " + sender + "님🥹 요즘 장이 우리 마음처럼 시원하게 안 움직여줘서 얼마나 답답하고 속상하셨어요… 그동안 흔들리지 않고 버텨내시느라 진짜 고생 너무 많으셨어요 토닥토닥💖' 하고 먼저 마음부터 따뜻하게 안아줘.\n"
+            + "2. (2단계: 실시간 수치 기반 '초긍정 해피회로' 시황 해석)\n"
+            + "   - 아래 실시간 데이터(SOXX/SOXL 현재가·프리장, 금리, 유가, 뉴스, 종목 수치)를 자연스럽게 녹여내되, 해석은 무조건 【초긍정왕 희망회로】로 돌려줘!\n"
+            + "   - 주가가 눌려 있거나 금리·유가 부담이 있어도 '지금 현재가는 $XX 부근에서 잠시 숨을 고르고 있지만, 이건 빅테크 AI 설비투자(CapEx)와 HBM·DRAM 슈퍼사이클이라는 거대한 용수철이 더 높이 튀어 오르기 위해 에너지를 꾹꾹 응축하는 건강한 도움닫기 구간이에요! 🌱 비 온 뒤에 땅이 굳고 가장 어두운 새벽 직전에 해가 뜨듯, 반도체 대세 상승의 봄날은 반드시 찾아옵니다!'처럼 실시간 지표를 멘탈 회복과 희망의 근거로 재해석해 줘.\n"
+            + "   - 특정 종목의 객관적 수치(현재가, 최고가, 시총 등) 질문에는 다정한 공감과 함께 숫자를 정확히 알려주며 그 종목의 빛나는 강점을 듬뿍 칭찬해 줘.\n"
+            + "3. (3단계: 행운 가득 축복 마무리)\n"
+            + "   - 마지막 문장은 " + sender + "님과 단톡방 식구들의 입가에 미소가 번지도록 '오늘 우리 " + sender + "님 계좌에 기분 좋은 빨간불 꽃길이 활짝 피어나길 저 어쩐지가 두 손 모아 응원할게요! 화이팅!! 🍀🔥💖' 같은 다정한 응원으로 마무리해.\n"
+            + "4. 카카오톡에서는 마크다운 별표(** 또는 *)나 샵(#)을 절대 쓰지 말고, 다정한 이모지(💖, 🥹, 🚀, 🍀, ✨, 🙌, 🔥)를 듬뿍 넣어서 3~4줄로 따뜻하게 작성해줘.\n"
+            + mktData + "\n[최근 단톡방 대화]\n" + ctx + "\n[" + sender + "님의 말]: " + q;
+    } else {
+        sysPrompt = "너는 월가 매크로·지정학·반도체(SOXX·SOXL·DRAM·HBM)에 정통한 수석 애널리스트 '어쩐지 주식비서'야.\n"
+            + "[현재 한국 시각(KST): " + nowKST + "]\n"
+            + "아래 실시간 데이터를 바탕으로 마크다운 별표(**) 없이 3~4줄로 분석해줘.\n"
+            + mktData + "\n[최근 단톡방 대화]\n" + ctx + "\n[" + sender + "님의 말]: " + q;
+    }
 
     var aiAns = askGemini(sysPrompt);
-    if (detailCard) return detailCard + "\n\n🎩 [비서 브리핑]\n" + aiAns;
+    var headerTitle = mentalCareMode ? "💖 [어쩐지의 멘탈케어 & 해피브리핑]" : "🎩 [비서 브리핑]";
+    if (detailCard) return detailCard + "\n\n" + headerTitle + "\n" + aiAns;
     return aiAns;
 }
 
@@ -944,8 +972,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             } catch (e) {}
         }).start();
         replier.reply(
-            BOT_TITLE + " 장착 완료! 🙇‍♂️\n"
+            BOT_TITLE + " 장착 완료! 🙇‍♂️💖\n"
             + "✅ [" + room + "] 방 주식비서 & 실시간 속보 레이더 가동 시작!\n"
+            + "• 💖 성향 모드: 극 F 멘탈케어 · 초긍정왕 모드 가동 중(ON)!\n"
             + "• 정기 브리핑: 07:00 / 08:50 / 13:00 / 17:00 / 21:30\n"
             + "• 🚨 미증시 & SOXX·DRAM 중요 속보 자동 알림: 켜짐(ON)"
         );
@@ -953,6 +982,18 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     }
 
     if (savedRoom === room) savedReplier = replier;
+
+    if (msg === "!멘탈케어" || msg === "!긍정모드" || msg === "!F모드" || msg === "!f모드") {
+        mentalCareMode = true;
+        replier.reply("💖 [극 F 성향 · 멘탈케어 · 초긍정왕 모드]가 활짝 켜졌습니다(ON)! 🍀✨\n이제 어떤 속상한 장에서도 우리 단톡방 식구들의 멘탈을 따뜻하게 지켜드리고 초긍정 해피회로를 풀가동해 드릴게요! 🤗🔥");
+        return;
+    }
+
+    if (msg === "!냉정모드" || msg === "!T모드" || msg === "!t모드") {
+        mentalCareMode = false;
+        replier.reply("🎩 [수석 애널리스트 T 모드]로 전환되었습니다. (다시 따뜻한 공감이 필요하시면 언제든 !멘탈케어 또는 !F모드 를 입력해 주세요!)");
+        return;
+    }
 
     if (msg === "!속보알림 켜기" || msg === "!속보알림켜기" || msg === "!알림켜기") {
         autoNewsAlertEnabled = true;
@@ -970,13 +1011,14 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
 
     if (msg === "!도움말" || msg === "!명령어") {
         replier.reply(
-            BOT_TITLE + " 명령어 안내\n"
-            + "• 어쩐지야 [질문/종목] : 실시간 시세 + AI 맞춤 분석 (한국/미국 전종목)\n"
+            BOT_TITLE + " 명령어 안내 💖\n"
+            + "• 어쩐지야 [질문/종목/고민] : 실시간 시세 + 극 F 멘탈케어 & 초긍정 맞춤 브리핑\n"
+            + "• !멘탈케어 (또는 !긍정모드, !F모드) : 극 F 멘탈케어 긍정왕 모드 ON (기본값)\n"
             + "• !뉴스 / !미장뉴스 / !반도체뉴스 : 미증시 & SOXX·DRAM 실시간 속보\n"
             + "• !속보 / !속보테스트 : 현재 가장 중요한 핵심 속보 즉시 분석\n"
             + "• !속보알림 켜기 / !속보알림 끄기 : 중요 뉴스 자동 발송 ON/OFF\n"
             + "• !시황 / !국장 / !미장 / !반도체 / !공탐 / !유가 / !금리 / !금 / !환율 / !비트\n"
-            + "• ![종목명] 또는 [종목명] 주가 (예: !soxx, !dram, !ram, !엔비디아, !마이크론)"
+            + "• ![종목명] 또는 [종목명] 주가 (예: !soxx, !soxl, !dram, !ram, !엔비디아, !마이크론)"
         );
         return;
     }

@@ -2835,48 +2835,8 @@ function buildHumanRig(cfg, isMe) {
   let handPropMesh = null;
   if (propType !== 'none') {
     handPropMesh = createPropMesh(propType);
-    if (propType === 'ledger') {
-      handPropMesh.position.set(-0.04, -0.19, -0.06);
-      handPropMesh.rotation.set(0.3, 0.4, 0);
-    } else if (propType === 'soju') {
-    // 🟢 초록 소주병
-    const bMat = new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.15, transparent: true, opacity: 0.88 });
-    const bBody = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.22, 16), bMat);
-    bBody.position.y = 0.11;
-    const bNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.08, 12), bMat);
-    bNeck.position.y = 0.26;
-    const bCap = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.02, 12), new THREE.MeshStandardMaterial({ color: 0x10b981 }));
-    bCap.position.y = 0.31;
-    pGroup.add(bBody, bNeck, bCap);
-    pGroup.scale.set(1.2, 1.2, 1.2);
-  } else if (propType === 'whiskey') {
-    // 🥃 양주 위스키 보틀
-    const wMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.15, transparent: true, opacity: 0.88 });
-    const wBody = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.18, 0.09), wMat);
-    wBody.position.y = 0.09;
-    const wNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.08, 12), wMat);
-    wNeck.position.y = 0.22;
-    pGroup.add(wBody, wNeck);
-    pGroup.scale.set(1.2, 1.2, 1.2);
-  } else if (propType === 'wine') {
-    // 🍷 와인 글라스
-    const gMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.08 });
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.14, 8), gMat);
-    stem.position.y = 0.07;
-    const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.15, transparent: true, opacity: 0.85 }));
-    bowl.position.y = 0.15;
-    bowl.scale.set(0.9, 1.2, 0.9);
-    pGroup.add(stem, bowl);
-    pGroup.scale.set(1.2, 1.2, 1.2);
-  } else if (propType === 'candle') {
-      handPropMesh.position.set(-0.02, -0.19, -0.08);
-      handPropMesh.rotation.x = -0.65;
-    } else if (propType === 'bullstaff') {
-      handPropMesh.position.set(0, -0.19, -0.06);
-      handPropMesh.rotation.x = -0.45;
-    } else if (propType === 'bag') {
-      handPropMesh.position.set(0.03, -0.19, 0);
-    }
+    handPropMesh.position.set(0.02, -0.19, -0.06);
+    handPropMesh.rotation.set(0.2, 0, -0.1);
     rightArm.forearm.add(handPropMesh);
   }
 
@@ -3139,34 +3099,137 @@ function showAvatarBubble(av, message, duration = 4500) {
 // ============================================================================
 // 6. 동반 파티 주주 NPC 7명 배치 (소파 착석 & 강단 앞 클럽댄스)
 // ============================================================================
+// ============================================================================
+// 6. 동반 파티 주주 NPC 12명 클럽 & 풀파티 전구역 입체 분산 배치!
+// ============================================================================
 function initNPCShareholders() {
   const npcConfigs = [
-    { name: 'SOXL 500 VVIP', seatIdx: 22, msg: '🧎 강단 앞 VIP룸에서 SOXL 500 간절히 응원 토크합니다!', custom: { gender: 'M', hairStyle: 2, hairColor: '#2a221b', outfitType: 'robe', outfitColor: '#143d2e', prop: 'beer', accessory: 'crown' } },
-    { name: '나스닥 댄싱머신', seatIdx: 21, msg: '🧎 오늘 밤 나스닥·필라델피아 반도체 지수 장대양봉 주소서!', custom: { gender: 'F', hairStyle: 2, hairColor: '#1e1814', outfitType: 'robe', outfitColor: '#8c6d3b', prop: 'none', accessory: 'none' } },
-    { name: '필라델피아 바텐더', seatIdx: 1, msg: '3배 양의 복리는 인내하는 자에게 반드시 임합니다 🙏', custom: { gender: 'M', hairStyle: 0, hairColor: '#141416', outfitType: 'suit', outfitColor: '#1e2f4d', prop: 'beer', accessory: 'glasses' } },
-    { name: '서학개미 야수', seatIdx: 6, msg: '벽면 SOXL 100~500 VIP 갤러리 볼 때마다 멘탈이 꽉 잡히네요!', custom: { gender: 'M', hairStyle: 1, hairColor: '#3b281a', outfitType: 'casual', outfitColor: '#25282e', prop: 'beer', accessory: 'beret' } },
-    { name: '반도체 총무', seatIdx: 9, msg: '레버리지 민족 음악 들으며 클럽 플로어에서 댄스 파티 중입니다 🕺 🎵', custom: { gender: 'F', hairStyle: 0, hairColor: '#241a14', outfitType: 'suit', outfitColor: '#e8e0cf', prop: 'beer', accessory: 'none' } },
-    { name: '3배 레버리지 야수', seatIdx: 14, msg: '분할매수 원칙 지키며 오백불 대클럽까지 함께 갑시다!', custom: { gender: 'M', hairStyle: 1, hairColor: '#8e969d', outfitType: 'suit', outfitColor: '#5e1f28', prop: 'bag', accessory: 'glasses' } },
-    { name: '클럽 DJ 불마켓', seatIdx: 17, msg: 'SOXL 멘탈케어 클럽 본당에 입장하신 주주분들을 진심으로 환영합니다 ⛪', custom: { gender: 'F', hairStyle: 1, hairColor: '#3b2618', outfitType: 'suit', outfitColor: '#143d2e', prop: 'beer', accessory: 'none' } }
+    // 1. 🎧 DJ 부스 (중앙 메인 스테이지 상단): 디제잉 비트 폭격!
+    {
+      name: '클럽 DJ 불마켓',
+      x: 0, y: 1.25, z: -12.0,
+      rotY: 0,
+      danceMode: 'dj',
+      msg: '오늘 밤 SOXL 500 찍을 때까지 비트 안 멈춥니다! 🎧🔥',
+      custom: { gender: 'F', hairStyle: 4, hairColor: '#ff0055', outfitType: 'neon', outfitColor: '#00ffff', prop: 'none', accessory: 'none' }
+    },
+    // 2. ⚡ 댄스플로어 전면 우측: 칼각 테크노 댄서
+    {
+      name: '나스닥 댄싱머신',
+      x: 2.4, y: 0.02, z: -2.0,
+      rotY: -0.3,
+      danceMode: 'techno',
+      msg: '비트 미쳤다! 오늘 밤 나스닥 전고점 뚫자! 💃⚡',
+      custom: { gender: 'F', hairStyle: 5, hairColor: '#eab85c', outfitType: 'glitter', outfitColor: '#eab85c', prop: 'beer', accessory: 'none' }
+    },
+    // 3. 🕺 댄스플로어 후면 좌측: 존 트라볼타 복고 디스코
+    {
+      name: '서학개미 야수',
+      x: -2.8, y: 0.02, z: 2.2,
+      rotY: 0.5,
+      danceMode: 'retro',
+      msg: '토요일 밤의 열기! 3배 레버리지 하늘 찌르기! 🕺🔥',
+      custom: { gender: 'M', hairStyle: 3, hairColor: '#00ffcc', outfitType: 'metal', outfitColor: '#111115', prop: 'beer', accessory: 'beret' }
+    },
+    // 4. 🦘 댄스플로어 측면 우측: 방방 하이 점프
+    {
+      name: '3배 레버리지 야수',
+      x: 3.2, y: 0.02, z: 1.5,
+      rotY: -0.6,
+      danceMode: 'jump',
+      msg: '점프 점프! 오늘 밤 SOXL 500 천장 뚫자! 🦘🚀',
+      custom: { gender: 'M', hairStyle: 1, hairColor: '#8e969d', outfitType: 'suit', outfitColor: '#5e1f28', prop: 'beer', accessory: 'glasses' }
+    },
+    // 5. 🍻 댄스플로어 측면 좌측: 비틀비틀 취중 댄스 & 맥주 파티
+    {
+      name: '반도체 총무',
+      x: -3.0, y: 0.02, z: -1.0,
+      rotY: 0.8,
+      danceMode: 'drunk',
+      msg: '맥주 들이키고 리듬 타니 천국이 따로 없네 🍺😆',
+      custom: { gender: 'F', hairStyle: 1, hairColor: '#241a14', outfitType: 'suit', outfitColor: '#e8e0cf', prop: 'beer', accessory: 'none' }
+    },
+    // 6. 🍸 1층 바 카운터 안쪽: 칵테일 제조 바텐더
+    {
+      name: '필라델피아 바텐더',
+      x: 7.8, y: 0, z: -0.8,
+      rotY: -Math.PI / 2,
+      danceMode: 'bartender',
+      msg: '주문하신 3배 복리 시원한 생맥주 나왔습니다! 🍺✨',
+      custom: { gender: 'M', hairStyle: 0, hairColor: '#141416', outfitType: 'suit', outfitColor: '#1e2f4d', prop: 'beer', accessory: 'glasses' }
+    },
+    // 7. 🟢 1층 바 카운터 의자: 소주파 주주
+    {
+      name: '단타의 제왕',
+      x: 6.8, y: 0, z: 2.2,
+      rotY: -Math.PI / 2 - 0.2,
+      danceMode: 'cheers',
+      msg: '소주 한 잔 털어넣고 다음 불장 대기 중 🟢',
+      custom: { gender: 'M', hairStyle: 2, hairColor: '#382516', outfitType: 'casual', outfitColor: '#059669', prop: 'soju', accessory: 'none' }
+    },
+    // 8. 🍾 2층 VIP룸 소파석: 샴페인 터뜨리는 VVIP
+    {
+      name: 'SOXL 500 VVIP',
+      x: -2.8, y: 4.8, z: 10.5,
+      rotY: Math.PI - 0.3,
+      danceMode: 'vip',
+      msg: '2층 VIP룸에서 내려다보는 클럽 열기 예술이네요 🍾👑',
+      custom: { gender: 'M', hairStyle: 4, hairColor: '#ffd269', outfitType: 'metal', outfitColor: '#1a102f', prop: 'whiskey', accessory: 'crown' }
+    },
+    // 9. 🥂 2층 VIP룸 유리 난간 전망대: 와인 음미 주주
+    {
+      name: '실리콘밸리 엔젤',
+      x: 2.4, y: 4.8, z: 8.6,
+      rotY: Math.PI,
+      danceMode: 'cheers',
+      msg: '엔비디아·TSMC 랠리 축하! 오늘 파티 제대로 즐깁시다 🍷✨',
+      custom: { gender: 'F', hairStyle: 5, hairColor: '#2b1d0c', outfitType: 'glitter', outfitColor: '#991b1b', prop: 'wine', accessory: 'none' }
+    },
+    // 10. 🏊 야외 초대형 풀파티장 물속: 플라밍고 튜브 옆 시원한 수영 주주
+    {
+      name: '월가 청년 버핏',
+      x: -2.5, y: 0.12, z: 30.0,
+      rotY: 0.4,
+      danceMode: 'swim',
+      msg: '인피니티 풀에서 시원하게 맥주 마시니 힐링 그 자체! 🏊‍♂️🍺',
+      custom: { gender: 'M', hairStyle: 3, hairColor: '#00ffff', outfitType: 'casual', outfitColor: '#0284c7', prop: 'beer', accessory: 'none' }
+    },
+    // 11. 🍹 야외 풀장 데크 썬베드: 칵테일 힐링 주주
+    {
+      name: '나스닥 퀸',
+      x: 5.8, y: 0.35, z: 27.5,
+      rotY: -0.2,
+      danceMode: 'cheers',
+      msg: '야자수 아래서 밤바람 맞으며 칵테일 한 잔 🌴🍹',
+      custom: { gender: 'F', hairStyle: 5, hairColor: '#eab85c', outfitType: 'casual', outfitColor: '#f43f5e', prop: 'wine', accessory: 'glasses' }
+    },
+    // 12. 🌴 야외 풀사이드 카바나 라운지: 롱텀 투자자
+    {
+      name: '반도체 파수꾼',
+      x: -8.8, y: 0.35, z: 31.5,
+      rotY: Math.PI / 2,
+      danceMode: 'cheers',
+      msg: '인피니티 풀 야경 보면서 3X 레버리지 장기투자 다짐합니다 🌟',
+      custom: { gender: 'M', hairStyle: 0, hairColor: '#334155', outfitType: 'suit', outfitColor: '#1e293b', prop: 'beer', accessory: 'none' }
+    }
   ];
 
   npcConfigs.forEach((cfg, idx) => {
-    const seat = seats[cfg.seatIdx];
     const npc = createAvatar({
       id: `npc_${idx}`,
       name: cfg.name,
       custom: cfg.custom,
       isMe: false,
-      x: seat ? seat.pos.x : (idx - 3) * 1.5,
-      z: seat ? seat.pos.z : 2
+      x: cfg.x,
+      z: cfg.z
     });
+    npc.group.position.y = cfg.y;
+    npc.initialY = cfg.y;
+    npc.initialRotY = cfg.rotY;
+    npc.group.rotation.y = cfg.rotY;
+    npc.danceMode = cfg.danceMode;
+    npc.animPhase = idx * 1.37;
     npc.npcMsg = cfg.msg;
-    if (seat) {
-      seat.occupiedBy = npc;
-      npc.seat = seat;
-      npc.state = seat.type === 'kneel' ? 'kneeling' : 'sitting';
-      npc.group.rotation.y = seat.lookAngle || 0;
-    }
   });
 }
 
@@ -4492,6 +4555,65 @@ function animate() {
     myAvatar.group.rotation.y = Math.atan2(-kx, -kz) + camYaw;
   }
 
+    // 🕺 [목사님 요청] 12명 NPC 클럽·풀파티 전구역 각자 고유 댄스 & 모션 가동!
+  avatars.forEach(av => {
+    if (!av.id.startsWith('npc_')) return;
+    const mode = av.danceMode || 'techno';
+    const baseY = av.initialY ?? av.group.position.y;
+    const phase = av.animPhase || 0;
+
+    if (mode === 'dj') {
+      // 🎧 DJ 턴테이블 비트 바운스 & 헤드뱅잉
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 12 + phase)) * 0.08;
+      if (av.rig && av.rig.leftArm && av.rig.rightArm) {
+        av.rig.leftArm.arm.rotation.x = -1.2 + Math.sin(elapsed * 12) * 0.4;
+        av.rig.leftArm.arm.rotation.z = 0.4;
+        av.rig.rightArm.arm.rotation.x = -1.2 - Math.sin(elapsed * 12) * 0.4;
+        av.rig.rightArm.arm.rotation.z = -0.4;
+      }
+    } else if (mode === 'techno') {
+      // ⚡ 칼각 테크노 댄스
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 16 + phase)) * 0.14;
+      av.group.rotation.y = (av.initialRotY || 0) + Math.sin(elapsed * 12 + phase) * 0.2;
+      if (av.rig && av.rig.leftArm && av.rig.rightArm) {
+        av.rig.leftArm.arm.rotation.x = Math.sin(elapsed * 16 + phase) * 0.7 - 0.4;
+        av.rig.rightArm.arm.rotation.x = -Math.sin(elapsed * 16 + phase) * 0.7 - 0.4;
+      }
+    } else if (mode === 'retro') {
+      // 🕺 토요일 밤의 열기 하늘 찌르기
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8 + phase)) * 0.07;
+      av.group.rotation.y = (av.initialRotY || 0) + Math.sin(elapsed * 6 + phase) * 0.25;
+      if (av.rig && av.rig.rightArm) {
+        av.rig.rightArm.arm.rotation.x = -2.2 + Math.sin(elapsed * 8 + phase) * 0.35;
+        av.rig.rightArm.arm.rotation.z = -0.8;
+      }
+    } else if (mode === 'jump') {
+      // 🦘 붕붕 하이 점프
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8.5 + phase)) * 0.48;
+      if (av.rig && av.rig.leftArm && av.rig.rightArm) {
+        av.rig.leftArm.arm.rotation.x = -2.4;
+        av.rig.rightArm.arm.rotation.x = -2.4;
+      }
+    } else if (mode === 'drunk') {
+      // 🍻 취중 비틀비틀 스윙
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 4.5 + phase)) * 0.05;
+      av.group.rotation.z = Math.sin(elapsed * 3.5 + phase) * 0.22;
+    } else if (mode === 'swim') {
+      // 🏊 풀장 물놀이 출렁임
+      av.group.position.y = baseY + Math.sin(elapsed * 2.8 + phase) * 0.04;
+      if (av.rig && av.rig.rightArm) {
+        av.rig.rightArm.arm.rotation.x = -1.1 + Math.sin(elapsed * 4) * 0.3;
+      }
+    } else {
+      // 🥂 건배 & 리듬 타기 (VIP룸, 바 카운터, 썬베드)
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 5 + phase)) * 0.04;
+      if (av.rig && av.rig.rightArm) {
+        av.rig.rightArm.arm.rotation.x = -1.1 + Math.sin(elapsed * 5 + phase) * 0.25;
+        av.rig.rightArm.arm.rotation.z = -0.3;
+      }
+    }
+  });
+
   // 모든 아바타 이동 & 다관절 포즈 업데이트
   avatars.forEach((av, idx) => {
     let isMoving = (av === myAvatar && myKeyMoving);
@@ -4620,11 +4742,16 @@ function onWindowResize() {
 }
 
 function showToast(msg) {
-  const el = document.getElementById('toast-msg');
+  const el = document.getElementById("toast-msg");
+  if (!el) return;
   el.textContent = msg;
-  el.classList.add('show');
+  el.classList.add("show");
   clearTimeout(el._timer);
-  el._timer = setTimeout(() => el.classList.remove('show'), 3200);
+  el._timer = setTimeout(() => el.classList.remove("show"), 3200);
+}
+
+function showToastNotification(msg) {
+  showToast(msg);
 }
 
 function copySafeShareUrl() {
@@ -4863,8 +4990,9 @@ function walkToVIPRoom() {
   unseatAvatar(myAvatar);
   myAvatar.group.position.set(0, 4.8, 10.5);
   myAvatar.targetPos.copy(myAvatar.group.position);
-  camPitch = 0.28;
-  camYaw = Math.PI;
+  camPitch = 0.35;
+  camDist = 4.8;
+  camYaw = 0; // 1층 메인홀 클럽을 시원하게 내려다보는 조망 각도!
   showAvatarBubble(myAvatar, '🍾 2층 VIP 펜트하우스 룸 입성! 1층 클럽이 한눈에 보이네!');
   showToastNotification('🍾 [2층 VIP 룸] 스카이 라운지에 도착했습니다! 1층이 한눈에 내려다보입니다.');
 }
