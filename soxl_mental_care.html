@@ -223,10 +223,13 @@
 
   /* 좌측 하단: 홈페이지 게시판 스타일 🔥 떡상 주문 + 실시간 주주 대화방 (처음 입장 시 1줄 가로 탭으로 접힘) */
   #left-sanctuary-stack {
-    position: fixed; left: 16px; bottom: 62px; z-index: 20;
+    position: fixed; left: 16px; bottom: 92px; z-index: 45;
     width: min(440px, calc(100vw - 32px));
     display: flex; flex-direction: column; gap: 6px;
     pointer-events: none;
+  }
+  #left-sanctuary-stack:not(.both-min) {
+    z-index: 135;
   }
   #left-sanctuary-stack.both-min {
     flex-direction: row;
@@ -235,12 +238,12 @@
   }
   .sanctuary-panel-box {
     pointer-events: auto;
-    background: rgba(8, 17, 14, 0.94);
-    border: 1px solid rgba(234, 184, 92, 0.42);
+    background: rgba(8, 17, 14, 0.96);
+    border: 1.5px solid rgba(234, 184, 92, 0.55);
     border-top: 2px solid var(--gold);
     border-radius: 8px; padding: 12px 14px;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.58);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.68);
     transition: all 0.22s ease;
   }
   #mantra-wheel-box.minimized .vw-body { display: none; }
@@ -248,9 +251,14 @@
   #mantra-wheel-box.minimized,
   #chat-box.minimized {
     padding: 7px 12px;
-    border-radius: 6px;
-    border-top: 1px solid rgba(234, 184, 92, 0.42);
-    background: rgba(8, 17, 14, 0.9);
+    border-radius: 7px;
+    border-top: 1.5px solid rgba(234, 184, 92, 0.55);
+    background: rgba(8, 18, 15, 0.95);
+  }
+  #chat-box.minimized {
+    border: 1.5px solid rgba(46, 229, 157, 0.85);
+    background: linear-gradient(135deg, rgba(14, 42, 32, 0.96), rgba(8, 22, 17, 0.96));
+    box-shadow: 0 4px 16px rgba(46, 229, 157, 0.28);
   }
   .vw-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -699,12 +707,16 @@
       text-overflow: ellipsis;
     }
 
-    /* 좌하단 🔥 떡상 주문 & 대화방: 기본 접힘(홈페이지 게시판 가로 탭 2개 나란히) */
+    /* 좌하단 🔥 떡상 주문 & 실시간 채팅하기: 하단 2단 독 바로 위에 선명하게 고정 (절대 가려지지 않음) */
     #left-sanctuary-stack {
       left: 6px; right: 6px;
       width: auto;
-      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 42px);
-      gap: 4px;
+      bottom: calc(max(6px, env(safe-area-inset-bottom)) + 78px);
+      gap: 5px;
+      z-index: 45;
+    }
+    #left-sanctuary-stack:not(.both-min) {
+      z-index: 135;
     }
     #left-sanctuary-stack.both-min {
       flex-direction: row;
@@ -714,37 +726,43 @@
       min-width: 0;
     }
     .sanctuary-panel-box {
-      padding: 8px 10px;
-      border-radius: 6px;
+      padding: 10px 12px;
+      border-radius: 8px;
     }
     .sanctuary-panel-box.minimized {
-      padding: 6px 9px;
-      border-radius: 6px;
-      background: rgba(7, 16, 13, 0.92);
+      padding: 7px 10px;
+      border-radius: 7px;
+      background: rgba(8, 18, 15, 0.95);
+    }
+    #chat-box.minimized {
+      border: 1.5px solid #2ee59d;
+      background: linear-gradient(135deg, rgba(16, 48, 36, 0.96), rgba(9, 24, 19, 0.96));
+      box-shadow: 0 4px 16px rgba(46, 229, 157, 0.32);
     }
     .sanctuary-panel-box.minimized .vw-ref { display: none; }
     .vw-badge {
-      font-size: 10px;
+      font-size: 11px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .vw-ref { font-size: 9.5px; white-space: nowrap; }
-    .vw-text { font-size: 11px; max-height: 48px; }
-    .chat-log { height: 64px; }
-    .chat-msg { font-size: 10.5px; }
-    .chat-input { padding: 5px 9px; font-size: 11px; border-radius: 5px; }
-    .chat-send-btn { padding: 5px 10px; font-size: 11px; border-radius: 5px; }
+    .vw-ref { font-size: 10px; white-space: nowrap; }
+    .vw-text { font-size: 11.5px; max-height: 52px; }
+    .chat-log { height: 96px; max-height: 110px; }
+    .chat-msg { font-size: 11.5px; }
+    .chat-input { padding: 7px 10px; font-size: 16px; border-radius: 6px; }
+    .chat-send-btn { padding: 7px 14px; font-size: 12.5px; border-radius: 6px; }
 
     /* 하단 제2열: 4대 댄스 제스처 가로 바 (기본 접힘) */
     #emote-bar {
       left: 6px; right: 6px;
-      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 74px);
+      bottom: calc(max(6px, env(safe-area-inset-bottom)) + 116px);
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 4px;
       padding: 4px;
       border-radius: 6px;
+      z-index: 46;
     }
     .emote-btn {
       padding: 5px 2px;
@@ -785,11 +803,12 @@
     .avatar-bubble { font-size: 10px; padding: 3px 7px; bottom: 21px; border-radius: 6px; }
     .modal-card {
       width: calc(100vw - 16px);
-      bottom: calc(max(4px, env(safe-area-inset-bottom)) + 44px);
+      bottom: calc(max(6px, env(safe-area-inset-bottom)) + 82px);
       padding: 14px;
       max-height: 64vh;
       overflow-y: auto;
-      border-radius: 8px;
+      border-radius: 12px;
+      z-index: 140;
     }
     .docent-preview-wrap { height: 155px; }
   }
@@ -798,9 +817,9 @@
 #virtual-dpad {
   position: fixed;
   left: 18px;
-  bottom: 84px;
-  width: 120px;
-  height: 120px;
+  bottom: 138px;
+  width: 114px;
+  height: 114px;
   z-index: 120;
   display: flex;
   flex-direction: column;
@@ -809,21 +828,26 @@
   pointer-events: auto;
   user-select: none;
   -webkit-user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+body.left-panel-open #virtual-dpad {
+  opacity: 0;
+  pointer-events: none;
 }
 .dpad-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 .dpad-btn {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   background: rgba(15, 23, 42, 0.85);
   border: 1.5px solid rgba(234, 184, 92, 0.45);
   color: #fce7f3;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -839,8 +863,8 @@
   border-color: #ffd269;
 }
 .dpad-center {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   background: rgba(8, 14, 26, 0.5);
   display: flex;
@@ -849,11 +873,12 @@
   font-size: 11px;
   color: #94a3b8;
 }
-@media (max-width: 768px) {
+@media (max-width: 820px), (hover: none) and (pointer: coarse) {
   #virtual-dpad {
-    bottom: 96px;
-    left: 12px;
-    transform: scale(0.95);
+    bottom: calc(max(6px, env(safe-area-inset-bottom)) + 116px);
+    left: 10px;
+    transform: scale(0.9);
+    transform-origin: bottom left;
   }
 }
 
@@ -908,11 +933,14 @@
       <span class="status-dot"></span>
       <span id="online-count-txt">🪩 클럽 &amp; 풀파티 · 12명</span>
     </div>
+    <button type="button" class="glass-pill" id="btn-top-chat" onclick="openChatFromDock()" title="실시간 주주 채팅창 열기/접기" style="border-color:#2ee59d;color:#9effd6;background:rgba(46,229,157,0.18);font-weight:800;">
+      <span id="top-chat-toggle-txt">💬 채팅하기</span>
+    </button>
     <button type="button" class="glass-pill" id="btn-toggle-frame-strip" onclick="toggleFrameStrip()" title="비전 프레임 및 VIP룸 빠른 이동 바 열기/접기" style="border-color:rgba(245,200,76,0.55);color:#ffe49e;">
       <span id="frame-strip-toggle-txt">🧭 핫스팟 이동 ▾</span>
     </button>
-    <button type="button" class="glass-pill" id="btn-toggle-cheer-feed" onclick="toggleCheerFeed()" title="실시간 주주 네온 샷 💬 떡상 토크 피드 열기/접기">
-      <span id="cheer-feed-toggle-txt">💬 떡상 토크 ▾</span>
+    <button type="button" class="glass-pill" id="btn-toggle-cheer-feed" onclick="toggleCheerFeed()" title="실시간 주주 네온 샷 🕯️ 응원 토크 보드 열기/접기">
+      <span id="cheer-feed-toggle-txt">🕯️ 응원보드 ▾</span>
     </button>
   </div>
 
@@ -925,9 +953,13 @@
       <span>🎥</span>
       <span id="cam-preset-label">시점 전환</span>
     </button>
-    <button type="button" class="glass-pill" id="btn-now-playing" onclick="togglePanel('sound')">
+    <button type="button" class="glass-pill" id="btn-bgm-toggle" onclick="toggleBgmOnOff()" title="클럽 배경음악(BGM) 즉시 켜기/끄기 (단축키 M)" style="border-color:rgba(46,229,157,0.7);color:#9effd6;background:rgba(46,229,157,0.16);font-weight:800;">
+      <span id="bgm-toggle-icon">🔊</span>
+      <span id="bgm-toggle-label">BGM ON</span>
+    </button>
+    <button type="button" class="glass-pill" id="btn-now-playing" onclick="togglePanel('sound')" title="배경음악 곡 변경 및 볼륨 믹서 열기">
       <span>🎵</span>
-      <span id="now-playing-label">클럽 BGM</span>
+      <span id="now-playing-label">곡 선택</span>
     </button>
     <button type="button" class="glass-pill" id="btn-light-mode" title="클럽 조명 분위기 전환">
       <span id="light-mode-label">⚡ 사이키 조명 ON</span>
@@ -984,8 +1016,8 @@
 
   <div class="sanctuary-panel-box minimized" id="chat-box">
     <div class="vw-header" onclick="toggleChatMinimize()">
-      <span class="vw-badge" id="chat-badge-title">💬 실시간 주주 대화방 (열기 ▲)</span>
-      <span class="vw-ref">Enter로 입력</span>
+      <span class="vw-badge" id="chat-badge-title">💬 실시간 채팅하기 (열기 ▲)</span>
+      <span class="vw-ref">터치하여 대화</span>
     </div>
     <div class="chat-body">
       <div class="chat-log" id="chat-log"></div>
@@ -1129,9 +1161,12 @@
 <!-- 모달 4: 레버리지 민족 음악 & 클럽 사운드 믹서 -->
 <div class="modal-card" id="modal-sound">
   <div class="modal-head">
-    <span class="modal-title">🎵 레버리지 민족 · 클럽 클럽 사운드 믹서</span>
+    <span class="modal-title">🎵 레버리지 민족 · 클럽 사운드 믹서</span>
     <button type="button" class="modal-close" onclick="closeAllModals()">✕</button>
   </div>
+  <button type="button" id="modal-bgm-master-btn" onclick="toggleBgmOnOff()" style="width:100%; margin-bottom:12px; padding:11px 14px; border-radius:10px; border:1.5px solid #2ee59d; background:linear-gradient(135deg, rgba(46,229,157,0.22), rgba(234,184,92,0.18)); color:#9effd6; font-size:13px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+    <span id="modal-bgm-master-txt">🔊 현재 클럽 BGM 켜짐 — 터치 시 음악 끄기 (OFF)</span>
+  </button>
   <div class="track-list" id="track-list">
     <button type="button" class="track-btn playing" data-track="0" onclick="selectBgmTrack(0)">
       <span>🔥 1. 레버리지 민족 (Midnight Bull Run · 원곡 신스웨이브)</span>
@@ -1236,23 +1271,26 @@
     </div>
   </div>
 
-  <!-- 2열: 핫스팟 워프 & 클럽 편의 유틸 -->
+  <!-- 2열: 실시간 채팅하기 & 핫스팟 워프 & 클럽 편의 유틸 -->
   <div class="dock-row" id="dock-row-nav">
     <div class="dock-segment" style="flex:1; justify-content:center;">
+      <button type="button" class="dock-btn" id="dock-chat" onclick="openChatFromDock()" title="실시간 주주 채팅창 열기/접기! (단축키 Enter)" style="border-color:#2ee59d; color:#9effd6; font-weight:800; background:rgba(46,229,157,0.22);">
+        <span>💬</span><span class="label-txt" id="dock-chat-label">채팅하기</span><span class="key-badge">Enter</span>
+      </button>
       <button type="button" class="dock-btn highlight-pool" id="dock-pool" onclick="walkToPoolParty()" title="야외 풀파티장으로 이동! (단축키 P)" style="border-color:#06b6d4; color:#67e8f9; font-weight:800; background:rgba(6,182,212,0.18);">
-        <span>🏊</span><span class="label-txt">야외 풀파티장</span><span class="key-badge">P</span>
+        <span>🏊</span><span class="label-txt">풀파티</span><span class="key-badge">P</span>
       </button>
       <button type="button" class="dock-btn highlight-vip" id="dock-vip" onclick="walkToVIPRoom()" title="2층 VIP 스카이라운지로 이동!" style="border-color:#eab85c; color:#ffe39f;">
-        <span>🍾</span><span class="label-txt">2층 VIP룸</span><span class="key-badge">6</span>
+        <span>🍾</span><span class="label-txt">2층VIP</span><span class="key-badge">6</span>
       </button>
       <button type="button" class="dock-btn" id="dock-floor" onclick="walkToDanceFloor()" title="1층 플로어로 이동!">
-        <span>🪩</span><span class="label-txt">1층 플로어</span><span class="key-badge">7</span>
+        <span>🪩</span><span class="label-txt">플로어</span><span class="key-badge">7</span>
       </button>
       <button type="button" class="dock-btn" id="dock-sit" onclick="toggleMySit()" title="주변 소파나 바 의자에 앉기">
-        <span>🪑</span><span class="label-txt" id="dock-sit-label">소파 착석</span><span class="key-badge">8</span>
+        <span>🪑</span><span class="label-txt" id="dock-sit-label">착석</span><span class="key-badge">8</span>
       </button>
-      <button type="button" class="dock-btn" id="dock-sound" onclick="togglePanel('sound')" title="클럽 BGM 사운드 패널">
-        <span>🎵</span><span class="label-txt">BGM</span><span class="key-badge">9</span>
+      <button type="button" class="dock-btn active" id="dock-sound" onclick="toggleBgmOnOff()" title="클럽 BGM 음악 즉시 켜기/끄기 (단축키 M 또는 9)">
+        <span id="dock-bgm-icon">🔊</span><span class="label-txt" id="dock-bgm-label">BGM ON</span><span class="key-badge">M</span>
       </button>
     </div>
   </div>
@@ -1528,6 +1566,8 @@ let bcChannel = null;
 let bgmAudio = new Audio();
 bgmAudio.loop = true;
 bgmAudio.volume = 0.78;
+window.bgmAudio = bgmAudio;
+let isBgmPlaying = true;
 let currentTrackIdx = 0;
 let audioCtx = null;
 let waterGain = null, padGain = null;
@@ -2625,7 +2665,7 @@ function buildTargetRippleRing() {
 function createPropMesh(propType) {
   const pGroup = new THREE.Group();
     if (propType === 'beer' || propType === 'ledger') {
-    // 🍺 [목사님 요청] 손에 든 성경책 100% 제거 -> 시원한 갈색 맥주병(Beer Bottle) 장착!
+    // 🍺 [공식 스펙] 손 소품: 시원한 갈색 맥주병(Beer Bottle) 장착!
     const bottleMat = new THREE.MeshStandardMaterial({
       color: 0x78350f, // 앰버 브라운 맥주병
       roughness: 0.12,
@@ -3708,7 +3748,7 @@ function updateOnlineCount() {
   const npcCount = showNPCs ? avatars.filter(a => a.id.startsWith('npc_')).length : 0;
   const total = 1 + npcCount + activePeers;
   document.getElementById('online-count-txt').textContent = isMobileViewport()
-    ? `⛪ 클럽 · ${total}명`
+    ? `🪩 클럽 · ${total}명`
     : `🪩 SOXL 멘탈케어 클럽 · 현재 주주 ${total}명 올나잇 파티 중 🔥`;
 }
 
@@ -3720,6 +3760,11 @@ function initChatLog() {
 }
 
 function appendChatMessage(author, text, isSys = false) {
+  if (author && typeof author === 'object') {
+    isSys = !!author.isSys;
+    text = author.text || '';
+    author = author.author || 'SOXL 주주';
+  }
   const log = document.getElementById('chat-log');
   if (!log) return;
   const div = document.createElement('div');
@@ -3882,8 +3927,14 @@ function setupPointerAndKeyboardControls() {
     }
     keysPressed[e.code] = true;
     if (e.key === 'Enter') {
-      const ci = document.getElementById('chat-input');
-      if (ci) { e.preventDefault(); ci.focus(); }
+      e.preventDefault();
+      const cBox = document.getElementById('chat-box');
+      if (cBox && cBox.classList.contains('minimized')) {
+        openChatFromDock();
+      } else {
+        const ci = document.getElementById('chat-input');
+        if (ci) ci.focus();
+      }
       return;
     }
     if (e.key === '1' || e.key.toLowerCase() === 's') drinkAlcohol('soju');
@@ -3898,7 +3949,7 @@ function setupPointerAndKeyboardControls() {
     if (e.key === '6' || e.key.toLowerCase() === 'v') walkToVIPRoom();
     if (e.key === '7') walkToDanceFloor();
     if (e.key === '8') toggleMySit();
-    if (e.key === '9') togglePanel('sound');
+    if (e.key === '9' || e.key.toLowerCase() === 'm') toggleBgmOnOff();
     if (e.key === 'Escape') {
       closeAllModals();
       closeZoomLightbox();
@@ -3955,12 +4006,22 @@ function syncLeftStackState() {
   const cBox = document.getElementById('chat-box');
   const wBadge = document.getElementById('vw-badge-title');
   const cBadge = document.getElementById('chat-badge-title');
+  const dockChatBtn = document.getElementById('dock-chat');
+  const dockChatLbl = document.getElementById('dock-chat-label');
+  const topChatBtn = document.getElementById('btn-top-chat');
+  const topChatLbl = document.getElementById('top-chat-toggle-txt');
   if (!stack || !wBox || !cBox) return;
   const wMin = wBox.classList.contains('minimized');
   const cMin = cBox.classList.contains('minimized');
-  stack.classList.toggle('both-min', wMin && cMin);
+  const bothMin = wMin && cMin;
+  stack.classList.toggle('both-min', bothMin);
+  document.body.classList.toggle('left-panel-open', !bothMin);
   if (wBadge) wBadge.textContent = wMin ? '📜 🔥 떡상 주문 (열기 ▲)' : '📜 🔥 떡상 주문 (접기 ▼)';
-  if (cBadge) cBadge.textContent = cMin ? '💬 실시간 주주 대화방 (열기 ▲)' : '💬 실시간 주주 대화방 (접기 ▼)';
+  if (cBadge) cBadge.textContent = cMin ? '💬 실시간 채팅하기 (열기 ▲)' : '💬 실시간 채팅하기 (접기 ▼)';
+  if (dockChatBtn) dockChatBtn.classList.toggle('active', !cMin);
+  if (dockChatLbl) dockChatLbl.textContent = cMin ? '채팅하기' : '채팅접기';
+  if (topChatBtn) topChatBtn.classList.toggle('active-tab', !cMin);
+  if (topChatLbl) topChatLbl.textContent = cMin ? '💬 채팅하기' : '💬 채팅접기 ▴';
 }
 
 function toggleWheelMinimize() {
@@ -3981,6 +4042,35 @@ function toggleChatMinimize() {
     wBox.classList.add('minimized');
   }
   syncLeftStackState();
+  if (!cBox.classList.contains('minimized')) {
+    const log = document.getElementById('chat-log');
+    if (log) log.scrollTop = log.scrollHeight;
+    setTimeout(() => {
+      const ci = document.getElementById('chat-input');
+      if (ci && !isMobileViewport()) ci.focus();
+    }, 60);
+  }
+}
+
+function openChatFromDock() {
+  const wBox = document.getElementById('mantra-wheel-box');
+  const cBox = document.getElementById('chat-box');
+  if (!cBox) return;
+  const wasMin = cBox.classList.contains('minimized');
+  if (wasMin) {
+    cBox.classList.remove('minimized');
+    if (wBox) wBox.classList.add('minimized');
+    syncLeftStackState();
+    const log = document.getElementById('chat-log');
+    if (log) log.scrollTop = log.scrollHeight;
+    setTimeout(() => {
+      const ci = document.getElementById('chat-input');
+      if (ci) ci.focus();
+    }, 80);
+  } else {
+    cBox.classList.add('minimized');
+    syncLeftStackState();
+  }
 }
 
 function toggleFrameStrip() {
@@ -3989,7 +4079,7 @@ function toggleFrameStrip() {
   const btn = document.getElementById('btn-toggle-frame-strip');
   if (!strip) return;
   const isCol = strip.classList.toggle('collapsed');
-  if (txt) txt.textContent = isCol ? '🧭 🍾 VIP룸·플로어 이동 ▾' : '🧭 🍾 VIP룸·플로어 이동 ▴';
+  if (txt) txt.textContent = isCol ? '🧭 핫스팟 이동 ▾' : '🧭 핫스팟 이동 ▴';
   if (btn) btn.classList.toggle('active-pill', !isCol);
 }
 
@@ -3999,7 +4089,7 @@ function toggleCheerFeed() {
   const btn = document.getElementById('btn-toggle-cheer-feed');
   if (!feed) return;
   const isCol = feed.classList.toggle('collapsed');
-  if (txt) txt.textContent = isCol ? '🕯️ 💬 떡상 토크 피드 ▾' : '🕯️ 💬 떡상 토크 피드 ▴';
+  if (txt) txt.textContent = isCol ? '🕯️ 응원보드 ▾' : '🕯️ 응원보드 ▴';
   if (btn) btn.classList.toggle('active-pill', !isCol);
 }
 
@@ -4059,8 +4149,10 @@ function closeAllModals() {
   ['candle', 'docent', 'avatar', 'sound'].forEach(k => {
     const m = document.getElementById('modal-' + k);
     if (m) m.classList.remove('open');
-    const btn = document.getElementById('dock-' + k);
-    if (btn) btn.classList.remove('active');
+    if (k !== 'sound') {
+      const btn = document.getElementById('dock-' + k);
+      if (btn) btn.classList.remove('active');
+    }
   });
 }
 
@@ -4071,10 +4163,13 @@ function togglePanel(name, forceOpen = false) {
   closeAllModals();
   if (forceOpen || !isOpen) {
     modal.classList.add('open');
-    const btn = document.getElementById('dock-' + name);
-    if (btn) btn.classList.add('active');
+    if (name !== 'sound') {
+      const btn = document.getElementById('dock-' + name);
+      if (btn) btn.classList.add('active');
+    }
     if (name === 'docent') selectDocentFrame(currentDocentIdx);
     if (name === 'avatar') syncCustomizerUI();
+    if (name === 'sound') syncBgmToggleUI();
   }
 }
 
@@ -4144,12 +4239,18 @@ function initNotesFeed() {
   const saved = JSON.parse(localStorage.getItem('soxl_mc_notes') || 'null');
   const list = saved && saved.length ? saved : INITIAL_NOTES;
   const feed = document.getElementById('cheer-feed');
-  feed.innerHTML = '';
-  list.forEach(item => prependNoteCard(item, false));
+  feed.innerHTML = `
+    <div id="cheer-feed-actions" style="display:flex; gap:6px; margin-bottom:4px; position:sticky; top:0; z-index:2; background:rgba(7,15,12,0.96); padding-bottom:6px; border-bottom:1px solid rgba(234,184,92,0.28);">
+      <button type="button" onclick="toggleCheerFeed(); togglePanel('candle', true);" style="flex:1; background:linear-gradient(135deg,#eab85c,#2ee59d); color:#06120e; border:none; border-radius:6px; padding:7px 8px; font-size:11.5px; font-weight:900; cursor:pointer;">🕯️ 응원 글 올리기</button>
+      <button type="button" onclick="toggleCheerFeed(); openChatFromDock();" style="flex:1; background:rgba(46,229,157,0.2); color:#9effd6; border:1px solid #2ee59d; border-radius:6px; padding:7px 8px; font-size:11.5px; font-weight:800; cursor:pointer;">💬 실시간 채팅창</button>
+    </div>
+    <div id="cheer-cards-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+  `;
+  list.slice().reverse().forEach(item => prependNoteCard(item, false));
 }
 
 function prependNoteCard(note, saveLocal = true) {
-  const feed = document.getElementById('cheer-feed');
+  const feedList = document.getElementById('cheer-cards-list') || document.getElementById('cheer-feed');
   const card = document.createElement('div');
   card.className = 'cheer-card';
   card.innerHTML = `
@@ -4162,7 +4263,7 @@ function prependNoteCard(note, saveLocal = true) {
       🙏 떡상 치얼스 🥂 <span>${note.likes || 1}</span>
     </button>
   `;
-  feed.prepend(card);
+  feedList.prepend(card);
 
   if (saveLocal) {
     const saved = JSON.parse(localStorage.getItem('soxl_mc_notes') || 'null') || INITIAL_NOTES.slice();
@@ -4189,13 +4290,87 @@ function submitCandleNote() {
   startLightingCandleSequence(text);
 }
 
+function syncBgmToggleUI() {
+  const topBtn = document.getElementById('btn-bgm-toggle');
+  const topIcon = document.getElementById('bgm-toggle-icon');
+  const topLbl = document.getElementById('bgm-toggle-label');
+  const dockBtn = document.getElementById('dock-sound');
+  const dockIcon = document.getElementById('dock-bgm-icon');
+  const dockLbl = document.getElementById('dock-bgm-label');
+  const modalBtn = document.getElementById('modal-bgm-master-btn');
+  const modalTxt = document.getElementById('modal-bgm-master-txt');
+
+  if (topIcon) topIcon.textContent = isBgmPlaying ? '🔊' : '🔇';
+  if (topLbl) topLbl.textContent = isBgmPlaying ? 'BGM ON' : 'BGM OFF';
+  if (topBtn) {
+    topBtn.style.borderColor = isBgmPlaying ? 'rgba(46,229,157,0.75)' : 'rgba(255,110,110,0.6)';
+    topBtn.style.color = isBgmPlaying ? '#9effd6' : '#ffb4b4';
+    topBtn.style.background = isBgmPlaying ? 'rgba(46,229,157,0.18)' : 'rgba(255,90,90,0.14)';
+  }
+
+  if (dockIcon) dockIcon.textContent = isBgmPlaying ? '🔊' : '🔇';
+  if (dockLbl) dockLbl.textContent = isBgmPlaying ? 'BGM ON' : 'BGM OFF';
+  if (dockBtn) dockBtn.classList.toggle('active', isBgmPlaying);
+
+  if (modalTxt) {
+    modalTxt.textContent = isBgmPlaying
+      ? '🔊 현재 클럽 BGM 켜짐 — 터치 시 음악 끄기 (OFF)'
+      : '🔇 현재 클럽 BGM 꺼짐 — 터치 시 음악 켜기 (ON)';
+  }
+  if (modalBtn) {
+    modalBtn.style.borderColor = isBgmPlaying ? '#2ee59d' : '#ff6b6b';
+    modalBtn.style.color = isBgmPlaying ? '#9effd6' : '#ffb4b4';
+    modalBtn.style.background = isBgmPlaying
+      ? 'linear-gradient(135deg, rgba(46,229,157,0.22), rgba(234,184,92,0.18))'
+      : 'rgba(255,90,90,0.16)';
+  }
+
+  document.querySelectorAll('#track-list .track-btn').forEach((btn, i) => {
+    const isThis = isBgmPlaying && (i === currentTrackIdx);
+    btn.classList.toggle('playing', isThis);
+    const sp = btn.querySelector('span:last-child');
+    if (sp) sp.textContent = isThis ? '🔊 재생중' : 'PLAY';
+  });
+}
+
+function toggleBgmOnOff() {
+  isBgmPlaying = !isBgmPlaying;
+  if (!isBgmPlaying) {
+    bgmAudio.pause();
+    bgmAudio.muted = true;
+    if (waterGain) waterGain.gain.value = 0;
+    if (padGain) padGain.gain.value = 0;
+    syncBgmToggleUI();
+    showToast('🔇 클럽 배경음악(BGM)을 껐습니다. (다시 켜려면 BGM OFF 버튼 터치)');
+  } else {
+    bgmAudio.muted = false;
+    if (!bgmAudio.src) {
+      const tr = BGM_TRACKS[currentTrackIdx || 0];
+      if (tr) bgmAudio.src = tr.src;
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    updateVolumes();
+    bgmAudio.play().catch(() => {});
+    syncBgmToggleUI();
+    showToast('🔊 클럽 배경음악(BGM)을 켰습니다!');
+  }
+}
+
 function startAudioEngine(withMusic = true) {
+  isBgmPlaying = !!withMusic;
   if (withMusic) {
     selectBgmTrack(0);
+  } else {
+    bgmAudio.pause();
+    bgmAudio.muted = true;
+    syncBgmToggleUI();
   }
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
+    window.audioCtx = audioCtx;
 
     // 1) 야외 웨이퍼 치유 연못 물소리
     const bufferSize = audioCtx.sampleRate * 2;
@@ -4247,24 +4422,27 @@ function selectBgmTrack(idx) {
   currentTrackIdx = idx;
   const tr = BGM_TRACKS[idx];
   if (!tr) return;
+  isBgmPlaying = true;
+  bgmAudio.muted = false;
   bgmAudio.src = tr.src;
   bgmAudio.play().catch(() => {});
-  document.getElementById('now-playing-label').textContent = tr.title;
-
-  document.querySelectorAll('#track-list .track-btn').forEach((btn, i) => {
-    btn.classList.toggle('playing', i === idx);
-    btn.querySelector('span:last-child').textContent = i === idx ? '🔊 재생중' : 'PLAY';
-  });
+  updateVolumes();
+  document.getElementById('now-playing-label').textContent = '곡 선택';
+  syncBgmToggleUI();
 }
 
 function loadCustomAudioFile(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
   const url = URL.createObjectURL(file);
+  isBgmPlaying = true;
+  bgmAudio.muted = false;
   bgmAudio.src = url;
   bgmAudio.play().catch(() => {});
+  updateVolumes();
   const cleanName = file.name.replace(/\.[^.]+$/, '');
   document.getElementById('now-playing-label').textContent = '🎧 ' + cleanName;
+  syncBgmToggleUI();
   document.querySelectorAll('#track-list .track-btn').forEach(btn => {
     btn.classList.remove('playing');
     btn.querySelector('span:last-child').textContent = 'PLAY';
@@ -4277,8 +4455,8 @@ function updateVolumes() {
   const vWater = document.getElementById('vol-water').value / 100;
   const vPad = document.getElementById('vol-pad').value / 100;
   bgmAudio.volume = vBgm;
-  if (waterGain) waterGain.gain.value = vWater * 0.35;
-  if (padGain) padGain.gain.value = vPad * 0.12;
+  if (waterGain) waterGain.gain.value = isBgmPlaying ? (vWater * 0.35) : 0;
+  if (padGain) padGain.gain.value = isBgmPlaying ? (vPad * 0.12) : 0;
 }
 
 function playBellChime() {
@@ -4664,7 +4842,7 @@ function animate() {
     myAvatar.group.rotation.y = Math.atan2(-kx, -kz) + camYaw;
   }
 
-    // 🕺 [목사님 요청] 12명 NPC 클럽·풀파티 전구역 각자 고유 댄스 & 모션 가동!
+    // 🕺 [공식 스펙] 12명 NPC 클럽·풀파티 전구역 각자 고유 댄스 & 모션 가동!
   avatars.forEach(av => {
     if (!av.id.startsWith('npc_')) return;
     const mode = av.danceMode || 'techno';
@@ -4901,8 +5079,8 @@ function enterSanctuary(withMusic) {
   startAudioEngine(withMusic);
   initMultiplayerSync();
   showToast(withMusic
-    ? `⛪ [${myCustom.name}] 님, SOXL 멘탈케어 클럽 메인홀에 입장하셨습니다! (레버리지 민족 음악 재생 중)`
-    : `⛪ [${myCustom.name}] 님, 조용한 무음 모드로 SOXL 멘탈케어 클럽에 입장하셨습니다.`);
+    ? `🪩 [${myCustom.name}] 님, SOXL 멘탈케어 클럽 메인홀에 입장하셨습니다! (레버리지 민족 음악 재생 중)`
+    : `🪩 [${myCustom.name}] 님, 조용한 무음 모드로 SOXL 멘탈케어 클럽에 입장하셨습니다.`);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -4939,13 +5117,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }, 50);
 
-  // 모바일/데스크톱 첫 터치 시 사운드 자동 언락
+  // 모바일/데스크톱 첫 터치 시 사운드 자동 언락 (단, BGM ON 상태일 때만 재생)
   const unlockAudio = () => {
     try {
       if (window.audioCtx && window.audioCtx.state === 'suspended') {
         window.audioCtx.resume();
       }
-      if (window.bgmAudio && window.bgmAudio.paused) {
+      if (isBgmPlaying && window.bgmAudio && window.bgmAudio.paused) {
         window.bgmAudio.play().catch(() => {});
       }
     } catch(e) {}
