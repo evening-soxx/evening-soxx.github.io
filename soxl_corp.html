@@ -1,0 +1,3784 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a2e22">
+<title>SOXL 주식회사 (SOXL Corp) 3D 스마트 오피스 · 목표주가 $500 & 수익률 300% 총력전</title>
+<meta name="description" content="어쩐지저녁의 SOXX — SOXL 주식회사 3D 메타버스 스마트 오피스. 10인+팀장 구성의 4대 트레이딩팀 아일랜드와 안쪽 대표이사 회장실·3X 운용본부장실, 목표주가 $500 결의 현수막, 월스트리트 오피스 BGM을 갖춘 인터랙티브 공간.">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="./assets/js/three.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'"></script>
+<script src="./assets/js/mqtt.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/mqtt@5.3.4/dist/mqtt.min.js'"></script>
+<style>
+  :root {
+    --soxl-green: #0d7a56;
+    --soxl-green-bright: #10b981;
+    --soxl-neon: #2ee59d;
+    --soxl-gold: #eab85c;
+    --soxl-gold-light: #ffe596;
+    --bg-dark: #0b141a;
+    --panel-bg: rgba(12, 22, 28, 0.95);
+    --panel-border: rgba(46, 229, 157, 0.45);
+    --text-light: #F4F6FA;
+    --text-dim: #A6B8C3;
+    --sans: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+    background: var(--bg-dark); color: var(--text-light); font-family: var(--sans);
+  }
+
+  /* 1. 부트(출근 입장) 화면 — SOXL 월스트리트 에메랄드 & 불골드 */
+  .office-boot {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px;
+    background: radial-gradient(circle at 50% 25%, #0f3829 0%, #0b1922 65%, #060c10 100%);
+    color: #fff; text-align: center;
+    transition: opacity 0.65s ease, visibility 0.65s ease;
+    overflow-y: auto;
+  }
+  .office-boot.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  .soxl-circle-logo {
+    width: 74px; height: 74px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 21px; letter-spacing: -0.5px; color: #fff;
+    box-shadow: 0 10px 32px rgba(16, 185, 129, 0.55), inset 0 2px 5px rgba(255,255,255,0.4);
+    margin-bottom: 12px; border: 2.5px solid #ffd269;
+    animation: pulse-soxl 3s ease-in-out infinite;
+  }
+  @keyframes pulse-soxl {
+    50% { transform: translateY(-4px) scale(1.04); box-shadow: 0 14px 40px rgba(46, 229, 157, 0.75); }
+  }
+  .boot-badge {
+    display: inline-block; margin-bottom: 8px; padding: 6px 16px; border-radius: 999px;
+    background: rgba(16, 185, 129, 0.2); border: 1px solid #2ee59d;
+    color: #9effd6; font-size: 13px; font-weight: 800; letter-spacing: 0.5px;
+  }
+  .office-boot h1 {
+    margin: 0; font-size: clamp(23px, 4vw, 34px); font-weight: 900;
+    letter-spacing: -0.5px; color: #ffffff;
+  }
+  .boot-sub {
+    margin: 8px 0 0; font-size: 14px; font-weight: 500; color: #cddbe6; line-height: 1.6;
+    max-width: 580px; word-break: keep-all;
+  }
+  .boot-slogan-banner {
+    margin: 12px 0 14px; padding: 11px 20px; border-radius: 14px;
+    background: linear-gradient(90deg, rgba(6,95,70,0.45) 0%, rgba(234,184,92,0.25) 50%, rgba(6,95,70,0.45) 100%);
+    border: 1.5px solid rgba(234, 184, 92, 0.7);
+    font-size: 14px; font-weight: 800; color: #ffe596; line-height: 1.55;
+    max-width: 580px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .boot-avatar-box {
+    width: 100%; max-width: 430px; margin: 0 0 14px; padding: 13px 15px;
+    border-radius: 16px; background: rgba(14, 27, 34, 0.92);
+    border: 1.5px solid rgba(46, 229, 157, 0.45);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .boot-gender-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .boot-gender-btn {
+    padding: 9px 12px; border-radius: 11px;
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06); color: #d0e0e8;
+    font-size: 13.5px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.2s ease;
+  }
+  .boot-gender-btn.active {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    border-color: #ffd269; color: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+  }
+  .boot-name-row {
+    display: grid; grid-template-columns: 1.15fr 1.25fr; gap: 8px;
+  }
+  .boot-name-row select, .boot-name-row input {
+    padding: 9px 11px; border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: #091319; color: #fff; font-size: 13.5px; font-weight: 700;
+    user-select: text; -webkit-user-select: text;
+  }
+  .boot-actions {
+    display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 340px;
+  }
+  .boot-btn-primary {
+    padding: 14px 22px; border-radius: 999px;
+    border: 1.5px solid #ffd269;
+    background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+    color: #ffffff; font-size: 15.5px; font-weight: 900;
+    cursor: pointer; transition: all 0.22s ease;
+    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
+  }
+  .boot-btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  .boot-btn-secondary {
+    padding: 8px 16px; border-radius: 999px; border: none;
+    background: transparent; color: #9ab2bd; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 4px;
+  }
+  .boot-btn-secondary:hover { color: #ffffff; }
+
+  /* 2. 3D 캔버스 & 아바타 이름표 레이어 */
+  #canvas-wrap {
+    position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; cursor: grab;
+  }
+  #canvas-wrap:active { cursor: grabbing; }
+  #labels-layer {
+    position: fixed; inset: 0; pointer-events: none; z-index: 10; overflow: hidden;
+  }
+  .avatar-label {
+    position: absolute; transform: translate(-50%, -100%);
+    padding: 4px 10px; border-radius: 6px;
+    background: rgba(10, 20, 26, 0.90); border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #f4f7fc; font-size: 12px; font-weight: 700; white-space: nowrap;
+    backdrop-filter: blur(6px); pointer-events: auto; cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+    transition: transform 0.15s ease;
+  }
+  .avatar-label:hover { transform: translate(-50%, -100%) scale(1.06); z-index: 20; }
+  .avatar-label.is-me {
+    background: linear-gradient(135deg, rgba(16,185,129,0.95), rgba(6,95,70,0.95));
+    border: 1.5px solid #ffd269; color: #fff;
+  }
+  .avatar-label.is-exec {
+    background: linear-gradient(135deg, rgba(42, 30, 12, 0.95), rgba(22, 16, 8, 0.95));
+    border: 1.5px solid #eab85c; color: #ffe699;
+  }
+  .avatar-label.is-leader {
+    border-color: #2ee59d; color: #b5ffe0;
+  }
+  .avatar-bubble {
+    position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%);
+    padding: 6px 13px; border-radius: 8px;
+    background: #ffffff; color: #0b1714;
+    border: 2px solid #0d7a56;
+    font-size: 12.5px; font-weight: 800;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45); white-space: nowrap;
+  }
+
+  /* 3. 상단 헤더 바 & 구역 이동 서브 바 */
+  .top-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    min-height: 46px; padding: max(6px, env(safe-area-inset-top)) 12px 6px 12px;
+    background: rgba(10, 19, 25, 0.95);
+    border-bottom: 1.5px solid rgba(46, 229, 157, 0.5);
+    z-index: 30; display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; pointer-events: auto; flex-wrap: nowrap;
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.55);
+  }
+  .top-bar::-webkit-scrollbar { display: none; }
+  .top-left, .top-right {
+    display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex-shrink: 0;
+  }
+  .hud-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 11px; border-radius: 7px;
+    background: rgba(20, 34, 44, 0.92); border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f0f7fa; font-size: 12px; font-weight: 700;
+    white-space: nowrap; flex-shrink: 0;
+    cursor: pointer; transition: all 0.18s ease;
+    text-decoration: none;
+  }
+  .hud-pill:hover {
+    border-color: #2ee59d; background: rgba(28, 52, 62, 0.96); color: #fff;
+  }
+  .hud-pill.soxl-brand {
+    background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+    border-color: #ffd269; color: #ffffff; font-weight: 900;
+  }
+  .hud-pill.club-link {
+    background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+    border-color: #f9a8d4; color: #ffffff; font-weight: 800;
+  }
+  .hud-pill.gold-link {
+    background: linear-gradient(135deg, #3d2c10 0%, #241908 100%);
+    border-color: #eab85c; color: #ffe699; font-weight: 800;
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #2ee59d;
+    box-shadow: 0 0 8px rgba(46, 229, 157, 0.9); flex-shrink: 0;
+  }
+
+  /* 구역 바로가기 바 (1~4팀, 회장실, 운용본부장실, 쇼룸·카페) */
+  .zone-nav-bar {
+    position: fixed; top: 48px; left: 50%; transform: translateX(-50%);
+    z-index: 28; display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 0 0 12px 12px;
+    background: rgba(11, 22, 28, 0.94);
+    border: 1px solid rgba(46, 229, 157, 0.42); border-top: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    max-width: 98vw; overflow-x: auto; scrollbar-width: none;
+  }
+  .zone-nav-bar::-webkit-scrollbar { display: none; }
+  .zone-btn {
+    padding: 5px 10px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06); color: #dcecf2;
+    font-size: 11.5px; font-weight: 700; white-space: nowrap; cursor: pointer;
+    transition: all 0.16s ease;
+  }
+  .zone-btn:hover { background: rgba(16, 185, 129, 0.25); border-color: #2ee59d; color: #fff; }
+  .zone-btn.active {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    border-color: #ffd269; color: #fff; font-weight: 800;
+  }
+
+  .status-banner {
+    position: fixed; top: 88px; left: 50%; transform: translateX(-50%);
+    z-index: 25; padding: 8px 16px; border-radius: 8px;
+    background: rgba(10, 22, 28, 0.95); border: 1.5px solid #2ee59d;
+    color: #ffffff; font-size: 13px; font-weight: 800;
+    backdrop-filter: blur(10px); pointer-events: none; text-align: center; max-width: 92vw;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.55);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .status-banner.is-faded {
+    opacity: 0 !important; pointer-events: none !important; transform: translateX(-50%) translateY(-6px);
+  }
+
+  /* 좌·우 카메라 회전 플로팅 버튼 */
+  .cam-pan-btn {
+    position: fixed; top: 50%; transform: translateY(-50%);
+    z-index: 24; width: 40px; height: 64px; border-radius: 12px;
+    background: rgba(12, 22, 30, 0.8); border: 1px solid rgba(46, 229, 157, 0.45);
+    color: #fff; font-size: 20px; font-weight: 900; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px); transition: all 0.18s ease;
+  }
+  .cam-pan-btn:hover { background: rgba(16, 185, 129, 0.85); border-color: #ffd269; }
+  #btn-cam-left { left: 10px; }
+  #btn-cam-right { right: 10px; }
+
+  /* 모바일 & 데스크톱 겸용 가상 십자 방향키 (D-PAD) */
+  #virtual-dpad {
+    position: fixed; right: 16px; bottom: 74px;
+    width: 112px; height: 112px; z-index: 33;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; pointer-events: auto;
+  }
+  .dpad-row { display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .dpad-btn {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: rgba(12, 24, 30, 0.86);
+    border: 1.5px solid rgba(46, 229, 157, 0.5);
+    color: #ffe596; font-size: 14px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    touch-action: manipulation;
+  }
+  .dpad-btn:active {
+    transform: scale(0.92);
+    background: rgba(16, 185, 129, 0.65);
+    border-color: #ffd269;
+  }
+  .dpad-center {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: rgba(8, 16, 20, 0.55);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #94a3b8;
+  }
+
+  /* 4. 하단 인터랙션 독 */
+  .bottom-dock {
+    position: fixed; bottom: max(10px, env(safe-area-inset-bottom)); left: 50%;
+    transform: translateX(-50%); z-index: 30;
+    display: flex; align-items: center; gap: 5px; padding: 6px 8px;
+    border-radius: 10px; background: rgba(10, 19, 25, 0.95);
+    border: 1.5px solid rgba(46, 229, 157, 0.55);
+    backdrop-filter: blur(16px); box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65);
+    max-width: 96vw; overflow-x: auto; scrollbar-width: none;
+  }
+  .bottom-dock::-webkit-scrollbar { display: none; }
+  .dock-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 8px 12px; border-radius: 7px; border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05); color: #f0f7fa; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: all 0.18s ease;
+  }
+  .dock-btn:hover { background: rgba(16, 185, 129, 0.25); border-color: #2ee59d; color: #fff; }
+  .dock-btn.is-active {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    border-color: #ffd269; color: #fff;
+  }
+  .dock-btn .shortcut {
+    font-size: 10.5px; font-weight: 800; color: #ffd269; padding: 1px 5px;
+    border-radius: 4px; background: rgba(0,0,0,0.35);
+  }
+
+  /* 4-B. 좌측 하단 사내 메신저 채팅 & 빠른 액션 바 */
+  .office-chat-stack {
+    position: fixed; left: 14px; bottom: 68px; width: 345px; max-width: calc(100vw - 145px);
+    z-index: 32; display: flex; flex-direction: column; gap: 5px;
+    pointer-events: auto;
+  }
+  .office-chatlog {
+    position: relative; border-radius: 8px;
+    background: rgba(10, 20, 26, 0.94);
+    border: 1px solid rgba(46, 229, 157, 0.5);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+  .chatlog-tab-toggle {
+    width: 100%; text-align: left; padding: 7px 12px;
+    background: rgba(16, 185, 129, 0.24); border: none;
+    color: #b5ffe0; font-size: 12px; font-weight: 800; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .office-chat-list {
+    list-style: none; margin: 0; padding: 8px 12px;
+    max-height: 135px; overflow-y: auto; font-size: 12px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .office-chatlog.is-collapsed .office-chat-list { display: none; }
+  .office-chat-list li {
+    line-height: 1.45; color: #e2eef4; word-break: break-word;
+  }
+  .office-chat-list li strong { color: #2ee59d; margin-right: 5px; }
+  .office-chat-list li.sys-msg { color: #ffd269; font-weight: 700; }
+
+  .quick-action-row {
+    display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none;
+  }
+  .quick-action-row::-webkit-scrollbar { display: none; }
+  .emote-pill-btn {
+    padding: 5px 9px; border-radius: 6px;
+    background: rgba(14, 26, 34, 0.92); border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e6f4f8; font-size: 11px; font-weight: 700; white-space: nowrap;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .emote-pill-btn:hover { background: #0d7a56; border-color: #ffd269; color: #fff; }
+
+  .office-chatbar {
+    display: flex; gap: 5px;
+  }
+  .office-chatbar input {
+    flex: 1; padding: 8px 11px; border-radius: 7px;
+    border: 1px solid rgba(46, 229, 157, 0.5);
+    background: rgba(10, 20, 26, 0.95); color: #fff; font-size: 12.5px;
+    user-select: text; -webkit-user-select: text;
+  }
+  .office-chatbar button {
+    padding: 0 13px; border-radius: 7px; border: 1px solid #ffd269;
+    background: linear-gradient(135deg, #10b981, #047857);
+    color: #fff; font-weight: 800; cursor: pointer;
+  }
+
+  /* 5. 우측 플로팅 기능 패널들 */
+  .floating-panel {
+    position: fixed; right: 16px; bottom: 72px;
+    width: 390px; max-width: calc(100vw - 24px); max-height: calc(100vh - 150px);
+    overflow-y: auto; z-index: 45;
+    padding: 18px; border-radius: 16px;
+    background: var(--panel-bg); border: 1.5px solid var(--panel-border);
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(18px);
+    display: none; flex-direction: column; gap: 12px;
+  }
+  .floating-panel.is-open { display: flex; }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 10px;
+  }
+  .panel-title {
+    margin: 0; font-size: 15.5px; font-weight: 800; color: #ffffff;
+  }
+  .panel-close {
+    background: transparent; border: none; color: #9ab2bd; font-size: 18px;
+    cursor: pointer; padding: 2px 6px;
+  }
+  .panel-close:hover { color: #fff; }
+
+  .cust-section { display: flex; flex-direction: column; gap: 6px; }
+  .cust-label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 700; color: #c4d7df;
+  }
+  .cust-seg {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  }
+  .cust-chip {
+    padding: 8px 6px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.05); color: #dcecf2;
+    font-size: 12px; font-weight: 700; cursor: pointer; text-align: center;
+  }
+  .cust-chip.active {
+    background: linear-gradient(135deg, #10b981, #047857);
+    border-color: #ffd269; color: #fff;
+  }
+  .swatch-row { display: flex; gap: 7px; flex-wrap: wrap; }
+  .color-swatch {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.25); cursor: pointer;
+  }
+  .color-swatch.active {
+    border-color: #ffd269; transform: scale(1.15);
+    box-shadow: 0 0 10px rgba(255, 210, 105, 0.7);
+  }
+
+  .soxl-btn {
+    width: 100%; padding: 11px 14px; border-radius: 10px;
+    border: 1px solid #ffd269;
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    color: #fff; font-size: 13.5px; font-weight: 800; cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .soxl-btn:hover { filter: brightness(1.1); }
+  .soxl-input {
+    width: 100%; padding: 9px 12px; border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(8, 16, 22, 0.9); color: #fff; font-size: 13px;
+    user-select: text; -webkit-user-select: text;
+  }
+
+  /* 실적 게이지 카드 */
+  .kpi-box {
+    padding: 14px; border-radius: 12px;
+    background: linear-gradient(145deg, rgba(16,185,129,0.22), rgba(14,24,34,0.9));
+    border: 1px solid rgba(234, 184, 92, 0.48);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .kpi-bar-bg {
+    width: 100%; height: 18px; border-radius: 999px;
+    background: rgba(255,255,255,0.1); overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .kpi-bar-fill {
+    height: 100%; width: 78%;
+    background: linear-gradient(90deg, #059669 0%, #10b981 50%, #ffd269 100%);
+    transition: width 0.3s ease;
+  }
+
+  /* 응원/결의 보드 아이템 */
+  .memo-item {
+    padding: 9px 11px; border-radius: 9px;
+    background: rgba(255,255,255,0.05);
+    border-left: 3.5px solid #10b981;
+    margin-bottom: 7px; font-size: 12.5px; line-height: 1.5;
+  }
+  .memo-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: #9ab2bd; margin-top: 4px;
+  }
+  .cheer-btn {
+    padding: 2px 8px; border-radius: 999px;
+    border: 1px solid rgba(234,184,92,0.5); background: rgba(234,184,92,0.15);
+    color: #ffe28a; font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+
+  /* 모달 백드롭 */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(6, 11, 15, 0.82); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; padding: 18px;
+  }
+  .modal-backdrop.is-open { display: flex; }
+  .modal-card {
+    width: 100%; max-width: 580px; max-height: 88vh; overflow-y: auto;
+    padding: 22px; border-radius: 18px;
+    background: #0e1a22; border: 1.5px solid rgba(46, 229, 157, 0.55);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.8);
+  }
+
+  @media (max-width: 820px) {
+    .top-bar { min-height: 40px; padding: max(4px, env(safe-area-inset-top)) 8px 4px 8px; gap: 4px; }
+    .hud-pill { padding: 4px 8px; font-size: 10.5px; }
+    .zone-nav-bar { top: 41px; left: 0; right: 0; transform: none; max-width: 100vw; border-radius: 0; padding: 4px 8px; }
+    .zone-btn { padding: 4px 8px; font-size: 10.5px; }
+    .status-banner { top: 76px; font-size: 11px; padding: 6px 12px; }
+    .bottom-dock {
+      bottom: max(6px, env(safe-area-inset-bottom));
+      left: 6px; right: 6px; transform: none; max-width: none;
+      justify-content: space-between; padding: 5px 6px; gap: 3px;
+    }
+    .dock-btn { flex: 1 1 0; justify-content: center; padding: 6px 4px; font-size: 10.5px; gap: 3px; }
+    .dock-btn .shortcut { display: none; }
+    .office-chat-stack {
+      left: 8px; bottom: 56px; width: calc(100vw - 122px); max-width: none;
+    }
+    .office-chat-list { max-height: 88px; }
+    #virtual-dpad { right: 8px; bottom: 58px; width: 98px; height: 98px; }
+    .dpad-btn, .dpad-center { width: 30px; height: 30px; font-size: 12px; }
+    .cam-pan-btn { width: 32px; height: 52px; font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 1. 부트(출근 입장) 화면 -->
+<main class="office-boot" id="office-boot">
+  <div class="soxl-circle-logo">SOXL</div>
+  <div class="boot-badge">🏢 SOXL 주식회사 · 3D 월스트리트 스마트 오피스</div>
+  <h1>SOXL 주식회사 (SOXL Corp) 본사</h1>
+  <p class="boot-sub">
+    AI가속기 1팀, HBM메모리 2팀, 야수의심장 멘탈방어 3팀과 자율좌석 4구역(각 11석, 팀장석 공석 완비) 및
+    안쪽에 자리한 <strong>대표이사 회장실 · 3X 운용본부장실(CIO)</strong>, 그리고 사방에 걸린 <strong>‘목표주가 $500 · 수익률 300% 달성’</strong> 결의 현수막을 직접 걸어 다니며 체험하세요!
+  </p>
+  <div class="boot-slogan-banner">
+    🔥 “SOXL 목표주가 $500 돌파 &amp; 수익률 300% 상승을 향하여! 야수의 심장으로 매수하고 다이아몬드 핸즈로 홀딩하라!”
+  </div>
+
+  <div class="boot-avatar-box">
+    <div style="font-size:12.5px; font-weight:800; color:#9effd6; text-align:left;">
+      🪪 내 SOXL 주식회사 임직원 사원증 &amp; 아바타 설정
+    </div>
+    <div class="boot-gender-row">
+      <button type="button" class="boot-gender-btn active" data-boot-gender="M">👨 남성 임직원·주주</button>
+      <button type="button" class="boot-gender-btn" data-boot-gender="F">👩 여성 임직원·주주</button>
+    </div>
+    <div class="boot-name-row">
+      <select id="boot-role-select" title="직책 선택">
+        <option value="회장">👑 대표이사 회장</option>
+        <option value="부사장">💼 운용본부장(CIO)</option>
+        <option value="팀장" selected>🚩 트레이딩팀장</option>
+        <option value="수석">📊 수석애널리스트</option>
+        <option value="매니저">💻 퀀트매니저</option>
+        <option value="대주주">💎 VIP 대주주</option>
+      </select>
+      <input type="text" id="boot-name-input" maxlength="14" value="김속슬" placeholder="이름 입력 (예: 홍길동)">
+    </div>
+  </div>
+
+  <div class="boot-actions">
+    <button class="boot-btn-primary" id="btn-enter-sound">🎵 월가 오피스 BGM 켜고 힘차게 출근하기</button>
+    <button class="boot-btn-secondary" id="btn-enter-mute">조용히 출근하기 (음소거 모드)</button>
+  </div>
+</main>
+
+<!-- 2. 3D 캔버스 & 아바타 이름표 레이어 -->
+<div id="canvas-wrap"></div>
+<div id="labels-layer"></div>
+
+<!-- 좌·우 시선 회전 버튼 -->
+<button type="button" class="cam-pan-btn" id="btn-cam-left" title="시선 왼쪽으로 회전">‹</button>
+<button type="button" class="cam-pan-btn" id="btn-cam-right" title="시선 오른쪽으로 회전">›</button>
+
+<!-- 모바일 & 데스크톱 겸용 가상 십자 방향키 (D-PAD) -->
+<div id="virtual-dpad" aria-label="화면 이동 방향키">
+  <div class="dpad-row">
+    <button type="button" class="dpad-btn" data-dpad="up" title="앞으로 이동">▲</button>
+  </div>
+  <div class="dpad-row">
+    <button type="button" class="dpad-btn" data-dpad="left" title="왼쪽 이동">◀</button>
+    <div class="dpad-center">이동</div>
+    <button type="button" class="dpad-btn" data-dpad="right" title="오른쪽 이동">▶</button>
+  </div>
+  <div class="dpad-row">
+    <button type="button" class="dpad-btn" data-dpad="down" title="뒤로 이동">▼</button>
+  </div>
+</div>
+
+<!-- 3. 상단 HUD 바 -->
+<header class="top-bar">
+  <div class="top-left">
+    <span class="hud-pill soxl-brand">
+      <span>🏢 SOXL 주식회사 본사</span>
+    </span>
+    <button class="hud-pill" id="btn-office-status" title="현재 접속 임직원 및 오피스 현황">
+      <span class="live-dot"></span>
+      <span id="current-zone-title">메인 트레이딩 오피스 (4대 팀 · 임원실)</span>
+      <span style="color:#ffd269;">· <strong id="online-total-count">15</strong>명 근무 중</span>
+    </button>
+    <button class="hud-pill" id="btn-top-avatar" title="복장·직책·사원증·트레이딩 소품 꾸미기">
+      <span>🪪 사원증·아바타</span>
+    </button>
+    <button class="hud-pill" id="btn-cam-preset" title="카메라 시점 전환">
+      <span>🎥 시점: <strong id="cam-preset-label">오피스 워크뷰</strong></span>
+    </button>
+    <button class="hud-pill" id="btn-zoom-in" title="화면 확대"><span>🔍 +확대</span></button>
+    <button class="hud-pill" id="btn-zoom-out" title="화면 축소"><span>🔎 -축소</span></button>
+  </div>
+  <div class="top-right">
+    <button class="hud-pill" id="btn-bgm-toggle" title="월스트리트 오피스 BGM 원터치 켜기/끄기">
+      <span id="bgm-status-label">🔊 오피스 BGM 켜짐</span>
+    </button>
+    <button class="hud-pill" id="btn-broadcast-chime" title="사내 방송 차임벨 및 목표주가 $500 독려 방송">
+      <span>📢 사내방송 송출</span>
+    </button>
+    <a class="hud-pill club-link" href="./soxl_mental_care.html?v=20261107d" title="퇴근 후 SOXL 멘탈케어 클럽 & 풀파티로 이동">
+      <span>🪩 클럽·풀파티 가기</span>
+    </a>
+    <a class="hud-pill gold-link" href="./index.html" title="어쩐지저녁의 SOXX 실시간 시황 데스크로 이동">
+      <span>📊 시황 데스크 ↗</span>
+    </a>
+  </div>
+</header>
+
+<!-- 3-B. 부서·임원실 1초 순간이동 네비게이션 바 -->
+<nav class="zone-nav-bar" aria-label="SOXL 주식회사 공간 바로가기">
+  <button type="button" class="zone-btn active" data-zone="overview">🏢 전체 오피스 중앙</button>
+  <button type="button" class="zone-btn" data-zone="team1">🚀 1팀 (AI가속기·NVDA팀)</button>
+  <button type="button" class="zone-btn" data-zone="team2">💾 2팀 (HBM·메모리팀)</button>
+  <button type="button" class="zone-btn" data-zone="team3">💎 3팀 (물타기·멘탈방어팀)</button>
+  <button type="button" class="zone-btn" data-zone="team4">🪑 4구역 (자율좌석·공석 11석)</button>
+  <button type="button" class="zone-btn" data-zone="chief">👑 안쪽: 대표이사 회장실</button>
+  <button type="button" class="zone-btn" data-zone="director">💼 안쪽: 3X 운용본부장실</button>
+  <button type="button" class="zone-btn" data-zone="lounge">☕ $500 쇼룸·사내카페</button>
+</nav>
+
+<div class="status-banner" id="status-banner">
+  🏢 SOXL 주식회사에 출근하셨습니다! 원하는 팀 책상이나 안쪽 대표이사 회장실·운용본부장실 의자를 클릭하면 착석해 업무를 봅니다.
+</div>
+
+<!-- 4-A. 좌측 하단 실시간 사내 메신저(EP) 채팅 & 빠른 액션 바 -->
+<section class="office-chat-stack" id="office-chat-stack" aria-label="실시간 사내 메신저 및 포즈">
+  <div class="office-chatlog" id="office-chatlog">
+    <button type="button" class="chatlog-tab-toggle" id="btn-chatlog-toggle">
+      <span id="chatlog-toggle-label">💬 SOXL 주식회사 실시간 EP 메신저 (접기 ▼)</span>
+    </button>
+    <ul class="office-chat-list" id="office-chat-list"></ul>
+  </div>
+
+  <div class="quick-action-row" role="toolbar">
+    <button type="button" class="emote-pill-btn" data-emote-btn="sit">🪑 자리착석(열일)</button>
+    <button type="button" class="emote-pill-btn" data-emote-btn="cheer">🔥 $500 가자!</button>
+    <button type="button" class="emote-pill-btn" data-emote-btn="salute">🫡 필승보고</button>
+    <button type="button" class="emote-pill-btn" data-emote-btn="wave">👋 반갑습니다</button>
+    <button type="button" class="emote-pill-btn" data-emote-btn="brief">📊 수익브리핑</button>
+  </div>
+
+  <form class="office-chatbar" id="office-chat-form" autocomplete="off">
+    <input type="text" id="office-chat-input" maxlength="50" placeholder="임직원·주주들에게 응원이나 시황 보고를 입력하세요...">
+    <button type="submit" title="전송">전송</button>
+  </form>
+</section>
+
+<!-- 4-B. 하단 7대 인터랙션 독 -->
+<nav class="bottom-dock" aria-label="스마트 오피스 컨트롤 독">
+  <button class="dock-btn" id="dock-sit">
+    <span>🪑</span>
+    <span id="dock-sit-label">내 자리 착석</span>
+    <span class="shortcut">1</span>
+  </button>
+  <button class="dock-btn" id="dock-cheer">
+    <span>🔥</span>
+    <span>$500 돌파 파이팅!</span>
+    <span class="shortcut">2</span>
+  </button>
+  <button class="dock-btn" id="dock-avatar">
+    <span>🪪</span>
+    <span>사원증·복장</span>
+    <span class="shortcut">3</span>
+  </button>
+  <button class="dock-btn" id="dock-kpi">
+    <span>📈</span>
+    <span>수익률 300% 상황판</span>
+    <span class="shortcut">4</span>
+  </button>
+  <button class="dock-btn" id="dock-memo">
+    <span>📌</span>
+    <span>주주 결의보드</span>
+    <span class="shortcut">5</span>
+  </button>
+  <button class="dock-btn" id="dock-banners">
+    <span>🚩</span>
+    <span>사내 표어·현수막</span>
+    <span class="shortcut">6</span>
+  </button>
+  <button class="dock-btn" id="dock-audio">
+    <span>🎵</span>
+    <span>오피스 BGM</span>
+    <span class="shortcut">7</span>
+  </button>
+</nav>
+
+<!-- 5-1. [사원증·아바타 꾸미기] 패널 -->
+<aside class="floating-panel" id="panel-avatar">
+  <div class="panel-header">
+    <h2 class="panel-title">🪪 내 SOXL 사원증 &amp; 오피스 아바타 설정</h2>
+    <button class="panel-close" data-close="panel-avatar">✕</button>
+  </div>
+
+  <div class="cust-section">
+    <div class="cust-label"><span>성별 선택</span></div>
+    <div class="cust-seg" style="grid-template-columns:1fr 1fr;">
+      <button type="button" class="cust-chip active" data-cust-gender="M">👨 남성 임직원</button>
+      <button type="button" class="cust-chip" data-cust-gender="F">👩 여성 임직원</button>
+    </div>
+  </div>
+
+  <div class="cust-section">
+    <div class="cust-label"><span>헤어스타일 &amp; 머리색</span></div>
+    <div class="cust-seg">
+      <button type="button" class="cust-chip active" data-cust-hair="0">월가 비즈니스컷</button>
+      <button type="button" class="cust-chip" data-cust-hair="1">스마트 가르마</button>
+      <button type="button" class="cust-chip" data-cust-hair="2">볼륨 스타일</button>
+    </div>
+    <div class="swatch-row" style="margin-top:4px;">
+      <button type="button" class="color-swatch active" data-hair-color="#1b1613" style="background:#1b1613;" title="내추럴 블랙"></button>
+      <button type="button" class="color-swatch" data-hair-color="#422c1d" style="background:#422c1d;" title="다크 브라운"></button>
+      <button type="button" class="color-swatch" data-hair-color="#6e4b32" style="background:#6e4b32;" title="에스프레소 브라운"></button>
+      <button type="button" class="color-swatch" data-hair-color="#eab85c" style="background:#eab85c;" title="불마켓 골드"></button>
+      <button type="button" class="color-swatch" data-hair-color="#b8bfc7" style="background:#b8bfc7;" title="임원 실버그레이"></button>
+    </div>
+  </div>
+
+  <div class="cust-section">
+    <div class="cust-label"><span>오피스 복장 (월가 수트 / 실리콘밸리 캐주얼 / 불장 조끼)</span></div>
+    <div class="cust-seg">
+      <button type="button" class="cust-chip active" data-cust-outfit="suit">👔 월스트리트 정장</button>
+      <button type="button" class="cust-chip" data-cust-outfit="casual">🧥 테크 캐주얼</button>
+      <button type="button" class="cust-chip" data-cust-outfit="vest">🟢 SOXL 불장조끼</button>
+    </div>
+    <div class="swatch-row" style="margin-top:4px;">
+      <button type="button" class="color-swatch active" data-outfit-color="#1e293b" style="background:#1e293b;" title="월가 네이비 수트"></button>
+      <button type="button" class="color-swatch" data-outfit-color="#27272a" style="background:#27272a;" title="차콜 수트"></button>
+      <button type="button" class="color-swatch" data-outfit-color="#047857" style="background:#047857;" title="SOXL 불마켓 그린"></button>
+      <button type="button" class="color-swatch" data-outfit-color="#b91c1c" style="background:#b91c1c;" title="한국식 양봉 레드"></button>
+      <button type="button" class="color-swatch" data-outfit-color="#334155" style="background:#334155;" title="슬레이트 블루"></button>
+      <button type="button" class="color-swatch" data-outfit-color="#e2e8f0" style="background:#e2e8f0;" title="화이트 셔츠/자켓"></button>
+    </div>
+  </div>
+
+  <div class="cust-section">
+    <div class="cust-label"><span>업무 소품 (손에 들고 다니는 아이템)</span></div>
+    <div class="cust-seg" style="grid-template-columns:repeat(3,1fr);">
+      <button type="button" class="cust-chip active" data-cust-prop="laptop">💻 트레이딩 맥북</button>
+      <button type="button" class="cust-chip" data-cust-prop="folder">📋 $500 결재판</button>
+      <button type="button" class="cust-chip" data-cust-prop="coffee">☕ 아이스커피</button>
+      <button type="button" class="cust-chip" data-cust-prop="goldbar">🪙 순금 골드바</button>
+      <button type="button" class="cust-chip" data-cust-prop="bag">💼 월가 서류가방</button>
+      <button type="button" class="cust-chip" data-cust-prop="none">🤲 빈손</button>
+    </div>
+  </div>
+
+  <div class="cust-section">
+    <div class="cust-label"><span>안경 착용</span></div>
+    <div class="cust-seg" style="grid-template-columns:1fr 1fr;">
+      <button type="button" class="cust-chip active" data-cust-acc="none">미착용</button>
+      <button type="button" class="cust-chip" data-cust-acc="glasses">👓 애널리스트 안경</button>
+    </div>
+  </div>
+
+  <div class="cust-section">
+    <div class="cust-label"><span>직책 &amp; 성명 변경</span></div>
+    <div style="display:flex; gap:6px;">
+      <select class="soxl-input" id="cust-role-select" style="width:42%;">
+        <option value="회장">👑 회장</option>
+        <option value="부사장">💼 부사장</option>
+        <option value="팀장" selected>🚩 팀장</option>
+        <option value="수석">📊 수석</option>
+        <option value="매니저">💻 매니저</option>
+        <option value="대주주">💎 대주주</option>
+      </select>
+      <input type="text" class="soxl-input" id="cust-name-input" maxlength="14" value="김속슬">
+      <button type="button" class="soxl-btn" id="btn-save-custom-name" style="width:auto; white-space:nowrap; padding:0 14px;">적용</button>
+    </div>
+  </div>
+</aside>
+
+<!-- 5-2. [목표주가 $500 & 수익률 300% 상황판] 패널 -->
+<aside class="floating-panel" id="panel-kpi">
+  <div class="panel-header">
+    <h2 class="panel-title">📈 SOXL 주식회사 목표주가 $500 상황판</h2>
+    <button class="panel-close" data-close="panel-kpi">✕</button>
+  </div>
+
+  <div class="kpi-box">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:12.5px; color:#ffd269; font-weight:800;">🔥 전사 수익률 300% 목표 달성률</span>
+      <strong id="kpi-percent-txt" style="font-size:21px; color:#fff; font-weight:900;">236% / 300%</strong>
+    </div>
+    <div class="kpi-bar-bg">
+      <div class="kpi-bar-fill" id="kpi-bar-fill" style="width:78%;"></div>
+    </div>
+    <div style="font-size:12px; color:#d0e4e8; line-height:1.5;" id="kpi-desc-txt">
+      현재 AI가속기 1팀, HBM메모리 2팀, 멘탈방어 3팀 합산 반도체 슈퍼사이클 매수세가 폭발하고 있습니다! 아래 버튼을 눌러 불장 부스트를 가동하세요!
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px; font-size:12px;">
+    <div style="padding:9px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);">
+      <div style="color:#2ee59d; font-weight:800;">🚀 1팀 (AI가속기·NVDA팀)</div>
+      <div style="font-size:14.5px; font-weight:900; color:#fff; margin-top:2px;">NVDA·AVGO 285%</div>
+    </div>
+    <div style="padding:9px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);">
+      <div style="color:#9ec5ff; font-weight:800;">💾 2팀 (HBM·메모리팀)</div>
+      <div style="font-size:14.5px; font-weight:900; color:#fff; margin-top:2px;">HBM4·MU·RAM 274%</div>
+    </div>
+    <div style="padding:9px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);">
+      <div style="color:#ffd269; font-weight:800;">💎 3팀 (물타기·멘탈방어팀)</div>
+      <div style="font-size:14.5px; font-weight:900; color:#fff; margin-top:2px;">다이아몬드 홀딩 310%</div>
+    </div>
+    <div style="padding:9px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);">
+      <div style="color:#cbd5e1; font-weight:800;">🪑 4구역 (자율좌석)</div>
+      <div style="font-size:14.5px; font-weight:900; color:#fff; margin-top:2px;">11석 완비 (공석)</div>
+    </div>
+  </div>
+
+  <button type="button" class="soxl-btn" id="btn-kpi-boost">
+    🚀 기관 대량 순매수 체결시키기! (+수익률 게이지 상승 &amp; 팡파레)
+  </button>
+</aside>
+
+<!-- 5-3. [SOXL $500 주주 결의·응원 보드 (영구 방명록)] 패널 -->
+<aside class="floating-panel" id="panel-memo">
+  <div class="panel-header">
+    <h2 class="panel-title">📌 SOXL 주식회사 $500 결의·응원 보드</h2>
+    <button class="panel-close" data-close="panel-memo">✕</button>
+  </div>
+  <div style="font-size:12px; color:#c4d7df; line-height:1.55;">
+    남겨주신 홀딩 결의와 응원 메시지는 창을 닫아도 사라지지 않고 <strong>SOXL 주식회사 상황판 결의 보드에 영구 보존</strong>됩니다.
+  </div>
+  <input type="text" class="soxl-input" id="memo-input" maxlength="80" placeholder="예: SOXL $500 갈 때까지 절대 익절 안 합니다! 다이아몬드 핸즈 파이팅!">
+  <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:6px;">
+    <button type="button" class="soxl-btn" id="btn-walk-memo" style="font-size:12.5px; padding:10px 8px;">📌 상황판 앞으로 걸어가 붙이기</button>
+    <button type="button" class="soxl-btn" id="btn-direct-memo" style="font-size:12.5px; padding:10px 8px; background:linear-gradient(135deg,#1e293b,#0f172a); border-color:#ffd269; color:#ffe699;">✍️ 내 자리에서 바로 등록</button>
+  </div>
+  <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#ffd269; font-weight:700;">
+    <span>🔥 임직원·주주 결의 메시지 (<span id="memo-count-num">5</span>건)</span>
+    <span style="color:#2ee59d;">🟢 실시간 영구 보존</span>
+  </div>
+  <div id="memo-list" style="max-height:210px; overflow-y:auto;"></div>
+</aside>
+
+<!-- 5-4. [사내 표어·현수막 갤러리] 패널 -->
+<aside class="floating-panel" id="panel-banners">
+  <div class="panel-header">
+    <h2 class="panel-title">🚩 SOXL 주식회사 사내 표어 · 현수막 모음</h2>
+    <button class="panel-close" data-close="panel-banners">✕</button>
+  </div>
+  <div style="font-size:12px; color:#c4d7df;">
+    트레이딩 본부 벽면과 임원실에 걸려 있는 목표주가 $500 · 수익률 300% 달성 표어입니다. 항목을 누르면 해당 현수막 앞으로 이동합니다!
+  </div>
+  <div id="banner-gallery-list" style="display:flex; flex-direction:column; gap:8px; max-height:310px; overflow-y:auto;"></div>
+</aside>
+
+<!-- 5-5. [오피스 BGM · 사운드 컨트롤] 패널 -->
+<aside class="floating-panel" id="panel-audio">
+  <div class="panel-header">
+    <h2 class="panel-title">🎵 월스트리트 오피스 BGM &amp; 사운드</h2>
+    <button class="panel-close" data-close="panel-audio">✕</button>
+  </div>
+
+  <div style="font-size:12px; color:#ffd269; font-weight:800;">
+    💿 배경음악(BGM) 트랙 선택
+  </div>
+  <div style="display:flex; flex-direction:column; gap:6px;">
+    <button type="button" class="cust-chip active" data-bgm-track="prestige" style="text-align:left; padding:10px 12px;">
+      🎵 Track 1. <strong>Wall Street Prestige — Smart Office Lounge</strong> (품격 있는 월가 스마트 오피스 피아노 &amp; 라운지)
+    </button>
+    <button type="button" class="cust-chip" data-bgm-track="bullrun" style="text-align:left; padding:10px 12px;">
+      🔥 Track 2. <strong>SOXL $500 Bull Run — 300% 돌파 출정가</strong> (에너지 넘치는 3배 레버리지 불마켓 앤썸)
+    </button>
+    <button type="button" class="cust-chip" data-bgm-track="anthem" style="text-align:left; padding:10px 12px;">
+      👑 Track 3. <strong>Leverage Nation — 대주주 총회 행진곡</strong> (웅장한 월스트리트 심포니)
+    </button>
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,0.12); padding-top:10px; display:flex; flex-direction:column; gap:8px; font-size:12.5px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span>🎵 오피스 BGM 볼륨</span>
+      <input type="range" id="vol-bgm" min="0" max="100" value="65" style="accent-color:#10b981;">
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span>⌨️ 트레이딩 데스크 키보드 타건음</span>
+      <input type="range" id="vol-office" min="0" max="100" value="45" style="accent-color:#10b981;">
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span>🔔 뉴욕증시 오프닝 벨 &amp; 사내방송 차임벨</span>
+      <input type="checkbox" id="chk-sfx" checked style="accent-color:#10b981; width:16px; height:16px;">
+    </div>
+  </div>
+
+  <button type="button" class="soxl-btn" id="btn-panel-broadcast">
+    📢 “띵동댕동~ SOXL 목표주가 $500 달성 총력전!” 사내 방송 울리기
+  </button>
+</aside>
+
+<!-- 6. 부서 및 근무 인원 안내 모달 -->
+<div class="modal-backdrop" id="modal-office-info">
+  <div class="modal-card">
+    <div class="panel-header">
+      <h2 class="panel-title">🏢 SOXL 주식회사 공간 구성 &amp; 근무 현황</h2>
+      <button class="panel-close" id="btn-close-office-info">✕</button>
+    </div>
+    <div style="margin-top:10px; padding:11px 14px; border-radius:10px; background:rgba(16,185,129,0.14); border:1px solid rgba(46,229,157,0.4); font-size:12.5px; color:#dcfce7; line-height:1.55;">
+      🟢 <strong>실시간 스마트 오피스 가동 중:</strong> 실제 접속자 <strong id="real-user-count">1</strong>명 + 상주 근무 중인 SOXL 주식회사 임직원(대표이사 회장·운용본부장·1~3팀 핵심 트레이더) <strong id="npc-user-count">14</strong>명
+    </div>
+    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:#e2e8f0;">
+      <span>👥 상주 근무 중인 임원·팀원 NPC 함께 표시하기</span>
+      <input type="checkbox" id="chk-show-npc" checked style="accent-color:#10b981; width:17px; height:17px; cursor:pointer;">
+    </div>
+    <div style="margin-top:12px; display:flex; flex-direction:column; gap:7px; font-size:12.5px;">
+      <div style="padding:9px 12px; border-radius:8px; background:rgba(255,255,255,0.05); cursor:pointer;" data-modal-zone="chief">
+        👑 <strong>안쪽 좌측: 대표이사 회장실 (CEO 집무실)</strong> — 중역 데스크, VIP 가죽 응접 소파, 6인 대주주 작전회의탁, 황금 황소 조형물
+      </div>
+      <div style="padding:9px 12px; border-radius:8px; background:rgba(255,255,255,0.05); cursor:pointer;" data-modal-zone="director">
+        💼 <strong>안쪽 우측: 3X 운용본부장실 (CIO 부사장실)</strong> — 유리 가벽 독립 임원실, 중역 데스크, 4인 퀀트 전략 원탁
+      </div>
+      <div style="padding:9px 12px; border-radius:8px; background:rgba(255,255,255,0.05); cursor:pointer;" data-modal-zone="team1">
+        🚀 <strong>제1팀: AI가속기 · NVDA 3X 트레이딩팀 (팀장석 공석 · 팀원 10석)</strong> — 엔비디아 · 브로드컴 · TSMC 집중 운용
+      </div>
+      <div style="padding:9px 12px; border-radius:8px; background:rgba(255,255,255,0.05); cursor:pointer;" data-modal-zone="team2">
+        💾 <strong>제2팀: HBM · 메모리 슈퍼사이클팀 (팀장석 공석 · 팀원 10석)</strong> — 마이크론 · SK하이닉스 · 삼성전자 · RAM 2X 분석
+      </div>
+      <div style="padding:9px 12px; border-radius:8px; background:rgba(255,255,255,0.05); cursor:pointer;" data-modal-zone="team3">
+        💎 <strong>제3팀: 야수의심장 물타기 · 멘탈방어팀 (팀장석 공석 · 팀원 10석)</strong> — 분할매수 · 평단관리 · 다이아몬드 핸즈 수호
+      </div>
+      <div style="padding:9px 12px; border-radius:8px; background:rgba(255,255,255,0.05); cursor:pointer;" data-modal-zone="team4">
+        🪑 <strong>제4구역: 주주 자율좌석 &amp; 퀀트 TF 존 (전체 11석 공석)</strong> — 자유롭게 앉을 수 있는 100% 공석 자율근무 구역
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 오디오 에셋 (17_어쩐지저녁의_SOXX 자체 오디오만 100% 사용) -->
+<audio id="audio-bgm-prestige" loop preload="auto" src="./assets/audio/wall_street_prestige.mp3"></audio>
+<audio id="audio-bgm-bullrun" loop preload="auto" src="./assets/audio/leverage_nation_bull_run.mp3"></audio>
+<audio id="audio-bgm-anthem" loop preload="auto" src="./assets/audio/leverage_nation_anthem.mp3"></audio>
+<script>
+(() => {
+  /* ==============================================================
+   * 1. 사내 표어·현수막 데이터 (SOXL 목표주가 $500 & 수익률 300% 달성 총력전!)
+   * ============================================================== */
+  const OFFICE_SLOGANS = [
+    {
+      id: 'main_banner',
+      title: '🔥 [필승] SOXL 목표주가 $500 돌파 & 전 주주 수익률 300% 달성 총력전!',
+      sub: '“야수의 심장으로 매수하고 다이아몬드 핸즈로 홀딩하라! 반도체는 결국 우상향한다!”',
+      zone: 'overview',
+      lookPos: { x: 0, z: -4.0, yaw: 0 }
+    },
+    {
+      id: 'left_banner_1',
+      title: '🚀 [AI가속기 1팀] 엔비디아·브로드컴·TSMC 초격차! 3배 레버리지 수익 300% 돌파!',
+      sub: '“전 세계 AI 데이터센터의 심장은 우리 손안에 있다! 목표는 오직 $500!”',
+      zone: 'team1',
+      lookPos: { x: -15.0, z: -4.2, yaw: Math.PI / 2 }
+    },
+    {
+      id: 'right_banner_1',
+      title: '💾 [HBM메모리 2팀] HBM4 슈퍼사이클 완판! 마이크론·하이닉스·RAM 2X 실적 폭발!',
+      sub: '“메모리 병목이 곧 우리의 수익이다! $500 달성 시 전 임직원 월스트리트 특별 성과급 지급!”',
+      zone: 'team2',
+      lookPos: { x: 15.0, z: -4.2, yaw: -Math.PI / 2 }
+    },
+    {
+      id: 'left_banner_2',
+      title: '💎 [물타기·멘탈방어 3팀] 흔들리는 음봉은 바겐세일! 분할매수로 평단가를 제압하라!',
+      sub: '“공포에 사고 환희에 축배를 들어라! 3배 레버리지 주주의 인내는 황금으로 돌아온다!”',
+      zone: 'team3',
+      lookPos: { x: -15.0, z: 8.2, yaw: Math.PI / 2 }
+    },
+    {
+      id: 'right_banner_2',
+      title: '🪑 [제4구역 자율워크존] 주주님이 곧 임원입니다! 원하시는 자리 어디든 착석하세요!',
+      sub: '“팀장석부터 11석 자율좌석까지 100% 공석 개방! 나만의 트레이딩 데스크에서 작전을 지휘하세요!”',
+      zone: 'team4',
+      lookPos: { x: 15.0, z: 8.2, yaw: -Math.PI / 2 }
+    },
+    {
+      id: 'chief_banner',
+      title: '👑 SOXL 주식회사 대표이사 회장실 · 목표주가 $500 GREAT JUMP 컨트롤타워',
+      sub: '“월스트리트 No.1 반도체 홀딩스의 자부심! 모든 주주와 함께 $500 고지에 깃발을 꽂습니다!”',
+      zone: 'chief',
+      lookPos: { x: -5.5, z: -16.2, yaw: 0 }
+    },
+    {
+      id: 'director_banner',
+      title: '💼 3X 운용본부장(CIO) 집무실 · 글로벌 반도체 마켓쉐어 1위 & 수익률 300%!',
+      sub: '“데이터와 실적에 답이 있다! 압도적 퀀트 전략으로 불마켓 수익률을 극대화한다!”',
+      zone: 'director',
+      lookPos: { x: 13.5, z: -16.2, yaw: 0 }
+    }
+  ];
+
+  /* ==============================================================
+   * 2. Web Audio 사운드스케이프 (월가 BGM + 기계식 키보드 타건음 + 뉴욕증시 벨/사내방송 차임벨 + 백업 신디)
+   * ============================================================== */
+  let audioCtx = null;
+  let masterMuted = false;
+  let officeAmbGain = null;
+  let currentBgmTrack = 'prestige';
+  let synthLoopTimer = null;
+
+  const bgmPrestigeEl = document.getElementById('audio-bgm-prestige');
+  const bgmBullrunEl = document.getElementById('audio-bgm-bullrun');
+  const bgmAnthemEl = document.getElementById('audio-bgm-anthem');
+
+  function initWebAudio() {
+    if (audioCtx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+
+    const bufferSize = Math.floor(audioCtx.sampleRate * 1.5);
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const out = noiseBuffer.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.03 * w) / 1.03;
+      out[i] = last * 0.07;
+    }
+    const src = audioCtx.createBufferSource();
+    src.buffer = noiseBuffer;
+    src.loop = true;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 340;
+    filter.Q.value = 0.8;
+
+    officeAmbGain = audioCtx.createGain();
+    officeAmbGain.gain.value = 0.14;
+
+    src.connect(filter);
+    filter.connect(officeAmbGain);
+    officeAmbGain.connect(audioCtx.destination);
+    src.start(0);
+
+    setInterval(() => {
+      if (!audioCtx || masterMuted) return;
+      if (Math.random() < 0.65) playKeyboardClackBurst();
+    }, 2600);
+  }
+
+  function playKeyboardClackBurst() {
+    if (!audioCtx || masterMuted) return;
+    const vol = Number(document.getElementById('vol-office').value) / 100;
+    if (vol <= 0.03) return;
+    const count = 3 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        if (!audioCtx || masterMuted) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1150 + Math.random() * 650, now);
+        osc.frequency.exponentialRampToValueAtTime(290, now + 0.022);
+        g.gain.setValueAtTime(0.015 * vol, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.028);
+      }, i * (55 + Math.random() * 45));
+    }
+  }
+
+  function playOfficeBroadcastChime(isFanfare = false) {
+    if (!audioCtx || masterMuted) return;
+    const sfxChk = document.getElementById('chk-sfx');
+    if (sfxChk && !sfxChk.checked) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const notes = isFanfare
+      ? [523.25, 659.25, 783.99, 1046.50, 1318.51]
+      : [523.25, 659.25, 783.99, 1046.50];
+    const step = isFanfare ? 0.13 : 0.24;
+
+    notes.forEach((freq, idx) => {
+      const start = audioCtx.currentTime + idx * step;
+      const osc = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = 'sine';
+      osc2.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, start);
+      osc2.frequency.setValueAtTime(freq * 2, start);
+
+      const dur = idx === notes.length - 1 ? 1.25 : 0.45;
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.linearRampToValueAtTime(0.075, start + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+
+      osc.connect(g);
+      osc2.connect(g);
+      g.connect(audioCtx.destination);
+      osc.start(start);
+      osc2.start(start);
+      osc.stop(start + dur + 0.02);
+      osc2.stop(start + dur + 0.02);
+    });
+  }
+
+  function startFallbackSynthBgm() {
+    if (synthLoopTimer) return;
+    let step = 0;
+    const chordProg = [
+      [261.63, 329.63, 392.00, 493.88, 587.33],
+      [246.94, 293.66, 392.00, 493.88, 587.33],
+      [220.00, 261.63, 329.63, 392.00, 493.88],
+      [174.61, 220.00, 261.63, 329.63, 392.00]
+    ];
+    synthLoopTimer = setInterval(() => {
+      if (!audioCtx || masterMuted) return;
+      const activeAudio = currentBgmTrack === 'bullrun' ? bgmBullrunEl : (currentBgmTrack === 'anthem' ? bgmAnthemEl : bgmPrestigeEl);
+      if (activeAudio && !activeAudio.paused && activeAudio.currentTime > 0.1) return;
+
+      const vol = (Number(document.getElementById('vol-bgm').value) / 100) * 0.04;
+      const chord = chordProg[Math.floor(step / 4) % chordProg.length];
+      const note = chord[step % chord.length];
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(note, now);
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(vol, now + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.48);
+      osc.connect(g);
+      g.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.5);
+      step++;
+    }, 280);
+  }
+
+  function syncBgmPlayback() {
+    const vol = Number(document.getElementById('vol-bgm').value) / 100;
+    [bgmPrestigeEl, bgmBullrunEl, bgmAnthemEl].forEach(el => { if (el) el.volume = vol; });
+
+    if (masterMuted) {
+      [bgmPrestigeEl, bgmBullrunEl, bgmAnthemEl].forEach(el => { if (el) el.pause(); });
+      if (officeAmbGain) officeAmbGain.gain.value = 0;
+      document.getElementById('bgm-status-label').textContent = '🔇 오피스 BGM 꺼짐';
+      return;
+    }
+    if (officeAmbGain) {
+      officeAmbGain.gain.value = (Number(document.getElementById('vol-office').value) / 100) * 0.22;
+    }
+    document.getElementById('bgm-status-label').textContent =
+      currentBgmTrack === 'bullrun' ? '🔥 $500 출정가 재생중' :
+      (currentBgmTrack === 'anthem' ? '👑 대주주 행진곡 재생중' : '🔊 오피스 BGM 켜짐');
+
+    [bgmPrestigeEl, bgmBullrunEl, bgmAnthemEl].forEach(el => { if (el) el.pause(); });
+    const targetEl = currentBgmTrack === 'bullrun' ? bgmBullrunEl : (currentBgmTrack === 'anthem' ? bgmAnthemEl : bgmPrestigeEl);
+    if (targetEl) {
+      targetEl.play().catch(() => { startFallbackSynthBgm(); });
+    }
+  }
+
+  function startAudioSystem(withSound) {
+    initWebAudio();
+    masterMuted = !withSound;
+    if (withSound && audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    syncBgmPlayback();
+    startFallbackSynthBgm();
+  }
+
+  /* ==============================================================
+   * 3. Three.js 3D 스마트 오피스 씬(Scene) 초기화 & 조명
+   * ============================================================== */
+  const wrap = document.getElementById('canvas-wrap');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x16222c);
+  scene.fog = new THREE.FogExp2(0x16222c, 0.0082);
+
+  const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 160);
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.98;
+  wrap.appendChild(renderer.domElement);
+
+  const ambientLight = new THREE.AmbientLight(0xf4f9fc, 0.80);
+  scene.add(ambientLight);
+
+  const mainDirLight = new THREE.DirectionalLight(0xfffdf6, 0.70);
+  mainDirLight.position.set(14, 24, 16);
+  mainDirLight.castShadow = true;
+  mainDirLight.shadow.mapSize.width = 1024;
+  mainDirLight.shadow.mapSize.height = 1024;
+  mainDirLight.shadow.camera.near = 0.5;
+  mainDirLight.shadow.camera.far = 75;
+  const sd = 30;
+  mainDirLight.shadow.camera.left = -sd;
+  mainDirLight.shadow.camera.right = sd;
+  mainDirLight.shadow.camera.top = sd;
+  mainDirLight.shadow.camera.bottom = -sd;
+  scene.add(mainDirLight);
+
+  const chiefRoomLight = new THREE.PointLight(0xffe8c2, 0.58, 18);
+  chiefRoomLight.position.set(-5.5, 5.2, -18.0);
+  scene.add(chiefRoomLight);
+
+  const directorRoomLight = new THREE.PointLight(0xffe8c2, 0.52, 16);
+  directorRoomLight.position.set(13.5, 5.2, -18.0);
+  scene.add(directorRoomLight);
+
+  const worldGroup = new THREE.Group();
+  scene.add(worldGroup);
+
+  /* ==============================================================
+   * 4. 절차적(Procedural) 캔버스 텍스처 생성기
+   * ============================================================== */
+  function createOfficeCarpetTexture() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#cfd8df';
+    ctx.fillRect(0, 0, 512, 512);
+    const tile = 64;
+    for (let y = 0; y < 512; y += tile) {
+      for (let x = 0; x < 512; x += tile) {
+        const even = ((x / tile) + (y / tile)) % 2 === 0;
+        ctx.fillStyle = even ? '#d4dee5' : '#c6d1d9';
+        ctx.fillRect(x, y, tile, tile);
+        ctx.strokeStyle = '#b5c2cc';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x, y, tile, tile);
+      }
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(10, 10);
+    return tex;
+  }
+
+  function createExecWoodTexture() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#6e4c30';
+    ctx.fillRect(0, 0, 512, 512);
+    for (let y = 0; y < 512; y += 32) {
+      ctx.fillStyle = (y / 32) % 2 === 0 ? '#785336' : '#654429';
+      ctx.fillRect(0, y, 512, 30);
+      ctx.fillStyle = '#4d321c';
+      ctx.fillRect(0, y + 30, 512, 2);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(6, 4);
+    return tex;
+  }
+
+  function createCityWindowTexture() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const g = c.getContext('2d');
+    const sky = g.createLinearGradient(0, 0, 0, 512);
+    sky.addColorStop(0, '#1e4e79');
+    sky.addColorStop(0.55, '#6ba4cf');
+    sky.addColorStop(1, '#d8ecf8');
+    g.fillStyle = sky;
+    g.fillRect(0, 0, 512, 512);
+
+    // 월스트리트 & 맨해튼 마천루 실루엣
+    const blds = [
+      [15, 190, 58, 322, '#2d455e'], [82, 130, 72, 382, '#23384f'],
+      [164, 210, 58, 302, '#3d566f'], [232, 105, 86, 407, '#1b2d42'],
+      [328, 170, 66, 342, '#2f4761'], [404, 135, 92, 377, '#253b52']
+    ];
+    blds.forEach(([bx, by, bw, bh, col]) => {
+      g.fillStyle = col;
+      g.fillRect(bx, by, bw, bh);
+      g.fillStyle = 'rgba(255, 245, 200, 0.52)';
+      for (let wy = by + 14; wy < 490; wy += 20) {
+        for (let wx = bx + 8; wx < bx + bw - 10; wx += 14) {
+          g.fillRect(wx, wy, 8, 10);
+        }
+      }
+    });
+    g.strokeStyle = '#1f2937';
+    g.lineWidth = 10;
+    g.strokeRect(5, 5, 502, 502);
+    g.beginPath();
+    g.moveTo(256, 0); g.lineTo(256, 512);
+    g.moveTo(0, 360); g.lineTo(512, 360);
+    g.stroke();
+    return new THREE.CanvasTexture(c);
+  }
+
+  function makeSloganBannerTex({ badge, title, sub, bg1 = '#064e3b', bg2 = '#047857', border = '#ffd269', titleColor = '#ffffff', subColor = '#ffe596', width = 1024, height = 220 }) {
+    const c = document.createElement('canvas');
+    c.width = width; c.height = height;
+    const g = c.getContext('2d');
+    const grad = g.createLinearGradient(0, 0, width, height);
+    grad.addColorStop(0, bg1);
+    grad.addColorStop(0.5, bg2);
+    grad.addColorStop(1, bg1);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, width, height);
+
+    g.strokeStyle = border;
+    g.lineWidth = 8;
+    g.strokeRect(8, 8, width - 16, height - 16);
+
+    // 좌측 SOXL 원형 심볼 마크
+    g.fillStyle = '#ffffff';
+    g.beginPath();
+    g.arc(76, height / 2, 44, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#065f46';
+    g.font = '900 24px sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('SOXL', 76, height / 2 + 2);
+
+    // 우측 $500 황금 엠블럼
+    g.fillStyle = border;
+    g.beginPath();
+    g.arc(width - 78, height / 2, 44, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#0b1714';
+    g.font = '900 26px sans-serif';
+    g.fillText('$500', width - 78, height / 2 + 2);
+
+    if (badge) {
+      g.fillStyle = border;
+      g.font = '800 22px sans-serif';
+      g.fillText(badge, width / 2, 42);
+    }
+    g.fillStyle = titleColor;
+    g.font = title.length > 30 ? '900 34px sans-serif' : '900 40px sans-serif';
+    g.fillText(title, width / 2, badge ? 105 : 86);
+
+    if (sub) {
+      g.fillStyle = subColor;
+      g.font = '700 24px sans-serif';
+      g.fillText(sub, width / 2, height - 42);
+    }
+
+    const t = new THREE.CanvasTexture(c);
+    t.generateMipmaps = false;
+    t.minFilter = THREE.LinearFilter;
+    return t;
+  }
+
+  function createMonitorScreenTexture(accentHex = '#047857', isLeader = false) {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 144;
+    const g = c.getContext('2d');
+    g.fillStyle = isLeader ? '#09131c' : '#0f172a';
+    g.fillRect(0, 0, 256, 144);
+    g.fillStyle = accentHex;
+    g.fillRect(0, 0, 256, 22);
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 11.5px sans-serif';
+    g.fillText('SOXL TERMINAL · TARGET $500 (3X)', 8, 15);
+    const bars = [26, 40, 56, 74, 96, 118];
+    bars.forEach((bh, idx) => {
+      g.fillStyle = idx >= 3 ? '#10b981' : '#ef4444';
+      g.fillRect(22 + idx * 36, 130 - bh * 0.75, 22, bh * 0.75);
+    });
+    g.strokeStyle = '#ffd269';
+    g.lineWidth = 3.5;
+    g.beginPath();
+    g.moveTo(25, 112);
+    g.lineTo(95, 84);
+    g.lineTo(165, 52);
+    g.lineTo(225, 26);
+    g.stroke();
+    return new THREE.CanvasTexture(c);
+  }
+
+  /* ==============================================================
+   * 5. 오피스 건축 구조물 (바닥, 벽체, 통창, 천장 LED 루버)
+   * ============================================================== */
+  const seats = [];
+  const clickableBannerMeshes = [];
+
+  const mainFloorMat = new THREE.MeshStandardMaterial({
+    map: createOfficeCarpetTexture(),
+    roughness: 0.82,
+    metalness: 0.04
+  });
+  const mainFloorMesh = new THREE.Mesh(new THREE.PlaneGeometry(52, 48), mainFloorMat);
+  mainFloorMesh.rotation.x = -Math.PI / 2;
+  mainFloorMesh.position.set(0, 0, 0);
+  mainFloorMesh.receiveShadow = true;
+  worldGroup.add(mainFloorMesh);
+
+  const corridorMat = new THREE.MeshStandardMaterial({ color: 0xe2ece9, roughness: 0.65 });
+  const greenStripeMat = new THREE.MeshBasicMaterial({ color: 0x059669 });
+
+  const mainAisleV = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 35), corridorMat);
+  mainAisleV.rotation.x = -Math.PI / 2;
+  mainAisleV.position.set(0, 0.01, 4.5);
+  mainAisleV.receiveShadow = true;
+  worldGroup.add(mainAisleV);
+
+  for (const sx of [-1.66, 1.66]) {
+    const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 35), greenStripeMat);
+    stripe.rotation.x = -Math.PI / 2;
+    stripe.position.set(sx, 0.014, 4.5);
+    worldGroup.add(stripe);
+  }
+
+  const crossAisleH = new THREE.Mesh(new THREE.PlaneGeometry(48, 2.8), corridorMat);
+  crossAisleH.rotation.x = -Math.PI / 2;
+  crossAisleH.position.set(0, 0.012, 2.0);
+  crossAisleH.receiveShadow = true;
+  worldGroup.add(crossAisleH);
+
+  const execFloorMat = new THREE.MeshStandardMaterial({
+    map: createExecWoodTexture(),
+    roughness: 0.48,
+    metalness: 0.08
+  });
+  const execFloorMesh = new THREE.Mesh(new THREE.PlaneGeometry(50, 11.4), execFloorMat);
+  execFloorMesh.rotation.x = -Math.PI / 2;
+  execFloorMesh.position.set(0, 0.015, -17.9);
+  execFloorMesh.receiveShadow = true;
+  worldGroup.add(execFloorMesh);
+
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.78 });
+  const darkFrameMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.35 });
+  const soxlGreenMat = new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.35, metalness: 0.15 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xe5b84b, roughness: 0.28, metalness: 0.72 });
+
+  const northWall = new THREE.Mesh(new THREE.BoxGeometry(50.4, 7.6, 0.4), wallMat);
+  northWall.position.set(0, 3.8, -23.5);
+  const southWall = new THREE.Mesh(new THREE.BoxGeometry(50.4, 7.6, 0.4), wallMat);
+  southWall.position.set(0, 3.8, 23.5);
+  const westWall = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7.6, 47.4), wallMat);
+  westWall.position.set(-25.0, 3.8, 0);
+  const eastWall = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7.6, 47.4), wallMat);
+  eastWall.position.set(25.0, 3.8, 0);
+  worldGroup.add(northWall, southWall, westWall, eastWall);
+
+  const windowTex = createCityWindowTexture();
+  const windowMat = new THREE.MeshBasicMaterial({ map: windowTex });
+  [-17.5, -9.0, -0.5, 8.0, 16.5].forEach((wz) => {
+    const winGeo = new THREE.PlaneGeometry(5.6, 3.8);
+    const winL = new THREE.Mesh(winGeo, windowMat);
+    winL.position.set(-24.76, 3.8, wz);
+    winL.rotation.y = Math.PI / 2;
+
+    const winR = new THREE.Mesh(winGeo, windowMat);
+    winR.position.set(24.76, 3.8, wz);
+    winR.rotation.y = -Math.PI / 2;
+    worldGroup.add(winL, winR);
+  });
+
+  const ceilingMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.85, side: THREE.DoubleSide });
+  const ceilingMesh = new THREE.Mesh(new THREE.PlaneGeometry(50.4, 47.4), ceilingMat);
+  ceilingMesh.rotation.x = Math.PI / 2;
+  ceilingMesh.position.set(0, 7.5, 0);
+  worldGroup.add(ceilingMesh);
+
+  const ledPanelMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const acBodyMat = new THREE.MeshStandardMaterial({ color: 0xedeff2, roughness: 0.4 });
+  const acVaneMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+
+  for (let cz = -18; cz <= 18; cz += 7.2) {
+    for (const cx of [-16.5, -8.5, 0, 8.5, 16.5]) {
+      const led = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.06, 0.55), ledPanelMat);
+      led.position.set(cx, 7.45, cz);
+      worldGroup.add(led);
+    }
+  }
+  for (const [ax, az] of [[-11.5, -5.0], [11.5, -5.0], [-11.5, 8.5], [11.5, 8.5], [-6.0, -17.5], [13.5, -17.5]]) {
+    const acGroup = new THREE.Group();
+    const acBox = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 1.4), acBodyMat);
+    const acCenter = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.9), new THREE.MeshStandardMaterial({ color: 0xdbe2ec }));
+    const acLed = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.13, 0.06), acVaneMat);
+    acLed.position.set(0, 0, 0.48);
+    acGroup.add(acBox, acCenter, acLed);
+    acGroup.position.set(ax, 7.44, az);
+    worldGroup.add(acGroup);
+  }
+
+  /* ==============================================================
+   * 6. 안쪽 임원 공간 분리 유리 가벽 (z = -12.2m) & 출입 게이트
+   *    - 좌측/중앙 안쪽: 👑 대표이사 회장실 (CEO 집무실)
+   *    - 우측 안쪽:      💼 3X 운용본부장실 (CIO 부사장실)
+   * ============================================================== */
+  const glassWallMat = new THREE.MeshStandardMaterial({
+    color: 0xd8f5ec,
+    transparent: true,
+    opacity: 0.32,
+    roughness: 0.12,
+    metalness: 0.15,
+    side: THREE.DoubleSide
+  });
+  const frostBandMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.58,
+    side: THREE.DoubleSide
+  });
+
+  function createGlassPartitionSegment(x1, x2, zPos, height = 4.6) {
+    const len = Math.abs(x2 - x1);
+    const cx = (x1 + x2) / 2;
+    const grp = new THREE.Group();
+    const glass = new THREE.Mesh(new THREE.BoxGeometry(len, height, 0.08), glassWallMat);
+    glass.position.y = height / 2;
+    const frost = new THREE.Mesh(new THREE.PlaneGeometry(len - 0.1, 0.85), frostBandMat);
+    frost.position.set(0, 1.45, 0.05);
+    const frostBack = frost.clone();
+    frostBack.position.z = -0.05;
+    frostBack.rotation.y = Math.PI;
+    const topRail = new THREE.Mesh(new THREE.BoxGeometry(len, 0.12, 0.14), darkFrameMat);
+    topRail.position.y = height;
+    const botRail = new THREE.Mesh(new THREE.BoxGeometry(len, 0.10, 0.14), darkFrameMat);
+    botRail.position.y = 0.05;
+    grp.add(glass, frost, frostBack, topRail, botRail);
+    grp.position.set(cx, 0, zPos);
+    worldGroup.add(grp);
+  }
+
+  createGlassPartitionSegment(-24.8, -5.8, -12.2, 4.6);
+  createGlassPartitionSegment(-3.0, 10.2, -12.2, 4.6);
+  createGlassPartitionSegment(12.8, 24.8, -12.2, 4.6);
+
+  const roomDivWall = new THREE.Mesh(new THREE.BoxGeometry(0.28, 4.6, 11.3), wallMat);
+  roomDivWall.position.set(3.8, 2.3, -17.85);
+  worldGroup.add(roomDivWall);
+
+  const chiefDoorSign = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.2, 0.72),
+    new THREE.MeshBasicMaterial({
+      map: makeSloganBannerTex({
+        badge: 'CHAIRMAN & CEO SUITE · VIP',
+        title: '👑 SOXL 대표이사 회장실 (CEO)',
+        sub: 'Chairman of SOXL 3X Bull Holdings',
+        bg1: '#072a1f', bg2: '#064e3b', border: '#ffd269'
+      })
+    })
+  );
+  chiefDoorSign.position.set(-4.4, 4.25, -12.12);
+  worldGroup.add(chiefDoorSign);
+
+  const directorDoorSign = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.2, 0.72),
+    new THREE.MeshBasicMaterial({
+      map: makeSloganBannerTex({
+        badge: 'CHIEF INVESTMENT OFFICER',
+        title: '💼 3X 운용본부장 집무실 (CIO)',
+        sub: 'VP of Semiconductor Quant & Risk HQ',
+        bg1: '#121c2d', bg2: '#1e2f4d', border: '#9ec5ff'
+      })
+    })
+  );
+  directorDoorSign.position.set(11.5, 4.25, -12.12);
+  worldGroup.add(directorDoorSign);
+
+  /* ==============================================================
+   * 6-A. 👑 안쪽 좌측·중앙: 대표이사 회장실 내부 가구 배치
+   * ============================================================== */
+  const walnutMat = new THREE.MeshStandardMaterial({ color: 0x4a2c18, roughness: 0.38, metalness: 0.1 });
+  const leatherBlackMat = new THREE.MeshStandardMaterial({ color: 0x181a20, roughness: 0.42, metalness: 0.15 });
+  const sofaCreamMat = new THREE.MeshStandardMaterial({ color: 0xded6c8, roughness: 0.6 });
+
+  const chiefRug = new THREE.Mesh(
+    new THREE.PlaneGeometry(14.5, 8.8),
+    new THREE.MeshStandardMaterial({ color: 0x0a3628, roughness: 0.88 })
+  );
+  chiefRug.rotation.x = -Math.PI / 2;
+  chiefRug.position.set(-6.5, 0.02, -18.0);
+  worldGroup.add(chiefRug);
+
+  const chiefDeskGrp = new THREE.Group();
+  const cdTop = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.10, 1.25), walnutMat);
+  cdTop.position.y = 0.76;
+  cdTop.castShadow = true;
+  const cdFront = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.72, 0.08), walnutMat);
+  cdFront.position.set(0, 0.38, 0.56);
+  const cdGoldTrim = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.06, 0.10), goldMat);
+  cdGoldTrim.position.set(0, 0.52, 0.58);
+  const cdSideL = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.72, 1.18), walnutMat);
+  cdSideL.position.set(-1.28, 0.36, 0);
+  const cdSideR = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.72, 1.18), walnutMat);
+  cdSideR.position.set(1.28, 0.36, 0);
+
+  const chiefPlaque = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.14, 0.12), goldMat);
+  chiefPlaque.position.set(0.85, 0.86, 0.42);
+  const chiefMonTex = createMonitorScreenTexture('#047857', true);
+  const chiefMon = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.48, 0.04), new THREE.MeshBasicMaterial({ map: chiefMonTex }));
+  chiefMon.position.set(0, 1.12, -0.25);
+  chiefDeskGrp.add(cdTop, cdFront, cdGoldTrim, cdSideL, cdSideR, chiefPlaque, chiefMon);
+  chiefDeskGrp.position.set(-6.5, 0, -20.2);
+  worldGroup.add(chiefDeskGrp);
+
+  const chiefChairGrp = new THREE.Group();
+  const ccSeat = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.12, 0.68), leatherBlackMat);
+  ccSeat.position.y = 0.48;
+  const ccBack = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.95, 0.12), leatherBlackMat);
+  ccBack.position.set(0, 0.98, -0.28);
+  const ccBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.32, 0.45, 12), darkFrameMat);
+  ccBase.position.y = 0.22;
+  chiefChairGrp.add(ccSeat, ccBack, ccBase);
+  chiefChairGrp.position.set(-6.5, 0, -21.15);
+  worldGroup.add(chiefChairGrp);
+
+  seats.push({
+    id: 'exec_chief_seat',
+    label: '👑 SOXL 대표이사 회장(CEO) 집무석',
+    pos: new THREE.Vector3(-6.5, 0, -21.05),
+    lookAngle: Math.PI,
+    roleType: 'chief',
+    zone: 'chief',
+    occupiedBy: null
+  });
+
+  // 회장실 좌측 VIP 가죽 응접 소파
+  const vipTable = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.42, 1.1), walnutMat);
+  vipTable.position.set(-14.5, 0.21, -17.2);
+  worldGroup.add(vipTable);
+
+  for (const [sz, lookAng, sTag] of [[-18.6, Math.PI, '북측'], [-15.8, 0, '남측']]) {
+    const sofa = new THREE.Group();
+    const sSeat = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.38, 0.82), sofaCreamMat);
+    sSeat.position.y = 0.22;
+    const sBack = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.78, 0.22), sofaCreamMat);
+    sBack.position.set(0, 0.56, sz < -17.2 ? -0.32 : 0.32);
+    sofa.add(sSeat, sBack);
+    sofa.position.set(-14.5, 0, sz);
+    worldGroup.add(sofa);
+
+    [-0.75, 0.75].forEach((ox, idx) => {
+      seats.push({
+        id: `chief_sofa_${sTag}_${idx}`,
+        label: `회장실 VIP 대주주 응접 소파 (${sTag})`,
+        pos: new THREE.Vector3(-14.5 + ox, 0, sz),
+        lookAngle: lookAng,
+        roleType: 'sofa',
+        zone: 'chief',
+        occupiedBy: null
+      });
+    });
+  }
+
+  // 회장실 우측 대주주 작전회의 테이블 (6인석)
+  const chiefConfTbl = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.74, 4.2), walnutMat);
+  chiefConfTbl.position.set(-0.2, 0.37, -17.2);
+  worldGroup.add(chiefConfTbl);
+
+  [-18.6, -17.2, -15.8].forEach((cz, rIdx) => {
+    for (const [cxOff, rotY] of [[-1.55, -Math.PI / 2], [1.55, Math.PI / 2]]) {
+      const mChair = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.48, 0.56), leatherBlackMat);
+      mChair.position.set(-0.2 + cxOff, 0.24, cz);
+      worldGroup.add(mChair);
+      seats.push({
+        id: `chief_conf_${rIdx}_${cxOff < 0 ? 'L' : 'R'}`,
+        label: `회장실 대주주 임원회의석`,
+        pos: new THREE.Vector3(-0.2 + cxOff, 0, cz),
+        lookAngle: rotY,
+        roleType: 'desk',
+        zone: 'chief',
+        occupiedBy: null
+      });
+    }
+  });
+
+  // 회장실 월스트리트 황금 황소(Charging Bull) 조형물
+  const bullStatueGrp = new THREE.Group();
+  const bullPedestal = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.75, 0.9), darkFrameMat);
+  bullPedestal.position.y = 0.375;
+  const bullBody = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.46, 0.42), goldMat);
+  bullBody.position.set(0, 1.02, 0);
+  const bullHead = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.34, 0.34), goldMat);
+  bullHead.position.set(0.45, 1.14, 0);
+  bullStatueGrp.add(bullPedestal, bullBody, bullHead);
+  bullStatueGrp.position.set(-19.2, 0, -21.2);
+  bullStatueGrp.rotation.y = 0.4;
+  worldGroup.add(bullStatueGrp);
+
+  /* ==============================================================
+   * 6-B. 💼 안쪽 우측: 3X 운용본부장실 (CIO 부사장실)
+   * ============================================================== */
+  const dirRug = new THREE.Mesh(
+    new THREE.PlaneGeometry(11.5, 8.2),
+    new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.88 })
+  );
+  dirRug.rotation.x = -Math.PI / 2;
+  dirRug.position.set(13.5, 0.02, -18.0);
+  worldGroup.add(dirRug);
+
+  const dirDeskGrp = new THREE.Group();
+  const ddTop = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.10, 1.15), walnutMat);
+  ddTop.position.y = 0.75;
+  const ddFront = new THREE.Mesh(new THREE.BoxGeometry(2.45, 0.70, 0.08), walnutMat);
+  ddFront.position.set(0, 0.36, 0.52);
+  const ddMon = new THREE.Mesh(
+    new THREE.BoxGeometry(0.92, 0.44, 0.04),
+    new THREE.MeshBasicMaterial({ map: createMonitorScreenTexture('#1d4ed8', true) })
+  );
+  ddMon.position.set(0, 1.08, -0.2);
+  dirDeskGrp.add(ddTop, ddFront, ddMon);
+  dirDeskGrp.position.set(14.5, 0, -20.0);
+  worldGroup.add(dirDeskGrp);
+
+  const dirChair = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.85, 0.65), leatherBlackMat);
+  dirChair.position.set(14.5, 0.44, -20.95);
+  worldGroup.add(dirChair);
+
+  seats.push({
+    id: 'exec_director_seat',
+    label: '💼 3X 운용본부장(CIO) 집무석',
+    pos: new THREE.Vector3(14.5, 0, -20.85),
+    lookAngle: Math.PI,
+    roleType: 'director',
+    zone: 'director',
+    occupiedBy: null
+  });
+
+  const dirRoundTbl = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 0.74, 24), walnutMat);
+  dirRoundTbl.position.set(9.2, 0.37, -16.8);
+  worldGroup.add(dirRoundTbl);
+  [[0, -1.65, Math.PI], [0, 1.65, 0], [-1.65, 0, -Math.PI / 2], [1.65, 0, Math.PI / 2]].forEach(([dx, dz, rot], idx) => {
+    const ch = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.48, 0.55), leatherBlackMat);
+    ch.position.set(9.2 + dx, 0.24, -16.8 + dz);
+    worldGroup.add(ch);
+    seats.push({
+      id: `director_round_${idx}`,
+      label: `운용본부장실 퀀트 전략회의 원탁석`,
+      pos: new THREE.Vector3(9.2 + dx, 0, -16.8 + dz),
+      lookAngle: rot,
+      roleType: 'desk',
+      zone: 'director',
+      occupiedBy: null
+    });
+  });
+
+  /* ==============================================================
+   * 7. 메인 오픈 오피스: 「팀장 1명 + 팀원 10명 = 11명 한 팀」 × 4개 부서 클러스터!
+   * ============================================================== */
+  const deskWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf3f6f8, roughness: 0.42 });
+  const deskLegMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5, metalness: 0.35 });
+  const partFabricMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85 });
+  const chairMeshMat = new THREE.MeshStandardMaterial({ color: 0x1e2430, roughness: 0.65 });
+  const kbMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.5 });
+  const mugMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+
+  function buildOfficeSwivelChair(isTeamLeader = false) {
+    const cg = new THREE.Group();
+    const seatColor = isTeamLeader ? leatherBlackMat : chairMeshMat;
+    const basePole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.42, 8), deskLegMat);
+    basePole.position.y = 0.21;
+    const baseStar = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.30, 0.04, 5), deskLegMat);
+    baseStar.position.y = 0.03;
+    const seatPad = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.07, 0.50), seatColor);
+    seatPad.position.y = 0.45;
+    const backHeight = isTeamLeader ? 0.68 : 0.52;
+    const backRest = new THREE.Mesh(new THREE.BoxGeometry(0.48, backHeight, 0.06), seatColor);
+    backRest.position.set(0, 0.48 + backHeight / 2, 0.23);
+    for (const sx of [-0.26, 0.26]) {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.18, 0.32), deskLegMat);
+      arm.position.set(sx, 0.56, 0.04);
+      cg.add(arm);
+    }
+    cg.add(basePole, baseStar, seatPad, backRest);
+    return cg;
+  }
+
+  const TEAM_CONFIGS = [
+    {
+      teamKey: 'team1',
+      teamNum: 1,
+      name: 'AI가속기 · NVDA 3X 1팀',
+      sub: '엔비디아 · 브로드컴 · TSMC 집중 운용 (팀장석 공석 · 11석)',
+      centerX: -13.0,
+      centerZ: -4.2,
+      side: -1,
+      accentHex: '#047857',
+      accentColor: 0x047857
+    },
+    {
+      teamKey: 'team2',
+      teamNum: 2,
+      name: 'HBM · 메모리 슈퍼사이클 2팀',
+      sub: '마이크론 · SK하이닉스 · 삼성전자 · RAM 2X (팀장석 공석 · 11석)',
+      centerX: 13.0,
+      centerZ: -4.2,
+      side: 1,
+      accentHex: '#1d4ed8',
+      accentColor: 0x1d4ed8
+    },
+    {
+      teamKey: 'team3',
+      teamNum: 3,
+      name: '야수의심장 물타기 · 멘탈방어 3팀',
+      sub: '분할매수 · 평단관리 · 다이아몬드 핸즈 (팀장석 공석 · 11석)',
+      centerX: -13.0,
+      centerZ: 8.2,
+      side: -1,
+      accentHex: '#b45309',
+      accentColor: 0xb45309
+    },
+    {
+      teamKey: 'team4',
+      teamNum: 4,
+      name: '제4구역 (주주 자율좌석·공석)',
+      sub: '신규 주주 & 퀀트 TF 자율 스마트 워크존 (전 좌석 공석 · 11석)',
+      centerX: 13.0,
+      centerZ: 8.2,
+      side: 1,
+      accentHex: '#475569',
+      accentColor: 0x475569
+    }
+  ];
+
+  TEAM_CONFIGS.forEach((tCfg) => {
+    const podGroup = new THREE.Group();
+    const monTexStaff = createMonitorScreenTexture(tCfg.accentHex, false);
+    const monTexLeader = createMonitorScreenTexture(tCfg.accentHex, true);
+    const accentTrimMat = new THREE.MeshStandardMaterial({ color: tCfg.accentColor, roughness: 0.4 });
+
+    const signTex = makeSloganBannerTex({
+      badge: `SOXL CORP TRADING HQ · TEAM ${tCfg.teamNum} (11인 구성)`,
+      title: `🚩 ${tCfg.name}`,
+      sub: tCfg.sub,
+      bg1: '#0d1922',
+      bg2: tCfg.accentHex,
+      border: '#ffd269',
+      width: 1024,
+      height: 190
+    });
+    const signMat = new THREE.MeshBasicMaterial({ map: signTex });
+    const signFront = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 1.35), signMat);
+    signFront.position.set(tCfg.centerX, 4.95, tCfg.centerZ + 0.04);
+    const signBack = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 1.35), signMat);
+    signBack.position.set(tCfg.centerX, 4.95, tCfg.centerZ - 0.04);
+    signBack.rotation.y = Math.PI;
+    podGroup.add(signFront, signBack);
+
+    const leaderDeskX = tCfg.side < 0 ? -5.8 : 5.8;
+    const leaderChairX = tCfg.side < 0 ? -4.85 : 4.85;
+    const leaderLookYaw = tCfg.side < 0 ? Math.PI / 2 : -Math.PI / 2;
+
+    const lDesk = new THREE.Group();
+    const ldTop = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.07, 2.45), walnutMat);
+    ldTop.position.y = 0.74;
+    ldTop.castShadow = true;
+    const ldModesty = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.68, 2.35), walnutMat);
+    ldModesty.position.set(tCfg.side < 0 ? -0.46 : 0.46, 0.38, 0);
+    const ldStripe = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.12, 2.38), accentTrimMat);
+    ldStripe.position.set(tCfg.side < 0 ? -0.47 : 0.47, 0.62, 0);
+    const ldMon = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.42, 0.88), new THREE.MeshBasicMaterial({ map: monTexLeader }));
+    ldMon.position.set(tCfg.side < 0 ? -0.22 : 0.22, 1.02, 0);
+    const ldPlaque = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.42), goldMat);
+    ldPlaque.position.set(tCfg.side < 0 ? -0.35 : 0.35, 0.84, 0.65);
+    lDesk.add(ldTop, ldModesty, ldStripe, ldMon, ldPlaque);
+    lDesk.position.set(leaderDeskX, 0, tCfg.centerZ);
+    podGroup.add(lDesk);
+
+    const lChair = buildOfficeSwivelChair(true);
+    lChair.position.set(leaderChairX, 0, tCfg.centerZ);
+    lChair.rotation.y = leaderLookYaw;
+    podGroup.add(lChair);
+
+    seats.push({
+      id: `${tCfg.teamKey}_leader`,
+      label: `🚩 ${tCfg.name} 팀장석`,
+      pos: new THREE.Vector3(leaderChairX, 0, tCfg.centerZ),
+      lookAngle: leaderLookYaw,
+      roleType: 'leader',
+      zone: tCfg.teamKey,
+      occupiedBy: null
+    });
+
+    const islandWidth = 9.6;
+    const islandCenterX = tCfg.side < 0 ? -12.0 : 12.0;
+
+    const islandTop = new THREE.Mesh(new THREE.BoxGeometry(islandWidth, 0.07, 1.72), deskWhiteMat);
+    islandTop.position.set(islandCenterX, 0.73, tCfg.centerZ);
+    islandTop.castShadow = true; islandTop.receiveShadow = true;
+    podGroup.add(islandTop);
+
+    const centerPart = new THREE.Mesh(new THREE.BoxGeometry(islandWidth - 0.1, 0.46, 0.06), partFabricMat);
+    centerPart.position.set(islandCenterX, 0.98, tCfg.centerZ);
+    const partCap = new THREE.Mesh(new THREE.BoxGeometry(islandWidth - 0.08, 0.06, 0.08), accentTrimMat);
+    partCap.position.set(islandCenterX, 1.22, tCfg.centerZ);
+    podGroup.add(centerPart, partCap);
+
+    for (const lx of [islandCenterX - 4.6, islandCenterX, islandCenterX + 4.6]) {
+      for (const lz of [tCfg.centerZ - 0.78, tCfg.centerZ + 0.78]) {
+        const dLeg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.72, 0.08), deskLegMat);
+        dLeg.position.set(lx, 0.36, lz);
+        podGroup.add(dLeg);
+      }
+    }
+
+    for (let c = 0; c < 5; c++) {
+      const deskX = (tCfg.side < 0 ? -8.2 : 8.2) + tCfg.side * (c * 1.9);
+      if (c > 0) {
+        const subPart = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.36, 1.64), partFabricMat);
+        subPart.position.set(deskX - tCfg.side * 0.95, 0.92, tCfg.centerZ);
+        podGroup.add(subPart);
+      }
+
+      for (let r = 0; r < 2; r++) {
+        const memberIdx = r * 5 + c + 1;
+        const isNorthRow = (r === 0);
+        const monZ = tCfg.centerZ + (isNorthRow ? -0.18 : 0.18);
+        const kbZ = tCfg.centerZ + (isNorthRow ? -0.52 : 0.52);
+        const chairZ = tCfg.centerZ + (isNorthRow ? -1.22 : 1.22);
+        const lookYaw = isNorthRow ? Math.PI : 0;
+
+        const monMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(0.68, 0.34, 0.03),
+          new THREE.MeshBasicMaterial({ map: monTexStaff })
+        );
+        monMesh.position.set(deskX, 0.98, monZ);
+        const monStand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.08), deskLegMat);
+        monStand.position.set(deskX, 0.80, monZ);
+
+        const kbMesh = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.02, 0.14), kbMat);
+        kbMesh.position.set(deskX, 0.77, kbZ);
+        const mugMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.035, 0.09, 10), mugMat);
+        mugMesh.position.set(deskX + 0.32, 0.81, kbZ);
+
+        const sChair = buildOfficeSwivelChair(false);
+        sChair.position.set(deskX, 0, chairZ);
+        sChair.rotation.y = lookYaw;
+
+        podGroup.add(monMesh, monStand, kbMesh, mugMesh, sChair);
+
+        seats.push({
+          id: `${tCfg.teamKey}_staff_${memberIdx}`,
+          label: `💻 ${tCfg.name} 제${memberIdx}석`,
+          pos: new THREE.Vector3(deskX, 0, chairZ),
+          lookAngle: lookYaw,
+          roleType: 'desk',
+          zone: tCfg.teamKey,
+          occupiedBy: null
+        });
+      }
+    }
+
+    worldGroup.add(podGroup);
+  });
+  /* ==============================================================
+   * 8. 「SOXL 목표주가 $500 돌파 & 수익률 300% 달성」 대형 현수막 & 실시간 대시보드 & X-배너
+   * ============================================================== */
+  const mainHeroBanner = new THREE.Mesh(
+    new THREE.PlaneGeometry(13.6, 2.2),
+    new THREE.MeshBasicMaterial({
+      map: makeSloganBannerTex({
+        badge: '🔥 SOXL 주식회사 전 임직원 · 주주 총력 결의 슬로건 🔥',
+        title: '목표주가 $500 돌파 & 수익률 300% 달성! 거침없이 돌파하라!',
+        sub: '“야수의 심장으로 매수하고 다이아몬드 핸즈로 홀딩하라! 반도체는 결국 우상향한다!”',
+        bg1: '#064e3b', bg2: '#059669', border: '#ffd269', width: 1280, height: 240
+      })
+    })
+  );
+  mainHeroBanner.position.set(0, 5.65, -12.05);
+  mainHeroBanner.userData.sloganIdx = 0;
+  worldGroup.add(mainHeroBanner);
+  clickableBannerMeshes.push(mainHeroBanner);
+
+  const wallBannersSpec = [
+    {
+      idx: 1, x: -24.72, y: 5.75, z: -4.2, rotY: Math.PI / 2, w: 11.2, h: 1.85,
+      badge: '🚀 AI가속기 · NVDA 3X 1팀 필승 결의',
+      title: '엔비디아·브로드컴·TSMC 초격차! 수익률 300% 돌파!',
+      sub: '“전 세계 AI 데이터센터의 심장은 우리 손안에 있다! 목표는 오직 $500!”',
+      bg1: '#064e3b', bg2: '#047857'
+    },
+    {
+      idx: 2, x: 24.72, y: 5.75, z: -4.2, rotY: -Math.PI / 2, w: 11.2, h: 1.85,
+      badge: '💾 HBM · 메모리 슈퍼사이클 2팀 필승 결의',
+      title: 'HBM4 슈퍼사이클 완판! 마이크론·하이닉스 실적 폭발!',
+      sub: '“메모리 병목이 곧 우리의 수익이다! $500 달성 시 전원 월스트리트 특별 성과급!”',
+      bg1: '#152c59', bg2: '#1d4ed8'
+    },
+    {
+      idx: 3, x: -24.72, y: 5.75, z: 8.2, rotY: Math.PI / 2, w: 11.2, h: 1.85,
+      badge: '💎 야수의심장 물타기 · 멘탈방어 3팀 필승 결의',
+      title: '흔들리는 음봉은 바겐세일! 분할매수로 평단가를 제압하라!',
+      sub: '“공포에 사고 환희에 축배를 들어라! 3배 레버리지 주주의 인내는 황금으로 돌아온다!”',
+      bg1: '#78350f', bg2: '#b45309'
+    },
+    {
+      idx: 4, x: 24.72, y: 5.75, z: 8.2, rotY: -Math.PI / 2, w: 11.2, h: 1.85,
+      badge: '🪑 제4구역 · 신규 주주 자율근무 워크존',
+      title: '주주님이 곧 임원입니다! 원하시는 자리 어디든 착석하세요!',
+      sub: '“팀장석부터 11석 자율좌석까지 100% 공석 개방! 나만의 데스크에서 작전을 지휘하세요!”',
+      bg1: '#334155', bg2: '#475569'
+    },
+    {
+      idx: 5, x: -6.5, y: 4.8, z: -23.22, rotY: 0, w: 12.4, h: 1.9,
+      badge: '👑 CHAIRMAN & CEO SUITE · VISION $500',
+      title: 'SOXL 주식회사 · 목표주가 $500 GREAT JUMP!',
+      sub: '“월스트리트 No.1 반도체 홀딩스의 자부심! 모든 주주와 함께 $500 고지에 깃발을 꽂습니다!”',
+      bg1: '#072a1f', bg2: '#065f46'
+    },
+    {
+      idx: 6, x: 14.5, y: 4.8, z: -23.22, rotY: 0, w: 10.6, h: 1.8,
+      badge: '💼 CIO QUANT & RISK HQ GOAL',
+      title: '글로벌 반도체 마켓쉐어 1위 · 수익률 300% 달성!',
+      sub: '“데이터와 실적에 답이 있다! 압도적 퀀트 전략으로 불마켓 수익률을 극대화한다!”',
+      bg1: '#0f172a', bg2: '#1e3a8a'
+    }
+  ];
+
+  wallBannersSpec.forEach((wb) => {
+    const bm = new THREE.Mesh(
+      new THREE.PlaneGeometry(wb.w, wb.h),
+      new THREE.MeshBasicMaterial({
+        map: makeSloganBannerTex({
+          badge: wb.badge, title: wb.title, sub: wb.sub,
+          bg1: wb.bg1, bg2: wb.bg2, border: '#ffd269', width: 1024, height: 210
+        })
+      })
+    );
+    bm.position.set(wb.x, wb.y, wb.z);
+    bm.rotation.y = wb.rotY;
+    bm.userData.sloganIdx = wb.idx;
+    worldGroup.add(bm);
+    clickableBannerMeshes.push(bm);
+  });
+
+  function createStandXBanner(x, z, rotY, badge, line1, line2, bgHex) {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 512;
+    const g = c.getContext('2d');
+    g.fillStyle = bgHex;
+    g.fillRect(0, 0, 256, 512);
+    g.strokeStyle = '#ffd269';
+    g.lineWidth = 8;
+    g.strokeRect(8, 8, 240, 496);
+
+    g.fillStyle = '#ffd269';
+    g.font = '900 22px sans-serif';
+    g.textAlign = 'center';
+    g.fillText(badge, 128, 64);
+
+    g.fillStyle = '#ffffff';
+    g.font = '900 32px sans-serif';
+    g.fillText('SOXL 목표주가', 128, 145);
+    g.fillStyle = '#ffe596';
+    g.font = '900 54px sans-serif';
+    g.fillText('$500 돌파!', 128, 215);
+
+    g.fillStyle = '#ffffff';
+    g.font = '800 23px sans-serif';
+    g.fillText(line1, 128, 305);
+    g.fillText(line2, 128, 345);
+
+    g.fillStyle = '#ffffff';
+    g.beginPath();
+    g.arc(128, 435, 36, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#065f46';
+    g.font = '900 20px sans-serif';
+    g.fillText('SOXL', 128, 443);
+
+    const tex = new THREE.CanvasTexture(c);
+    const grp = new THREE.Group();
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.06, 0.45), darkFrameMat);
+    base.position.y = 0.03;
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.95, 8), darkFrameMat);
+    pole.position.set(0, 0.98, -0.05);
+    const bannerPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.82, 1.72),
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+    );
+    bannerPlane.position.set(0, 1.02, 0);
+    grp.add(base, pole, bannerPlane);
+    grp.position.set(x, 0, z);
+    grp.rotation.y = rotY;
+    worldGroup.add(grp);
+  }
+
+  createStandXBanner(-2.5, -6.8, 0.25, '🔥 사훈 1계명', '첫째도 홀딩!', '둘째도 수익 300%!', '#065f46');
+  createStandXBanner( 2.5, -6.8, -0.25, '🎯 특별 포상', '$500 달성 시', '전원 특별성과급!', '#1e3a8a');
+  createStandXBanner(-2.5,  5.2, 0.25, '🚀 슈퍼사이클', 'AI · HBM 완판', '3배 레버리지 점프!', '#78350f');
+  createStandXBanner( 2.5,  5.2, -0.25, '☕ 사내 복지', '커피는 무제한!', '계좌는 빨간불로!', '#881337');
+
+  // 전면 중앙 초대형 Micro-LED 실시간 상황판 스크린
+  const dashCanvas = document.createElement('canvas');
+  dashCanvas.width = 1024;
+  dashCanvas.height = 420;
+  const dashCtx = dashCanvas.getContext('2d');
+  const dashTexture = new THREE.CanvasTexture(dashCanvas);
+  dashTexture.minFilter = THREE.LinearFilter;
+
+  let currentKpiPct = 236;
+  function drawMainDashboard(timeSec = 0) {
+    const g = dashCtx;
+    g.fillStyle = '#07121a';
+    g.fillRect(0, 0, 1024, 420);
+
+    g.fillStyle = '#047857';
+    g.fillRect(0, 0, 1024, 64);
+    g.fillStyle = '#ffffff';
+    g.font = '900 26px sans-serif';
+    g.textAlign = 'left';
+    g.fillText('🏢 SOXL 주식회사 · 목표주가 $500 & 수익률 300% 실시간 상황판', 22, 42);
+
+    g.fillStyle = '#ffd269';
+    g.font = '800 21px sans-serif';
+    g.textAlign = 'right';
+    g.fillText(`목표: 300% ($500) | 현재: ${currentKpiPct}% 돌파 중!`, 996, 41);
+
+    const teams = [
+      { name: '1팀 (AI가속기·NVDA팀)', val: Math.min(360, currentKpiPct + 32), col: '#10b981' },
+      { name: '2팀 (HBM·메모리팀)', val: Math.min(360, currentKpiPct + 24), col: '#3b82f6' },
+      { name: '3팀 (물타기·멘탈방어팀)', val: Math.min(360, currentKpiPct + 45), col: '#f59e0b' },
+      { name: '4구역 (자율좌석·퀀트TF)', val: Math.min(360, currentKpiPct + 14), col: '#94a3b8' }
+    ];
+    teams.forEach((t, i) => {
+      const y = 98 + i * 72;
+      g.fillStyle = '#dcecf2';
+      g.font = '700 20px sans-serif';
+      g.textAlign = 'left';
+      g.fillText(t.name, 26, y + 26);
+
+      g.fillStyle = '#1e293b';
+      g.fillRect(255, y + 4, 360, 32);
+
+      const pulse = Math.sin(timeSec * 3 + i) * 6;
+      const barW = Math.min(360, Math.max(40, (t.val / 320) * 360 + pulse));
+      g.fillStyle = t.col;
+      g.fillRect(255, y + 4, barW, 32);
+
+      g.fillStyle = '#ffffff';
+      g.font = '900 20px sans-serif';
+      g.fillText(`${t.val}%`, 630, y + 27);
+    });
+
+    g.strokeStyle = '#ffd269';
+    g.lineWidth = 3;
+    g.strokeRect(710, 92, 286, 296);
+    g.fillStyle = '#ffd269';
+    g.font = '900 24px sans-serif';
+    g.textAlign = 'center';
+    g.fillText('🚀 전사 목표주가', 853, 136);
+    g.fillStyle = '#ffffff';
+    g.font = '900 62px sans-serif';
+    g.fillText('$500', 853, 212);
+    g.fillStyle = '#2ee59d';
+    g.font = '800 22px sans-serif';
+    g.fillText(`현재 수익률: ${currentKpiPct}%`, 853, 268);
+    g.fillStyle = '#9ec5ff';
+    g.font = '700 17px sans-serif';
+    g.fillText('클릭 시 상황판 & 매수 부스트!', 853, 345);
+
+    dashTexture.needsUpdate = true;
+  }
+  drawMainDashboard(0);
+
+  const dashFrame = new THREE.Mesh(new THREE.BoxGeometry(10.6, 3.6, 0.14), darkFrameMat);
+  dashFrame.position.set(0, 2.45, -12.08);
+  const dashScreenMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(10.2, 3.35),
+    new THREE.MeshBasicMaterial({ map: dashTexture })
+  );
+  dashScreenMesh.position.set(0, 2.45, -11.98);
+  worldGroup.add(dashFrame, dashScreenMesh);
+
+  /* ==============================================================
+   * 9. 남측 로비: SOXL $100~$500 비전 쇼룸 & 사내 골드바 에스프레소 카페 (z = +16.0 ~ +22.0)
+   * ============================================================== */
+  const showroomStage = new THREE.Mesh(
+    new THREE.BoxGeometry(11.5, 0.18, 4.5),
+    new THREE.MeshStandardMaterial({ color: 0xe6dfd5, roughness: 0.45 })
+  );
+  showroomStage.position.set(-14.0, 0.09, 19.8);
+  worldGroup.add(showroomStage);
+
+  const showroomSign = new THREE.Mesh(
+    new THREE.PlaneGeometry(8.8, 1.4),
+    new THREE.MeshBasicMaterial({
+      map: makeSloganBannerTex({
+        badge: 'SOXL $100 · $200 · $300 · $400 · $500 HALL OF FAME',
+        title: '🏆 SOXL 목표주가 $500 비전 로드맵 쇼룸',
+        sub: '황금 황소 트로피 · $100~$500 기념비 · 다이아몬드 주주 명예의 전당',
+        bg1: '#072a1f', bg2: '#065f46', border: '#ffd269'
+      })
+    })
+  );
+  showroomSign.position.set(-14.0, 4.2, 23.22);
+  showroomSign.rotation.y = Math.PI;
+  worldGroup.add(showroomSign);
+
+  // 쇼룸 황금 타워 트로피 3종 전시
+  const trophyPillar1 = new THREE.Mesh(
+    new THREE.BoxGeometry(1.15, 2.05, 0.85),
+    new THREE.MeshStandardMaterial({ color: 0x065f46, roughness: 0.25, metalness: 0.3 })
+  );
+  trophyPillar1.position.set(-17.2, 1.12, 20.2);
+  const trophyPillar2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.85, 2.25, 0.85),
+    goldMat
+  );
+  trophyPillar2.position.set(-15.0, 1.22, 20.2);
+  const roadmapTv = new THREE.Mesh(
+    new THREE.BoxGeometry(2.6, 1.45, 0.08),
+    new THREE.MeshBasicMaterial({ map: createMonitorScreenTexture('#047857', true) })
+  );
+  roadmapTv.position.set(-11.8, 1.85, 20.8);
+  worldGroup.add(trophyPillar1, trophyPillar2, roadmapTv);
+
+  // 우측 남단: Wall Street Bull 사내 카페 라운지
+  const cafeSign = new THREE.Mesh(
+    new THREE.PlaneGeometry(8.8, 1.4),
+    new THREE.MeshBasicMaterial({
+      map: makeSloganBannerTex({
+        badge: 'WALL STREET BULL ESPRESSO LOUNGE',
+        title: '☕ SOXL 주식회사 사내 카페 · 리프레시 라운지',
+        sub: '“잠깐 커피 한 잔의 여유가 목표주가 $500 홀딩의 멘탈을 만듭니다!”',
+        bg1: '#3b1d11', bg2: '#6e361f', border: '#ffd269'
+      })
+    })
+  );
+  cafeSign.position.set(14.0, 4.2, 23.22);
+  cafeSign.rotation.y = Math.PI;
+  worldGroup.add(cafeSign);
+
+  for (const [tx, tz, tIdx] of [[11.0, 18.5, 1], [16.8, 18.5, 2]]) {
+    const cTbl = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.74, 20), deskWhiteMat);
+    cTbl.position.set(tx, 0.37, tz);
+    worldGroup.add(cTbl);
+    [[0, -1.45, Math.PI], [0, 1.45, 0], [-1.45, 0, -Math.PI / 2], [1.45, 0, Math.PI / 2]].forEach(([dx, dz, rot], cIdx) => {
+      const ch = buildOfficeSwivelChair(false);
+      ch.position.set(tx + dx, 0, tz + dz);
+      ch.rotation.y = rot;
+      worldGroup.add(ch);
+      seats.push({
+        id: `cafe_seat_${tIdx}_${cIdx}`,
+        label: `☕ 사내 카페 제${tIdx}테이블 의자`,
+        pos: new THREE.Vector3(tx + dx, 0, tz + dz),
+        lookAngle: rot,
+        roleType: 'cafe',
+        zone: 'lounge',
+        occupiedBy: null
+      });
+    });
+  }
+
+  const rippleMesh = new THREE.Mesh(
+    new THREE.RingGeometry(0.18, 0.28, 28),
+    new THREE.MeshBasicMaterial({ color: 0x2ee59d, side: THREE.DoubleSide, transparent: true, opacity: 0 })
+  );
+  rippleMesh.rotation.x = -Math.PI / 2;
+  rippleMesh.position.y = 0.025;
+  worldGroup.add(rippleMesh);
+  let rippleAge = 99;
+
+  /* ==============================================================
+   * 10. 관절형 3D 임직원 아바타 생성 엔진 (SOXL 사원증 목걸이, 정장/불장조끼, 맥북·결재판·골드바·커피)
+   * ============================================================== */
+  const labelsLayer = document.getElementById('labels-layer');
+  const avatars = [];
+
+  const DEFAULT_MY_CUSTOM = {
+    name: '김속슬',
+    role: '팀장',
+    gender: 'M',
+    hairStyle: 0,
+    hairColor: '#1b1613',
+    outfitType: 'suit',
+    outfitColor: '#1e293b',
+    prop: 'laptop',
+    accessory: 'none'
+  };
+
+  function loadMyCustom() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('soxl_corp_office_avatar_v1') || 'null');
+      if (raw && typeof raw === 'object') {
+        return { ...DEFAULT_MY_CUSTOM, ...raw };
+      }
+    } catch (_) {}
+    return { ...DEFAULT_MY_CUSTOM };
+  }
+
+  function saveMyCustom(cfg = myCustom) {
+    try { localStorage.setItem('soxl_corp_office_avatar_v1', JSON.stringify(cfg)); } catch (_) {}
+  }
+
+  const myCustom = loadMyCustom();
+
+  function createOfficePropMesh(propType) {
+    const pGroup = new THREE.Group();
+    if (propType === 'laptop') {
+      const body = new THREE.Mesh(
+        new THREE.BoxGeometry(0.22, 0.16, 0.018),
+        new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.5, roughness: 0.22 })
+      );
+      const logoDot = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.022, 0.022),
+        new THREE.MeshBasicMaterial({ color: 0x10b981 })
+      );
+      pGroup.add(body, logoDot);
+    } else if (propType === 'folder') {
+      const board = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.24, 0.025),
+        new THREE.MeshStandardMaterial({ color: 0x047857, roughness: 0.5 })
+      );
+      const paper = new THREE.Mesh(
+        new THREE.BoxGeometry(0.16, 0.22, 0.028),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 })
+      );
+      pGroup.add(board, paper);
+    } else if (propType === 'coffee') {
+      const cup = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.042, 0.032, 0.13, 12),
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 })
+      );
+      const sleeve = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.043, 0.036, 0.055, 12),
+        new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.6 })
+      );
+      cup.position.y = 0.02;
+      sleeve.position.y = 0.02;
+      pGroup.add(cup, sleeve);
+    } else if (propType === 'goldbar') {
+      const bar = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.07, 0.09),
+        goldMat
+      );
+      pGroup.add(bar);
+    } else if (propType === 'bag') {
+      const bag = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.22, 0.30),
+        new THREE.MeshStandardMaterial({ color: 0x292524, roughness: 0.45 })
+      );
+      bag.position.y = -0.12;
+      pGroup.add(bag);
+    }
+    return pGroup;
+  }
+
+  function buildHumanRig(cfg, isMe) {
+    const gender = cfg.gender === 'F' ? 'F' : 'M';
+    const hairStyle = Number(cfg.hairStyle) || 0;
+    const hairColor = cfg.hairColor || '#1b1613';
+    const outfitType = cfg.outfitType || 'suit';
+    const outfitColor = cfg.outfitColor || '#1e293b';
+    const propType = cfg.prop || 'none';
+    const accType = cfg.accessory || 'none';
+
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5d8be, roughness: 0.6 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.75 });
+    const clothMat = new THREE.MeshStandardMaterial({
+      color: outfitType === 'vest' ? '#059669' : outfitColor,
+      roughness: 0.68
+    });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e2430, roughness: 0.75 });
+    const shoeMat = new THREE.MeshStandardMaterial({ color: 0x141619, roughness: 0.45 });
+    const shirtMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
+
+    const root = new THREE.Group();
+
+    const shadow = new THREE.Mesh(
+      new THREE.CircleGeometry(0.32, 20),
+      new THREE.MeshBasicMaterial({ color: 0x05070b, transparent: true, opacity: 0.36, depthWrite: false })
+    );
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.012;
+    root.add(shadow);
+
+    if (isMe) {
+      const meRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.36, 0.44, 32),
+        new THREE.MeshBasicMaterial({ color: 0x2ee59d, side: THREE.DoubleSide, transparent: true, opacity: 0.9, depthWrite: false })
+      );
+      meRing.rotation.x = -Math.PI / 2;
+      meRing.position.y = 0.018;
+      root.add(meRing);
+    }
+
+    const pelvis = new THREE.Group();
+    root.add(pelvis);
+
+    function makeLeg(side) {
+      const hipGroup = new THREE.Group();
+      hipGroup.position.set(side * 0.105, 0.56, 0);
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.058, 0.28, 10), pantsMat);
+      thigh.position.y = -0.14;
+      hipGroup.add(thigh);
+
+      const shinGroup = new THREE.Group();
+      shinGroup.position.set(0, -0.28, 0);
+      const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.045, 0.25, 10), pantsMat);
+      shin.position.y = -0.125;
+      const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.095, 0.065, 0.17), shoeMat);
+      shoe.position.set(0, -0.25, -0.035);
+      shinGroup.add(shin, shoe);
+      hipGroup.add(shinGroup);
+      pelvis.add(hipGroup);
+      return { hip: hipGroup, shin: shinGroup };
+    }
+
+    const leftLeg = makeLeg(-1);
+    const rightLeg = makeLeg(1);
+
+    const torso = new THREE.Group();
+    torso.position.set(0, 0.56, 0);
+    pelvis.add(torso);
+
+    const hipBox = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.12, 14), pantsMat);
+    hipBox.position.y = 0.02;
+    torso.add(hipBox);
+
+    const topR = gender === 'M' ? 0.205 : 0.175;
+    const botR = gender === 'M' ? 0.162 : 0.145;
+    const chest = new THREE.Mesh(new THREE.CylinderGeometry(topR, botR, 0.42, 16), clothMat);
+    chest.position.y = 0.24;
+    chest.scale.z = 0.78;
+    chest.castShadow = true;
+    torso.add(chest);
+
+    // 셔츠 칼라 & SOXL 에메랄드 넥타이 & SOXL 사원증 목걸이
+    const shirtV = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.16, 0.04), shirtMat);
+    shirtV.position.set(0, 0.36, -0.135);
+    const soxlTie = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.17, 0.045), soxlGreenMat);
+    soxlTie.position.set(0, 0.30, -0.142);
+    const idCard = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.09, 0.015), shirtMat);
+    idCard.position.set(0.065, 0.22, -0.152);
+    const idGreenHeader = new THREE.Mesh(new THREE.BoxGeometry(0.066, 0.022, 0.018), soxlGreenMat);
+    idGreenHeader.position.set(0.065, 0.255, -0.153);
+    torso.add(shirtV, soxlTie, idCard, idGreenHeader);
+
+    const shoulderX = gender === 'M' ? 0.235 : 0.20;
+    function makeArm(side) {
+      const shoulderGroup = new THREE.Group();
+      shoulderGroup.position.set(side * shoulderX, 0.41, 0);
+      const armMat = outfitType === 'vest' ? shirtMat : clothMat;
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.044, 0.20, 10), armMat);
+      upperArm.position.y = -0.10;
+      shoulderGroup.add(upperArm);
+
+      const forearmGroup = new THREE.Group();
+      forearmGroup.position.set(0, -0.20, 0);
+      const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.043, 0.038, 0.17, 10), armMat);
+      forearm.position.y = -0.085;
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 10), skinMat);
+      hand.position.set(0, -0.185, 0);
+      forearmGroup.add(forearm, hand);
+      shoulderGroup.add(forearmGroup);
+      torso.add(shoulderGroup);
+      return { arm: shoulderGroup, forearm: forearmGroup };
+    }
+
+    const leftArm = makeArm(-1);
+    const rightArm = makeArm(1);
+
+    let handPropMesh = null;
+    if (propType !== 'none') {
+      handPropMesh = createOfficePropMesh(propType);
+      handPropMesh.position.set(-0.03, -0.19, -0.06);
+      handPropMesh.rotation.set(0.3, 0.3, 0);
+      rightArm.forearm.add(handPropMesh);
+    }
+
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.45, 0);
+    torso.add(headGroup);
+
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.065, 0.09, 10), skinMat);
+    neck.position.y = 0.04;
+    const headBall = new THREE.Mesh(new THREE.SphereGeometry(0.195, 18, 16), skinMat);
+    headBall.position.y = 0.21;
+    headBall.scale.set(0.96, 1.04, 0.95);
+    headGroup.add(neck, headBall);
+
+    const eyeDarkMat = new THREE.MeshStandardMaterial({ color: 0x161210, roughness: 0.25 });
+    const eyes = [];
+    for (const s of [-1, 1]) {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 10), eyeDarkMat);
+      eye.position.set(s * 0.068, 0.22, -0.175);
+      eye.scale.set(1.0, 1.15, 0.5);
+      headGroup.add(eye);
+      eyes.push(eye);
+    }
+
+    const hairGroup = new THREE.Group();
+    headGroup.add(hairGroup);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.206, 16, 14, 0, Math.PI * 2, 0, Math.PI * 0.58), hairMat);
+    cap.position.y = 0.22;
+    cap.rotation.x = 0.18;
+    hairGroup.add(cap);
+
+    if (gender === 'M') {
+      const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.075, 0.09), hairMat);
+      fringe.position.set(hairStyle === 1 ? -0.02 : 0.02, 0.34, -0.145);
+      hairGroup.add(fringe);
+    } else {
+      const bangs = new THREE.Mesh(new THREE.SphereGeometry(0.15, 14, 10), hairMat);
+      bangs.position.set(0, 0.33, -0.105);
+      bangs.scale.set(1.18, 0.52, 0.75);
+      const backLong = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.11), hairMat);
+      backLong.position.set(0, 0.12, 0.12);
+      hairGroup.add(bangs, backLong);
+    }
+
+    if (accType === 'glasses') {
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, metalness: 0.65, roughness: 0.25 });
+      for (const s of [-1, 1]) {
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.006, 8, 16), glassMat);
+        rim.position.set(s * 0.068, 0.22, -0.186);
+        headGroup.add(rim);
+      }
+    }
+
+    return {
+      root, pelvis, torso, headGroup, eyes,
+      legL: leftLeg.hip, shinL: leftLeg.shin,
+      legR: rightLeg.hip, shinR: rightLeg.shin,
+      armL: leftArm.arm, forearmL: leftArm.forearm,
+      armR: rightArm.arm, forearmR: rightArm.forearm,
+      handPropMesh
+    };
+  }
+
+  function createAvatar({ id, name, role = '매니저', custom = {}, isMe = false, roleClass = '', x = 0, z = 2, quote = '' }) {
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    worldGroup.add(group);
+
+    const cfg = {
+      name,
+      role,
+      gender: custom.gender || 'M',
+      hairStyle: custom.hairStyle ?? 0,
+      hairColor: custom.hairColor || '#1b1613',
+      outfitType: custom.outfitType || 'suit',
+      outfitColor: custom.outfitColor || '#1e293b',
+      prop: custom.prop || 'laptop',
+      accessory: custom.accessory || 'none'
+    };
+
+    const rig = buildHumanRig(cfg, isMe);
+    group.add(rig.root);
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'avatar-label' + (isMe ? ' is-me' : '') + (roleClass ? ' ' + roleClass : '');
+    const badge = role === '회장' ? '👑' : (role === '부사장' ? '💼' : (role === '팀장' ? '🚩' : '🪪'));
+    labelEl.innerHTML = `<span class="badge-span">${badge}</span><span class="name-span">[${role}] ${name}</span>`;
+    labelsLayer.appendChild(labelEl);
+
+    const av = {
+      id, name, role, isMe, custom: cfg, group, rig, labelEl,
+      targetPos: new THREE.Vector3(x, 0, z),
+      state: 'standing',
+      seat: null,
+      emote: null,
+      emoteTimer: 0,
+      walkPhase: Math.random() * 10,
+      quote: quote || '🔥 SOXL 목표주가 $500 돌파! 다이아몬드 핸즈 파이팅!',
+      bubbleTimer: null
+    };
+
+    labelEl.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      dragMoved = false;
+      camYawVel = 0;
+      prevMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    labelEl.addEventListener('click', (e) => {
+      if (dragMoved) return;
+      e.stopPropagation();
+      if (isMe) {
+        triggerAvatarEmote(av, 'cheer', '🔥 SOXL 목표주가 $500 · 수익률 300% 가자!!');
+      } else {
+        showAvatarBubble(av, av.quote, 4800);
+        triggerAvatarEmote(av, 'wave', av.quote);
+        triggerAvatarEmote(myAvatar, 'salute', `🫡 [${av.role}] ${av.name}님, 성투 필승!`);
+        playOfficeBroadcastChime(false);
+      }
+    });
+
+    avatars.push(av);
+    return av;
+  }
+
+  function rebuildAvatarRig(av, newCustom) {
+    av.custom = { ...av.custom, ...newCustom };
+    if (newCustom.name) av.name = newCustom.name;
+    if (newCustom.role) av.role = newCustom.role;
+    if (av.rig && av.rig.root) av.group.remove(av.rig.root);
+    av.rig = buildHumanRig(av.custom, av.isMe);
+    av.group.add(av.rig.root);
+    const badge = av.role === '회장' ? '👑' : (av.role === '부사장' ? '💼' : (av.role === '팀장' ? '🚩' : '🪪'));
+    av.labelEl.querySelector('.badge-span').textContent = badge;
+    av.labelEl.querySelector('.name-span').textContent = `[${av.role}] ${av.name}` + (av.isMe ? ' (나)' : '');
+  }
+
+  function showAvatarBubble(av, message, duration = 4200) {
+    const old = av.labelEl.querySelector('.avatar-bubble');
+    if (old) old.remove();
+    const b = document.createElement('div');
+    b.className = 'avatar-bubble';
+    b.textContent = message;
+    av.labelEl.appendChild(b);
+    if (av.bubbleTimer) clearTimeout(av.bubbleTimer);
+    av.bubbleTimer = setTimeout(() => b.remove(), duration);
+  }
+
+  const myAvatar = createAvatar({
+    id: 'me',
+    name: `${myCustom.name} (나)`,
+    role: myCustom.role || '팀장',
+    custom: myCustom,
+    isMe: true,
+    x: 0,
+    z: 3.2
+  });
+
+  /* ==============================================================
+   * 11. 상주 근무 중인 SOXL 주식회사 임직원 NPC 14명 배치
+   *     - 각 팀 팀장석(1~4팀)과 4구역 전체는 언제든 오셔서 앉으실 수 있게 100% 공석 개방!
+   * ============================================================== */
+  const npcSpecs = [
+    {
+      name: '황소장 대표회장', role: '회장', seatId: 'exec_chief_seat', roleClass: 'is-exec',
+      quote: '👑 “환영합니다! AI가속기 1팀, HBM메모리 2팀, 멘탈방어 3팀 모두 SOXL $500 돌파를 향해 돌진합시다! 각 팀장석은 언제든 앉으실 수 있게 비워두었습니다!”',
+      custom: { gender: 'M', hairStyle: 1, hairColor: '#1b1613', outfitType: 'suit', outfitColor: '#1e293b', prop: 'goldbar', accessory: 'glasses' }
+    },
+    {
+      name: '정퀀트 부사장(CIO)', role: '부사장', seatId: 'exec_director_seat', roleClass: 'is-exec',
+      quote: '💼 “엔비디아·브로드컴·마이크론·하이닉스 펀더멘털이 역대 최고입니다! 수익률 300% 무조건 돌파합니다!”',
+      custom: { gender: 'M', hairStyle: 0, hairColor: '#b8bfc7', outfitType: 'suit', outfitColor: '#27272a', prop: 'laptop', accessory: 'glasses' }
+    },
+
+    // 제1팀: AI가속기 · NVDA 3X 1팀 (팀장석 공석! 팀원 4명 근무)
+    { name: '김엔비 수석', role: 'AI가속기팀', seatId: 'team1_staff_1', quote: '🚀 “엔비디아 블랙웰·루빈 데이터센터 수주 잔고 완전 폭발입니다!”', custom: { gender: 'F', hairStyle: 1, outfitType: 'suit', outfitColor: '#334155', prop: 'laptop', accessory: 'none' } },
+    { name: '박브로드 매니저', role: 'AI가속기팀', seatId: 'team1_staff_3', quote: '🔥 “브로드컴(AVGO) 맞춤형 AI ASIC 칩 매출 가이던스 상향 완료!”', custom: { gender: 'M', hairStyle: 2, outfitType: 'casual', outfitColor: '#1e293b', prop: 'coffee', accessory: 'glasses' } },
+    { name: '최파운드 매니저', role: 'AI가속기팀', seatId: 'team1_staff_7', quote: '📈 “TSMC CoWoS 패키징 라인 풀가동! SOXL 3배 레버리지 달립니다!”', custom: { gender: 'F', hairStyle: 0, outfitType: 'suit', outfitColor: '#047857', prop: 'laptop', accessory: 'none' } },
+    { name: '장가속 사원', role: 'AI가속기팀', seatId: 'team1_staff_9', quote: '💚 “AI가속기 1팀, 목표주가 $500까지 단 한 주도 팔지 않겠습니다!”', custom: { gender: 'M', hairStyle: 0, outfitType: 'vest', outfitColor: '#059669', prop: 'folder', accessory: 'none' } },
+
+    // 제2팀: HBM · 메모리 슈퍼사이클 2팀 (팀장석 공석! 팀원 4명 근무)
+    { name: '윤하이닉 수석', role: 'HBM메모리팀', seatId: 'team2_staff_2', quote: '💾 “HBM4 16단 물량 내년치까지 전량 완판 체결되었습니다!”', custom: { gender: 'M', hairStyle: 0, outfitType: 'suit', outfitColor: '#27272a', prop: 'laptop', accessory: 'none' } },
+    { name: '강마이크 매니저', role: 'HBM메모리팀', seatId: 'team2_staff_4', quote: '✨ “마이크론(MU)과 RAM 2X ETF 장중 기관 순매수 역대 최대 유입!”', custom: { gender: 'F', hairStyle: 1, outfitType: 'casual', outfitColor: '#334155', prop: 'coffee', accessory: 'glasses' } },
+    { name: '조디램 매니저', role: 'HBM메모리팀', seatId: 'team2_staff_6', quote: '📊 “서버용 DDR5 및 eSSD 고정거래가격 상승세 거침없습니다!”', custom: { gender: 'M', hairStyle: 2, outfitType: 'suit', outfitColor: '#1e293b', prop: 'laptop', accessory: 'none' } },
+    { name: '한웨이퍼 사원', role: 'HBM메모리팀', seatId: 'team2_staff_10', quote: '🚀 “메모리 슈퍼사이클이 SOXL $500 신화를 견인합니다!”', custom: { gender: 'F', hairStyle: 0, outfitType: 'suit', outfitColor: '#57534e', prop: 'bag', accessory: 'none' } },
+
+    // 제3팀: 야수의심장 물타기 · 멘탈방어 3팀 (팀장석 공석! 팀원 4명 근무)
+    { name: '송다이아 수석', role: '멘탈방어팀', seatId: 'team3_staff_1', quote: '💎 “음봉은 바겐세일입니다! 흔들리지 않는 다이아몬드 핸즈 가동!”', custom: { gender: 'F', hairStyle: 0, outfitType: 'casual', outfitColor: '#e2e8f0', prop: 'coffee', accessory: 'none' } },
+    { name: '오물타기 매니저', role: '멘탈방어팀', seatId: 'team3_staff_3', quote: '🛡️ “VIX 공포지수 급등 구간 분할매수로 평단가 완벽 방어 완료!”', custom: { gender: 'M', hairStyle: 1, outfitType: 'vest', outfitColor: '#059669', prop: 'laptop', accessory: 'glasses' } },
+    { name: '서야수 매니저', role: '멘탈방어팀', seatId: 'team3_staff_8', quote: '🦁 “모두가 두려워할 때 과감히 매수하는 야수의 심장 3팀입니다!”', custom: { gender: 'M', hairStyle: 0, outfitType: 'suit', outfitColor: '#334155', prop: 'folder', accessory: 'none' } },
+    { name: '유존버 사원', role: '멘탈방어팀', seatId: 'team3_staff_9', quote: '🔥 “퇴근 후엔 바로 옆 SOXL 멘탈케어 클럽 풀파티에서 힐링합시다!”', custom: { gender: 'F', hairStyle: 2, outfitType: 'casual', outfitColor: '#1e293b', prop: 'goldbar', accessory: 'none' } }
+  ];
+
+  npcSpecs.forEach((spec, idx) => {
+    const seat = seats.find(s => s.id === spec.seatId);
+    const npc = createAvatar({
+      id: `npc_${idx}`,
+      name: spec.name,
+      role: spec.role,
+      roleClass: spec.roleClass || '',
+      custom: spec.custom,
+      isMe: false,
+      x: seat ? seat.pos.x : 0,
+      z: seat ? seat.pos.z : 0,
+      quote: spec.quote
+    });
+    if (seat) {
+      seat.occupiedBy = npc;
+      npc.seat = seat;
+      npc.group.position.copy(seat.pos);
+      npc.targetPos.copy(seat.pos);
+      npc.state = 'sitting';
+      npc.group.rotation.y = seat.lookAngle || 0;
+    }
+  });
+
+  /* ==============================================================
+   * 12. 착석, 파이팅 액션, 구역 이동 제어
+   * ============================================================== */
+  let sitStartTime = null;
+  let statusBannerTimer = null;
+
+  function setStatusBanner(text, dur = 3600) {
+    const el = document.getElementById('status-banner');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('is-faded');
+    if (statusBannerTimer) clearTimeout(statusBannerTimer);
+    statusBannerTimer = setTimeout(() => {
+      el.classList.add('is-faded');
+    }, dur);
+  }
+
+  function syncSitButtonUI() {
+    const isSit = myAvatar.state === 'sitting' || myAvatar.state === 'walking_to_seat';
+    const btn = document.getElementById('dock-sit');
+    const lbl = document.getElementById('dock-sit-label');
+    if (btn) btn.classList.toggle('is-active', isSit);
+    if (lbl && !isSit) lbl.textContent = '내 자리 착석';
+  }
+
+  function unseatAvatar(av) {
+    if (av.seat) {
+      if (av.seat.occupiedBy === av) av.seat.occupiedBy = null;
+      av.seat = null;
+    }
+    av.state = 'standing';
+    if (av.isMe) {
+      sitStartTime = null;
+      syncSitButtonUI();
+    }
+  }
+
+  function sitAvatarAtSeat(av, seat) {
+    unseatAvatar(av);
+    if (seat.occupiedBy && seat.occupiedBy !== av && String(seat.occupiedBy.id).startsWith('npc_')) {
+      const prevNpc = seat.occupiedBy;
+      prevNpc.seat = null;
+      prevNpc.state = 'standing';
+      prevNpc.group.position.set(seat.pos.x + 1.15, 0, seat.pos.z + 0.65);
+      prevNpc.targetPos.copy(prevNpc.group.position);
+      showAvatarBubble(prevNpc, '🫡 자리 비켜드리겠습니다! 편히 앉으십시오!');
+    }
+    av.targetPos.copy(seat.pos);
+    av.seat = seat;
+    seat.occupiedBy = av;
+    av.state = 'walking_to_seat';
+    if (av.isMe) {
+      syncSitButtonUI();
+      setStatusBanner(`🪑 「${seat.label}」 자리로 걸어가 착석합니다...`);
+      broadcastMyState();
+    }
+  }
+
+  function toggleMySit() {
+    if (myAvatar.state === 'sitting' || myAvatar.state === 'walking_to_seat') {
+      unseatAvatar(myAvatar);
+      myAvatar.targetPos.set(myAvatar.group.position.x, 0, myAvatar.group.position.z + 0.65);
+      setStatusBanner('의자에서 일어났습니다. 사무실 바닥이나 다른 부서 의자를 클릭해 이동해 보세요.');
+      broadcastMyState();
+      return;
+    }
+    let bestSeat = null;
+    let minDist = Infinity;
+    for (const s of seats) {
+      if (s.occupiedBy && s.occupiedBy !== myAvatar && !String(s.occupiedBy.id).startsWith('npc_')) continue;
+      const penalty = s.occupiedBy ? 2.2 : 0;
+      const d = myAvatar.group.position.distanceTo(s.pos) + penalty;
+      if (d < minDist) {
+        minDist = d;
+        bestSeat = s;
+      }
+    }
+    if (bestSeat) sitAvatarAtSeat(myAvatar, bestSeat);
+  }
+
+  const EMOTE_META = {
+    cheer:  { dur: 3.8, msg: '🔥 SOXL 목표주가 $500 · 수익률 300% 가자!!', banner: '🔥 두 팔을 번쩍 들고 SOXL $500 돌파를 외칩니다! 전 부서 트레이더들이 뜨겁게 호응합니다!' },
+    salute: { dur: 3.0, msg: '🫡 필승! $500 고지까지 다이아몬드 홀딩 완수하겠습니다!', banner: '🫡 절도 있게 거수경례하며 수익률 300% 달성을 보고합니다.' },
+    wave:   { dur: 3.0, msg: '👋 반갑습니다! 오늘도 성투하시고 불장 되세요!', banner: '👋 동료 임직원·주주들에게 밝게 손인사를 건넵니다.' },
+    brief:  { dur: 4.0, msg: '📊 AI 가속기 & HBM 메모리 슈퍼사이클 순항 중입니다!', banner: '📊 결재판과 맥북을 들어 보이며 SOXL 3배 레버리지 실적을 브리핑합니다.' }
+  };
+
+  function triggerAvatarEmote(av, emoteKey, customMsg = null) {
+    const meta = EMOTE_META[emoteKey] || EMOTE_META.wave;
+    const msg = customMsg || meta.msg;
+    av.emote = emoteKey;
+    av.emoteTimer = meta.dur;
+    showAvatarBubble(av, msg, meta.dur * 1000);
+
+    if (av.isMe) {
+      playOfficeBroadcastChime(emoteKey === 'cheer');
+      setStatusBanner(meta.banner);
+      broadcastMyState(emoteKey, msg);
+
+      if (emoteKey === 'cheer') {
+        setTimeout(() => {
+          const visibleNpcs = avatars.filter(a => String(a.id).startsWith('npc_') && a.group.visible);
+          const replies = [
+            '🔥 SOXL $500 무조건 돌파합니다!!',
+            '🚀 야수의 심장으로 수익률 300% 가자!!',
+            '💎 다이아몬드 핸즈! 우리 팀이 끝까지 홀딩합니다!',
+            '🏆 $500 찍고 다 같이 월스트리트 특별 성과급 받읍시다!!'
+          ];
+          visibleNpcs.sort(() => Math.random() - 0.5).slice(0, 4).forEach((npc, idx) => {
+            setTimeout(() => {
+              npc.emote = 'cheer';
+              npc.emoteTimer = 3.2;
+              showAvatarBubble(npc, replies[idx % replies.length], 3400);
+            }, idx * 180);
+          });
+        }, 450);
+      }
+    }
+  }
+
+  /* ==============================================================
+   * 13. 구역 1초 순간이동
+   * ============================================================== */
+  let camYaw = 0;
+  let camYawVel = 0;
+  let camPanDir = 0;
+  let camPitch = 0.30;
+  let camDist = 11.8;
+  let cameraPresetIdx = 0;
+  const cameraPresets = [
+    { name: '오피스 워크뷰', dist: 11.8, pitch: 0.30 },
+    { name: '근접 업무뷰', dist: 5.5, pitch: 0.18 },
+    { name: '전체 조감도', dist: 21.0, pitch: 0.52 },
+    { name: '1인칭 몰입뷰', dist: 2.6, pitch: 0.12 }
+  ];
+
+  function jumpToOfficeZone(zoneKey) {
+    unseatAvatar(myAvatar);
+    document.querySelectorAll('.zone-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-zone') === zoneKey);
+    });
+
+    const titleEl = document.getElementById('current-zone-title');
+
+    if (zoneKey === 'overview') {
+      myAvatar.group.position.set(0, 0, 4.5);
+      myAvatar.targetPos.set(0, 0, 2.2);
+      myAvatar.state = 'walking';
+      camYaw = 0; camPitch = 0.30; camDist = 12.2;
+      if (titleEl) titleEl.textContent = '🏢 메인 트레이딩 오피스 (4대 팀 · 임원실)';
+      setStatusBanner('🏢 SOXL 주식회사 중앙 복도입니다. 좌·우에 11인 구성의 1~4팀이 배치되어 있고, 안쪽 유리문 너머에 대표이사 회장실과 운용본부장실이 있습니다.');
+    } else if (zoneKey === 'team1') {
+      myAvatar.group.position.set(-4.2, 0, -4.2);
+      myAvatar.targetPos.set(-6.8, 0, -4.2);
+      myAvatar.state = 'walking';
+      camYaw = Math.PI / 2; camPitch = 0.32; camDist = 10.5;
+      if (titleEl) titleEl.textContent = '🚀 1팀: AI가속기·NVDA팀 (팀장석 공석)';
+      setStatusBanner('🚀 「AI가속기 · NVDA 3X 1팀」 공간입니다. 팀장석이 비워져 있으니 언제든 착석해 팀을 리드하세요!');
+    } else if (zoneKey === 'team2') {
+      myAvatar.group.position.set(4.2, 0, -4.2);
+      myAvatar.targetPos.set(6.8, 0, -4.2);
+      myAvatar.state = 'walking';
+      camYaw = -Math.PI / 2; camPitch = 0.32; camDist = 10.5;
+      if (titleEl) titleEl.textContent = '💾 2팀: HBM·메모리팀 (팀장석 공석)';
+      setStatusBanner('💾 「HBM · 메모리 슈퍼사이클 2팀」 공간입니다. 비워져 있는 팀장석이나 팀원석에 바로 앉아보세요!');
+    } else if (zoneKey === 'team3') {
+      myAvatar.group.position.set(-4.2, 0, 8.2);
+      myAvatar.targetPos.set(-6.8, 0, 8.2);
+      myAvatar.state = 'walking';
+      camYaw = Math.PI / 2; camPitch = 0.32; camDist = 10.5;
+      if (titleEl) titleEl.textContent = '💎 3팀: 물타기·멘탈방어팀 (팀장석 공석)';
+      setStatusBanner('💎 「야수의심장 물타기 · 멘탈방어 3팀」 공간입니다. 팀장석을 비워두어 바로 착석하실 수 있습니다!');
+    } else if (zoneKey === 'team4') {
+      myAvatar.group.position.set(4.2, 0, 8.2);
+      myAvatar.targetPos.set(6.8, 0, 8.2);
+      myAvatar.state = 'walking';
+      camYaw = -Math.PI / 2; camPitch = 0.32; camDist = 10.5;
+      if (titleEl) titleEl.textContent = '🪑 제4구역 (주주 자율좌석·11석 공석)';
+      setStatusBanner('🪑 「제4구역」은 전 좌석(팀장석+팀원10석)이 완벽히 비워져 있는 주주 자율근무 구역입니다.');
+    } else if (zoneKey === 'chief') {
+      myAvatar.group.position.set(-4.5, 0, -13.2);
+      myAvatar.targetPos.set(-6.5, 0, -16.8);
+      myAvatar.state = 'walking';
+      camYaw = 0; camPitch = 0.28; camDist = 9.5;
+      if (titleEl) titleEl.textContent = '👑 안쪽: SOXL 대표이사 회장실 (CEO)';
+      setStatusBanner('👑 안쪽 VIP 공간인 「대표이사 회장실」로 들어왔습니다! 회장님 집무 의자, 가죽 응접 소파, 6인 대주주 회의탁에 앉으실 수 있습니다.');
+    } else if (zoneKey === 'director') {
+      myAvatar.group.position.set(11.5, 0, -13.2);
+      myAvatar.targetPos.set(13.2, 0, -16.8);
+      myAvatar.state = 'walking';
+      camYaw = 0; camPitch = 0.28; camDist = 9.2;
+      if (titleEl) titleEl.textContent = '💼 안쪽: 3X 운용본부장실 (CIO)';
+      setStatusBanner('💼 안쪽 독립 임원 공간인 「3X 운용본부장(CIO) 집무실」입니다. 중역 데스크와 4인 퀀트 전략 원탁이 마련되어 있습니다.');
+    } else if (zoneKey === 'lounge') {
+      myAvatar.group.position.set(0, 0, 15.5);
+      myAvatar.targetPos.set(6.5, 0, 18.2);
+      myAvatar.state = 'walking';
+      camYaw = Math.PI; camPitch = 0.28; camDist = 10.8;
+      if (titleEl) titleEl.textContent = '☕ $500 로드맵 쇼룸 & 사내 카페';
+      setStatusBanner('☕ 남측 로비 「SOXL $500 로드맵 쇼룸 & 사내 카페 라운지」입니다. 동료들과 커피를 마시며 $500 전략을 나눕니다.');
+    }
+    broadcastMyState();
+  }
+
+  document.querySelectorAll('.zone-btn').forEach(btn => {
+    btn.addEventListener('click', () => jumpToOfficeZone(btn.getAttribute('data-zone')));
+  });
+  document.querySelectorAll('[data-modal-zone]').forEach(el => {
+    el.addEventListener('click', () => {
+      document.getElementById('modal-office-info').classList.remove('is-open');
+      jumpToOfficeZone(el.getAttribute('data-modal-zone'));
+    });
+  });
+
+  /* ==============================================================
+   * 14. 영구 결의·응원 보드 (방명록) & 사내 표어 갤러리 & KPI 부스트
+   * ============================================================== */
+  const MEMO_STORAGE_KEY = 'soxl_corp_memo_board_v1';
+  const DEFAULT_MEMOS = [
+    { id: 'm1', author: '[회장] 황소장 대표회장', text: '🔥 목표주가 $500 돌파 & 수익률 300% 달성! 1~3팀 트레이더 및 주주 여러분 파이팅! 각 팀장석은 언제든 앉으실 수 있게 활짝 비워두었습니다!', cheers: 58, ts: Date.now() - 1000 * 60 * 50 },
+    { id: 'm2', author: '[부사장] 정퀀트 CIO', text: '📈 AI 데이터센터와 HBM4 수요 폭발로 SOXL 슈퍼사이클 초과 달성을 확신합니다!', cheers: 41, ts: Date.now() - 1000 * 60 * 38 },
+    { id: 'm3', author: '[AI가속기팀] 김엔비 수석', text: '🚀 엔비디아·브로드컴·TSMC 삼총사가 이끄는 AI 혁명! $500까지 거침없이 갑니다!', cheers: 35, ts: Date.now() - 1000 * 60 * 24 },
+    { id: 'm4', author: '[HBM메모리팀] 윤하이닉 수석', text: '💾 HBM메모리 2팀, 마이크론·SK하이닉스·RAM 2X와 함께 수익률 300% 완수 결의!', cheers: 33, ts: Date.now() - 1000 * 60 * 15 },
+    { id: 'm5', author: '[멘탈방어팀] 송다이아 수석', text: '💎 흔들리는 음봉에 절대 털리지 않는 다이아몬드 핸즈! 퇴근 후엔 클럽 풀파티에서 만납시다!', cheers: 49, ts: Date.now() - 1000 * 60 * 9 }
+  ];
+
+  let MEMO_ITEMS = [];
+  function loadMemos() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(MEMO_STORAGE_KEY) || 'null');
+      if (Array.isArray(raw) && raw.length > 0) {
+        MEMO_ITEMS = raw;
+        return;
+      }
+    } catch (_) {}
+    MEMO_ITEMS = [...DEFAULT_MEMOS];
+  }
+  function saveMemos() {
+    try { localStorage.setItem(MEMO_STORAGE_KEY, JSON.stringify(MEMO_ITEMS.slice(0, 80))); } catch (_) {}
+  }
+  loadMemos();
+
+  function renderMemoList() {
+    const listEl = document.getElementById('memo-list');
+    const cntEl = document.getElementById('memo-count-num');
+    if (!listEl) return;
+    if (cntEl) cntEl.textContent = String(MEMO_ITEMS.length);
+    listEl.innerHTML = '';
+    MEMO_ITEMS.forEach((item) => {
+      const div = document.createElement('div');
+      div.className = 'memo-item';
+      div.innerHTML = `
+        <div style="font-weight:700; color:#fff;">${item.text}</div>
+        <div class="memo-meta">
+          <span>🪪 ${item.author}</span>
+          <button type="button" class="cheer-btn" data-cheer-id="${item.id}">🔥 공감·성투 ${item.cheers || 1}</button>
+        </div>
+      `;
+      div.querySelector('.cheer-btn').addEventListener('click', () => {
+        item.cheers = (item.cheers || 1) + 1;
+        saveMemos();
+        renderMemoList();
+        playOfficeBroadcastChime(false);
+      });
+      listEl.appendChild(div);
+    });
+  }
+  renderMemoList();
+
+  function addNewMemo(text, walkToBoard = false) {
+    const clean = (text || '').trim() || '🔥 SOXL 목표주가 $500 & 수익률 300% 무조건 달성합니다!';
+    const entry = {
+      id: 'memo_' + Date.now(),
+      author: `[${myCustom.role || '임직원'}] ${myCustom.name}`,
+      text: clean,
+      cheers: 1,
+      ts: Date.now()
+    };
+    MEMO_ITEMS.unshift(entry);
+    saveMemos();
+    renderMemoList();
+    document.getElementById('memo-input').value = '';
+
+    if (walkToBoard) {
+      unseatAvatar(myAvatar);
+      myAvatar.targetPos.set(0, 0, -9.2);
+      myAvatar.state = 'walking_to_board';
+      myAvatar.pendingMemo = clean;
+      setStatusBanner('📌 전면 $500 상황판 앞으로 걸어가 결의 메시지를 부착합니다...');
+    } else {
+      playOfficeBroadcastChime(true);
+      showAvatarBubble(myAvatar, `📌 ${clean}`);
+      setStatusBanner('📌 나의 SOXL $500 달성 결의가 보드에 영구 등록되었습니다!');
+      broadcastMyState('cheer', `📌 ${clean}`);
+    }
+  }
+
+  document.getElementById('btn-walk-memo').addEventListener('click', () => {
+    addNewMemo(document.getElementById('memo-input').value, true);
+  });
+  document.getElementById('btn-direct-memo').addEventListener('click', () => {
+    addNewMemo(document.getElementById('memo-input').value, false);
+  });
+
+  const bannerListEl = document.getElementById('banner-gallery-list');
+  OFFICE_SLOGANS.forEach((sl) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(234,184,92,0.35); cursor:pointer;';
+    card.innerHTML = `
+      <div style="font-size:13px; font-weight:800; color:#ffe596;">${sl.title}</div>
+      <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">${sl.sub}</div>
+      <div style="font-size:11px; color:#2ee59d; font-weight:700; margin-top:5px;">👉 클릭 시 이 현수막 앞으로 이동</div>
+    `;
+    card.addEventListener('click', () => {
+      unseatAvatar(myAvatar);
+      myAvatar.targetPos.set(sl.lookPos.x, 0, sl.lookPos.z);
+      myAvatar.state = 'walking';
+      camYaw = sl.lookPos.yaw;
+      setStatusBanner(`🚩 「${sl.title}」 현수막 앞으로 이동합니다!`);
+    });
+    bannerListEl.appendChild(card);
+  });
+
+  document.getElementById('btn-kpi-boost').addEventListener('click', () => {
+    currentKpiPct = Math.min(500, currentKpiPct + 12);
+    drawMainDashboard(clock.getElapsedTime());
+    document.getElementById('kpi-percent-txt').textContent = `${currentKpiPct}% / 300%`;
+    document.getElementById('kpi-bar-fill').style.width = `${Math.min(100, Math.round((currentKpiPct / 300) * 100))}%`;
+    playOfficeBroadcastChime(true);
+
+    if (currentKpiPct >= 300) {
+      document.getElementById('kpi-desc-txt').innerHTML =
+        `<strong style="color:#ffd269;">🎉 축하합니다!! SOXL 주식회사 수익률 ${currentKpiPct}% 돌파 & 목표주가 $500 신화를 이룩했습니다!!</strong> 전 임직원·주주 특별 성과급이 확정되었습니다!`;
+      triggerAvatarEmote(myAvatar, 'cheer', `🏆 수익률 ${currentKpiPct}% 돌파!! SOXL 주식회사 만세!!`);
+    } else {
+      triggerAvatarEmote(myAvatar, 'brief', `📈 기관 대량 순매수 유입! 현재 전사 수익률 ${currentKpiPct}% 돌파!`);
+    }
+  });
+
+  /* ==============================================================
+   * 15. 마우스/터치/키보드/D-PAD 조작 & 패널 이벤트 바인딩
+   * ============================================================== */
+  let isDragging = false;
+  let dragMoved = false;
+  let prevMouse = { x: 0, y: 0 };
+  const raycaster = new THREE.Raycaster();
+  const mouseNDC = new THREE.Vector2();
+
+  wrap.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    dragMoved = false;
+    camYawVel = 0;
+    prevMouse = { x: e.clientX, y: e.clientY };
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevMouse.x;
+    const dy = e.clientY - prevMouse.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+    const yawStep = -dx * 0.008;
+    camYaw += yawStep;
+    camYawVel = yawStep * 0.65;
+    camPitch = Math.max(0.08, Math.min(1.15, camPitch + dy * 0.0055));
+    prevMouse = { x: e.clientX, y: e.clientY };
+  });
+  window.addEventListener('pointerup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (!dragMoved && e.target === renderer.domElement) {
+      handleSceneClick(e);
+    }
+  });
+
+  function bindPanBtn(btn, dir) {
+    if (!btn) return;
+    btn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      camPanDir = dir;
+      camYaw += dir * 0.22;
+    });
+    btn.addEventListener('pointerup', () => { camPanDir = 0; });
+    btn.addEventListener('pointerleave', () => { camPanDir = 0; });
+  }
+  bindPanBtn(document.getElementById('btn-cam-left'), 1);
+  bindPanBtn(document.getElementById('btn-cam-right'), -1);
+
+  wrap.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY) * 0.35 || e.shiftKey) {
+      const hDelta = (e.shiftKey && Math.abs(e.deltaX) < 1) ? e.deltaY : e.deltaX;
+      camYaw -= hDelta * 0.0068;
+      camYawVel = 0;
+    } else {
+      camDist = Math.max(2.0, Math.min(34.0, camDist + e.deltaY * 0.006));
+    }
+  }, { passive: false });
+
+  function handleSceneClick(e) {
+    mouseNDC.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseNDC.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouseNDC, camera);
+
+    const dashHit = raycaster.intersectObject(dashScreenMesh);
+    if (dashHit.length > 0) {
+      togglePanel('panel-kpi', 'dock-kpi');
+      playOfficeBroadcastChime(false);
+      setStatusBanner('📈 SOXL 목표주가 $500 & 수익률 300% 실시간 상황판을 열었습니다!');
+      return;
+    }
+
+    const bannerHits = raycaster.intersectObjects(clickableBannerMeshes);
+    if (bannerHits.length > 0) {
+      const sIdx = bannerHits[0].object.userData.sloganIdx || 0;
+      const sl = OFFICE_SLOGANS[sIdx] || OFFICE_SLOGANS[0];
+      playOfficeBroadcastChime(false);
+      showAvatarBubble(myAvatar, sl.title);
+      setStatusBanner(`${sl.title} — ${sl.sub}`);
+      return;
+    }
+
+    const floorHits = raycaster.intersectObjects([mainFloorMesh, execFloorMesh, mainAisleV, crossAisleH]);
+    if (floorHits.length > 0) {
+      const pt = floorHits[0].point;
+      const cx = Math.max(-23.5, Math.min(23.5, pt.x));
+      const cz = Math.max(-22.2, Math.min(22.2, pt.z));
+      const clickVec = new THREE.Vector3(cx, 0, cz);
+
+      let nearSeat = null;
+      let minDist = 1.15;
+      for (const s of seats) {
+        const d = s.pos.distanceTo(clickVec);
+        if (d < minDist) {
+          minDist = d;
+          nearSeat = s;
+        }
+      }
+      if (nearSeat) {
+        sitAvatarAtSeat(myAvatar, nearSeat);
+        return;
+      }
+
+      unseatAvatar(myAvatar);
+      myAvatar.targetPos.set(cx, 0, cz);
+      myAvatar.state = 'walking';
+      rippleMesh.position.set(cx, 0.03, cz);
+      rippleAge = 0;
+      broadcastMyState();
+    }
+  }
+
+  const panelMap = {
+    'panel-avatar': 'dock-avatar',
+    'panel-kpi': 'dock-kpi',
+    'panel-memo': 'dock-memo',
+    'panel-banners': 'dock-banners',
+    'panel-audio': 'dock-audio'
+  };
+  function togglePanel(panelId, dockId) {
+    Object.keys(panelMap).forEach(pid => {
+      const pEl = document.getElementById(pid);
+      const dEl = document.getElementById(panelMap[pid]);
+      if (pid === panelId) {
+        const openNow = !pEl.classList.contains('is-open');
+        pEl.classList.toggle('is-open', openNow);
+        if (dEl) dEl.classList.toggle('is-active', openNow);
+      } else {
+        if (pEl) pEl.classList.remove('is-open');
+        if (dEl) dEl.classList.remove('is-active');
+      }
+    });
+  }
+
+  document.getElementById('dock-sit').addEventListener('click', toggleMySit);
+  document.getElementById('dock-cheer').addEventListener('click', () => triggerAvatarEmote(myAvatar, 'cheer'));
+  document.getElementById('dock-avatar').addEventListener('click', () => togglePanel('panel-avatar', 'dock-avatar'));
+  document.getElementById('btn-top-avatar').addEventListener('click', () => togglePanel('panel-avatar', 'dock-avatar'));
+  document.getElementById('dock-kpi').addEventListener('click', () => togglePanel('panel-kpi', 'dock-kpi'));
+  document.getElementById('dock-memo').addEventListener('click', () => togglePanel('panel-memo', 'dock-memo'));
+  document.getElementById('dock-banners').addEventListener('click', () => togglePanel('panel-banners', 'dock-banners'));
+  document.getElementById('dock-audio').addEventListener('click', () => togglePanel('panel-audio', 'dock-audio'));
+
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pid = btn.getAttribute('data-close');
+      document.getElementById(pid).classList.remove('is-open');
+      const dId = panelMap[pid];
+      if (dId) document.getElementById(dId).classList.remove('is-active');
+    });
+  });
+
+  document.querySelectorAll('[data-emote-btn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.getAttribute('data-emote-btn');
+      if (k === 'sit') toggleMySit();
+      else triggerAvatarEmote(myAvatar, k);
+    });
+  });
+
+  document.getElementById('btn-cam-preset').addEventListener('click', () => {
+    cameraPresetIdx = (cameraPresetIdx + 1) % cameraPresets.length;
+    const p = cameraPresets[cameraPresetIdx];
+    camDist = p.dist; camPitch = p.pitch;
+    document.getElementById('cam-preset-label').textContent = p.name;
+  });
+  document.getElementById('btn-zoom-in').addEventListener('click', () => { camDist = Math.max(2.0, camDist - 1.6); });
+  document.getElementById('btn-zoom-out').addEventListener('click', () => { camDist = Math.min(34.0, camDist + 1.8); });
+
+  document.getElementById('btn-bgm-toggle').addEventListener('click', () => {
+    initWebAudio();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    masterMuted = !masterMuted;
+    syncBgmPlayback();
+  });
+
+  function triggerCompanyBroadcast() {
+    initWebAudio();
+    playOfficeBroadcastChime(true);
+    const msgs = [
+      '📢 [사내방송] 띵동댕동~ SOXL 주식회사 임직원 및 주주 여러분! 목표주가 $500 돌파를 향해 오늘도 힘차게 전진합시다!',
+      '📢 [사내방송] 띵동댕동~ AI가속기 1팀 · HBM메모리 2팀 · 멘탈방어 3팀 모두 이번 분기 수익률 300% 순항 중입니다!',
+      '📢 [회장 특별격려] “SOXL $500 달성 시 전 임직원 월스트리트 특별 성과급과 SOXL 멘탈케어 클럽 VIP 풀파티를 약속합니다!”'
+    ];
+    const pick = msgs[Math.floor(Math.random() * msgs.length)];
+    setStatusBanner(pick, 5200);
+    appendChatMessage({ name: '📢 사내방송센터', text: pick.replace('📢 ', ''), isSystem: true });
+  }
+  document.getElementById('btn-broadcast-chime').addEventListener('click', triggerCompanyBroadcast);
+  document.getElementById('btn-panel-broadcast').addEventListener('click', triggerCompanyBroadcast);
+
+  document.getElementById('btn-office-status').addEventListener('click', () => {
+    document.getElementById('modal-office-info').classList.add('is-open');
+  });
+  document.getElementById('btn-close-office-info').addEventListener('click', () => {
+    document.getElementById('modal-office-info').classList.remove('is-open');
+  });
+
+  document.querySelectorAll('[data-bgm-track]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-bgm-track]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentBgmTrack = btn.getAttribute('data-bgm-track');
+      masterMuted = false;
+      syncBgmPlayback();
+      setStatusBanner(currentBgmTrack === 'bullrun'
+        ? '🔥 BGM 변경: 「SOXL $500 Bull Run — 300% 돌파 출정가」가 재생됩니다!'
+        : (currentBgmTrack === 'anthem'
+          ? '👑 BGM 변경: 「Leverage Nation — 대주주 총회 행진곡」이 재생됩니다!'
+          : '🎵 BGM 변경: 「Wall Street Prestige — Smart Office Lounge」가 재생됩니다!'));
+    });
+  });
+  document.getElementById('vol-bgm').addEventListener('input', syncBgmPlayback);
+  document.getElementById('vol-office').addEventListener('input', syncBgmPlayback);
+
+  function applyCustomPatch(patch) {
+    Object.assign(myCustom, patch);
+    saveMyCustom(myCustom);
+    rebuildAvatarRig(myAvatar, myCustom);
+    broadcastMyState();
+  }
+  document.querySelectorAll('[data-cust-gender]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-cust-gender]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyCustomPatch({ gender: b.getAttribute('data-cust-gender') });
+    });
+  });
+  document.querySelectorAll('[data-cust-hair]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-cust-hair]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyCustomPatch({ hairStyle: Number(b.getAttribute('data-cust-hair')) });
+    });
+  });
+  document.querySelectorAll('[data-hair-color]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-hair-color]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyCustomPatch({ hairColor: b.getAttribute('data-hair-color') });
+    });
+  });
+  document.querySelectorAll('[data-cust-outfit]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-cust-outfit]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyCustomPatch({ outfitType: b.getAttribute('data-cust-outfit') });
+    });
+  });
+  document.querySelectorAll('[data-outfit-color]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-outfit-color]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyCustomPatch({ outfitColor: b.getAttribute('data-outfit-color') });
+    });
+  });
+  document.querySelectorAll('[data-cust-prop]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-cust-prop]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyCustomPatch({ prop: b.getAttribute('data-cust-prop') });
+    });
+  });
+  document.querySelectorAll('[data-cust-acc]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-cust-acc]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyCustomPatch({ accessory: b.getAttribute('data-cust-acc') });
+    });
+  });
+  document.getElementById('btn-save-custom-name').addEventListener('click', () => {
+    const newName = document.getElementById('cust-name-input').value.trim() || '김속슬';
+    const newRole = document.getElementById('cust-role-select').value || '팀장';
+    applyCustomPatch({ name: newName, role: newRole });
+    showAvatarBubble(myAvatar, `🪪 [${newRole}] ${newName}입니다! SOXL $500 파이팅!`);
+  });
+
+  let hasEnteredOffice = false;
+  document.querySelectorAll('[data-boot-gender]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-boot-gender]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      myCustom.gender = b.getAttribute('data-boot-gender');
+    });
+  });
+
+  function enterOffice(withSound) {
+    const bName = document.getElementById('boot-name-input').value.trim() || '김속슬';
+    const bRole = document.getElementById('boot-role-select').value || '팀장';
+    document.getElementById('cust-name-input').value = bName;
+    document.getElementById('cust-role-select').value = bRole;
+    applyCustomPatch({ name: bName, role: bRole });
+
+    document.getElementById('office-boot').classList.add('is-hidden');
+    hasEnteredOffice = true;
+    startAudioSystem(withSound);
+    if (withSound) playOfficeBroadcastChime(false);
+    showAvatarBubble(myAvatar, `🫡 [${bRole}] ${bName} 출근 완료! SOXL $500 가자!`);
+    broadcastMyState('wave', `🫡 [${bRole}] ${bName} 출근 완료!`);
+  }
+
+  document.getElementById('btn-enter-sound').addEventListener('click', () => enterOffice(true));
+  document.getElementById('btn-enter-mute').addEventListener('click', () => enterOffice(false));
+
+  setTimeout(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('autostart') === '1') {
+      document.getElementById('office-boot').classList.add('is-hidden');
+      hasEnteredOffice = true;
+    }
+    const zParam = params.get('zone');
+    if (zParam) jumpToOfficeZone(zParam);
+  }, 120);
+
+  const chatLogBox = document.getElementById('office-chatlog');
+  const chatToggleLbl = document.getElementById('chatlog-toggle-label');
+  document.getElementById('btn-chatlog-toggle').addEventListener('click', () => {
+    const collapsed = chatLogBox.classList.toggle('is-collapsed');
+    chatToggleLbl.textContent = collapsed
+      ? '💬 SOXL 주식회사 실시간 EP 메신저 (열기 ▲)'
+      : '💬 SOXL 주식회사 실시간 EP 메신저 (접기 ▼)';
+  });
+
+  function appendChatMessage({ name, text, isSystem = false }) {
+    const list = document.getElementById('office-chat-list');
+    if (!list) return;
+    const li = document.createElement('li');
+    if (isSystem) {
+      li.className = 'sys-msg';
+      li.textContent = text;
+    } else {
+      const strong = document.createElement('strong');
+      strong.textContent = name + ':';
+      li.appendChild(strong);
+      li.appendChild(document.createTextNode(' ' + text));
+    }
+    list.appendChild(li);
+    while (list.children.length > 35) list.removeChild(list.firstChild);
+    list.scrollTop = list.scrollHeight;
+  }
+
+  appendChatMessage({ name: '시스템', text: '🏢 SOXL 주식회사 월스트리트 스마트 오피스 메신저에 연결되었습니다.', isSystem: true });
+  appendChatMessage({ name: '[회장] 황소장 대표회장', text: '임직원 및 주주 여러분 반갑습니다! 목표주가 $500 · 수익률 300%를 향해 다 함께 뛰어봅시다!' });
+  appendChatMessage({ name: '[AI가속기팀] 김엔비 수석', text: '엔비디아·브로드컴·TSMC 차세대 AI 데이터센터 수주 순항 중입니다!' });
+  appendChatMessage({ name: '[HBM메모리팀] 윤하이닉 수석', text: 'HBM4 및 마이크론·RAM 2X 기관 매수세 폭발하고 있습니다!' });
+  appendChatMessage({ name: '[멘탈방어팀] 송다이아 수석', text: '흔들림 없는 다이아몬드 핸즈! 오늘 열일하고 퇴근 후엔 클럽 풀파티 갑시다!' });
+
+  document.getElementById('office-chat-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('office-chat-input');
+    const txt = input.value.trim();
+    if (!txt) return;
+    input.value = '';
+    const sender = `[${myCustom.role}] ${myCustom.name}`;
+    appendChatMessage({ name: sender, text: txt });
+    showAvatarBubble(myAvatar, txt, 4800);
+    broadcastMyState('chat', txt);
+  });
+
+  // 키보드 & 가상 D-PAD 이동 바인딩
+  const keysPressed = {};
+  const dpadMap = { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright' };
+  document.querySelectorAll('[data-dpad]').forEach(btn => {
+    const k = dpadMap[btn.getAttribute('data-dpad')];
+    const startHold = (e) => { e.preventDefault(); e.stopPropagation(); keysPressed[k] = true; };
+    const endHold = (e) => { e.preventDefault(); keysPressed[k] = false; };
+    btn.addEventListener('pointerdown', startHold);
+    btn.addEventListener('pointerup', endHold);
+    btn.addEventListener('pointerleave', endHold);
+    btn.addEventListener('pointercancel', endHold);
+  });
+
+  window.addEventListener('keydown', (e) => {
+    const tag = document.activeElement ? document.activeElement.tagName : '';
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) {
+      if (e.key === 'Escape') document.activeElement.blur();
+      return;
+    }
+    keysPressed[e.key.toLowerCase()] = true;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('office-chat-input').focus();
+      return;
+    }
+    if (e.key === '1') toggleMySit();
+    if (e.key === '2') triggerAvatarEmote(myAvatar, 'cheer');
+    if (e.key === '3') togglePanel('panel-avatar', 'dock-avatar');
+    if (e.key === '4') togglePanel('panel-kpi', 'dock-kpi');
+    if (e.key === '5') togglePanel('panel-memo', 'dock-memo');
+    if (e.key === '6') togglePanel('panel-banners', 'dock-banners');
+    if (e.key === '7') togglePanel('panel-audio', 'dock-audio');
+  });
+  window.addEventListener('keyup', (e) => {
+    keysPressed[e.key.toLowerCase()] = false;
+  });
+
+  /* ==============================================================
+   * 16. 실시간 멀티플레이어 동기화 (MQTT + BroadcastChannel)
+   * ============================================================== */
+  let mySessionId = sessionStorage.getItem('soxl_corp_office_sid');
+  if (!mySessionId) {
+    mySessionId = 'soxl_' + Math.random().toString(36).slice(2, 10);
+    try { sessionStorage.setItem('soxl_corp_office_sid', mySessionId); } catch (_) {}
+  }
+  let showNpcs = true;
+  const remotePeers = new Map();
+
+  function updateOnlineCounters() {
+    const realCount = 1 + remotePeers.size;
+    const npcCount = showNpcs ? npcSpecs.length : 0;
+    document.getElementById('online-total-count').textContent = String(realCount + npcCount);
+    const rEl = document.getElementById('real-user-count');
+    const nEl = document.getElementById('npc-user-count');
+    if (rEl) rEl.textContent = String(realCount);
+    if (nEl) nEl.textContent = String(npcCount);
+  }
+
+  document.getElementById('chk-show-npc').addEventListener('change', (e) => {
+    showNpcs = e.target.checked;
+    avatars.forEach(av => {
+      if (String(av.id).startsWith('npc_')) {
+        av.group.visible = showNpcs;
+        av.labelEl.style.visibility = showNpcs ? 'visible' : 'hidden';
+      }
+    });
+    updateOnlineCounters();
+  });
+
+  function handleIncomingPacket(data) {
+    if (!data || data.sid === mySessionId) return;
+    let peer = remotePeers.get(data.sid);
+    if (data.type === 'leave') {
+      if (peer) {
+        unseatAvatar(peer.avatar);
+        worldGroup.remove(peer.avatar.group);
+        peer.avatar.labelEl.remove();
+        const idx = avatars.indexOf(peer.avatar);
+        if (idx !== -1) avatars.splice(idx, 1);
+        remotePeers.delete(data.sid);
+        updateOnlineCounters();
+      }
+      return;
+    }
+    if (!peer) {
+      const av = createAvatar({
+        id: data.sid,
+        name: data.name || '주주임원',
+        role: data.role || '매니저',
+        custom: data.custom || {},
+        isMe: false,
+        x: data.x || 0,
+        z: data.z || 3.0
+      });
+      peer = { avatar: av, lastSeen: Date.now() };
+      remotePeers.set(data.sid, peer);
+    }
+    peer.lastSeen = Date.now();
+    const av = peer.avatar;
+    if (data.seatId) {
+      const sObj = seats.find(s => s.id === data.seatId);
+      if (sObj && av.seat !== sObj) sitAvatarAtSeat(av, sObj);
+    } else {
+      if (av.seat) unseatAvatar(av);
+      av.targetPos.set(data.x || 0, 0, data.z || 3.0);
+      if (av.group.position.distanceTo(av.targetPos) > 0.12) av.state = 'walking';
+    }
+    if (data.action === 'chat' && data.msg) {
+      showAvatarBubble(av, data.msg, 4800);
+      appendChatMessage({ name: `[${data.role || '임직원'}] ${data.name}`, text: data.msg });
+    } else if (data.action && EMOTE_META[data.action]) {
+      av.emote = data.action;
+      av.emoteTimer = 3.2;
+      if (data.msg) showAvatarBubble(av, data.msg, 3500);
+    }
+    updateOnlineCounters();
+  }
+
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('soxl_corp_office_v1') : null;
+  if (bc) bc.onmessage = (ev) => handleIncomingPacket(ev.data);
+
+  let mqttClient = null;
+  const MQTT_TOPIC = 'evening-soxx/metaverse/soxl_corp/v1/presence';
+  if (window.mqtt) {
+    try {
+      mqttClient = window.mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+        clientId: 'soxlcorp_' + mySessionId,
+        clean: true,
+        connectTimeout: 4000,
+        reconnectPeriod: 5000
+      });
+      mqttClient.on('connect', () => {
+        mqttClient.subscribe(MQTT_TOPIC);
+      });
+      mqttClient.on('message', (t, payload) => {
+        if (t === MQTT_TOPIC) {
+          try { handleIncomingPacket(JSON.parse(payload.toString())); } catch (_) {}
+        }
+      });
+    } catch (_) {}
+  }
+
+  function broadcastMyState(action = null, msg = null) {
+    if (!hasEnteredOffice) return;
+    const pkt = {
+      sid: mySessionId,
+      name: myCustom.name,
+      role: myCustom.role,
+      custom: myCustom,
+      x: Number(myAvatar.targetPos.x.toFixed(2)),
+      z: Number(myAvatar.targetPos.z.toFixed(2)),
+      seatId: myAvatar.seat ? myAvatar.seat.id : null,
+      action,
+      msg
+    };
+    if (bc) bc.postMessage(pkt);
+    if (mqttClient && mqttClient.connected) mqttClient.publish(MQTT_TOPIC, JSON.stringify(pkt));
+  }
+
+  /* ==============================================================
+   * 17. 다관절 임직원 포즈 애니메이션
+   * ============================================================== */
+  function updateAvatarPose(av, dt, elapsed, isMoving) {
+    const rig = av.rig;
+    if (!rig) return;
+
+    if (rig.handPropMesh) rig.handPropMesh.visible = true;
+
+    if (isMoving) {
+      av.walkPhase += dt * 9.5;
+      const p = av.walkPhase;
+      const swing = Math.sin(p);
+      const bob = Math.abs(Math.cos(p * 2)) * 0.032;
+
+      rig.pelvis.position.set(0, bob, 0);
+      rig.legL.rotation.set(swing * 0.58, 0, 0);
+      rig.legR.rotation.set(-swing * 0.58, 0, 0);
+      rig.shinL.rotation.set(-Math.max(0, -Math.cos(p)) * 0.62 - 0.06, 0, 0);
+      rig.shinR.rotation.set(-Math.max(0, Math.cos(p)) * 0.62 - 0.06, 0, 0);
+
+      rig.torso.rotation.set(-0.04, -swing * 0.08, swing * 0.02);
+      rig.headGroup.rotation.set(Math.sin(p * 2) * 0.025, swing * 0.05, 0);
+
+      rig.armL.rotation.set(-swing * 0.45, 0, 0.06);
+      rig.forearmL.rotation.set(0.32 + Math.max(0, -swing) * 0.25, 0, 0);
+      rig.armR.rotation.set(0.32 + swing * 0.16, -0.15, -0.08);
+      rig.forearmR.rotation.set(0.65, -0.1, 0);
+    } else if (av.state === 'sitting') {
+      const typeSpeed = elapsed * 11.0 + av.walkPhase;
+      const typeL = Math.sin(typeSpeed) * 0.09;
+      const typeR = Math.cos(typeSpeed * 1.1) * 0.09;
+      const breath = Math.sin(elapsed * 2.0 + av.walkPhase) * 0.015;
+
+      rig.pelvis.position.set(0, -0.09, 0.04);
+      rig.legL.rotation.set(1.48, 0.06, 0);
+      rig.legR.rotation.set(1.48, -0.06, 0);
+      rig.shinL.rotation.set(-1.48, 0, 0);
+      rig.shinR.rotation.set(-1.48, 0, 0);
+
+      rig.torso.rotation.set(-0.06 + breath * 0.5, 0, 0);
+      rig.headGroup.rotation.set(-0.08 + breath, Math.sin(elapsed * 0.9 + av.walkPhase) * 0.08, 0);
+
+      rig.armL.rotation.set(0.55 + typeL, 0.20, 0.08);
+      rig.forearmL.rotation.set(0.95 - typeL, 0.22, 0);
+      rig.armR.rotation.set(0.55 + typeR, -0.20, -0.08);
+      rig.forearmR.rotation.set(0.95 - typeR, -0.22, 0);
+
+      if (rig.handPropMesh) rig.handPropMesh.visible = false;
+    } else {
+      const breath = Math.sin(elapsed * 1.8 + av.walkPhase);
+      rig.pelvis.position.set(0, breath * 0.008, 0);
+      rig.legL.rotation.set(0, 0, 0);
+      rig.legR.rotation.set(0, 0, 0);
+      rig.shinL.rotation.set(0, 0, 0);
+      rig.shinR.rotation.set(0, 0, 0);
+
+      rig.torso.rotation.set(breath * 0.012, 0, 0);
+      rig.headGroup.rotation.set(breath * 0.018, Math.sin(elapsed * 0.6 + av.walkPhase) * 0.05, 0);
+
+      rig.armL.rotation.set(0.06, 0, 0.07);
+      rig.forearmL.rotation.set(0.22, 0.08, 0);
+      rig.armR.rotation.set(0.36, -0.18, -0.08);
+      rig.forearmR.rotation.set(0.70, -0.15, 0);
+    }
+
+    if (av.emote) {
+      av.emoteTimer -= dt;
+      if (av.emoteTimer <= 0) {
+        av.emote = null;
+      } else if (av.emote === 'cheer') {
+        const w = Math.sin(elapsed * 9.0) * 0.18;
+        rig.armL.rotation.set(2.72, 0, -0.25 + w);
+        rig.forearmL.rotation.set(0.25, 0, 0);
+        rig.armR.rotation.set(2.72, 0, 0.25 - w);
+        rig.forearmR.rotation.set(0.25, 0, 0);
+        rig.headGroup.rotation.set(0.14, w * 0.3, 0);
+      } else if (av.emote === 'salute') {
+        rig.armR.rotation.set(2.15, -0.35, -0.35);
+        rig.forearmR.rotation.set(1.85, 0, 0);
+        rig.headGroup.rotation.set(0.05, 0, 0);
+      } else if (av.emote === 'wave') {
+        const w = Math.sin(elapsed * 11.0) * 0.32;
+        rig.armR.rotation.set(2.25, -0.2, 0.28 + w * 0.5);
+        rig.forearmR.rotation.set(0.45, 0, w);
+      } else if (av.emote === 'brief') {
+        if (rig.handPropMesh) rig.handPropMesh.visible = true;
+        rig.armL.rotation.set(0.65, 0.3, 0.1);
+        rig.forearmL.rotation.set(0.95, 0.2, 0);
+        rig.armR.rotation.set(0.75, -0.2, -0.1);
+        rig.forearmR.rotation.set(1.05, -0.2, 0);
+      }
+    }
+  }
+
+  const clock = new THREE.Clock();
+  let lastDashDraw = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const dt = Math.min(clock.getDelta(), 0.1);
+    const elapsed = clock.getElapsedTime();
+
+    if (camPanDir !== 0) {
+      camYaw += camPanDir * 1.85 * dt;
+    } else if (!isDragging && Math.abs(camYawVel) > 0.0002) {
+      camYaw += camYawVel;
+      camYawVel *= 0.88;
+    }
+
+    let moveX = 0, moveZ = 0;
+    if (keysPressed['arrowup'] || keysPressed['w']) moveZ -= 1;
+    if (keysPressed['arrowdown'] || keysPressed['s']) moveZ += 1;
+    if (keysPressed['arrowleft'] || keysPressed['a']) moveX -= 1;
+    if (keysPressed['arrowright'] || keysPressed['d']) moveX += 1;
+
+    let myKeyMoving = false;
+    if (moveX !== 0 || moveZ !== 0) {
+      unseatAvatar(myAvatar);
+      myKeyMoving = true;
+      const speed = 3.8 * dt;
+      const forward = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
+      const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
+      myAvatar.group.position.addScaledVector(forward, moveZ * speed);
+      myAvatar.group.position.addScaledVector(right, moveX * speed);
+      myAvatar.group.position.x = Math.max(-23.5, Math.min(23.5, myAvatar.group.position.x));
+      myAvatar.group.position.z = Math.max(-22.0, Math.min(22.0, myAvatar.group.position.z));
+      myAvatar.targetPos.copy(myAvatar.group.position);
+      myAvatar.group.rotation.y = Math.atan2(-moveX, -moveZ) + camYaw;
+    }
+
+    avatars.forEach(av => {
+      let isMoving = (av === myAvatar && myKeyMoving);
+      if (av.state === 'walking' || av.state === 'walking_to_seat' || av.state === 'walking_to_board') {
+        const diff = new THREE.Vector3().subVectors(av.targetPos, av.group.position);
+        diff.y = 0;
+        const dist = diff.length();
+        if (dist > 0.08) {
+          diff.normalize();
+          av.group.position.addScaledVector(diff, Math.min(dist, 3.4 * dt));
+          av.group.rotation.y = Math.atan2(-diff.x, -diff.z);
+          isMoving = true;
+        } else {
+          av.group.position.copy(av.targetPos);
+          if (av.state === 'walking_to_seat' && av.seat) {
+            av.state = 'sitting';
+            av.group.rotation.y = av.seat.lookAngle || 0;
+            if (av.isMe) {
+              sitStartTime = Date.now();
+              syncSitButtonUI();
+              playKeyboardClackBurst();
+              const rType = av.seat.roleType;
+              if (rType === 'chief') {
+                setStatusBanner('👑 SOXL 대표이사 회장(CEO) 집무석에 착석하셨습니다! 목표주가 $500 달성 작전을 총지휘합니다!');
+              } else if (rType === 'director') {
+                setStatusBanner('💼 3X 운용본부장(CIO) 집무석에 착석하셨습니다! 글로벌 반도체 포트폴리오를 점검합니다.');
+              } else if (rType === 'leader') {
+                setStatusBanner(`🚩 ${av.seat.label}에 착석하셨습니다! 우리 팀원 10명과 함께 수익률 300% 달성을 향해 달립니다!`);
+              } else {
+                setStatusBanner(`💻 ${av.seat.label}에 착석하여 블룸버그·SOXL 터미널 모니터로 트레이딩 리포트를 작성합니다.`);
+              }
+            }
+          } else if (av.state === 'walking_to_board') {
+            av.state = 'standing';
+            av.group.rotation.y = 0;
+            playOfficeBroadcastChime(true);
+            triggerAvatarEmote(av, 'cheer', `📌 ${av.pendingMemo || 'SOXL $500 달성!'}`);
+          } else {
+            av.state = 'standing';
+          }
+        }
+      }
+      updateAvatarPose(av, dt, elapsed, isMoving);
+    });
+
+    if (myAvatar.state === 'sitting' && sitStartTime) {
+      const sec = Math.floor((Date.now() - sitStartTime) / 1000);
+      const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+      const ss = String(sec % 60).padStart(2, '0');
+      const lbl = document.getElementById('dock-sit-label');
+      if (lbl) lbl.textContent = `열일 중 ${mm}:${ss}`;
+    }
+
+    if (elapsed - lastDashDraw > 0.2) {
+      lastDashDraw = elapsed;
+      drawMainDashboard(elapsed);
+    }
+
+    if (rippleAge < 1.0) {
+      rippleAge += dt * 1.8;
+      const s = 1 + rippleAge * 3.0;
+      rippleMesh.scale.set(s, s, 1);
+      rippleMesh.material.opacity = Math.max(0, (1 - rippleAge) * 0.7);
+    }
+
+    const lookTarget = new THREE.Vector3(
+      myAvatar.group.position.x - Math.sin(camYaw) * 0.9,
+      1.85,
+      myAvatar.group.position.z - Math.cos(camYaw) * 1.2
+    );
+    const desiredCamPos = new THREE.Vector3(
+      lookTarget.x + Math.sin(camYaw) * Math.cos(camPitch) * camDist,
+      lookTarget.y + Math.sin(camPitch) * camDist,
+      lookTarget.z + Math.cos(camYaw) * Math.cos(camPitch) * camDist
+    );
+    camera.position.lerp(desiredCamPos, 0.12);
+    camera.lookAt(lookTarget);
+
+    avatars.forEach(av => {
+      if (!av.group.visible) {
+        av.labelEl.style.display = 'none';
+        return;
+      }
+      const labelY = av.state === 'sitting' ? 1.40 : 1.65;
+      const headWorld = new THREE.Vector3(av.group.position.x, labelY, av.group.position.z);
+      headWorld.project(camera);
+      if (headWorld.z > 1) {
+        av.labelEl.style.display = 'none';
+      } else {
+        av.labelEl.style.display = 'flex';
+        const sx = (headWorld.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-headWorld.y * 0.5 + 0.5) * window.innerHeight;
+        av.labelEl.style.left = `${sx}px`;
+        av.labelEl.style.top = `${sy}px`;
+      }
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  updateOnlineCounters();
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+</script>
+</body>
+</html>
