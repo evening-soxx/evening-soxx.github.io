@@ -978,9 +978,16 @@ body.left-panel-open #virtual-dpad {
 </div>
 
 <!-- 상단 SOXL 100 ~ 500 비전 프레임 & 2층 VIP룸 원터치 이동 바 (초기 접힘) -->
-<div id="frame-quick-strip" class="collapsed">
-  <span class="fq-label">🧭 클럽 핫스팟 이동</span>
-  <button type="button" class="fq-btn" onclick="walkToPoolParty()" style="border-color:#06b6d4;color:#67e8f9;">🏊 야외 풀파티장</button><button type="button" class="fq-btn" onclick="walkToVIPRoom()" style="border-color:#eab85c;color:#ffe39f;">🍾 2층 VIP 룸</button><button type="button" class="fq-btn" onclick="walkToBarCounter()" style="border-color:#2ee59d;color:#9effd6;">🍸 1층 주류 바</button><button type="button" class="fq-btn" onclick="walkToDanceFloor()" style="border-color:#ff477e;color:#ff9ebb;">🕺 댄스플로어</button>
+<!-- 상단 3D 프라이빗 룸 5동 & SOXL 100~500 비전 프레임 원터치 이동 바 (기본 오픈) -->
+<div id="frame-quick-strip">
+  <span class="fq-label">🚪 3D 프라이빗 룸</span>
+  <button type="button" class="fq-btn active" data-room="vault" onclick="walkToRoom('vault')" style="border-color:#ffd269;color:#ffe699;font-weight:800;">👑 1룸: $500 황금금고 VVIP</button>
+  <button type="button" class="fq-btn" data-room="whiskey" onclick="walkToRoom('whiskey')" style="border-color:#f59e0b;color:#fde68a;font-weight:800;">🥃 2룸: 월스트리트 위스키&amp;시가바</button>
+  <button type="button" class="fq-btn" data-room="karaoke" onclick="walkToRoom('karaoke')" style="border-color:#ff007f;color:#ff9ebb;font-weight:800;">🎤 3룸: 하이퍼 네온 노래방</button>
+  <button type="button" class="fq-btn" data-room="fountain" onclick="walkToRoom('fountain')" style="border-color:#eab85c;color:#fef08a;font-weight:800;">🥂 4룸: 황금 샴페인 분수</button>
+  <button type="button" class="fq-btn" data-room="vip2f" onclick="walkToRoom('vip2f')" style="border-color:#a855f7;color:#e9d5ff;font-weight:800;">🍾 2층: VVIP 펜트하우스&amp;자쿠지</button>
+  <button type="button" class="fq-btn" data-room="pool" onclick="walkToRoom('pool')" style="border-color:#06b6d4;color:#67e8f9;font-weight:800;">🏊 야외 풀파티&amp;3D 카바나</button>
+  <button type="button" class="fq-btn" data-room="floor" onclick="walkToRoom('floor')" style="border-color:#2ee59d;color:#9effd6;">🪩 1층 메인 플로어</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(0)">SOXL 100</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(1)">SOXL 200</button>
   <button type="button" class="fq-btn" onclick="walkToFrame(2)">SOXL 300</button>
@@ -1274,22 +1281,34 @@ body.left-panel-open #virtual-dpad {
     </div>
   </div>
 
-  <!-- 2열: 실시간 채팅하기 & 핫스팟 워프 & 클럽 편의 유틸 -->
+  <!-- 2열: 3D 프라이빗 룸 워프 & 실시간 채팅하기 & 클럽 편의 유틸 -->
   <div class="dock-row" id="dock-row-nav">
-    <div class="dock-segment" style="flex:1; justify-content:center;">
+    <div class="dock-segment" style="flex:1; justify-content:center; flex-wrap:wrap;">
       <button type="button" class="dock-btn" id="dock-chat" onclick="openChatFromDock()" title="실시간 주주 채팅창 열기/접기! (단축키 Enter)" style="border-color:#2ee59d; color:#9effd6; font-weight:800; background:rgba(46,229,157,0.22);">
-        <span>💬</span><span class="label-txt" id="dock-chat-label">채팅하기</span><span class="key-badge">Enter</span>
+        <span>💬</span><span class="label-txt" id="dock-chat-label">채팅</span><span class="key-badge">Enter</span>
       </button>
-      <button type="button" class="dock-btn highlight-pool" id="dock-pool" onclick="walkToPoolParty()" title="야외 풀파티장으로 이동! (단축키 P)" style="border-color:#06b6d4; color:#67e8f9; font-weight:800; background:rgba(6,182,212,0.18);">
-        <span>🏊</span><span class="label-txt">풀파티</span><span class="key-badge">P</span>
+      <button type="button" class="dock-btn active" data-room="vault" id="dock-room1" onclick="walkToRoom('vault')" title="제1룸: SOXL $500 황금금고 VVIP룸으로 이동!" style="border-color:#ffd269; color:#ffe699; font-weight:800; background:rgba(255,210,105,0.18);">
+        <span>👑</span><span class="label-txt">1룸:금고</span>
       </button>
-      <button type="button" class="dock-btn highlight-vip" id="dock-vip" onclick="walkToVIPRoom()" title="2층 VIP 스카이라운지로 이동!" style="border-color:#eab85c; color:#ffe39f;">
+      <button type="button" class="dock-btn" data-room="whiskey" id="dock-room2" onclick="walkToRoom('whiskey')" title="제2룸: 월스트리트 위스키 & 시가 바로 이동!" style="border-color:#f59e0b; color:#fde68a; font-weight:800; background:rgba(245,158,11,0.18);">
+        <span>🥃</span><span class="label-txt">2룸:위스키</span>
+      </button>
+      <button type="button" class="dock-btn" data-room="karaoke" id="dock-room3" onclick="walkToRoom('karaoke')" title="제3룸: 하이퍼 네온 노래방 파티룸으로 이동!" style="border-color:#ff007f; color:#ff9ebb; font-weight:800; background:rgba(255,0,127,0.18);">
+        <span>🎤</span><span class="label-txt">3룸:노래방</span>
+      </button>
+      <button type="button" class="dock-btn" data-room="fountain" id="dock-room4" onclick="walkToRoom('fountain')" title="제4룸: 황금 샴페인 분수 라운지로 이동!" style="border-color:#eab85c; color:#fef08a; font-weight:800; background:rgba(234,184,92,0.16);">
+        <span>🥂</span><span class="label-txt">4룸:분수</span>
+      </button>
+      <button type="button" class="dock-btn highlight-vip" data-room="vip2f" id="dock-vip" onclick="walkToRoom('vip2f')" title="2층 VVIP 스카이 펜트하우스 & 루프탑 자쿠지로 이동!" style="border-color:#a855f7; color:#e9d5ff; font-weight:800;">
         <span>🍾</span><span class="label-txt">2층VIP</span><span class="key-badge">6</span>
       </button>
-      <button type="button" class="dock-btn" id="dock-floor" onclick="walkToDanceFloor()" title="1층 플로어로 이동!">
+      <button type="button" class="dock-btn highlight-pool" data-room="pool" id="dock-pool" onclick="walkToRoom('pool')" title="야외 풀파티장 & 3D 카바나 빌라로 이동! (단축키 P)" style="border-color:#06b6d4; color:#67e8f9; font-weight:800; background:rgba(6,182,212,0.18);">
+        <span>🏊</span><span class="label-txt">풀파티</span><span class="key-badge">P</span>
+      </button>
+      <button type="button" class="dock-btn" data-room="floor" id="dock-floor" onclick="walkToRoom('floor')" title="1층 메인 댄스플로어로 이동!">
         <span>🪩</span><span class="label-txt">플로어</span><span class="key-badge">7</span>
       </button>
-      <button type="button" class="dock-btn" id="dock-sit" onclick="toggleMySit()" title="주변 소파나 바 의자에 앉기">
+      <button type="button" class="dock-btn" id="dock-sit" onclick="toggleMySit()" title="현재 룸의 3D 소파/스툴/선베드에 착석">
         <span>🪑</span><span class="label-txt" id="dock-sit-label">착석</span><span class="key-badge">8</span>
       </button>
       <button type="button" class="dock-btn active" id="dock-sound" onclick="toggleBgmOnOff()" title="클럽 BGM 음악 즉시 켜기/끄기 (단축키 M 또는 9)">
@@ -1305,22 +1324,22 @@ body.left-panel-open #virtual-dpad {
 
 <script>
 // ============================================================================
-// 1. SOXL 100 · 200 · 300 · 400 · 500 클럽 액자 데이터 및 클럽 떡상 주문
+// 1. SOXL 100 · 200 · 300 · 400 · 500 3D 갤러리 액자 데이터 (5대 입체 룸 & 메인 스테이지 매립)
 // ============================================================================
 const SOXL_FRAMES = [
   {
     id: 0,
     code: 'SOXL 100',
     price: '$100',
-    badge: 'SANCTUARY I · THE AWAKENING',
+    badge: 'ROOM 1 · GOLDEN VAULT GALLERY I',
     title: 'SOXL 100 — 백불의 귀환 · 의심을 확신으로 바꾼 첫 성벽',
     subtitle: '변동성의 안개를 뚫고 마침내 세 자릿수($100) 고지를 탈환한 레버리지 민족의 첫 번째 비전 프레임',
     quote: '“모두가 역배열과 상장폐지를 말할 때, 분할매수로 씨앗을 심은 자들이 맞이하는 첫 번째 봄”',
     img: './assets/frames/soxl_100.png',
-    pos: { x: -7.66, y: 3.1, z: -4.2 },
+    pos: { x: -25.15, y: 3.55, z: -12.4 },
     rotY: Math.PI / 2,
-    size: { w: 3.5, h: 2.35 },
-    seatTarget: { x: -3.55, z: -3.6, lookAngle: Math.PI / 2 },
+    size: { w: 3.8, h: 2.55 },
+    seatTarget: { x: -20.2, y: 0, z: -12.4, lookAngle: Math.PI / 2 },
     accent: '#38d69a',
     bgTop: '#0a1c17', bgBot: '#050d0b',
     candles: [22, 18, 25, 31, 28, 39, 46, 42, 58, 67, 74, 88, 100]
@@ -1329,15 +1348,15 @@ const SOXL_FRAMES = [
     id: 1,
     code: 'SOXL 200',
     price: '$200',
-    badge: 'SANCTUARY II · THE BREAKOUT',
+    badge: 'ROOM 1 · GOLDEN VAULT GALLERY II',
     title: 'SOXL 200 — 이백불 돌파 · 파도를 넘어선 야수의 심장',
     subtitle: '수십 번의 흔들기와 조정장을 견뎌낸 진정한 장기 보유자만이 마주하는 대세 상승장',
     quote: '“단기 노이즈에 일희일비하지 마라. AI 반도체의 거대한 물결은 이미 200불 너머를 향하고 있다”',
     img: './assets/frames/soxl_200.png',
-    pos: { x: -7.66, y: 3.1, z: 1.2 },
+    pos: { x: -25.15, y: 3.55, z: -5.8 },
     rotY: Math.PI / 2,
-    size: { w: 3.5, h: 2.35 },
-    seatTarget: { x: -3.55, z: 1.2, lookAngle: Math.PI / 2 },
+    size: { w: 3.8, h: 2.55 },
+    seatTarget: { x: -20.2, y: 0, z: -5.8, lookAngle: Math.PI / 2 },
     accent: '#48bcff',
     bgTop: '#0c1826', bgBot: '#060b14',
     candles: [60, 75, 68, 92, 105, 98, 122, 138, 130, 156, 174, 186, 200]
@@ -1346,15 +1365,15 @@ const SOXL_FRAMES = [
     id: 2,
     code: 'SOXL 300',
     price: '$300',
-    badge: 'SANCTUARY III · TRIPLE CROWN',
+    badge: 'MAIN STAGE LEFT WING · TRIPLE CROWN',
     title: 'SOXL 300 — 삼백불 등정 · 3배 레버리지 양의 복리가 만개하다',
     subtitle: '일일 복리 효과(Daily Compounding)가 연속 상승 추세와 결합하여 계좌의 차원을 바꾸는 황금 제단화',
     quote: '“하락장에서의 고통이 3배였다면, 슈퍼사이클 본궤도에서의 보상 또한 3배의 복리로 돌아온다”',
     img: './assets/frames/soxl_300.png',
-    pos: { x: -4.65, y: 4.15, z: -11.42 },
+    pos: { x: -8.6, y: 4.5, z: -21.15 },
     rotY: 0,
-    size: { w: 4.1, h: 2.75 },
-    seatTarget: { x: -2.5, z: -3.6, lookAngle: 0 },
+    size: { w: 4.3, h: 2.85 },
+    seatTarget: { x: -6.5, y: 0, z: -12.5, lookAngle: 0 },
     accent: '#ba84ff',
     bgTop: '#1a142a', bgBot: '#090612',
     candles: [120, 140, 155, 148, 175, 198, 212, 205, 236, 258, 272, 288, 300]
@@ -1363,15 +1382,15 @@ const SOXL_FRAMES = [
     id: 3,
     code: 'SOXL 400',
     price: '$400',
-    badge: 'SANCTUARY IV · BEYOND GRAVITY',
+    badge: 'ROOM 2 · WHISKEY & CIGAR LOUNGE',
     title: 'SOXL 400 — 사백불 신세계 · 글로벌 AI 인프라 패권의 정점',
     subtitle: '데이터센터, HBM, 자율주행, 로보틱스까지 실리콘 제국이 완성되는 초격차의 영역',
     quote: '“공포에 던진 자들은 차트 아래에서 우러러보고, 원칙을 지킨 레버리지 민족은 400불의 능선을 걷는다”',
     img: './assets/frames/soxl_400.png',
-    pos: { x: 7.66, y: 3.1, z: -4.2 },
-    rotY: -Math.PI / 2,
-    size: { w: 3.5, h: 2.35 },
-    seatTarget: { x: 3.55, z: -3.6, lookAngle: -Math.PI / 2 },
+    pos: { x: 19.2, y: 3.65, z: -16.1 },
+    rotY: 0,
+    size: { w: 4.0, h: 2.65 },
+    seatTarget: { x: 18.2, y: 0, z: -11.2, lookAngle: 0 },
     accent: '#ffa448',
     bgTop: '#24160e', bgBot: '#0f0906',
     candles: [190, 215, 240, 232, 265, 290, 310, 302, 335, 358, 375, 390, 400]
@@ -1380,15 +1399,15 @@ const SOXL_FRAMES = [
     id: 4,
     code: 'SOXL 500',
     price: '$500',
-    badge: 'SANCTUARY V · LEGENDS OF LEVERAGE',
-    title: 'SOXL 500 — 오백불 신화 · SOXL 멘탈케어 클럽 최고 DJ 메인 부스화',
+    badge: 'MAIN STAGE RIGHT WING · LEGENDS OF LEVERAGE',
+    title: 'SOXL 500 — 오백불 신화 · SOXL 메가클럽 최고 DJ 메인 부스화',
     subtitle: '끝까지 살아남은 자가 가장 강한 자다 — SOXL $500 시대를 열어젖힌 불멸의 주주 헌정 DJ 메인 부스화',
-    quote: '“흔들리는 날마다 이 DJ 메인 부스화 앞에 무릎을 꿇으라. 우리의 목적지는 언제나 SOXL 500, 그 찬란한 정상이다”',
+    quote: '“흔들리는 날마다 이 DJ 메인 부스화 앞에 서라. 우리의 목적지는 언제나 SOXL 500, 그 찬란한 정상이다”',
     img: './assets/frames/soxl_500.png',
-    pos: { x: 4.65, y: 4.15, z: -11.42 },
+    pos: { x: 8.6, y: 4.5, z: -21.15 },
     rotY: 0,
-    size: { w: 4.1, h: 2.75 },
-    seatTarget: { x: 2.5, z: -3.6, lookAngle: 0 },
+    size: { w: 4.3, h: 2.85 },
+    seatTarget: { x: 6.5, y: 0, z: -12.5, lookAngle: 0 },
     accent: '#ffd75a',
     bgTop: '#281d08', bgBot: '#0e0a04',
     candles: [250, 280, 310, 335, 360, 390, 415, 440, 460, 475, 490, 496, 500]
@@ -1397,15 +1416,15 @@ const SOXL_FRAMES = [
     id: 5,
     code: 'SOXL CLUB',
     price: '3X WEALTH',
-    badge: 'SEMICONDUCTOR INVESTORS SANCTUARY',
+    badge: 'ROOM 3 · HYPER NEON KARAOKE ROOM',
     title: 'SOXL 주주 클럽 — 반도체에 진심인 사람들, 여기 모여라!',
     subtitle: '더 깊이, 더 넓게 함께! 좋은 정보가 더 큰 생각을 만듭니다.',
     quote: '“혼자 버티면 외로운 변동성이지만, 레버리지 민족이 클럽에 함께 모이면 역사가 된다”',
     img: './assets/frames/soxl_shareholder.png',
-    pos: { x: -7.66, y: 3.1, z: 6.2 },
+    pos: { x: -25.15, y: 3.55, z: 8.75 },
     rotY: Math.PI / 2,
-    size: { w: 3.4, h: 2.3 },
-    seatTarget: { x: -3.55, z: 6.0, lookAngle: Math.PI / 2 },
+    size: { w: 3.9, h: 2.6 },
+    seatTarget: { x: -20.2, y: 0, z: 8.75, lookAngle: Math.PI / 2 },
     accent: '#38bdf8',
     bgTop: '#081828', bgBot: '#040a12',
     candles: [40, 60, 85, 110, 150, 195, 240, 300, 360, 420, 500]
@@ -1414,15 +1433,15 @@ const SOXL_FRAMES = [
     id: 6,
     code: '100→500 MAP',
     price: '$100~$500',
-    badge: 'THE LEVERAGE NATION MASTER ROADMAP',
+    badge: 'ROOM 4 · CHAMPAGNE FOUNTAIN SUITE',
     title: '레버리지 민족 5대 이정표 마스터 로드맵 (SOXL 100 → 500)',
     subtitle: '백불의 귀환부터 오백불 대클럽까지 5단계 슈퍼사이클 마스터피스',
-    quote: '“폭락장은 영원하지 않고, 반도체의 진보는 멈추지 않는다. 흔들릴 때마다 이 다섯 개의 비전 프레임를 올려다보라.”',
+    quote: '“폭락장은 영원하지 않고, 반도체의 진보는 멈추지 않는다. 흔들릴 때마다 이 다섯 개의 비전 프레임을 올려다보라.”',
     img: './assets/frames/soxl_roadmap.png',
-    pos: { x: 7.66, y: 3.1, z: 1.2 },
+    pos: { x: 25.15, y: 3.55, z: 8.75 },
     rotY: -Math.PI / 2,
-    size: { w: 3.5, h: 2.35 },
-    seatTarget: { x: 3.55, z: 1.2, lookAngle: -Math.PI / 2 },
+    size: { w: 3.9, h: 2.6 },
+    seatTarget: { x: 20.2, y: 0, z: 8.75, lookAngle: -Math.PI / 2 },
     accent: '#eab85c',
     bgTop: '#161f28', bgBot: '#080d12',
     candles: [100, 150, 200, 250, 300, 350, 400, 450, 500]
@@ -1450,29 +1469,30 @@ const BGM_TRACKS = [
 
 const MENTAL_MANTRAS = [
   {
-    ref: 'SOXL 멘탈케어 클럽 제1장 · 야수의 심장',
+    ref: 'SOXL 3D 메가클럽 제1장 · 야수의 심장',
     text: '모두가 공포에 질려 투매할 때 분할로 씨앗을 심은 자만이 SOXL 100과 500의 찬란한 장대양봉을 거둔다.'
   },
   {
-    ref: 'SOXL 멘탈케어 클럽 제2장 · 3배 복리의 황금법칙',
+    ref: 'SOXL 3D 메가클럽 제2장 · 3배 복리의 황금법칙',
     text: '조정장은 레버리지 민족의 인내심을 시험하는 관문일 뿐, AI 반도체 슈퍼사이클의 거대한 물결은 멈추지 않는다.'
   },
   {
-    ref: 'SOXL 멘탈케어 클럽 제3장 · DJ 메인 부스의 약속',
-    text: '오늘의 흔들림에 계좌를 닫지 마라. 끝까지 살아남은 자가 강단 위 SOXL 500 DJ 메인 부스화 앞에서 마지막에 웃는다.'
+    ref: 'SOXL 3D 메가클럽 제3장 · 황금금고 VIP룸의 약속',
+    text: '오늘의 흔들림에 계좌를 닫지 마라. 끝까지 살아남은 자가 제1룸 황금금고와 SOXL 500 메인 스테이지 앞에서 마지막에 웃는다.'
   },
   {
-    ref: 'SOXL 멘탈케어 클럽 제4장 · 올나잇 파티의 원칙',
+    ref: 'SOXL 3D 메가클럽 제4장 · 올나잇 파티의 원칙',
     text: '급등에 추격하지 않고 급락에 절망하지 않으며, 나의 원칙과 현금 비중으로 변동성을 내 편으로 만든다.'
   }
 ];
 
 const INITIAL_NOTES = [
-  { id: 'n1', author: 'SOXL 500 VVIP', text: '2층 VIP 룸에서 샴페인 터뜨리며 SOXL 300·500 제단화 올려다보니 가슴이 웅장해집니다! 모두 성투하세요!', likes: 52, time: '방금 전' },
-  { id: 'n2', author: '필라델피아 바텐더', text: '레버리지 민족 찬가 들으면서 본당 소파에 앉아 있으니까 조정장 스트레스가 싹 내려가네요 🙏', likes: 39, time: '2분 전' },
-  { id: 'n3', author: '서학개미 야수', text: '오늘 밤 나스닥 본장 시원한 장대양봉 기원하며 강단 VIP 샴페인 바에 불꽃 하나 밝히고 갑니다!', likes: 64, time: '5분 전' },
-  { id: 'n4', author: '클럽 DJ 불마켓', text: 'SOXL 멘탈케어 클럽 메인홀에 입장하신 주주분들을 환영합니다. 소파에 앉거나 강단 앞 방석에서 클럽 댄스를 올리실 수 있습니다.', likes: 48, time: '9분 전' }
+  { id: 'n1', author: 'SOXL 500 VVIP', text: '새로 지어진 1룸 황금금고 VIP룸이랑 2룸 위스키 셀러 바 입체감 미쳤네요!! 골드바 피라미드 앞에서 기 받아갑니다 👑🔥', likes: 88, time: '방금 전' },
+  { id: 'n2', author: '필라델피아 바텐더', text: '2룸 월스트리트 위스키 & 시가 바에 양주 64병 진열장 꽉 채워뒀습니다! 언제든 오셔서 생맥주·양주 드세요 🥃🍺', likes: 64, time: '1분 전' },
+  { id: 'n3', author: '서학개미 야수', text: '3룸 하이퍼 네온 가라오케룸에서 마이크 잡고 레버리지 민족 찬가 열창 중입니다 🎤💃', likes: 71, time: '3분 전' },
+  { id: 'n4', author: '클럽 DJ 불마켓', text: '2층 스카이 펜트하우스 파빌리온이랑 야외 풀빌라 카바나 2동까지 오픈 완료! 원하는 룸 소파 어디든 앉으세요 🍾🌴', likes: 95, time: '6분 전' }
 ];
+
 // ============================================================================
 // 2. 전역 상태 변수 & 아바타 커스터마이징 로드
 // ============================================================================
@@ -1500,7 +1520,7 @@ function loadMyCustom() {
         hairColor: saved.hairColor || DEFAULT_CUSTOM.hairColor,
         outfitType: ['suit', 'robe', 'casual', 'swimwear', 'resort', 'hawaiian', 'metal', 'glitter', 'neon'].includes(saved.outfitType) ? saved.outfitType : 'suit',
         outfitColor: saved.outfitColor || DEFAULT_CUSTOM.outfitColor,
-        prop: 'beer',
+        prop: ['beer', 'soju', 'whiskey', 'wine', 'none'].includes(saved.prop) ? saved.prop : 'beer',
         accessory: ['none', 'glasses', 'beret', 'crown'].includes(saved.accessory) ? saved.accessory : 'none'
       };
     }
@@ -1521,11 +1541,13 @@ document.getElementById('my-nick-label').textContent = myCustom.name;
 document.getElementById('cust-name-input').value = myCustom.name;
 
 let scene, camera, renderer, clock, worldGroup;
-let floorMesh, gardenMesh, runnerMesh, pathMesh;
+let floorMesh, gardenMesh, runnerMesh, pathMesh, vipFloorMesh, poolDeckMesh;
 let myAvatar = null;
 let avatars = [];
-let seats = []; // { id, label, pos: THREE.Vector3, type: 'pew'|'kneel', lookAngle, occupiedBy }
+let seats = []; // { id, label, pos: THREE.Vector3, type: 'pew'|'kneel', lookAngle, occupiedBy, room }
 let frameMeshes = [];
+let clickablePortalMeshes = [];
+let walkableFloorMeshes = [];
 let candleFlames = [];
 let candleLightL, candleLightR;
 let pondWaferCore = null;
@@ -1533,11 +1555,25 @@ let particleSystem = null;
 let targetRing = null;
 let rippleAge = 99;
 let ambientLight, mainSpot, hemiLight, altarHaloMesh;
+let mirrorBallGroup = null;
+let subMirrorBalls = [];
+let movingLasers = [];
+let laserCones = [];
+let danceTiles = [];
+let vaultWheelMesh = null;
+let karaokeMirrorBall = null;
+let karaokeEqBars = [];
+let champagneFountainRings = [];
+let poolWaterMesh = null;
+let flamingoFloat = null;
+let donutFloat = null;
+let goldenSwanFloat = null;
+let underwaterLights = [];
 let lightModeIdx = 0;
 
 let camYaw = 0;
-let camPitch = 0.32;
-let camDist = 6.8;
+let camPitch = 0.34;
+let camDist = 7.6;
 let camPresetIdx = 0;
 window.setCamAngles = function(yaw, pitch, dist) {
   if (yaw !== undefined) camYaw = yaw;
@@ -1545,10 +1581,10 @@ window.setCamAngles = function(yaw, pitch, dist) {
   if (dist !== undefined) camDist = dist;
 };
 const CAM_PRESETS = [
-  { name: '시점: 클럽 3인칭', dist: 6.8, pitch: 0.32 },
-  { name: '시점: 강단 정면', dist: 4.0, pitch: 0.16 },
-  { name: '시점: 대클럽 조망', dist: 12.8, pitch: 0.50 },
-  { name: '시점: 1인칭 1인칭 시점', dist: 2.3, pitch: 0.12 }
+  { name: '시점: 클럽 3인칭', dist: 7.6, pitch: 0.34 },
+  { name: '시점: 룸 클로즈업', dist: 4.5, pitch: 0.22 },
+  { name: '시점: 메가클럽 광각 조망', dist: 16.5, pitch: 0.52 },
+  { name: '시점: 1인칭 몰입 시점', dist: 2.4, pitch: 0.14 }
 ];
 
 let isDragging = false, dragMoved = false, prevMouse = { x: 0, y: 0 };
@@ -1576,81 +1612,162 @@ let audioCtx = null;
 let waterGain = null, padGain = null;
 
 // ============================================================================
-// 3. 절차적(Procedural) 캔버스 텍스처 생성기 (CORS 0% 보장)
+// 3. 절차적(Procedural) 고해상도 3D 캔버스 텍스처 & 입체 간판 생성기 (CORS 0%)
 // ============================================================================
-function createWoodFloorTexture() {
+function createClubMarbleFloorTexture() {
   const c = document.createElement('canvas');
   c.width = 512; c.height = 512;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#2d2016';
+  ctx.fillStyle = '#0c111b';
   ctx.fillRect(0, 0, 512, 512);
-  for (let y = 0; y < 512; y += 32) {
-    ctx.fillStyle = (y / 32) % 2 === 0 ? '#332419' : '#281c13';
-    ctx.fillRect(0, y, 512, 30);
-    ctx.fillStyle = '#1a110b';
-    ctx.fillRect(0, y + 30, 512, 2);
-    for (let x = 0; x < 512; x += 128) {
-      const offset = ((y / 32) % 2) * 64;
-      ctx.fillRect((x + offset) % 512, y, 2, 32);
+
+  const tile = 128;
+  for (let y = 0; y < 512; y += tile) {
+    for (let x = 0; x < 512; x += tile) {
+      const even = ((x / tile) + (y / tile)) % 2 === 0;
+      const g = ctx.createLinearGradient(x, y, x + tile, y + tile);
+      g.addColorStop(0, even ? '#111827' : '#0d1422');
+      g.addColorStop(1, even ? '#0b101b' : '#131d2e');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, tile, tile);
+
+      // 은은한 골드 & 에메랄드 대리석 줄무늬
+      ctx.strokeStyle = 'rgba(234, 184, 92, 0.22)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 2, y + 2, tile - 4, tile - 4);
+
+      ctx.strokeStyle = 'rgba(46, 229, 157, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(x + 16, y + tile - 16);
+      ctx.lineTo(x + tile - 16, y + 16);
+      ctx.stroke();
     }
   }
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(6, 8);
+  tex.repeat.set(12, 10);
   return tex;
 }
 
-// SOXL 불마켓 & 반도체 웨이퍼 스테인드글라스 아치 창문 텍스처
-function createBullStainedGlassTexture(idx = 0) {
+function createHerringboneWoodTexture() {
   const c = document.createElement('canvas');
-  c.width = 256; c.height = 512;
+  c.width = 512; c.height = 512;
   const ctx = c.getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 0, 512);
-  grad.addColorStop(0, '#ffe28a');
-  grad.addColorStop(0.45, idx % 2 === 0 ? '#1fd18a' : '#eab85c');
-  grad.addColorStop(1, '#0c3b2e');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 256, 512);
-
-  // 고딕 스테인드글라스 납선 격자
-  ctx.strokeStyle = '#121a16';
-  ctx.lineWidth = 8;
-  ctx.strokeRect(8, 8, 240, 496);
-  for (let y = 110; y < 480; y += 110) {
-    ctx.beginPath(); ctx.moveTo(8, y); ctx.lineTo(248, y); ctx.stroke();
+  ctx.fillStyle = '#382214';
+  ctx.fillRect(0, 0, 512, 512);
+  for (let y = 0; y < 512; y += 32) {
+    ctx.fillStyle = (y / 32) % 2 === 0 ? '#462b19' : '#311d10';
+    ctx.fillRect(0, y, 512, 30);
+    ctx.fillStyle = '#22130a';
+    ctx.fillRect(0, y + 30, 512, 2);
+    for (let x = 0; x < 512; x += 64) {
+      ctx.fillRect(x, y, 2, 32);
+    }
   }
-  ctx.beginPath(); ctx.moveTo(128, 8); ctx.lineTo(128, 504); ctx.stroke();
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(4, 5);
+  return tex;
+}
 
-  // 상단 황금 웨이퍼 로제트 원형 문양
-  ctx.fillStyle = 'rgba(255, 248, 210, 0.88)';
-  ctx.beginPath(); ctx.arc(128, 135, 52, 0, Math.PI * 2); ctx.fill();
-  ctx.lineWidth = 5; ctx.strokeStyle = '#1a241e'; ctx.stroke();
+function createNeonGridFloorTexture(accentHex = '#ec4899') {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#120924';
+  ctx.fillRect(0, 0, 512, 512);
+  ctx.strokeStyle = accentHex;
+  ctx.lineWidth = 3;
+  for (let i = 0; i <= 512; i += 64) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(4, 4);
+  return tex;
+}
 
-  // 중앙 3개의 상승 양봉 캔들 문양
-  const bars = [
-    { x: 68, y: 270, h: 90, col: '#2ee59d' },
-    { x: 114, y: 230, h: 130, col: '#ffd86b' },
-    { x: 160, y: 195, h: 165, col: '#2ee59d' }
-  ];
-  bars.forEach(b => {
-    ctx.strokeStyle = '#fff5cc';
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(b.x + 14, b.y - 22); ctx.lineTo(b.x + 14, b.y + b.h + 18); ctx.stroke();
-    ctx.fillStyle = b.col;
-    ctx.fillRect(b.x, b.y, 28, b.h);
-    ctx.strokeStyle = '#121a16';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(b.x, b.y, 28, b.h);
-  });
+function create3DNeonSignBoard({
+  width = 5.4,
+  height = 1.05,
+  depth = 0.24,
+  badge = 'VIP ROOM',
+  title = '👑 SOXL $500 VIP SUITE',
+  sub = '3X LEVERAGE NATION',
+  bg1 = '#091520',
+  bg2 = '#132a3e',
+  borderColor = '#ffd269',
+  glowColor = 0xffd269,
+  titleColor = '#ffffff',
+  subColor = '#ffe596'
+}) {
+  const grp = new THREE.Group();
 
-  // 하단 타겟 텍스트
-  const labels = ['SOXL 100', 'SOXL 200', 'SOXL 300', 'SOXL 500'];
-  ctx.fillStyle = '#fff8e7';
-  ctx.font = '900 28px Pretendard, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(labels[idx % labels.length], 128, 455);
+  // 1) 3D 입체 금속 하우징 박스
+  const bodyGeo = new THREE.BoxGeometry(width, height, depth);
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0b111c, roughness: 0.3, metalness: 0.85 });
+  const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+  grp.add(bodyMesh);
 
-  return new THREE.CanvasTexture(c);
+  // 2) 외곽 3D 골드/네온 베젤 몰딩
+  const bezelGeo = new THREE.BoxGeometry(width + 0.14, height + 0.14, depth * 0.72);
+  const bezelMat = new THREE.MeshStandardMaterial({ color: glowColor, roughness: 0.2, metalness: 0.88 });
+  const bezelMesh = new THREE.Mesh(bezelGeo, bezelMat);
+  bezelMesh.position.z = -0.02;
+  grp.add(bezelMesh);
+
+  // 3) 상·하단 3D 원통형 발광 네온 튜브 바
+  const neonMat = new THREE.MeshBasicMaterial({ color: glowColor });
+  for (const sy of [-height / 2 - 0.05, height / 2 + 0.05]) {
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, width + 0.1, 12), neonMat);
+    tube.rotation.z = Math.PI / 2;
+    tube.position.set(0, sy, depth / 2 + 0.02);
+    grp.add(tube);
+  }
+
+  // 4) 고해상도 캔버스 전면·후면 발광 패널
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 240;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 1024, 240);
+  grad.addColorStop(0, bg1);
+  grad.addColorStop(0.5, bg2);
+  grad.addColorStop(1, bg1);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 1024, 240);
+
+  g.strokeStyle = borderColor;
+  g.lineWidth = 8;
+  g.strokeRect(10, 10, 1004, 220);
+
+  if (badge) {
+    g.fillStyle = borderColor;
+    g.font = '800 24px Pretendard, sans-serif';
+    g.textAlign = 'center';
+    g.fillText(badge, 512, 48);
+  }
+  g.fillStyle = titleColor;
+  g.font = title.length > 24 ? '900 42px Pretendard, sans-serif' : '900 48px Pretendard, sans-serif';
+  g.textAlign = 'center';
+  g.fillText(title, 512, badge ? 122 : 108);
+
+  if (sub) {
+    g.fillStyle = subColor;
+    g.font = '700 26px Pretendard, sans-serif';
+    g.fillText(sub, 512, 188);
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  const faceMat = new THREE.MeshBasicMaterial({ map: tex });
+  const frontFace = new THREE.Mesh(new THREE.PlaneGeometry(width - 0.08, height - 0.08), faceMat);
+  frontFace.position.z = depth / 2 + 0.01;
+  const backFace = new THREE.Mesh(new THREE.PlaneGeometry(width - 0.08, height - 0.08), faceMat);
+  backFace.position.z = -depth / 2 - 0.01;
+  backFace.rotation.y = Math.PI;
+  grp.add(frontFace, backFace);
+
+  return grp;
 }
 
 function createHighResFrameTexture(frameData) {
@@ -1723,10 +1840,10 @@ function createHighResFrameTexture(frameData) {
   ctx.strokeRect(36, 36, c.width - 72, c.height - 72);
 
   ctx.fillStyle = 'rgba(234, 184, 92, 0.16)';
-  ctx.fillRect(76, 66, 440, 42);
+  ctx.fillRect(76, 66, 480, 42);
   ctx.strokeStyle = frameData.accent;
   ctx.lineWidth = 2;
-  ctx.strokeRect(76, 66, 440, 42);
+  ctx.strokeRect(76, 66, 480, 42);
   ctx.fillStyle = '#ffe39f';
   ctx.font = '800 21px Pretendard, sans-serif';
   ctx.fillText(frameData.badge, 96, 94);
@@ -1779,7 +1896,7 @@ function createHighResFrameTexture(frameData) {
 
   ctx.fillStyle = '#93aba1';
   ctx.font = '700 16px Pretendard, sans-serif';
-  ctx.fillText('SOXL 멘탈케어 클럽 · LEVERAGE NATION 3X BULL SANCTUARY', 98, 742);
+  ctx.fillText('SOXL 3D 메가클럽 & 5대 VIP 룸 · LEVERAGE NATION 3X BULL SANCTUARY', 98, 742);
 
   const tex = new THREE.CanvasTexture(c);
   tex.anisotropy = 4;
@@ -1815,75 +1932,77 @@ function createPlaqueTexture(text) {
 }
 
 // ============================================================================
-// 4. Three.js 3D 『SOXL 멘탈케어 클럽 메인홀』 구축 (본당 + 강단 + 라운지 소파 + VIP룸 + 야외정원)
+// 4. Three.js 3D 『SOXL 메가클럽 & 5대 입체 프라이빗 VIP 룸』 구축
 // ============================================================================
 function init3DSpace() {
   const container = document.getElementById('canvas-container');
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0b1612);
-  scene.fog = new THREE.FogExp2(0x0b1612, 0.017);
+  scene.background = new THREE.Color(0x070d16);
+  scene.fog = new THREE.FogExp2(0x070d16, 0.0085);
 
-  camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 130);
+  camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 180);
   renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.06;
   container.appendChild(renderer.domElement);
 
   clock = new THREE.Clock();
   worldGroup = new THREE.Group();
   scene.add(worldGroup);
 
-  // 조명 시스템
-  ambientLight = new THREE.AmbientLight(0xdbece4, 0.74);
+  // 글로벌 조명 시스템 (화려하고 입체적인 클럽 & VIP 룸 조명)
+  ambientLight = new THREE.AmbientLight(0xdceef8, 0.82);
   scene.add(ambientLight);
 
-  hemiLight = new THREE.HemisphereLight(0xffe7b3, 0x0c2119, 0.68);
-  hemiLight.position.set(0, 16, 0);
+  hemiLight = new THREE.HemisphereLight(0xffe8b8, 0x0b1a28, 0.72);
+  hemiLight.position.set(0, 22, 0);
   scene.add(hemiLight);
 
-  mainSpot = new THREE.SpotLight(0xffe29e, 1.5, 42, Math.PI / 3, 0.48, 1.2);
-  mainSpot.position.set(0, 12.5, -3.5);
-  mainSpot.target.position.set(0, 1.5, -10.0);
+  mainSpot = new THREE.SpotLight(0xffe29e, 1.8, 58, Math.PI / 2.8, 0.45, 1.1);
+  mainSpot.position.set(0, 14.5, -4.0);
+  mainSpot.target.position.set(0, 1.2, -16.5);
   mainSpot.castShadow = true;
   scene.add(mainSpot);
   scene.add(mainSpot.target);
 
-  candleLightL = new THREE.PointLight(0xffb448, 1.15, 9.5);
-  candleLightL.position.set(-2.9, 1.9, -7.2);
+  candleLightL = new THREE.PointLight(0xffb448, 1.35, 18);
+  candleLightL.position.set(-19.2, 4.8, -9.2);
   scene.add(candleLightL);
 
-  candleLightR = new THREE.PointLight(0xffb448, 1.15, 9.5);
-  candleLightR.position.set(2.9, 1.9, -7.2);
+  candleLightR = new THREE.PointLight(0xff9438, 1.35, 18);
+  candleLightR.position.set(19.2, 4.8, -9.2);
   scene.add(candleLightR);
 
   buildOutdoorGardenAndWaferPond();
   buildSanctuaryArchitecture();
   buildAltarAndBullSpire();
-  buildPewsAndKneelers();
-  buildCandleAltars();
   buildSanctuaryFrames();
   buildTargetRippleRing();
 
-  // 내 아바타 생성
+  // 내 아바타 생성 (중앙 플로어 남측 시작)
   myAvatar = createAvatar({
     id: myId,
     name: `${myCustom.name} (나)`,
     custom: myCustom,
     isMe: true,
     x: 0,
-    z: 8.2
+    z: 3.5
   });
 
-  // 동반 파티 주주(NPC) 배치 (소파 착석 & 강단 앞 클럽댄스!)
+  // 동반 파티 주주(NPC) 18명 5대 룸 & 플로어 & 풀파티장 전구역 입체 배치!
   initNPCShareholders();
 
   window.addEventListener('resize', onWindowResize);
   setupPointerAndKeyboardControls();
   setupVirtualDPad();
 
-// 🎮 가상 D-PAD 터치/마우스 이동 이벤트 바인딩
+  animate();
+}
+
 function setupVirtualDPad() {
   const binds = [
     { id: 'dpad-up', key: 'KeyW' },
@@ -1891,7 +2010,6 @@ function setupVirtualDPad() {
     { id: 'dpad-left', key: 'KeyA' },
     { id: 'dpad-right', key: 'KeyD' }
   ];
-
   binds.forEach(({ id, key }) => {
     const btn = document.getElementById(id);
     if (!btn) return;
@@ -1912,53 +2030,31 @@ function setupVirtualDPad() {
   });
 }
 
-
-  animate();
-}
-
-// 4-1. 야외 실리콘밸리 달빛 정원 & 회전하는 3X 황금 웨이퍼 분수 연못
-
-// ============================================================================
-// 4-1. [대규모 신설] 야외 초대형 럭셔리 풀파티 인피니티 풀장 & 플로팅 튜브 & 카바나
-// ============================================================================
-
-let poolWaterMesh = null;
-let flamingoFloat = null;
-let donutFloat = null;
-let underwaterLights = [];
-
-
 // ============================================================================
 // 3D 주류 4총사 모델링 함수 (소주 · 생맥주 · 위스키 · 와인 세트)
 // ============================================================================
-
 function createSojuSet() {
   const group = new THREE.Group();
   const bottleMat = new THREE.MeshStandardMaterial({
-    color: 0x059669,
-    roughness: 0.15,
-    metalness: 0.1,
-    transparent: true,
-    opacity: 0.88
+    color: 0x059669, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.88
   });
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.32, 16), bottleMat);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.32, 14), bottleMat);
   body.position.y = 0.16;
-  const shoulder = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.08, 16), bottleMat);
+  const shoulder = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.08, 14), bottleMat);
   shoulder.position.y = 0.36;
   shoulder.rotation.x = Math.PI;
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.12, 12), bottleMat);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.12, 10), bottleMat);
   neck.position.y = 0.44;
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.035, 12), new THREE.MeshStandardMaterial({ color: 0x10b981 }));
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.035, 10), new THREE.MeshStandardMaterial({ color: 0x10b981 }));
   cap.position.y = 0.51;
-  const label = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.082, 0.14, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 }));
+  const label = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.082, 0.14, 14), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 }));
   label.position.y = 0.16;
   group.add(body, shoulder, neck, cap, label);
 
   const cupMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.1 });
-  const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.028, 0.065, 12), cupMat);
+  const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.028, 0.065, 10), cupMat);
   cup.position.set(0.14, 0.032, 0.05);
   group.add(cup);
-
   group.scale.set(1.1, 1.1, 1.1);
   return group;
 }
@@ -1969,17 +2065,15 @@ function createBeerSet() {
   const beerMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.25, roughness: 0.2 });
   const foamMat = new THREE.MeshStandardMaterial({ color: 0xfffbeb, roughness: 0.9 });
 
-  const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.09, 0.30, 16), glassMat);
+  const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.09, 0.30, 14), glassMat);
   mug.position.y = 0.15;
-  const beerLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.092, 0.082, 0.24, 16), beerMat);
+  const beerLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.092, 0.082, 0.24, 14), beerMat);
   beerLiquid.position.y = 0.13;
-  const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.102, 0.096, 0.06, 16), foamMat);
+  const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.102, 0.096, 0.06, 14), foamMat);
   foam.position.y = 0.28;
-
-  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.018, 8, 16, Math.PI), glassMat);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.018, 8, 12, Math.PI), glassMat);
   handle.position.set(0.11, 0.15, 0);
   handle.rotation.z = -Math.PI / 2;
-
   group.add(mug, beerLiquid, foam, handle);
   group.scale.set(1.1, 1.1, 1.1);
   return group;
@@ -1992,22 +2086,20 @@ function createWhiskeySet() {
 
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.28, 0.16), bottleMat);
   body.position.y = 0.14;
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.12, 12), bottleMat);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.12, 10), bottleMat);
   neck.position.y = 0.34;
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.04, 12), goldMat);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.04, 10), goldMat);
   cap.position.y = 0.41;
   const label = new THREE.Mesh(new THREE.PlaneGeometry(0.13, 0.14), goldMat);
   label.position.set(0, 0.14, 0.082);
-
   group.add(body, neck, cap, label);
 
   const glassMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.1 });
-  const rockGlass = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.10, 12), glassMat);
+  const rockGlass = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.10, 10), glassMat);
   rockGlass.position.set(0.18, 0.05, 0.06);
   const ice = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.045, 0.045), glassMat);
   ice.position.set(0.18, 0.05, 0.06);
   ice.rotation.set(0.3, 0.4, 0.2);
-
   group.add(rockGlass, ice);
   group.scale.set(1.1, 1.1, 1.1);
   return group;
@@ -2018,188 +2110,451 @@ function createWineSet() {
   const bottleMat = new THREE.MeshStandardMaterial({ color: 0x4c0519, roughness: 0.15, transparent: true, opacity: 0.92 });
   const foilMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, metalness: 0.6, roughness: 0.3 });
 
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.36, 16), bottleMat);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.36, 14), bottleMat);
   body.position.y = 0.18;
-  const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.075, 0.10, 16), bottleMat);
+  const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.075, 0.10, 14), bottleMat);
   shoulder.position.y = 0.41;
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.14, 12), bottleMat);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.14, 10), bottleMat);
   neck.position.y = 0.53;
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.07, 12), foilMat);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.07, 10), foilMat);
   cap.position.y = 0.57;
-
   group.add(body, shoulder, neck, cap);
 
   const glassMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.65, roughness: 0.08 });
   const wineGlass = new THREE.Group();
   wineGlass.position.set(0.16, 0, 0.06);
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.008, 12), glassMat);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.008, 10), glassMat);
   base.position.y = 0.004;
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.11, 8), glassMat);
   stem.position.y = 0.06;
-  const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.048, 12, 12), glassMat);
+  const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.048, 10, 10), glassMat);
   bowl.position.y = 0.13;
   bowl.scale.set(0.9, 1.25, 0.9);
   wineGlass.add(base, stem, bowl);
-
   group.add(wineGlass);
   group.scale.set(1.1, 1.1, 1.1);
   return group;
 }
 
+// ============================================================================
+// 3D 공용 건축 조형물 빌더 (황금 돌진 황소 동상 · 3D 샹들리에 · 3D 아치 게이트 · 3D 유리가벽)
+// ============================================================================
+function build3DChargingBullStatue(scale = 1.0) {
+  const grp = new THREE.Group();
+  const goldMat = new THREE.MeshStandardMaterial({
+    color: 0xffcf52, emissive: 0x85580a, emissiveIntensity: 0.28, metalness: 0.92, roughness: 0.16
+  });
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x0e1420, roughness: 0.25, metalness: 0.5 });
+
+  // 3단 입체 흑대리석 & 황금 좌대
+  const ped1 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.35, 1.4), baseMat);
+  ped1.position.y = 0.175;
+  const pedTrim = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.08, 1.25), goldMat);
+  pedTrim.position.y = 0.38;
+  const ped2 = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.55, 1.15), baseMat);
+  ped2.position.y = 0.68;
+  grp.add(ped1, pedTrim, ped2);
+
+  // 근육질 황소 상체·하체·머리·뿔·다리 입체 조합
+  const chest = new THREE.Mesh(new THREE.SphereGeometry(0.52, 18, 16), goldMat);
+  chest.scale.set(1.25, 1.05, 0.88);
+  chest.position.set(0.32, 1.45, 0);
+
+  const belly = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.36, 1.05, 16), goldMat);
+  belly.rotation.z = Math.PI / 2 - 0.12;
+  belly.position.set(-0.15, 1.38, 0);
+
+  const hip = new THREE.Mesh(new THREE.SphereGeometry(0.38, 16, 14), goldMat);
+  hip.position.set(-0.62, 1.44, 0);
+
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.38, 0.38), goldMat);
+  head.position.set(0.84, 1.34, 0);
+  head.rotation.z = -0.28;
+
+  // 황금 트윈 뿔 (Curved Bull Horns)
+  for (const side of [-1, 1]) {
+    const horn = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.48, 10), goldMat);
+    horn.position.set(0.92, 1.62, side * 0.28);
+    horn.rotation.set(side * 0.45, 0, -0.45);
+    grp.add(horn);
+  }
+
+  // 역동적인 4개 다리
+  const legPos = [
+    [0.52, 1.02, 0.24, 0.25],
+    [0.42, 1.02, -0.24, -0.15],
+    [-0.58, 1.02, 0.22, -0.22],
+    [-0.68, 1.02, -0.22, 0.18]
+  ];
+  legPos.forEach(([lx, ly, lz, rotZ]) => {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.06, 0.62, 10), goldMat);
+    leg.position.set(lx, ly, lz);
+    leg.rotation.z = rotZ;
+    grp.add(leg);
+  });
+
+  // 치켜올린 꼬리
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.65, 8), goldMat);
+  tail.position.set(-0.98, 1.65, 0);
+  tail.rotation.z = 0.55;
+
+  grp.add(chest, belly, hip, head, tail);
+  grp.scale.set(scale, scale, scale);
+  return grp;
+}
+
+function build3DCrystalChandelier(radius = 1.6, tiers = 3, glowHex = 0xffe49e) {
+  const grp = new THREE.Group();
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.9, roughness: 0.15 });
+  const crystalMat = new THREE.MeshBasicMaterial({ color: glowHex });
+
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.4, 10), goldMat);
+  rod.position.y = 0.7;
+  grp.add(rod);
+
+  for (let t = 0; t < tiers; t++) {
+    const r = radius * (1 - t * 0.26);
+    const ty = -t * 0.42;
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.045, 10, 28), goldMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = ty;
+    grp.add(ring);
+
+    const dropCount = 12 - t * 2;
+    for (let d = 0; d < dropCount; d++) {
+      const ang = (d / dropCount) * Math.PI * 2;
+      const drop = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.008, 0.34, 8), crystalMat);
+      drop.position.set(Math.cos(ang) * r, ty - 0.18, Math.sin(ang) * r);
+      grp.add(drop);
+    }
+  }
+  return grp;
+}
+
+function build3DGlassPartitionWall(x1, z1, x2, z2, height = 5.0, glassHex = 0x38bdf8, frameHex = 0xeab85c) {
+  const grp = new THREE.Group();
+  const len = Math.hypot(x2 - x1, z2 - z1);
+  const cx = (x1 + x2) / 2;
+  const cz = (z1 + z2) / 2;
+  const ang = Math.atan2(x2 - x1, z2 - z1);
+
+  // 하단 1.1m 입체 웨인스코팅 다크 골드 벽체
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x0f1726, roughness: 0.4, metalness: 0.5 });
+  const frameMat = new THREE.MeshStandardMaterial({ color: frameHex, roughness: 0.25, metalness: 0.85 });
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: glassHex, transparent: true, opacity: 0.26, roughness: 0.08, metalness: 0.2, side: THREE.DoubleSide
+  });
+  const neonMat = new THREE.MeshBasicMaterial({ color: frameHex });
+
+  const lowerWall = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.1, len), baseMat);
+  lowerWall.position.y = 0.55;
+  const midRail = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.09, len + 0.04), frameMat);
+  midRail.position.y = 1.12;
+
+  const glassPane = new THREE.Mesh(new THREE.BoxGeometry(0.08, height - 1.25, len - 0.1), glassMat);
+  glassPane.position.y = 1.15 + (height - 1.25) / 2;
+
+  const topBeam = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.22, len + 0.08), frameMat);
+  topBeam.position.y = height;
+
+  const neonStrip = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.05, len), neonMat);
+  neonStrip.position.y = height - 0.14;
+
+  // 양끝 및 중간 3D 사각 기둥 멀리언(Mullions)
+  const postCount = Math.max(2, Math.round(len / 3.5) + 1);
+  for (let i = 0; i < postCount; i++) {
+    const pz = -len / 2 + (i / (postCount - 1)) * len;
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.28, height, 0.22), frameMat);
+    post.position.set(0, height / 2, pz);
+    grp.add(post);
+  }
+
+  grp.add(lowerWall, midRail, glassPane, topBeam, neonStrip);
+  grp.position.set(cx, 0, cz);
+  grp.rotation.y = ang;
+  worldGroup.add(grp);
+  return grp;
+}
+
+function build3DArchwayPortal({ x, z, rotY = 0, width = 4.6, height = 5.0, colorHex = 0xffd269, badge, title, sub, roomKey }) {
+  const grp = new THREE.Group();
+  const pillarMat = new THREE.MeshStandardMaterial({ color: 0x161f30, roughness: 0.3, metalness: 0.7 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.2, metalness: 0.9 });
+  const neonMat = new THREE.MeshBasicMaterial({ color: colorHex });
+
+  // 좌·우 3D 입체 트윈 원통 기둥 & 주춧돌/주두
+  for (const s of [-1, 1]) {
+    const px = s * (width / 2);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.45, 0.58), goldMat);
+    base.position.set(px, 0.225, 0);
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, height - 0.6, 16), pillarMat);
+    col.position.set(px, height / 2, 0);
+    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.04, 10, 20), neonMat);
+    ring1.rotation.x = Math.PI / 2;
+    ring1.position.set(px, 1.4, 0);
+    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.04, 10, 20), neonMat);
+    ring2.rotation.x = Math.PI / 2;
+    ring2.position.set(px, height - 1.1, 0);
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.35, 0.56), goldMat);
+    cap.position.set(px, height - 0.18, 0);
+    grp.add(base, col, ring1, ring2, cap);
+  }
+
+  // 상단 3D 아치 인방 & 입체 네온 간판
+  const lintel = new THREE.Mesh(new THREE.BoxGeometry(width + 0.8, 0.38, 0.52), pillarMat);
+  lintel.position.set(0, height + 0.15, 0);
+  grp.add(lintel);
+
+  const signBoard = create3DNeonSignBoard({
+    width: width + 0.6,
+    height: 1.08,
+    depth: 0.28,
+    badge,
+    title,
+    sub,
+    borderColor: '#' + colorHex.toString(16).padStart(6, '0'),
+    glowColor: colorHex
+  });
+  signBoard.position.set(0, height + 0.88, 0);
+  if (roomKey) {
+    signBoard.traverse(ch => {
+      if (ch.isMesh) {
+        ch.userData = { roomKey };
+        clickablePortalMeshes.push(ch);
+      }
+    });
+  }
+  grp.add(signBoard);
+
+  grp.position.set(x, 0, z);
+  grp.rotation.y = rotY;
+  worldGroup.add(grp);
+  return grp;
+}
+
+// ============================================================================
+// 4-1. 야외 초대형 인피니티 풀파티 리조트 & 3D 풀빌라 카바나 2동 & 웨이퍼 연못
+// ============================================================================
 function buildOutdoorGardenAndWaferPond() {
-  // 1. 야외 잔디 & 티크우드 풀사이드 데크 (가로 45m x 세로 45m 대확장)
+  // 1. 야외 리조트 잔디 & 티크우드 바닥 (가로 96m x 세로 96m)
   gardenMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(90, 90),
-    new THREE.MeshStandardMaterial({ color: 0x091410, roughness: 0.95 })
+    new THREE.PlaneGeometry(96, 96),
+    new THREE.MeshStandardMaterial({ color: 0x07120e, roughness: 0.92 })
   );
   gardenMesh.rotation.x = -Math.PI / 2;
-  gardenMesh.position.y = -0.05;
+  gardenMesh.position.set(0, -0.05, 22);
   gardenMesh.receiveShadow = true;
   worldGroup.add(gardenMesh);
+  walkableFloorMeshes.push(gardenMesh);
 
-  // 클럽 입구(z=16)에서 야외 풀장(z=20)으로 이어지는 고급 우드 데크 산책로
+  // 클럽 남측 그랜드 오픈 테라스 데크 (z = 16 ~ 26)
   pathMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(6.5, 8.0),
-    new THREE.MeshStandardMaterial({ color: 0x2a1f18, roughness: 0.6 })
+    new THREE.BoxGeometry(26.0, 0.16, 10.0),
+    new THREE.MeshStandardMaterial({ color: 0x261a12, roughness: 0.55 })
   );
-  pathMesh.rotation.x = -Math.PI / 2;
-  pathMesh.position.set(0, -0.02, 18.5);
+  pathMesh.position.set(0, 0.0, 20.5);
   pathMesh.receiveShadow = true;
   worldGroup.add(pathMesh);
+  walkableFloorMeshes.push(pathMesh);
 
-  // 2. [초대형 인피니티 풀장] (가로 20m x 세로 15m, z = 22.0 ~ 37.0)
+  // 2. [야외 좌측] 3X 황금 웨이퍼 분수 치유 연못 & 정원 벤치 (x = -19.5, z = 22.0)
+  const pondGroup = new THREE.Group();
+  pondGroup.position.set(-19.5, 0.05, 22.0);
+  const pondRim = new THREE.Mesh(
+    new THREE.CylinderGeometry(3.4, 3.6, 0.45, 28),
+    new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.7, roughness: 0.3 })
+  );
+  pondRim.position.y = 0.22;
+  const pondWater = new THREE.Mesh(
+    new THREE.CylinderGeometry(3.15, 3.15, 0.38, 28),
+    new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.5, roughness: 0.1 })
+  );
+  pondWater.position.y = 0.24;
+
+  pondWaferCore = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.15, 1.15, 0.14, 24),
+    new THREE.MeshStandardMaterial({ color: 0xffd269, emissive: 0xb45309, emissiveIntensity: 0.5, metalness: 0.92, roughness: 0.12 })
+  );
+  pondWaferCore.rotation.z = Math.PI / 2;
+  pondWaferCore.position.y = 1.75;
+  pondGroup.add(pondRim, pondWater, pondWaferCore);
+  worldGroup.add(pondGroup);
+
+  // 연못 앞 정원 벤치 좌석 등록
+  seats.push({
+    id: 'garden_bench_0',
+    label: '⛲ 야외 3X 황금 웨이퍼 연못 치유 벤치',
+    pos: new THREE.Vector3(-15.2, 0, 22.0),
+    type: 'pew',
+    lookAngle: -Math.PI / 2,
+    occupiedBy: null,
+    room: 'pool'
+  });
+
+  // 3. [초대형 인피니티 풀장] (가로 38m x 세로 24m, z = 34.0 중심)
   const poolGroup = new THREE.Group();
-  poolGroup.position.set(0, 0, 29.5);
+  poolGroup.position.set(0, 0, 34.0);
 
-  // 풀장 화이트 대리석 데크 림
-  const deckRimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3, metalness: 0.2 });
-  const poolDeck = new THREE.Mesh(new THREE.BoxGeometry(38.0, 0.55, 26.0), deckRimMat);
-  poolDeck.position.y = 0.22;
-  poolGroup.add(poolDeck);
+  const deckRimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.28, metalness: 0.2 });
+  poolDeckMesh = new THREE.Mesh(new THREE.BoxGeometry(46.0, 0.48, 28.0), deckRimMat);
+  poolDeckMesh.position.y = 0.16;
+  poolGroup.add(poolDeckMesh);
+  walkableFloorMeshes.push(poolDeckMesh);
 
-  // 풀장 수조 내벽 (사파이어 블루 모자이크 타일)
   const poolBasin = new THREE.Mesh(
-    new THREE.BoxGeometry(35.2, 1.8, 23.2),
+    new THREE.BoxGeometry(34.0, 1.8, 22.0),
     new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 })
   );
-  poolBasin.position.y = -0.35;
+  poolBasin.position.y = -0.42;
   poolGroup.add(poolBasin);
 
-  // 풀장 영롱한 에메랄드 사이안 물 표면 (Water Surface with Transparency)
   const waterMat = new THREE.MeshStandardMaterial({
-    color: 0x06b6d4,
-    emissive: 0x0891b2,
-    emissiveIntensity: 0.65,
-    roughness: 0.08,
-    metalness: 0.4,
-    transparent: true,
-    opacity: 0.85
+    color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.68,
+    roughness: 0.08, metalness: 0.4, transparent: true, opacity: 0.86
   });
-  poolWaterMesh = new THREE.Mesh(new THREE.PlaneGeometry(34.8, 22.8), waterMat);
+  poolWaterMesh = new THREE.Mesh(new THREE.PlaneGeometry(33.6, 21.6), waterMat);
   poolWaterMesh.rotation.x = -Math.PI / 2;
-  poolWaterMesh.position.y = 0.12;
+  poolWaterMesh.position.y = 0.14;
   poolGroup.add(poolWaterMesh);
+  walkableFloorMeshes.push(poolWaterMesh);
 
-  // 수중 네온 조명 4기 (Underwater Neon Lights)
+  // 수중 네온 조명
   underwaterLights = [];
-  [[-6, -4], [6, -4], [-6, 4], [6, 4]].forEach(([ux, uz], uIdx) => {
-    const uLight = new THREE.PointLight(uIdx % 2 === 0 ? 0x00ffff : 0x2ee59d, 1.8, 14);
+  [[-9, -5], [9, -5], [-9, 5], [9, 5]].forEach(([ux, uz], uIdx) => {
+    const uLight = new THREE.PointLight(uIdx % 2 === 0 ? 0x00ffff : 0x2ee59d, 2.0, 18);
     uLight.position.set(ux, -0.2, uz);
     poolGroup.add(uLight);
     underwaterLights.push(uLight);
   });
 
-  // 3. 물 위에 둥둥 떠다니는 대형 플로팅 튜브 3종 (플라밍고, 도넛, 유니콘)
-  // ① 🦩 거대 핑크 플라밍고 튜브 (x = -4.5, z = 0)
+  // 4. 물 위에 둥둥 떠다니는 대형 3D 플로팅 튜브 3종 (플라밍고, 도넛, 황금 백조)
   flamingoFloat = new THREE.Group();
-  flamingoFloat.position.set(-4.5, 0.18, 0);
-  const fMat = new THREE.MeshStandardMaterial({ color: 0xff477e, roughness: 0.3 });
-  const fRing = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.35, 16, 32), fMat);
+  flamingoFloat.position.set(-6.5, 0.20, -1.5);
+  const fMat = new THREE.MeshStandardMaterial({ color: 0xff477e, roughness: 0.28 });
+  const fRing = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.38, 16, 32), fMat);
   fRing.rotation.x = Math.PI / 2;
-  // 플라밍고 목과 머리
-  const fNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 1.4, 12), fMat);
-  fNeck.position.set(0, 0.8, -1.1);
+  const fNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.20, 1.5, 12), fMat);
+  fNeck.position.set(0, 0.85, -1.2);
   fNeck.rotation.x = 0.35;
-  const fHead = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), fMat);
-  fHead.position.set(0, 1.4, -0.9);
-  const fBeak = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.28, 8), new THREE.MeshBasicMaterial({ color: 0x111111 }));
-  fBeak.position.set(0, 1.35, -1.2);
-  fBeak.rotation.x = -Math.PI / 2;
-  flamingoFloat.add(fRing, fNeck, fHead, fBeak);
+  const fHead = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 12), fMat);
+  fHead.position.set(0, 1.5, -0.95);
+  flamingoFloat.add(fRing, fNeck, fHead);
   poolGroup.add(flamingoFloat);
 
-  // ② 🍩 레인보우 도넛 튜브 (x = 4.2, z = -2.5)
   donutFloat = new THREE.Group();
-  donutFloat.position.set(4.2, 0.18, -2.5);
-  const dDough = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.32, 16, 32), new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 }));
+  donutFloat.position.set(6.2, 0.20, -2.5);
+  const dDough = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.36, 16, 32), new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 }));
   dDough.rotation.x = Math.PI / 2;
-  const dGlaze = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.33, 16, 32, Math.PI * 1.6), new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.2 }));
+  const dGlaze = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.37, 16, 32, Math.PI * 1.6), new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.2 }));
   dGlaze.rotation.x = Math.PI / 2;
   donutFloat.add(dDough, dGlaze);
   poolGroup.add(donutFloat);
 
-  // 4. 풀사이드 럭셔리 썬베드 & 비치 파라솔 & 주류 테이블 세트 (풀장 좌/우 데크)
-  const bedMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
-  const woodBedMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.7 });
-  const umbrellaMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+  // 신규: 👑 3D 황금 백조(Golden Swan) VIP 튜브
+  goldenSwanFloat = new THREE.Group();
+  goldenSwanFloat.position.set(0, 0.22, 3.2);
+  const gSwanMat = new THREE.MeshStandardMaterial({ color: 0xffd269, metalness: 0.88, roughness: 0.18 });
+  const sRing = new THREE.Mesh(new THREE.TorusGeometry(1.45, 0.40, 16, 32), gSwanMat);
+  sRing.rotation.x = Math.PI / 2;
+  const sNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 1.65, 12), gSwanMat);
+  sNeck.position.set(0, 0.95, -1.3);
+  sNeck.rotation.x = 0.28;
+  const sCrown = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), gSwanMat);
+  sCrown.position.set(0, 1.68, -1.08);
+  goldenSwanFloat.add(sRing, sNeck, sCrown);
+  poolGroup.add(goldenSwanFloat);
 
-  [-1, 1].forEach(side => {
-    const sx = side * 12.8;
-    for (let bz = -5.0; bz <= 5.0; bz += 3.5) {
-      const sbGroup = new THREE.Group();
-      sbGroup.position.set(sx, 0.22, bz);
+  // 5. [야외 좌·우 입체 건축] 3D 프라이빗 풀빌라 카바나 룸 2동 (West Emerald Cabana & East Gold Cabana)
+  const buildPoolCabanaVilla = (side) => {
+    const cab = new THREE.Group();
+    const cx = side * 19.6;
+    cab.position.set(cx, 0.40, 0);
 
-      // 썬베드 프레임 & 매트리스
-      const frame = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.22, 2.4), woodBedMat);
-      frame.position.y = 0.11;
-      const cushion = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.14, 2.3), bedMat);
-      cushion.position.y = 0.26;
-      const pillow = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.5), new THREE.MeshStandardMaterial({ color: 0x06b6d4 }));
-      pillow.position.set(0, 0.35, -0.85);
-      pillow.rotation.x = 0.3;
-      sbGroup.add(frame, cushion, pillow);
+    const colMat = new THREE.MeshStandardMaterial({ color: 0x3b2313, roughness: 0.55 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: side < 0 ? 0x065f46 : 0x78350f, roughness: 0.4, metalness: 0.3 });
+    const drapeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.72, roughness: 0.4, side: THREE.DoubleSide });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.85, roughness: 0.2 });
 
-      // 파라솔 2개씩
-      if (Math.abs(bz) < 2) {
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.2, 8), new THREE.MeshStandardMaterial({ color: 0xd4d4d8 }));
-        pole.position.set(side * -1.2, 1.6, 0);
-        const cone = new THREE.Mesh(new THREE.ConeGeometry(1.8, 0.65, 18, 1, true), umbrellaMat);
-        cone.position.set(side * -1.2, 3.0, 0);
-        sbGroup.add(pole, cone);
+    // 카바나 우드 플랫폼 바닥
+    const base = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.24, 9.6), colMat);
+    base.position.y = 0.12;
+    cab.add(base);
+
+    // 4개 입체 기둥 & 리조트 커튼 드레이프
+    for (const px of [-2.2, 2.2]) {
+      for (const pz of [-4.2, 4.2]) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 3.8, 12), colMat);
+        post.position.set(px, 2.0, pz);
+        const drape = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.18, 3.4, 12, 1, true), drapeMat);
+        drape.position.set(px, 1.9, pz);
+        cab.add(post, drape);
       }
-
-      // 썬베드 옆 협탁 & 시원한 맥주/칵테일
-      const table = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.35, 16), woodBedMat);
-      table.position.set(side * 0.9, 0.18, 0);
-      const drink = (side === 1 ? createBeerSet() : createWineSet());
-      drink.position.set(side * 0.9, 0.38, 0);
-      sbGroup.add(table, drink);
-
-      poolGroup.add(sbGroup);
     }
+
+    // 3D 피라미드형 카바나 지붕 & 샹들리에
+    const roofRim = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.28, 10.0), goldMat);
+    roofRim.position.y = 3.95;
+    const roofTop = new THREE.Mesh(new THREE.ConeGeometry(5.6, 1.6, 4), roofMat);
+    roofTop.position.y = 4.85;
+    roofTop.rotation.y = Math.PI / 4;
+    cab.add(roofRim, roofTop);
+
+    // 카바나 내부 럭셔리 데이베드 소파 2조 & 주류 테이블
+    for (const dz of [-2.2, 2.2]) {
+      const bed = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.45, 2.6), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 }));
+      bed.position.set(side * 0.4, 0.46, dz);
+      const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.95, 2.6), new THREE.MeshStandardMaterial({ color: side < 0 ? 0x10b981 : 0xeab85c }));
+      backrest.position.set(side * 1.8, 0.72, dz);
+      cab.add(bed, backrest);
+
+      const tbl = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.52, 16), goldMat);
+      tbl.position.set(-side * 1.4, 0.50, dz);
+      const drink = side < 0 ? createWineSet() : createWhiskeySet();
+      drink.position.set(-side * 1.4, 0.78, dz);
+      cab.add(tbl, drink);
+
+      seats.push({
+        id: `cabana_${side < 0 ? 'W' : 'E'}_${dz < 0 ? 1 : 2}`,
+        label: `🌴 야외 ${side < 0 ? '에메랄드' : '골든'} 풀빌라 카바나 데이베드`,
+        pos: new THREE.Vector3(cx - side * 0.2, 0.40, 34.0 + dz),
+        type: 'pew',
+        lookAngle: side < 0 ? -Math.PI / 2 : Math.PI / 2,
+        occupiedBy: null,
+        room: 'pool'
+      });
+    }
+
+    poolGroup.add(cab);
+  };
+  buildPoolCabanaVilla(-1);
+  buildPoolCabanaVilla(1);
+
+  // 6. 풀장 남측 초대형 3D 입체 트로피컬 네온 전광판 (2D 빈 박스가 아닌 실제 3D 입체 간판!)
+  const poolSign = create3DNeonSignBoard({
+    width: 18.5,
+    height: 2.4,
+    depth: 0.45,
+    badge: 'SOXL 3X LEVERAGE RESORT & INFINITY POOL PARTY',
+    title: '🌴 SOXL $500 LUXURY POOL PARTY & CABANA VILLAS 🏊',
+    sub: '시원한 인피니티 풀과 양옆 3D 풀빌라 카바나 룸에서 올나잇 풀파티를 즐기세요!',
+    bg1: '#041f2e',
+    bg2: '#064e63',
+    borderColor: '#00ffff',
+    glowColor: 0x00ffff
   });
+  poolSign.position.set(0, 4.2, 13.2);
+  poolSign.rotation.y = Math.PI;
+  poolGroup.add(poolSign);
 
-  // 5. 풀장 안쪽(z = 38.0) 초대형 트로피컬 네온 전광판
-  const neonSignMat = new THREE.MeshBasicMaterial({ color: 0x2ee59d });
-  const poolBoard = new THREE.Mesh(new THREE.BoxGeometry(16.0, 1.4, 0.2), new THREE.MeshStandardMaterial({ color: 0x050c12 }));
-  poolBoard.position.set(0, 3.2, 8.4);
-  poolGroup.add(poolBoard);
-
-  // 야자수(Palm Trees) 6그루가 풀장 둘레를 감싸 이국적인 풀파티 무드 형성
-  const palmCoords = [
-    [-13.5, -7.5], [13.5, -7.5],
-    [-14.0, 0], [14.0, 0],
-    [-13.5, 7.5], [13.5, 7.5]
-  ];
-  palmCoords.forEach(([px, pz]) => {
+  // 야자수 8그루 배치
+  [[-15.5, -10.5], [15.5, -10.5], [-16.0, 0], [16.0, 0], [-15.5, 10.5], [15.5, 10.5], [-9.0, 12.5], [9.0, 12.5]].forEach(([px, pz]) => {
     const palm = new THREE.Group();
     palm.position.set(px, 0.22, pz);
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.36, 4.8, 10), new THREE.MeshStandardMaterial({ color: 0x5c3818, roughness: 0.9 }));
-    trunk.position.y = 2.4;
-    trunk.rotation.z = (px < 0 ? -0.12 : 0.12);
-    // 야자수 잎
-    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.4, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 }));
-    leaves.position.set((px < 0 ? -0.4 : 0.4), 4.8, 0);
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.38, 5.4, 10), new THREE.MeshStandardMaterial({ color: 0x5c3818, roughness: 0.9 }));
+    trunk.position.y = 2.7;
+    trunk.rotation.z = (px < 0 ? -0.10 : 0.10);
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.6, 1.35, 8), new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 }));
+    leaves.position.set((px < 0 ? -0.35 : 0.35), 5.4, 0);
     palm.add(trunk, leaves);
     poolGroup.add(palm);
   });
@@ -2207,403 +2562,1033 @@ function buildOutdoorGardenAndWaferPond() {
   worldGroup.add(poolGroup);
 }
 
+// ============================================================================
+// 4-2. 『SOXL 3D 메가클럽 아레나』 (52m x 42m 대확장) & 5대 입체 프라이빗 룸 구축
+// ============================================================================
 function buildSanctuaryArchitecture() {
-  // 1. 대형 클럽 플로어 마룻바닥 (24m x 32m 대확장)
+  // 1. 초대형 다크 오닉스 & 골드 인레이 마블 플로어 (가로 52m x 세로 42m)
   floorMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(24, 32),
+    new THREE.PlaneGeometry(52, 42),
     new THREE.MeshStandardMaterial({
-      color: 0x111622,
-      roughness: 0.45,
-      metalness: 0.3
+      map: createClubMarbleFloorTexture(),
+      roughness: 0.32,
+      metalness: 0.25
     })
   );
   floorMesh.rotation.x = -Math.PI / 2;
+  floorMesh.position.set(0, 0, -1.0);
   floorMesh.receiveShadow = true;
   worldGroup.add(floorMesh);
+  walkableFloorMeshes.push(floorMesh);
 
-  // 2. 중앙 네온 LED 댄스 플로어 (10m x 10m 격자 타일)
+  // 각 룸으로 이어지는 3D 골드·에메랄드 발광 런웨이(Runway) 카펫
+  const runwayMat = new THREE.MeshStandardMaterial({ color: 0x0b2920, roughness: 0.55 });
+  const goldLineMat = new THREE.MeshBasicMaterial({ color: 0xeab85c });
+  runnerMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 36.0), runwayMat);
+  runnerMesh.rotation.x = -Math.PI / 2;
+  runnerMesh.position.set(0, 0.012, 2.0);
+  worldGroup.add(runnerMesh);
+
+  const crossRunway = new THREE.Mesh(new THREE.PlaneGeometry(32.0, 2.8), runwayMat);
+  crossRunway.rotation.x = -Math.PI / 2;
+  crossRunway.position.set(0, 0.011, -9.25);
+  const crossRunway2 = new THREE.Mesh(new THREE.PlaneGeometry(32.0, 2.8), runwayMat);
+  crossRunway2.rotation.x = -Math.PI / 2;
+  crossRunway2.position.set(0, 0.011, 8.75);
+  worldGroup.add(crossRunway, crossRunway2);
+
+  // 2. 중앙 7x7 그랜드 3D 입체 LED 댄스플로어 (가로 13.5m x 세로 13.5m, 49개 타일 + 3D 골드 단상 테두리)
   const dfGroup = new THREE.Group();
-  dfGroup.position.set(0, 0.02, 0);
-  const tileSize = 1.8;
+  dfGroup.position.set(0, 0.02, -1.5);
+
+  const dfRim = new THREE.Mesh(
+    new THREE.BoxGeometry(14.2, 0.08, 14.2),
+    new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.85, roughness: 0.2 })
+  );
+  dfRim.position.y = 0.02;
+  dfGroup.add(dfRim);
+
+  const tileSize = 1.85;
   danceTiles = [];
-  for (let ix = -2; ix <= 2; ix++) {
-    for (let iz = -2; iz <= 2; iz++) {
+  for (let ix = -3; ix <= 3; ix++) {
+    for (let iz = -3; iz <= 3; iz++) {
       const tileMat = new THREE.MeshStandardMaterial({
-        color: 0x1a233a,
+        color: 0x161f33,
         emissive: (ix + iz) % 2 === 0 ? 0x2ee59d : 0xeab85c,
-        emissiveIntensity: 0.45,
-        roughness: 0.2,
-        metalness: 0.5
+        emissiveIntensity: 0.55,
+        roughness: 0.18,
+        metalness: 0.55
       });
-      const tile = new THREE.Mesh(new THREE.BoxGeometry(tileSize * 0.94, 0.04, tileSize * 0.94), tileMat);
-      tile.position.set(ix * tileSize, 0.02, iz * tileSize);
+      const tile = new THREE.Mesh(new THREE.BoxGeometry(tileSize * 0.94, 0.07, tileSize * 0.94), tileMat);
+      tile.position.set(ix * tileSize, 0.06, iz * tileSize);
       dfGroup.add(tile);
       danceTiles.push(tile);
+      walkableFloorMeshes.push(tile);
     }
   }
   worldGroup.add(dfGroup);
 
-  // 3. 클럽 다크 네온 벽체
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.85 });
-  const frontWall = new THREE.Mesh(new THREE.BoxGeometry(24.4, 10.5, 0.6), wallMat);
-  frontWall.position.set(0, 5.25, -16.0);
-  worldGroup.add(frontWall);
-
-  const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.6, 10.5, 32.4), wallMat);
-  leftWall.position.set(-12.0, 5.25, 0);
-  const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.6, 10.5, 32.4), wallMat);
-  rightWall.position.set(12.0, 5.25, 0);
-  worldGroup.add(leftWall, rightWall);
-
-  // 3-1. [공식 요청] 클럽 메인홀과 야외 풀파티장을 시원하게 직통 연결하는 그랜드 오픈 테라스 게이트!
-  // 좌측 벽체 (x = -8.5, 폭 7.4m)
-  const backWallL = new THREE.Mesh(new THREE.BoxGeometry(7.4, 10.5, 0.6), wallMat);
-  backWallL.position.set(-8.5, 5.25, 16.0);
-  // 우측 벽체 (x = 8.5, 폭 7.4m)
-  const backWallR = new THREE.Mesh(new THREE.BoxGeometry(7.4, 10.5, 0.6), wallMat);
-  backWallR.position.set(8.5, 5.25, 16.0);
-  worldGroup.add(backWallL, backWallR);
-
-  // 1층 게이트 상단 인방 프레임 (폭 9.6m, 높이 y = 4.5m)
-  const gateHeader = new THREE.Mesh(
-    new THREE.BoxGeometry(9.6, 0.5, 0.65),
-    new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.8, roughness: 0.2 })
-  );
-  gateHeader.position.set(0, 4.55, 16.0);
-
-  // 게이트 상단 사이안 네온 사이니지 (🌴 POOL PARTY & TERRACE DECK 🏊)
-  const gateNeonSign = new THREE.Mesh(
-    new THREE.BoxGeometry(8.6, 0.26, 0.08),
-    new THREE.MeshBasicMaterial({ color: 0x06b6d4 })
-  );
-  gateNeonSign.position.set(0, 4.55, 15.65);
-  worldGroup.add(gateHeader, gateNeonSign);
-
-  // 2층 남쪽 전면 파노라마 글래스 윈도우 (VIP룸에서 야외 인피니티 풀장이 시원하게 조망됨!)
-  const vipSouthGlass = new THREE.Mesh(
-    new THREE.BoxGeometry(9.6, 5.2, 0.08),
-    new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.20, roughness: 0.05, metalness: 0.1 })
-  );
-  vipSouthGlass.position.set(0, 7.4, 16.0);
-  worldGroup.add(vipSouthGlass);
-
-  // 3-2. [핵심] 클럽 메인홀 ➡️ 야외 풀파티장 직통 연결 초대형 와이드 오픈 테라스 데크
-  // 폭 12.0m x 깊이 10.0m x 두께 0.18m 티크우드 데크 (z: 13.0 ~ 23.0)
-  const terraceDeckGeo = new THREE.BoxGeometry(12.0, 0.18, 10.0);
-  const terraceDeckMat = new THREE.MeshStandardMaterial({ color: 0x221711, roughness: 0.45, metalness: 0.1 });
-  const openTerraceDeck = new THREE.Mesh(terraceDeckGeo, terraceDeckMat);
-  openTerraceDeck.position.set(0, 0.02, 18.0);
-  openTerraceDeck.receiveShadow = true;
-  worldGroup.add(openTerraceDeck);
-
-  // 테라스 양옆 은은한 네온 볼라드 조명 (x = ±5.4, z = 15, 17.5, 20)
-  for (const bx of [-5.4, 5.4]) {
-    for (const bz of [15.0, 17.5, 20.0]) {
-      const bollard = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.06, 0.06, 0.85, 12),
-        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 })
-      );
-      bollard.position.set(bx, 0.42, bz);
-      const capLight = new THREE.Mesh(
-        new THREE.SphereGeometry(0.08, 10, 10),
-        new THREE.MeshBasicMaterial({ color: 0x00ffff })
-      );
-      capLight.position.set(bx, 0.85, bz);
-      worldGroup.add(bollard, capLight);
+  // 댄스플로어 네 모서리 3D 네온 레이저 트러스 타워 기둥 4기
+  const trussMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.88, roughness: 0.2 });
+  for (const [tx, tz] of [[-7.6, -9.1], [7.6, -9.1], [-7.6, 6.1], [7.6, 6.1]]) {
+    const tower = new THREE.Group();
+    tower.position.set(tx, 0, tz);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.45, 0.95), new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.6 }));
+    base.position.y = 0.225;
+    tower.add(base);
+    for (const [ox, oz] of [[-0.26, -0.26], [0.26, -0.26], [-0.26, 0.26], [0.26, 0.26]]) {
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 10.6, 8), trussMat);
+      pole.position.set(ox, 5.5, oz);
+      tower.add(pole);
     }
+    for (let ry = 1.2; ry <= 10.2; ry += 1.5) {
+      const ring = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.06, 0.62), new THREE.MeshBasicMaterial({ color: ry % 3 === 0 ? 0x00ffff : 0xff007f }));
+      ring.position.y = ry;
+      tower.add(ring);
+    }
+    worldGroup.add(tower);
   }
 
-  // 4. 천장 중앙 초대형 회전 미러볼 (Disco Mirror Ball)
-  mirrorBallGroup = new THREE.Group();
-  mirrorBallGroup.position.set(0, 8.4, 0);
-  const mbSphere = new THREE.Mesh(
-    new THREE.SphereGeometry(1.25, 32, 24),
-    new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 0.98, roughness: 0.05 })
-  );
-  const mbStem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.04, 0.04, 1.8, 12),
-    new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9, roughness: 0.2 })
-  );
-  mbStem.position.y = 1.0;
-  mirrorBallGroup.add(mbSphere, mbStem);
-  worldGroup.add(mirrorBallGroup);
+  // 3. 메가클럽 외곽 3D 건축 벽체 (높이 11.5m, 입체 골드 필라스터 기둥 & 네온 몰딩 장착)
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x080d18, roughness: 0.78 });
+  const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.85, roughness: 0.2 });
 
-  // 5. 4방향 무빙 레이저 라이트 (Moving Lasers: 핑크, 사이안, 그린, 골드)
-  movingLasers = [];
-  const laserColors = [0xff007f, 0x00ffff, 0x2ee59d, 0xffd269];
-  laserColors.forEach((col, idx) => {
-    const spot = new THREE.SpotLight(col, 2.2, 28, Math.PI / 6, 0.4, 1.2);
-    spot.position.set((idx === 0 || idx === 1 ? -6 : 6), 8.5, (idx === 0 || idx === 2 ? -6 : 6));
-    spot.target = new THREE.Object3D();
-    spot.target.position.set(0, 0, 0);
-    worldGroup.add(spot, spot.target);
-    movingLasers.push({ spot: spot, color: col, phase: idx * (Math.PI / 2) });
+  const northWall = new THREE.Mesh(new THREE.BoxGeometry(52.6, 11.5, 0.7), wallMat);
+  northWall.position.set(0, 5.75, -21.8);
+  const westWall = new THREE.Mesh(new THREE.BoxGeometry(0.7, 11.5, 42.6), wallMat);
+  westWall.position.set(-25.8, 5.75, -1.0);
+  const eastWall = new THREE.Mesh(new THREE.BoxGeometry(0.7, 11.5, 42.6), wallMat);
+  eastWall.position.set(25.8, 5.75, -1.0);
+  worldGroup.add(northWall, westWall, eastWall);
+
+  // 남측 외벽 & 야외 풀파티장 직통 그랜드 테라스 오픈 게이트 (중앙 14m 완전 개방!)
+  const southWallL = new THREE.Mesh(new THREE.BoxGeometry(19.0, 11.5, 0.7), wallMat);
+  southWallL.position.set(-16.5, 5.75, 19.6);
+  const southWallR = new THREE.Mesh(new THREE.BoxGeometry(19.0, 11.5, 0.7), wallMat);
+  southWallR.position.set(16.5, 5.75, 19.6);
+  worldGroup.add(southWallL, southWallR);
+
+  // 남측 게이트 3D 입체 아치 & 네온 간판 (1층 통과 높이 4.6m)
+  const gateSign = create3DNeonSignBoard({
+    width: 13.6,
+    height: 1.15,
+    depth: 0.35,
+    badge: 'GRAND TERRACE PORTAL · DIRECT TO INFINITY POOL',
+    title: '🌴 OUTDOOR POOL PARTY & CABANA RESORT 🏊',
+    sub: '남쪽 테라스로 걸어 나가면 38m 인피니티 풀과 3D 풀빌라 카바나 2동이 펼쳐집니다',
+    bg1: '#052233',
+    bg2: '#084c61',
+    borderColor: '#00ffff',
+    glowColor: 0x00ffff
   });
+  gateSign.position.set(0, 4.35, 19.35);
+  gateSign.rotation.y = Math.PI;
+  worldGroup.add(gateSign);
 
-  // 6. [대규모 신설] 2층 복층 VIP 룸 & 프라이빗 라운지 (y = 4.8m)
+  // 4. 천장 3D 콘서트 메가 트러스 돔 & 트리플 회전 미러볼 & 볼류메트릭 3D 레이저 콘
+  buildOverhead3DTrussAndLasers();
+
+  // 5. [핵심 요청] 2D가 아닌 진짜 3D 입체 건축 룸 4개 동 (1층) + 2층 스카이 펜트하우스 룸!
+  buildRoom1GoldenVaultVIP();
+  buildRoom2WhiskeyCigarBar();
+  buildRoom3HyperNeonKaraoke();
+  buildRoom4ChampagneFountainLounge();
   buildSecondFloorVIPSuite();
-
-  // 7. [대규모 신설] 1층 메인 라운지 바 & 주류 테이블 세트
-  buildFirstFloorBarAndTables();
 }
 
-// 2층 복층 VIP 테라스 룸 & 스카이 라운지 & 네온 계단
+function buildOverhead3DTrussAndLasers() {
+  const trussMat = new THREE.MeshStandardMaterial({ color: 0xc89d42, metalness: 0.88, roughness: 0.22 });
+
+  // 천장 중앙 대형 3D 원형 콘서트 트러스 링 2겹 (반경 8.5m, 5.2m)
+  for (const r of [8.6, 5.0]) {
+    const tRing = new THREE.Mesh(new THREE.TorusGeometry(r, 0.16, 12, 48), trussMat);
+    tRing.rotation.x = Math.PI / 2;
+    tRing.position.set(0, 10.6, -1.5);
+    worldGroup.add(tRing);
+  }
+
+  // 1) 중앙 초대형 3D 회전 미러볼 (Disco Mirror Ball + Gold Crown)
+  mirrorBallGroup = new THREE.Group();
+  mirrorBallGroup.position.set(0, 9.2, -1.5);
+  const mbSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(1.55, 36, 28),
+    new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.98, roughness: 0.04 })
+  );
+  const mbRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.75, 0.06, 12, 36),
+    new THREE.MeshStandardMaterial({ color: 0xffd269, emissive: 0xb45309, emissiveIntensity: 0.5, metalness: 0.9 })
+  );
+  mbRing.rotation.x = Math.PI / 3;
+  const mbStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.06, 0.06, 2.0, 12),
+    trussMat
+  );
+  mbStem.position.y = 1.4;
+  mirrorBallGroup.add(mbSphere, mbRing, mbStem);
+  worldGroup.add(mirrorBallGroup);
+
+  // 2) 좌·우 서브 3D 회전 미러볼 2기
+  subMirrorBalls = [];
+  for (const sx of [-8.2, 8.2]) {
+    const subMB = new THREE.Group();
+    subMB.position.set(sx, 9.3, -1.5);
+    const sBall = new THREE.Mesh(
+      new THREE.SphereGeometry(0.92, 28, 22),
+      new THREE.MeshStandardMaterial({ color: 0xffe49e, metalness: 0.96, roughness: 0.06 })
+    );
+    const sStem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5, 10), trussMat);
+    sStem.position.y = 1.1;
+    subMB.add(sBall, sStem);
+    worldGroup.add(subMB);
+    subMirrorBalls.push(subMB);
+  }
+
+  // 3) 6방향 초고속 무빙 레이저 스팟라이트 & 3D 볼류메트릭 레이저 빛기둥 콘(Laser Cones)!
+  movingLasers = [];
+  laserCones = [];
+  const laserMeta = [
+    { x: -7.5, z: -9.0, col: 0xff007f },
+    { x: 7.5,  z: -9.0, col: 0x00ffff },
+    { x: -7.5, z: 6.0,  col: 0x2ee59d },
+    { x: 7.5,  z: 6.0,  col: 0xffd269 },
+    { x: -11.0, z: -1.5, col: 0xa855f7 },
+    { x: 11.0,  z: -1.5, col: 0x38bdf8 }
+  ];
+  laserMeta.forEach((lm, idx) => {
+    const spot = new THREE.SpotLight(lm.col, 2.6, 36, Math.PI / 5.5, 0.42, 1.1);
+    spot.position.set(lm.x, 10.4, lm.z);
+    spot.target = new THREE.Object3D();
+    spot.target.position.set(0, 0, -1.5);
+    worldGroup.add(spot, spot.target);
+    movingLasers.push({ spot, color: lm.col, phase: idx * 1.05 });
+
+    // 공간 속에서 입체적으로 보이는 3D 반투명 레이저 빔 콘!
+    const coneGeo = new THREE.ConeGeometry(2.6, 11.5, 16, 1, true);
+    coneGeo.translate(0, -5.75, 0);
+    const coneMat = new THREE.MeshBasicMaterial({
+      color: lm.col,
+      transparent: true,
+      opacity: 0.13,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+    coneMesh.position.set(lm.x, 10.4, lm.z);
+    worldGroup.add(coneMesh);
+    laserCones.push({ mesh: coneMesh, basePos: new THREE.Vector3(lm.x, 10.4, lm.z), phase: idx * 1.05 });
+  });
+
+  // 4) 공중에 반짝이며 떠오르는 3D 황금·에메랄드 스파클 파티클 (320개)
+  const pCount = 320;
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(pCount * 3);
+  for (let i = 0; i < pCount; i++) {
+    pPos[i * 3] = (Math.random() - 0.5) * 48;
+    pPos[i * 3 + 1] = 0.5 + Math.random() * 9.5;
+    pPos[i * 3 + 2] = -20 + Math.random() * 58;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  particleSystem = new THREE.Points(
+    pGeo,
+    new THREE.PointsMaterial({ color: 0xffe49e, size: 0.16, transparent: true, opacity: 0.75 })
+  );
+  worldGroup.add(particleSystem);
+}
+
+// ============================================================================
+// 👑 [제1룸 · 북서쪽 3D 입체 룸] 『SOXL $500 황금금고 VVIP 룸 (Golden Vault & Dom Pérignon Room)』
+// 위치: x: -25.5 ~ -13.0, z: -16.5 ~ -2.0
+// ============================================================================
+function buildRoom1GoldenVaultVIP() {
+  const rGroup = new THREE.Group();
+
+  // 1) 룸 전용 딥 에메랄드 벨벳 & 골드 보더 플로어
+  const rFloor = new THREE.Mesh(
+    new THREE.BoxGeometry(12.4, 0.10, 14.4),
+    new THREE.MeshStandardMaterial({ color: 0x08261d, roughness: 0.55, metalness: 0.15 })
+  );
+  rFloor.position.set(-19.25, 0.05, -9.25);
+  rFloor.receiveShadow = true;
+  rGroup.add(rFloor);
+  walkableFloorMeshes.push(rFloor);
+
+  // 2) 룸을 둘러싸는 3D 강화유리 & 골드 프레임 가벽 + 3D 황금 아치 게이트웨이
+  build3DGlassPartitionWall(-25.4, -16.4, -13.0, -16.4, 5.2, 0xfbbf24, 0xffd269); // 북측 가벽
+  build3DGlassPartitionWall(-25.4, -2.0, -13.0, -2.0, 5.2, 0xfbbf24, 0xffd269);   // 남측 가벽
+  build3DGlassPartitionWall(-13.0, -16.4, -13.0, -11.6, 5.2, 0xfbbf24, 0xffd269); // 동측 상단 가벽
+  build3DGlassPartitionWall(-13.0, -6.9, -13.0, -2.0, 5.2, 0xfbbf24, 0xffd269);   // 동측 하단 가벽
+
+  build3DArchwayPortal({
+    x: -13.0, z: -9.25, rotY: Math.PI / 2, width: 4.6, height: 5.2, colorHex: 0xffd269,
+    badge: 'VIP ROOM 1 · GOLDEN BULLION & DOM PÉRIGNON',
+    title: '👑 제1룸: SOXL $500 황금금고 VVIP 룸',
+    sub: '회전하는 초대형 3D 황금 금고문 · 골드바 피라미드 · 돔 페리뇽 타워',
+    roomKey: 'vault'
+  });
+
+  // 3) 룸 천장 3D 다단 크리스탈 골드 샹들리에
+  const chand = build3DCrystalChandelier(1.85, 3, 0xffe49e);
+  chand.position.set(-19.25, 7.6, -9.25);
+  rGroup.add(chand);
+
+  // 4) [시그니처 3D 조형물 1] 북쪽 벽면 초대형 3D 원형 황금 은행 금고문 (3D Giant Circular Gold Bank Vault Door)!
+  const vaultGroup = new THREE.Group();
+  vaultGroup.position.set(-19.25, 2.75, -16.05);
+  const goldVaultMat = new THREE.MeshStandardMaterial({ color: 0xffcf52, metalness: 0.94, roughness: 0.14 });
+  const steelMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.88, roughness: 0.22 });
+
+  const outerRing = new THREE.Mesh(new THREE.TorusGeometry(2.05, 0.26, 16, 40), goldVaultMat);
+  const doorPlate = new THREE.Mesh(new THREE.CylinderGeometry(1.88, 1.88, 0.36, 36), goldVaultMat);
+  doorPlate.rotation.x = Math.PI / 2;
+  const innerDisc = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.42, 32), steelMat);
+  innerDisc.rotation.x = Math.PI / 2;
+
+  // 금고 잠금 볼트 기둥 8개
+  for (let b = 0; b < 8; b++) {
+    const ang = (b / 8) * Math.PI * 2;
+    const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.9, 10), steelMat);
+    bolt.position.set(Math.cos(ang) * 1.55, Math.sin(ang) * 1.55, 0.18);
+    bolt.rotation.z = ang + Math.PI / 2;
+    vaultGroup.add(bolt);
+  }
+
+  // 실시간 회전하는 중앙 8-스포크 황금 핸들 휠
+  vaultWheelMesh = new THREE.Group();
+  vaultWheelMesh.position.z = 0.28;
+  const wRing = new THREE.Mesh(new THREE.TorusGeometry(0.78, 0.075, 12, 28), goldVaultMat);
+  const wHub = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.18, 16), goldVaultMat);
+  wHub.rotation.x = Math.PI / 2;
+  vaultWheelMesh.add(wRing, wHub);
+  for (let s = 0; s < 8; s++) {
+    const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.56, 8), goldVaultMat);
+    spoke.rotation.z = (s / 8) * Math.PI * 2;
+    vaultWheelMesh.add(spoke);
+  }
+  vaultGroup.add(outerRing, doorPlate, innerDisc, vaultWheelMesh);
+  rGroup.add(vaultGroup);
+
+  // 5) [시그니처 3D 조형물 2] 금고 앞 황금 골드바(Gold Bullion) 28개 피라미드 적재대!
+  const bullionGroup = new THREE.Group();
+  bullionGroup.position.set(-15.8, 0.10, -14.2);
+  const ped = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.55, 1.6), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.3 }));
+  ped.position.y = 0.275;
+  bullionGroup.add(ped);
+
+  for (let layer = 0; layer < 4; layer++) {
+    const cols = 4 - layer;
+    for (let c = 0; c < cols; c++) {
+      for (let r = -1; r <= 1; r++) {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.22), goldVaultMat);
+        bar.position.set((c - (cols - 1) / 2) * 0.48, 0.62 + layer * 0.15, r * 0.28);
+        bullionGroup.add(bar);
+      }
+    }
+  }
+  rGroup.add(bullionGroup);
+
+  // 6) 황금금고 VIP룸 내부 럭셔리 벨벳 부스 소파 2조 & 오닉스 대리석 테이블 & 3D 샴페인 타워
+  const velvetMat = new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.45 });
+  const marbleMat = new THREE.MeshStandardMaterial({ color: 0x0b0f17, roughness: 0.18, metalness: 0.45 });
+
+  [-12.4, -5.8].forEach((bz, bIdx) => {
+    const booth = new THREE.Group();
+    booth.position.set(-20.2, 0.10, bz);
+
+    // ㄷ자형 VIP 소파
+    const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.15, 4.2), velvetMat);
+    seatBack.position.set(2.1, 0.58, 0);
+    const seatBase = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.46, 4.2), velvetMat);
+    seatBase.position.set(1.5, 0.23, 0);
+    const wingN = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.85, 0.55), velvetMat);
+    wingN.position.set(0.8, 0.42, -1.9);
+    const wingS = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.85, 0.55), velvetMat);
+    wingS.position.set(0.8, 0.42, 1.9);
+    booth.add(seatBack, seatBase, wingN, wingS);
+
+    // 오닉스 & 골드 테이블
+    const tbl = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.52, 2.8), marbleMat);
+    tbl.position.set(0, 0.26, 0);
+    const tblGold = new THREE.Mesh(new THREE.BoxGeometry(1.56, 0.06, 2.86), goldVaultMat);
+    tblGold.position.set(0, 0.52, 0);
+    booth.add(tbl, tblGold);
+
+    // 테이블 위 3D 발광 돔 페리뇽 샴페인 타워 & 주류 풀세트
+    const wh = createWhiskeySet(); wh.position.set(-0.2, 0.55, -0.7);
+    const wn = createWineSet();    wn.position.set(0.2, 0.55, 0.7);
+    const br = createBeerSet();    br.position.set(-0.2, 0.55, 0.2);
+    const sj = createSojuSet();    sj.position.set(0.2, 0.55, -0.2);
+    booth.add(wh, wn, br, sj);
+
+    rGroup.add(booth);
+
+    // 실제 착석 가능 좌석 3석씩 (총 6석) 등록!
+    [-1.1, 0, 1.1].forEach((oz, sIdx) => {
+      seats.push({
+        id: `room1_vault_seat_${bIdx}_${sIdx}`,
+        label: `👑 [1룸: 황금금고 VIP룸] 벨벳 VVIP 부스석 #${bIdx * 3 + sIdx + 1}`,
+        pos: new THREE.Vector3(-18.7, 0.10, bz + oz),
+        type: 'pew',
+        lookAngle: Math.PI / 2,
+        occupiedBy: null,
+        room: 'vault'
+      });
+    });
+  });
+
+  worldGroup.add(rGroup);
+}
+
+// ============================================================================
+// 🥃 [제2룸 · 북동쪽 3D 입체 룸] 『월스트리트 위스키 & 시가 바 룸 (Wall Street Whiskey & Cigar Lounge)』
+// 위치: x: +13.0 ~ +25.5, z: -16.5 ~ -2.0
+// ============================================================================
+function buildRoom2WhiskeyCigarBar() {
+  const rGroup = new THREE.Group();
+
+  // 1) 헤링본 월넛 우드 플로어
+  const rFloor = new THREE.Mesh(
+    new THREE.BoxGeometry(12.4, 0.10, 14.4),
+    new THREE.MeshStandardMaterial({ map: createHerringboneWoodTexture(), roughness: 0.42 })
+  );
+  rFloor.position.set(19.25, 0.05, -9.25);
+  rFloor.receiveShadow = true;
+  rGroup.add(rFloor);
+  walkableFloorMeshes.push(rFloor);
+
+  // 2) 3D 앰버 글래스 가벽 & 3D 앰버 네온 아치 게이트웨이
+  build3DGlassPartitionWall(13.0, -16.4, 25.4, -16.4, 5.2, 0xf59e0b, 0xf59e0b);
+  build3DGlassPartitionWall(13.0, -2.0, 25.4, -2.0, 5.2, 0xf59e0b, 0xf59e0b);
+  build3DGlassPartitionWall(13.0, -16.4, 13.0, -11.6, 5.2, 0xf59e0b, 0xf59e0b);
+  build3DGlassPartitionWall(13.0, -6.9, 13.0, -2.0, 5.2, 0xf59e0b, 0xf59e0b);
+
+  build3DArchwayPortal({
+    x: 13.0, z: -9.25, rotY: -Math.PI / 2, width: 4.6, height: 5.2, colorHex: 0xf59e0b,
+    badge: 'VIP ROOM 2 · SINGLE MALT WHISKEY & DRAFT BAR',
+    title: '🥃 제2룸: 월스트리트 위스키 & 시가 바 룸',
+    sub: '64병 3D 백릿 양주 셀러 월 · 마호가니 아일랜드 바 · 숙성 오크통 타워',
+    roomKey: 'whiskey'
+  });
+
+  // 3) 천장 3D 브래스 링 샹들리에
+  const chand = build3DCrystalChandelier(1.75, 3, 0xffb74d);
+  chand.position.set(19.25, 7.6, -9.25);
+  rGroup.add(chand);
+
+  // 4) [시그니처 3D 조형물 1] 동쪽 벽면 전체를 채운 높이 4.6m 3D 백릿(Backlit) 양주·와인 셀러 월 (64개 3D 보틀!)
+  const cellarGroup = new THREE.Group();
+  cellarGroup.position.set(25.1, 0.10, -9.25);
+  const woodMat = new THREE.MeshStandardMaterial({ color: 0x2b160a, roughness: 0.38 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.88, roughness: 0.2 });
+  const backGlowMat = new THREE.MeshBasicMaterial({ color: 0x451a03 });
+
+  const cabinet = new THREE.Mesh(new THREE.BoxGeometry(0.65, 4.8, 11.2), woodMat);
+  cabinet.position.y = 2.4;
+  const glowPanel = new THREE.Mesh(new THREE.PlaneGeometry(10.6, 4.2), backGlowMat);
+  glowPanel.position.set(-0.34, 2.5, 0);
+  glowPanel.rotation.y = -Math.PI / 2;
+  cellarGroup.add(cabinet, glowPanel);
+
+  // 4단 황금 선반 & 64개 3D 입체 양주·와인·소주 보틀 진열!
+  const bottleColors = [0xd97706, 0x991b1b, 0x059669, 0xb45309, 0x7c2d12];
+  for (let shelf = 0; shelf < 4; shelf++) {
+    const sy = 1.15 + shelf * 0.92;
+    const shelfBoard = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.06, 10.6), goldMat);
+    shelfBoard.position.set(-0.15, sy, 0);
+    cellarGroup.add(shelfBoard);
+
+    for (let bi = -7; bi <= 8; bi++) {
+      const bz = (bi - 0.5) * 0.62;
+      const bCol = bottleColors[Math.abs(bi + shelf) % bottleColors.length];
+      const bMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.085, 0.085, 0.42, 10),
+        new THREE.MeshStandardMaterial({ color: bCol, emissive: bCol, emissiveIntensity: 0.35, roughness: 0.15 })
+      );
+      bMesh.position.set(-0.22, sy + 0.24, bz);
+      const bNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.16, 8), goldMat);
+      bNeck.position.set(-0.22, sy + 0.50, bz);
+      cellarGroup.add(bMesh, bNeck);
+    }
+  }
+  rGroup.add(cellarGroup);
+
+  // 5) [시그니처 3D 조형물 2] 9.6m 마호가니 & 블랙 대리석 아일랜드 바 카운터 + 황금 생맥주 탭 타워 2기
+  const barCounter = new THREE.Mesh(
+    new THREE.BoxGeometry(1.4, 1.12, 9.6),
+    new THREE.MeshStandardMaterial({ color: 0x1e110a, roughness: 0.35 })
+  );
+  barCounter.position.set(22.4, 0.66, -9.25);
+  const barTop = new THREE.Mesh(
+    new THREE.BoxGeometry(1.75, 0.10, 9.8),
+    new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15, metalness: 0.4 })
+  );
+  barTop.position.set(22.4, 1.25, -9.25);
+  const barNeon = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.05, 9.7),
+    new THREE.MeshBasicMaterial({ color: 0xf59e0b })
+  );
+  barNeon.position.set(21.52, 1.20, -9.25);
+  rGroup.add(barCounter, barTop, barNeon);
+
+  // 황금 생맥주 드래프트 탭 타워 2기 & 바 위 주류 세트
+  for (const tz of [-11.5, -7.0]) {
+    const tapCol = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.52, 12), goldMat);
+    tapCol.position.set(22.4, 1.56, tz);
+    const tapCross = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 10), goldMat);
+    tapCross.rotation.x = Math.PI / 2;
+    tapCross.position.set(22.25, 1.76, tz);
+    rGroup.add(tapCol, tapCross);
+
+    const wSet = createWhiskeySet(); wSet.position.set(22.2, 1.30, tz + 1.1);
+    const bSet = createBeerSet();    bSet.position.set(22.2, 1.30, tz - 0.9);
+    rGroup.add(wSet, bSet);
+  }
+
+  // 바 카운터 앞 황금 회전 스툴 의자 5석 (실제 착석 가능!)
+  for (let i = -2; i <= 2; i++) {
+    const sz = -9.25 + i * 1.85;
+    const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.24, 0.76, 16), goldMat);
+    stool.position.set(20.85, 0.48, sz);
+    rGroup.add(stool);
+
+    seats.push({
+      id: `room2_bar_stool_${i + 2}`,
+      label: `🥃 [2룸: 위스키 바] 바 카운터 황금 스툴 #${i + 3}`,
+      pos: new THREE.Vector3(20.85, 0.10, sz),
+      type: 'pew',
+      lookAngle: -Math.PI / 2,
+      occupiedBy: null,
+      room: 'whiskey'
+    });
+  }
+
+  // 6) [시그니처 3D 조형물 3] 북서 코너 3D 숙성 양주 오크통(Oak Barrels) 피라미드 & 체스터필드 가죽 부스 2조
+  const barrelMat = new THREE.MeshStandardMaterial({ color: 0x5c3419, roughness: 0.65 });
+  for (const [bx, by, bz] of [[15.0, 0.52, -14.8], [16.2, 0.52, -14.8], [15.6, 1.32, -14.8]]) {
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.05, 16), barrelMat);
+    barrel.rotation.x = Math.PI / 2;
+    barrel.position.set(bx, by, bz);
+    rGroup.add(barrel);
+  }
+
+  // 룸 좌측 체스터필드 가죽 소파 부스 2조 (착석 가능 4석)
+  const leatherMat = new THREE.MeshStandardMaterial({ color: 0x3e1f0d, roughness: 0.45 });
+  [-11.8, -5.8].forEach((lz, lIdx) => {
+    const sofa = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.88, 1.15), leatherMat);
+    sofa.position.set(16.6, 0.54, lz);
+    const tbl = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.56, 20), woodMat);
+    tbl.position.set(16.6, 0.38, lz + 1.25);
+    const wh = createWhiskeySet();
+    wh.position.set(16.6, 0.68, lz + 1.25);
+    rGroup.add(sofa, tbl, wh);
+
+    [-0.75, 0.75].forEach((ox, sIdx) => {
+      seats.push({
+        id: `room2_leather_${lIdx}_${sIdx}`,
+        label: `🥃 [2룸: 위스키·시가룸] 체스터필드 가죽 소파석`,
+        pos: new THREE.Vector3(16.6 + ox, 0.10, lz + 0.15),
+        type: 'pew',
+        lookAngle: 0,
+        occupiedBy: null,
+        room: 'whiskey'
+      });
+    });
+  });
+
+  worldGroup.add(rGroup);
+}
+
+// ============================================================================
+// 🎤 [제3룸 · 남서쪽 3D 입체 룸] 『3X 하이퍼 네온 가라오케 & 프라이빗 파티룸 (Hyper-Neon Karaoke & DJ Room)』
+// 위치: x: -25.5 ~ -13.0, z: +1.5 ~ +16.0
+// ============================================================================
+function buildRoom3HyperNeonKaraoke() {
+  const rGroup = new THREE.Group();
+
+  // 1) 사이버 바이올렛 네온 그리드 플로어
+  const rFloor = new THREE.Mesh(
+    new THREE.BoxGeometry(12.4, 0.10, 14.4),
+    new THREE.MeshStandardMaterial({ map: createNeonGridFloorTexture('#ec4899'), roughness: 0.28 })
+  );
+  rFloor.position.set(-19.25, 0.05, 8.75);
+  rFloor.receiveShadow = true;
+  rGroup.add(rFloor);
+  walkableFloorMeshes.push(rFloor);
+
+  // 2) 마젠타·사이안 3D 강화유리 가벽 & 3D 사이버 네온 아치 포털
+  build3DGlassPartitionWall(-25.4, 1.5, -13.0, 1.5, 5.2, 0xec4899, 0x00ffff);
+  build3DGlassPartitionWall(-25.4, 16.0, -13.0, 16.0, 5.2, 0xec4899, 0x00ffff);
+  build3DGlassPartitionWall(-13.0, 1.5, -13.0, 6.4, 5.2, 0xec4899, 0x00ffff);
+  build3DGlassPartitionWall(-13.0, 11.1, -13.0, 16.0, 5.2, 0xec4899, 0x00ffff);
+
+  build3DArchwayPortal({
+    x: -13.0, z: 8.75, rotY: Math.PI / 2, width: 4.6, height: 5.2, colorHex: 0xec4899,
+    badge: 'VIP ROOM 3 · LIVE STAGE & RETRO ARCADE PARTY',
+    title: '🎤 제3룸: 3X 하이퍼 네온 가라오케 파티룸',
+    sub: '라이브 골드 마이크 단상 · 16채널 3D 이퀄라이저 월 · 회전 핑크 미러볼',
+    roomKey: 'karaoke'
+  });
+
+  // 3) 가라오케룸 전용 3D 회전 핑크 미러볼 & 네온 링 조명
+  karaokeMirrorBall = new THREE.Group();
+  karaokeMirrorBall.position.set(-19.25, 7.2, 8.75);
+  const kBall = new THREE.Mesh(
+    new THREE.SphereGeometry(0.95, 28, 22),
+    new THREE.MeshStandardMaterial({ color: 0xff80bf, metalness: 0.96, roughness: 0.05 })
+  );
+  const kRing = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.05, 10, 28), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+  kRing.rotation.x = Math.PI / 2;
+  karaokeMirrorBall.add(kBall, kRing);
+  rGroup.add(karaokeMirrorBall);
+
+  const kLight = new THREE.PointLight(0xff2e93, 1.45, 16);
+  kLight.position.set(-19.25, 5.2, 8.75);
+  rGroup.add(kLight);
+
+  // 4) [시그니처 3D 조형물 1] 가라오케 라이브 미니 스테이지 단상 & 3D 황금 스탠드 마이크 2기 + 16채널 3D 이퀄라이저 월!
+  const kStage = new THREE.Mesh(
+    new THREE.BoxGeometry(6.8, 0.36, 2.8),
+    new THREE.MeshStandardMaterial({ color: 0x1a1033, roughness: 0.3, metalness: 0.5 })
+  );
+  kStage.position.set(-19.25, 0.28, 14.1);
+  const kStageNeon = new THREE.Mesh(new THREE.BoxGeometry(6.86, 0.06, 2.86), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+  kStageNeon.position.set(-19.25, 0.46, 14.1);
+  rGroup.add(kStage, kStageNeon);
+
+  // 황금 스탠드 마이크 2기
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd269, metalness: 0.9, roughness: 0.15 });
+  for (const mx of [-20.4, -18.1]) {
+    const micBase = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.05, 14), goldMat);
+    micBase.position.set(mx, 0.48, 13.6);
+    const micPole = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.35, 8), goldMat);
+    micPole.position.set(mx, 1.15, 13.6);
+    const micHead = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 }));
+    micHead.position.set(mx, 1.85, 13.6);
+    rGroup.add(micBase, micPole, micHead);
+  }
+
+  // 남쪽 벽면 16채널 3D 볼류메트릭 이퀄라이저 스펙트럼 바 (비트에 맞춰 실시간 상하 율동!)
+  karaokeEqBars = [];
+  const eqColors = [0xff007f, 0xec4899, 0xa855f7, 0x00ffff, 0x2ee59d, 0xffd269];
+  for (let i = 0; i < 16; i++) {
+    const bx = -22.8 + i * 0.48;
+    const col = eqColors[i % eqColors.length];
+    const bar = new THREE.Mesh(
+      new THREE.BoxGeometry(0.34, 1.8, 0.18),
+      new THREE.MeshBasicMaterial({ color: col })
+    );
+    bar.position.set(bx, 2.6, 15.65);
+    rGroup.add(bar);
+    karaokeEqBars.push({ mesh: bar, phase: i * 0.45 });
+  }
+
+  // 5) [시그니처 3D 조형물 2] 3D 레트로 네온 아케이드 / 주크박스 머신 2기
+  for (const ax of [-15.2, -14.0]) {
+    const arc = new THREE.Group();
+    arc.position.set(ax, 0.10, 3.2);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.95, 0.85), new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.3 }));
+    cab.position.y = 0.975;
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 0.65), new THREE.MeshBasicMaterial({ color: ax < -14.5 ? 0x00ffff : 0xff007f }));
+    scr.position.set(0, 1.32, 0.43);
+    arc.add(cab, scr);
+    rGroup.add(arc);
+  }
+
+  // 6) 대형 네온 파티 U자형 부스 소파 & 파티 테이블 (착석 가능 6석!)
+  const sofaMat = new THREE.MeshStandardMaterial({ color: 0x2e1065, roughness: 0.45 });
+  const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(6.6, 1.05, 0.55), sofaMat);
+  sofaBack.position.set(-19.25, 0.62, 3.4);
+  const sofaSeat = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.46, 1.25), sofaMat);
+  sofaSeat.position.set(-19.25, 0.33, 4.1);
+  const pTable = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.52, 1.5), new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.2 }));
+  pTable.position.set(-19.25, 0.36, 6.2);
+  const pTrim = new THREE.Mesh(new THREE.BoxGeometry(4.86, 0.06, 1.56), new THREE.MeshBasicMaterial({ color: 0xff007f }));
+  pTrim.position.set(-19.25, 0.62, 6.2);
+  rGroup.add(sofaBack, sofaSeat, pTable, pTrim);
+
+  // 테이블 위 주류 풀세트
+  for (const tx of [-20.6, -19.25, -17.9]) {
+    const sj = createSojuSet(); sj.position.set(tx - 0.25, 0.65, 6.2);
+    const br = createBeerSet(); br.position.set(tx + 0.25, 0.65, 6.2);
+    rGroup.add(sj, br);
+  }
+
+  [-21.4, -20.0, -18.5, -17.1].forEach((sx, idx) => {
+    seats.push({
+      id: `room3_karaoke_seat_${idx}`,
+      label: `🎤 [3룸: 하이퍼 네온 가라오케] 파티 부스 소파석 #${idx + 1}`,
+      pos: new THREE.Vector3(sx, 0.10, 4.25),
+      type: 'pew',
+      lookAngle: Math.PI,
+      occupiedBy: null,
+      room: 'karaoke'
+    });
+  });
+
+  worldGroup.add(rGroup);
+}
+
+// ============================================================================
+// 🥂 [제4룸 · 남동쪽 3D 입체 룸] 『황금 샴페인 분수 & 불마켓 라운지 룸 (Golden Champagne Fountain Room)』
+// 위치: x: +13.0 ~ +25.5, z: +1.5 ~ +16.0
+// ============================================================================
+function buildRoom4ChampagneFountainLounge() {
+  const rGroup = new THREE.Group();
+
+  // 1) 에메랄드 & 진주 대리석 바닥
+  const rFloor = new THREE.Mesh(
+    new THREE.BoxGeometry(12.4, 0.10, 14.4),
+    new THREE.MeshStandardMaterial({ color: 0x0a241d, roughness: 0.32, metalness: 0.25 })
+  );
+  rFloor.position.set(19.25, 0.05, 8.75);
+  rFloor.receiveShadow = true;
+  rGroup.add(rFloor);
+  walkableFloorMeshes.push(rFloor);
+
+  // 2) 에메랄드·골드 3D 강화유리 가벽 & 3D 포털 게이트
+  build3DGlassPartitionWall(13.0, 1.5, 25.4, 1.5, 5.2, 0x2ee59d, 0xeab85c);
+  build3DGlassPartitionWall(13.0, 16.0, 25.4, 16.0, 5.2, 0x2ee59d, 0xeab85c);
+  build3DGlassPartitionWall(13.0, 1.5, 13.0, 6.4, 5.2, 0x2ee59d, 0xeab85c);
+  build3DGlassPartitionWall(13.0, 11.1, 13.0, 16.0, 5.2, 0x2ee59d, 0xeab85c);
+
+  build3DArchwayPortal({
+    x: 13.0, z: 8.75, rotY: -Math.PI / 2, width: 4.6, height: 5.2, colorHex: 0x2ee59d,
+    badge: 'VIP ROOM 4 · 5-TIER GOLDEN CHAMPAGNE FOUNTAIN',
+    title: '🥂 제4룸: 황금 샴페인 분수 & 테라스 룸',
+    sub: '5단 크리스탈 황금 샴페인 분수 타워 · 100→500 마스터 로드맵 갤러리',
+    roomKey: 'fountain'
+  });
+
+  // 3) [시그니처 3D 조형물] 룸 중앙 높이 3.4m 5단 크리스탈 황금 샴페인 분수 타워!
+  const ftnGroup = new THREE.Group();
+  ftnGroup.position.set(19.25, 0.10, 8.75);
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd269, metalness: 0.92, roughness: 0.14 });
+  const champMat = new THREE.MeshStandardMaterial({
+    color: 0xfbbf24, emissive: 0xd97706, emissiveIntensity: 0.55, roughness: 0.1, transparent: true, opacity: 0.85
+  });
+
+  const basin = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.3, 0.65, 28), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.25, metalness: 0.5 }));
+  basin.position.y = 0.325;
+  const basinRim = new THREE.Mesh(new THREE.TorusGeometry(2.15, 0.08, 12, 32), goldMat);
+  basinRim.rotation.x = Math.PI / 2;
+  basinRim.position.y = 0.65;
+  ftnGroup.add(basin, basinRim);
+
+  champagneFountainRings = [];
+  for (let t = 0; t < 5; t++) {
+    const r = 1.65 - t * 0.30;
+    const ty = 0.85 + t * 0.48;
+    const tierBowl = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.75, 0.22, 24), champMat);
+    tierBowl.position.y = ty;
+    const tierGold = new THREE.Mesh(new THREE.TorusGeometry(r, 0.035, 10, 24), goldMat);
+    tierGold.rotation.x = Math.PI / 2;
+    tierGold.position.y = ty + 0.10;
+    ftnGroup.add(tierBowl, tierGold);
+    champagneFountainRings.push(tierGold);
+  }
+  rGroup.add(ftnGroup);
+
+  // 4) 분수 타워를 둘러싼 북·남 럭셔리 라운지 소파 & 주류 테이블 (착석 가능 6석!)
+  const creamSofaMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 });
+  for (const [sz, lookAng, tag] of [[4.2, Math.PI, '북측'], [13.3, 0, '남측']]) {
+    const sSeat = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.46, 1.2), creamSofaMat);
+    sSeat.position.set(19.25, 0.33, sz);
+    const sBack = new THREE.Mesh(new THREE.BoxGeometry(5.6, 1.0, 0.45), creamSofaMat);
+    sBack.position.set(19.25, 0.60, sz + (sz < 8.75 ? -0.55 : 0.55));
+    rGroup.add(sSeat, sBack);
+
+    [-1.8, 0, 1.8].forEach((ox, idx) => {
+      seats.push({
+        id: `room4_fountain_${tag}_${idx}`,
+        label: `🥂 [4룸: 황금 샴페인 분수룸] ${tag} VIP 소파석 #${idx + 1}`,
+        pos: new THREE.Vector3(19.25 + ox, 0.10, sz),
+        type: 'pew',
+        lookAngle: lookAng,
+        occupiedBy: null,
+        room: 'fountain'
+      });
+    });
+  }
+
+  worldGroup.add(rGroup);
+}
+
+// ============================================================================
+// 🍾 [제5룸 · 2층 복층 스카이 펜트하우스] 『2층 VVIP 스카이 펜트하우스 & 루프탑 자쿠지 룸 (y = 5.0m)』
+// 위치: x: -22.5 ~ +22.5, z: +6.5 ~ +19.5, y = 5.0m
+// ============================================================================
 function buildSecondFloorVIPSuite() {
   const vipGroup = new THREE.Group();
-  vipGroup.position.set(0, 0, 0);
 
-  // 2층 바닥 슬래브 (폭 23.6m x 깊이 10.0m x 높이 y = 4.8m)
-  const floorGeo = new THREE.BoxGeometry(23.6, 0.4, 10.0);
-  const vipFloorMat = new THREE.MeshStandardMaterial({ color: 0x181e2b, roughness: 0.4, metalness: 0.2 });
-  const vipFloor = new THREE.Mesh(floorGeo, vipFloorMat);
-  vipFloor.position.set(0, 4.6, 10.5);
-  vipFloor.receiveShadow = true;
-  vipGroup.add(vipFloor);
+  // 1) 2층 초대형 메자닌 바닥 슬래브 (폭 45.0m x 깊이 13.0m x 높이 y = 4.8m, 상면 y = 5.0m)
+  const vipFloorMat = new THREE.MeshStandardMaterial({ color: 0x151d2e, roughness: 0.35, metalness: 0.25 });
+  vipFloorMesh = new THREE.Mesh(new THREE.BoxGeometry(45.0, 0.4, 13.0), vipFloorMat);
+  vipFloorMesh.position.set(0, 4.8, 13.0);
+  vipFloorMesh.receiveShadow = true;
+  vipGroup.add(vipFloorMesh);
+  walkableFloorMeshes.push(vipFloorMesh);
 
-  // 2층 전면 투명 강화유리 난간 (Glass Railing with Gold Neon Edge)
+  // 2) 2층 전면 투명 강화유리 난간 & 황금 네온 핸드레일 (1층 아레나 전체가 내려다보임!)
   const glassRailingMat = new THREE.MeshStandardMaterial({
-    color: 0x99ddff, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.45
+    color: 0x99ddff, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.42
   });
-  const glassRail = new THREE.Mesh(new THREE.BoxGeometry(23.4, 1.05, 0.08), glassRailingMat);
-  glassRail.position.set(0, 5.32, 5.5);
-  const goldHandrail = new THREE.Mesh(
-    new THREE.BoxGeometry(23.6, 0.08, 0.14),
-    new THREE.MeshStandardMaterial({ color: 0xeab85c, emissive: 0xa87722, emissiveIntensity: 0.4, metalness: 0.9, roughness: 0.2 })
-  );
-  goldHandrail.position.set(0, 5.86, 5.5);
+  const glassRail = new THREE.Mesh(new THREE.BoxGeometry(44.6, 1.1, 0.08), glassRailingMat);
+  glassRail.position.set(0, 5.55, 6.55);
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, emissive: 0xa87722, emissiveIntensity: 0.38, metalness: 0.9, roughness: 0.18 });
+  const goldHandrail = new THREE.Mesh(new THREE.BoxGeometry(44.8, 0.09, 0.16), goldMat);
+  goldHandrail.position.set(0, 6.12, 6.55);
   vipGroup.add(glassRail, goldHandrail);
 
-  // 2층 VIP 기둥 지지대
-  for (const cx of [-9.5, -3.2, 3.2, 9.5]) {
+  // 2층을 받치는 웅장한 3D 골드·다크스틸 기둥 6기
+  for (const cx of [-19.5, -12.0, -4.5, 4.5, 12.0, 19.5]) {
     const pillar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.18, 0.18, 4.6, 16),
-      new THREE.MeshStandardMaterial({ color: 0x222a3d, metalness: 0.7, roughness: 0.3 })
+      new THREE.CylinderGeometry(0.26, 0.28, 4.8, 18),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.78, roughness: 0.25 })
     );
-    pillar.position.set(cx, 2.3, 5.5);
+    pillar.position.set(cx, 2.4, 6.6);
     vipGroup.add(pillar);
   }
 
-  // 1층에서 2층으로 올라가는 네온 LED 계단 (좌측 x = -10.5, z = 0 ~ 5.5)
-  const stepCount = 12;
-  const stepH = 4.6 / stepCount;
-  const stepD = 5.2 / stepCount;
-  for (let s = 0; s < stepCount; s++) {
-    const stepMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1.8, stepH, stepD * 1.1),
-      new THREE.MeshStandardMaterial({ color: 0x1f2738, roughness: 0.5 })
-    );
-    stepMesh.position.set(-10.6, (s + 0.5) * stepH, 0.2 + s * stepD);
-    // 발판 네온 라이트 스트립
-    const neonEdge = new THREE.Mesh(
-      new THREE.BoxGeometry(1.82, 0.03, 0.05),
-      new THREE.MeshBasicMaterial({ color: 0x2ee59d })
-    );
-    neonEdge.position.set(-10.6, (s + 1.0) * stepH, 0.2 + s * stepD + stepD * 0.45);
-    vipGroup.add(stepMesh, neonEdge);
+  // 3) 좌·우 양방향 듀얼 3D 그랜드 네온 계단 (x = -11.2 및 x = +11.2, z = -0.5 ~ 6.5)
+  const stepCount = 16;
+  const stepH = 5.0 / stepCount;
+  const stepD = 7.0 / stepCount;
+  for (const stairX of [-11.2, 11.2]) {
+    for (let s = 0; s < stepCount; s++) {
+      const sy = (s + 0.5) * stepH;
+      const sz = -0.3 + s * stepD;
+      const stepMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, stepH, stepD * 1.12),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.45 })
+      );
+      stepMesh.position.set(stairX, sy, sz);
+      const neonEdge = new THREE.Mesh(
+        new THREE.BoxGeometry(2.24, 0.04, 0.06),
+        new THREE.MeshBasicMaterial({ color: stairX < 0 ? 0x2ee59d : 0xffd269 })
+      );
+      neonEdge.position.set(stairX, (s + 1.0) * stepH, sz - stepD * 0.45);
+      vipGroup.add(stepMesh, neonEdge);
+      walkableFloorMeshes.push(stepMesh);
+    }
   }
 
-  // 2층 VIP 라운지 소파 & 블랙 대리석 테이블 3조
-  const sofaMat = new THREE.MeshStandardMaterial({ color: 0xf4f6fa, roughness: 0.55 });
-  const marbleMat = new THREE.MeshStandardMaterial({ color: 0x0f131a, roughness: 0.2, metalness: 0.4 });
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.85, roughness: 0.2 });
+  // 4) [2층 입체 건축] 3개의 3D 황금 파빌리온 캐노피 VVIP 부스 룸 (x = -14.5, 0, +14.5)
+  const sofaMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 });
+  const marbleMat = new THREE.MeshStandardMaterial({ color: 0x0b0f17, roughness: 0.18, metalness: 0.45 });
 
-  [-6.5, 0, 6.5].forEach((vx, vIdx) => {
-    // U자형 VIP 소파
-    const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.95, 0.45), sofaMat);
-    sofaBack.position.set(vx, 5.28, 12.8);
-    const sofaSeat = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.45, 1.2), sofaMat);
-    sofaSeat.position.set(vx, 5.03, 12.0);
-    const sofaArmL = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.85, 1.4), sofaMat);
-    sofaArmL.position.set(vx - 2.0, 5.23, 11.9);
-    const sofaArmR = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.85, 1.4), sofaMat);
-    sofaArmR.position.set(vx + 2.0, 5.23, 11.9);
-    vipGroup.add(sofaBack, sofaSeat, sofaArmL, sofaArmR);
+  [-14.5, 0, 14.5].forEach((vx, vIdx) => {
+    const pav = new THREE.Group();
+    pav.position.set(vx, 5.0, 13.2);
 
-    // 대형 블랙 대리석 VIP 테이블
-    const vTable = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.48, 1.1), marbleMat);
-    vTable.position.set(vx, 5.04, 10.4);
-    const vTrim = new THREE.Mesh(new THREE.BoxGeometry(2.64, 0.05, 1.14), goldMat);
-    vTrim.position.set(vx, 5.28, 10.4);
-    vipGroup.add(vTable, vTrim);
+    // 4개 황금 사각 기둥 & 상단 3D 캐노피 루프 프레임 + 미니 크리스탈 샹들리에
+    for (const px of [-2.8, 2.8]) {
+      for (const pz of [-2.6, 2.6]) {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.18, 3.6, 0.18), goldMat);
+        post.position.set(px, 1.8, pz);
+        pav.add(post);
+      }
+    }
+    const roofFrame = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.22, 5.6), goldMat);
+    roofFrame.position.y = 3.65;
+    const miniChand = build3DCrystalChandelier(0.95, 2, 0xffe49e);
+    miniChand.position.y = 3.45;
+    pav.add(roofFrame, miniChand);
 
-    // VIP 테이블 위 풀 패키지 주류 세트 (소주, 맥주, 양주, 와인)
-    const soju = createSojuSet();
-    soju.position.set(vx - 0.75, 5.30, 10.4);
-    const beer = createBeerSet();
-    beer.position.set(vx - 0.25, 5.30, 10.4);
-    const whiskey = createWhiskeySet();
-    whiskey.position.set(vx + 0.35, 5.30, 10.4);
-    const wine = createWineSet();
-    wine.position.set(vx + 0.85, 5.30, 10.4);
-    vipGroup.add(soju, beer, whiskey, wine);
+    // U자형 화이트 가죽 VVIP 소파
+    const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(4.8, 1.05, 0.5), sofaMat);
+    sofaBack.position.set(0, 0.52, 2.1);
+    const sofaSeat = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.46, 1.25), sofaMat);
+    sofaSeat.position.set(0, 0.23, 1.4);
+    const sofaArmL = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, 2.2), sofaMat);
+    sofaArmL.position.set(-2.25, 0.45, 1.1);
+    const sofaArmR = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, 2.2), sofaMat);
+    sofaArmR.position.set(2.25, 0.45, 1.1);
+    pav.add(sofaBack, sofaSeat, sofaArmL, sofaArmR);
+
+    // 대형 블랙 대리석 테이블 & 3D 황금 샴페인 아이스 버킷 스탠드 + 주류 4종
+    const vTable = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.52, 1.2), marbleMat);
+    vTable.position.set(0, 0.26, -0.3);
+    const vTrim = new THREE.Mesh(new THREE.BoxGeometry(3.06, 0.05, 1.26), goldMat);
+    vTrim.position.set(0, 0.52, -0.3);
+    pav.add(vTable, vTrim);
+
+    const soju = createSojuSet();       soju.position.set(-0.9, 0.55, -0.3);
+    const beer = createBeerSet();       beer.position.set(-0.3, 0.55, -0.3);
+    const whiskey = createWhiskeySet(); whiskey.position.set(0.3, 0.55, -0.3);
+    const wine = createWineSet();       wine.position.set(0.9, 0.55, -0.3);
+    pav.add(soju, beer, whiskey, wine);
+
+    // 황금 샴페인 아이스 버킷 스탠드
+    const bucketStand = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.22, 0.82, 16), goldMat);
+    bucketStand.position.set(1.9, 0.41, -0.3);
+    pav.add(bucketStand);
+
+    vipGroup.add(pav);
+
+    // 2층 파빌리온 부스 실제 착석 좌석 (총 9석, y = 5.0m!)
+    [-1.4, 0, 1.4].forEach((ox, sIdx) => {
+      seats.push({
+        id: `vip2f_pav_${vIdx}_${sIdx}`,
+        label: `🍾 [2층 스카이 펜트하우스] 황금 파빌리온 #${vIdx + 1} VVIP 소파석`,
+        pos: new THREE.Vector3(vx + ox, 5.0, 14.4),
+        type: 'pew',
+        lookAngle: 0,
+        occupiedBy: null,
+        room: 'vip2f'
+      });
+    });
   });
 
-  // 2층 벽면 VIP 펜트하우스 네온 간판
-  const neonSignMat = new THREE.MeshBasicMaterial({ color: 0xffd269 });
-  const neonBox = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.75, 0.1), new THREE.MeshStandardMaterial({ color: 0x070b12 }));
-  neonBox.position.set(0, 8.2, 15.6);
-  vipGroup.add(neonBox);
+  // 5) [2층 시그니처 3D 조형물] 2층 루프탑 에메랄드 온수 스카이 자쿠지 스파 풀 (x = 7.2, z = 13.2, y = 5.0m)
+  const jacGroup = new THREE.Group();
+  jacGroup.position.set(7.2, 5.0, 13.2);
+  const jacRim = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.55, 0.68, 28), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.25 }));
+  jacRim.position.y = 0.34;
+  const jacGold = new THREE.Mesh(new THREE.TorusGeometry(2.42, 0.06, 12, 28), goldMat);
+  jacGold.rotation.x = Math.PI / 2;
+  jacGold.position.y = 0.68;
+  const jacWater = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.2, 2.2, 0.58, 28),
+    new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x0891b2, emissiveIntensity: 0.65, roughness: 0.1 })
+  );
+  jacWater.position.y = 0.36;
+  jacGroup.add(jacRim, jacGold, jacWater);
+  vipGroup.add(jacGroup);
+
+  // 6) 2층 중앙 상단 초대형 3D 입체 펜트하우스 간판 (빈 박스가 아닌 진짜 3D 네온 간판!)
+  const vipSign = create3DNeonSignBoard({
+    width: 14.5,
+    height: 1.55,
+    depth: 0.38,
+    badge: '2F SKY PENTHOUSE & ROOFTOP JACUZZI LOUNGE',
+    title: '🍾 2F SOXL $500 VVIP SKY PENTHOUSE SUITE 👑',
+    sub: '3대 황금 파빌리온 부스와 루프탑 스카이 자쿠지에서 1층 클럽과 야외 풀장을 한눈에 조망하세요',
+    bg1: '#171105',
+    bg2: '#332409',
+    borderColor: '#ffd269',
+    glowColor: 0xffd269
+  });
+  vipSign.position.set(0, 9.4, 18.8);
+  vipSign.rotation.y = Math.PI;
+  vipGroup.add(vipSign);
 
   worldGroup.add(vipGroup);
 }
 
-// 1층 메인 라운지 바 & 클럽 테이블 & 주류 세트
-function buildFirstFloorBarAndTables() {
-  const barGroup = new THREE.Group();
-
-  // 1층 우측 칵테일 바 카운터 (x = 8.5, z = -4.0 ~ 4.0)
-  const barTopMat = new THREE.MeshStandardMaterial({ color: 0x1f140e, roughness: 0.2, metalness: 0.3 });
-  const barFrontMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6 });
-  const barNeonMat = new THREE.MeshBasicMaterial({ color: 0x2ee59d });
-
-  const barCounter = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.15, 8.5), barFrontMat);
-  barCounter.position.set(9.2, 0.58, 0);
-  const barTop = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.08, 8.7), barTopMat);
-  barTop.position.set(9.2, 1.17, 0);
-  const barNeon = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 8.6), barNeonMat);
-  barNeon.position.set(8.28, 1.14, 0);
-  barGroup.add(barCounter, barTop, barNeon);
-
-  // 바 스툴 의자 5개
-  for (let bz = -3.2; bz <= 3.2; bz += 1.6) {
-    const stool = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.24, 0.22, 0.72, 16),
-      new THREE.MeshStandardMaterial({ color: 0xeab85c, metalness: 0.7, roughness: 0.3 })
-    );
-    stool.position.set(7.6, 0.36, bz);
-    barGroup.add(stool);
-
-    // 바 카운터 위 주류 배치
-    if (Math.abs(bz) < 2) {
-      const bWhiskey = createWhiskeySet();
-      bWhiskey.position.set(8.8, 1.21, bz - 0.3);
-      const bBeer = createBeerSet();
-      bBeer.position.set(8.8, 1.21, bz + 0.3);
-      barGroup.add(bWhiskey, bBeer);
-    }
-  }
-
-  // 1층 좌측 클럽 원형 테이블 & 가죽 부스 소파 4개 (x = -7.5)
-  [-7.0, -2.5, 2.0, 6.5].forEach((tz, tIdx) => {
-    const tableMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
-    const cTable = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.75, 24), tableMat);
-    cTable.position.set(-7.5, 0.38, tz);
-    barGroup.add(cTable);
-
-    // 테이블마다 주류 세트 골고루 배치
-    const soju = createSojuSet();
-    soju.position.set(-7.7, 0.76, tz - 0.2);
-    const beer = createBeerSet();
-    beer.position.set(-7.3, 0.76, tz + 0.2);
-    barGroup.add(soju, beer);
-
-    if (tIdx % 2 === 0) {
-      const whiskey = createWhiskeySet();
-      whiskey.position.set(-7.5, 0.76, tz + 0.3);
-      barGroup.add(whiskey);
-    } else {
-      const wine = createWineSet();
-      wine.position.set(-7.5, 0.76, tz - 0.3);
-      barGroup.add(wine);
-    }
-  });
-
-  worldGroup.add(barGroup);
-}
-
-// 4-C. DJ 부스 스테이지 & 대형 LED 전광판 ("SOXL TO THE MOON! 500!")
+// ============================================================================
+// 4-C. 북쪽 메인 DJ 슈퍼 스테이지 & 황금 돌진 황소 동상 한 쌍 & 3D 멀티비전 월
+// ============================================================================
 function buildAltarAndBullSpire() {
   const djGroup = new THREE.Group();
-  djGroup.position.set(0, 0, -13.5);
+  djGroup.position.set(0, 0, -17.5);
 
-  // DJ 단상 스테이지 (폭 12m x 깊이 3.6m x 높이 0.8m)
-  const djStage = new THREE.Mesh(
-    new THREE.BoxGeometry(12.0, 0.8, 3.6),
-    new THREE.MeshStandardMaterial({ color: 0x141a29, roughness: 0.5, metalness: 0.4 })
-  );
-  djStage.position.y = 0.4;
-  djGroup.add(djStage);
+  const stageMat = new THREE.MeshStandardMaterial({ color: 0x121929, roughness: 0.35, metalness: 0.5 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd269, metalness: 0.9, roughness: 0.18 });
 
-  // DJ 부스 콘솔 데스크
+  // 1) 3단 입체 대리석·네온 계단형 콘서트 스테이지 (폭 20m x 깊이 5.2m)
+  const step1 = new THREE.Mesh(new THREE.BoxGeometry(20.0, 0.35, 5.2), stageMat);
+  step1.position.y = 0.175;
+  const step2 = new THREE.Mesh(new THREE.BoxGeometry(17.2, 0.35, 4.4), stageMat);
+  step2.position.set(0, 0.525, -0.2);
+  const step3 = new THREE.Mesh(new THREE.BoxGeometry(14.0, 0.35, 3.6), stageMat);
+  step3.position.set(0, 0.875, -0.4);
+  djGroup.add(step1, step2, step3);
+
+  // 각 단 네온 라이저 스트립
+  const n1 = new THREE.Mesh(new THREE.BoxGeometry(20.05, 0.05, 0.06), new THREE.MeshBasicMaterial({ color: 0x2ee59d }));
+  n1.position.set(0, 0.34, 2.61);
+  const n2 = new THREE.Mesh(new THREE.BoxGeometry(17.25, 0.05, 0.06), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+  n2.position.set(0, 0.69, 2.01);
+  const n3 = new THREE.Mesh(new THREE.BoxGeometry(14.05, 0.05, 0.06), new THREE.MeshBasicMaterial({ color: 0xff007f }));
+  n3.position.set(0, 1.04, 1.41);
+  djGroup.add(n1, n2, n3);
+
+  // 2) 3D 사이버 골드 DJ 콘솔 데스크 & 듀얼 턴테이블 & 노트북 스탠드
   const consoleDesk = new THREE.Mesh(
-    new THREE.BoxGeometry(3.6, 1.05, 1.2),
-    new THREE.MeshStandardMaterial({ color: 0x0b0f19, roughness: 0.4 })
+    new THREE.BoxGeometry(4.4, 1.15, 1.35),
+    new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.25, metalness: 0.6 })
   );
-  consoleDesk.position.set(0, 1.32, 0.2);
-  const deskNeon = new THREE.Mesh(
-    new THREE.BoxGeometry(3.64, 0.06, 1.24),
-    new THREE.MeshBasicMaterial({ color: 0xff007f })
-  );
-  deskNeon.position.set(0, 1.85, 0.2);
-  djGroup.add(consoleDesk, deskNeon);
+  consoleDesk.position.set(0, 1.62, 0.2);
+  const deskGold = new THREE.Mesh(new THREE.BoxGeometry(4.48, 0.09, 1.42), goldMat);
+  deskGold.position.set(0, 2.20, 0.2);
+  const deskNeon = new THREE.Mesh(new THREE.BoxGeometry(4.46, 0.07, 1.40), new THREE.MeshBasicMaterial({ color: 0xff007f }));
+  deskNeon.position.set(0, 1.12, 0.2);
+  djGroup.add(consoleDesk, deskGold, deskNeon);
 
-  // 듀얼 턴테이블 & 믹서
-  for (const tx of [-0.95, 0.95]) {
+  for (const tx of [-1.15, 1.15]) {
     const vinyl = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.36, 0.36, 0.04, 24),
-      new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2, metalness: 0.8 })
+      new THREE.CylinderGeometry(0.42, 0.42, 0.05, 24),
+      new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.15, metalness: 0.85 })
     );
-    vinyl.position.set(tx, 1.88, 0.2);
-    djGroup.add(vinyl);
+    vinyl.position.set(tx, 2.26, 0.2);
+    const goldCenter = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.06, 16), goldMat);
+    goldCenter.position.set(tx, 2.27, 0.2);
+    djGroup.add(vinyl, goldCenter);
   }
 
-  // 거대 클럽 스피커 타워 4조
-  for (const sx of [-4.5, -2.6, 2.6, 4.5]) {
+  // 3) [시그니처 3D 조형물] 스테이지 좌·우를 호위하는 3D 황금 돌진 황소(Charging Bull) 조각상 한 쌍!
+  const bullL = build3DChargingBullStatue(1.25);
+  bullL.position.set(-7.6, 0.35, 1.1);
+  bullL.rotation.y = -0.35;
+  const bullR = build3DChargingBullStatue(1.25);
+  bullR.position.set(7.6, 0.35, 1.1);
+  bullR.rotation.y = Math.PI + 0.35;
+  djGroup.add(bullL, bullR);
+
+  // 4) 초대형 3D 콘서트 라인어레이 스피커 타워 6기
+  for (const sx of [-5.4, -3.6, 3.6, 5.4]) {
     const spk = new THREE.Mesh(
-      new THREE.BoxGeometry(1.2, 3.4, 1.1),
-      new THREE.MeshStandardMaterial({ color: 0x090c14, roughness: 0.8 })
+      new THREE.BoxGeometry(1.35, 4.2, 1.25),
+      new THREE.MeshStandardMaterial({ color: 0x090c14, roughness: 0.7 })
     );
-    spk.position.set(sx, 2.1, 0.2);
-    // 우퍼 콘
-    const woofer1 = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.06, 18), new THREE.MeshStandardMaterial({ color: 0x334155 }));
-    woofer1.rotation.x = Math.PI / 2;
-    woofer1.position.set(sx, 1.4, 0.76);
-    const woofer2 = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.06, 18), new THREE.MeshStandardMaterial({ color: 0x334155 }));
-    woofer2.rotation.x = Math.PI / 2;
-    woofer2.position.set(sx, 2.6, 0.76);
-    djGroup.add(spk, woofer1, woofer2);
+    spk.position.set(sx, 3.1, -0.3);
+    for (const wy of [2.0, 3.1, 4.2]) {
+      const woofer = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.08, 18), goldMat);
+      woofer.rotation.x = Math.PI / 2;
+      woofer.position.set(sx, wy, 0.34);
+      djGroup.add(woofer);
+    }
+    djGroup.add(spk);
   }
 
-  // DJ 부스 뒤편 초대형 클럽 LED 전광판
-  const ledCanvas = document.createElement('canvas');
-  ledCanvas.width = 1024; ledCanvas.height = 256;
-  const lctx = ledCanvas.getContext('2d');
-  lctx.fillStyle = '#05070e';
-  lctx.fillRect(0, 0, 1024, 256);
-  lctx.strokeStyle = '#2ee59d';
-  lctx.lineWidth = 12;
-  lctx.strokeRect(6, 6, 1012, 244);
-  lctx.fillStyle = '#ff007f';
-  lctx.font = 'bold 54px sans-serif';
-  lctx.textAlign = 'center';
-  lctx.fillText('🚀 SOXL 3X BULL NIGHTCLUB 500! 🔥', 512, 105);
-  lctx.fillStyle = '#ffd269';
-  lctx.font = 'bold 38px sans-serif';
-  lctx.fillText('오늘 밤 SOXL 떡상 축하 올나잇 파티! 🍾🥂', 512, 180);
+  // 5) 스테이지 후면 3D 입체 트러스 메가트론 LED 전광판 (두께 있는 3D 하우징!)
+  const megaSign = create3DNeonSignBoard({
+    width: 11.4,
+    height: 3.6,
+    depth: 0.55,
+    badge: 'DIREXION DAILY SEMICONDUCTOR BULL 3X · MAIN STAGE',
+    title: '🚀 SOXL $500 3D MEGA CLUB & 5 VIP ROOMS 🔥',
+    sub: '1룸:황금금고 · 2룸:위스키바 · 3룸:네온노래방 · 4룸:샴페인분수 · 2층:펜트하우스',
+    bg1: '#070b16',
+    bg2: '#131c36',
+    borderColor: '#2ee59d',
+    glowColor: 0x2ee59d,
+    titleColor: '#ffffff',
+    subColor: '#ffd269'
+  });
+  megaSign.position.set(0, 4.85, -1.6);
+  djGroup.add(megaSign);
 
-  const ledTex = new THREE.CanvasTexture(ledCanvas);
-  const ledScreen = new THREE.Mesh(
-    new THREE.PlaneGeometry(12.5, 3.2),
-    new THREE.MeshBasicMaterial({ map: ledTex })
+  // 중앙 후광 황금 웨이퍼 링
+  altarHaloMesh = new THREE.Mesh(
+    new THREE.TorusGeometry(2.6, 0.08, 14, 48),
+    new THREE.MeshBasicMaterial({ color: 0xffd269 })
   );
-  ledScreen.position.set(0, 4.4, -0.6);
-  djGroup.add(ledScreen);
+  altarHaloMesh.position.set(0, 4.85, -1.95);
+  djGroup.add(altarHaloMesh);
 
   worldGroup.add(djGroup);
 }
 
-// 기존 라운지 소파 함수는 클럽에서는 미니 부스로 치환
-function buildPewsAndKneelers() {
-  // 클럽에서는 메인 라운지 바와 테이블로 대체됨
-}
-
-function buildCandleAltars() {
-  // 클럽 조명 시스템으로 통합
-}
-
+// ============================================================================
+// 4-D. 3D 입체 골드 몰딩 갤러리 니치(Recessed 3D Gallery Niches) & 액자 장착
+// ============================================================================
 function buildSanctuaryFrames() {
   const goldFrameMat = new THREE.MeshStandardMaterial({
-    color: 0xeab85c, roughness: 0.25, metalness: 0.82
+    color: 0xeab85c, roughness: 0.22, metalness: 0.88
+  });
+  const nicheMat = new THREE.MeshStandardMaterial({
+    color: 0x0d1524, roughness: 0.4, metalness: 0.6
   });
 
   const docentTabsEl = document.getElementById('docent-tabs');
@@ -2614,31 +3599,49 @@ function buildSanctuaryFrames() {
     fGroup.position.set(f.pos.x, f.pos.y, f.pos.z);
     fGroup.rotation.y = f.rotY;
 
+    // 1) 벽면에 매립된 3D 입체 건축 니치 박스 & 좌우 미니 골드 기둥
+    const nicheBacking = new THREE.Mesh(
+      new THREE.BoxGeometry(f.size.w + 0.72, f.size.h + 0.72, 0.28),
+      nicheMat
+    );
+    nicheBacking.position.z = -0.08;
+    fGroup.add(nicheBacking);
+
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(f.size.w + 0.28, f.size.h + 0.28, 0.14),
+      new THREE.BoxGeometry(f.size.w + 0.34, f.size.h + 0.34, 0.22),
       goldFrameMat
     );
     backing.castShadow = true;
     fGroup.add(backing);
 
+    for (const sx of [-(f.size.w / 2 + 0.26), (f.size.w / 2 + 0.26)]) {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, f.size.h + 0.5, 12), goldFrameMat);
+      col.position.set(sx, 0, 0.08);
+      fGroup.add(col);
+    }
+
+    // 2) 고해상도 아트 캔버스
     const artTex = createHighResFrameTexture(f);
     const artMat = new THREE.MeshBasicMaterial({ map: artTex });
     const artMesh = new THREE.Mesh(new THREE.PlaneGeometry(f.size.w, f.size.h), artMat);
-    artMesh.position.z = 0.08;
+    artMesh.position.z = 0.13;
     artMesh.userData = { frameIdx: idx };
     fGroup.add(artMesh);
     frameMeshes.push(artMesh);
 
+    // 3) 상단 3D 입체 황금 명패 & 조명 후드
     const plaqueTex = createPlaqueTexture(f.code + ' · ' + f.price);
+    const plaqueBox = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.44, 0.14), goldFrameMat);
+    plaqueBox.position.set(0, f.size.h / 2 + 0.42, 0.10);
     const plaqueMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.85, 0.36),
+      new THREE.PlaneGeometry(1.95, 0.38),
       new THREE.MeshBasicMaterial({ map: plaqueTex })
     );
-    plaqueMesh.position.set(0, f.size.h / 2 + 0.36, 0.09);
-    fGroup.add(plaqueMesh);
+    plaqueMesh.position.set(0, f.size.h / 2 + 0.42, 0.18);
+    fGroup.add(plaqueBox, plaqueMesh);
 
-    const spot = new THREE.PointLight(0xffe6a3, 0.55, 7);
-    spot.position.set(0, f.size.h / 2 + 0.6, 1.3);
+    const spot = new THREE.PointLight(0xffe6a3, 0.75, 9);
+    spot.position.set(0, f.size.h / 2 + 0.8, 1.5);
     fGroup.add(spot);
 
     worldGroup.add(fGroup);
@@ -2653,18 +3656,16 @@ function buildSanctuaryFrames() {
 }
 
 function buildTargetRippleRing() {
-  const geo = new THREE.RingGeometry(0.18, 0.30, 32);
+  const geo = new THREE.RingGeometry(0.22, 0.36, 32);
   const mat = new THREE.MeshBasicMaterial({
     color: 0x2ee59d, side: THREE.DoubleSide, transparent: true, opacity: 0
   });
   targetRing = new THREE.Mesh(geo, mat);
   targetRing.rotation.x = -Math.PI / 2;
-  targetRing.position.y = 0.03;
+  targetRing.position.y = 0.04;
   worldGroup.add(targetRing);
 }
-// ============================================================================
-// 5. 다관절 3D 사람 아바타 생성 엔진 (걷기 / 소파 착석 / 강단 클럽댄스 / 4대 제스처)
-// ============================================================================
+
 function createPropMesh(propType) {
   const pGroup = new THREE.Group();
     if (propType === 'beer' || propType === 'ledger') {
@@ -3251,118 +4252,163 @@ function showAvatarBubble(av, message, duration = 4500) {
 // ============================================================================
 // 6. 동반 파티 주주 NPC 7명 배치 (소파 착석 & 강단 앞 클럽댄스)
 // ============================================================================
+
 // ============================================================================
-// 6. 동반 파티 주주 NPC 12명 클럽 & 풀파티 전구역 입체 분산 배치!
+// 6. 동반 파티 주주 NPC 18명 — 메가클럽 · 5대 3D VIP 룸 · 야외 풀빌라 전구역 입체 배치!
 // ============================================================================
 function initNPCShareholders() {
   const npcConfigs = [
-    // 1. 🎧 DJ 부스 (중앙 메인 스테이지 상단): 디제잉 비트 폭격!
+    // 1. 🎧 북쪽 메인 DJ 슈퍼 스테이지 (중앙 상단)
     {
       name: '클럽 DJ 불마켓',
-      x: 0, y: 1.25, z: -12.0,
+      x: 0, y: 1.08, z: -18.2,
       rotY: 0,
       danceMode: 'dj',
-      msg: '오늘 밤 SOXL 500 찍을 때까지 비트 안 멈춥니다! 🎧🔥',
+      msg: '오늘 밤 SOXL $500 찍을 때까지 5대 VIP 룸 전체 비트 풀가동합니다! 🎧🔥',
       custom: { gender: 'F', hairStyle: 4, hairColor: '#ff0055', outfitType: 'neon', outfitColor: '#00ffff', prop: 'none', accessory: 'none' }
     },
-    // 2. ⚡ 댄스플로어 전면 우측: 칼각 테크노 댄서
+    // 2~5. 🪩 중앙 7x7 그랜드 LED 댄스플로어
     {
       name: '나스닥 댄싱머신',
-      x: 2.4, y: 0.02, z: -2.0,
+      x: 2.8, y: 0.08, z: -3.2,
       rotY: -0.3,
       danceMode: 'techno',
-      msg: '비트 미쳤다! 오늘 밤 나스닥 전고점 뚫자! 💃⚡',
+      msg: '52m 메가클럽 스케일 미쳤다! 오늘 밤 나스닥 전고점 뚫자! 💃⚡',
       custom: { gender: 'F', hairStyle: 5, hairColor: '#eab85c', outfitType: 'glitter', outfitColor: '#eab85c', prop: 'beer', accessory: 'none' }
     },
-    // 3. 🕺 댄스플로어 후면 좌측: 존 트라볼타 복고 디스코
     {
       name: '서학개미 야수',
-      x: -2.8, y: 0.02, z: 2.2,
+      x: -3.2, y: 0.08, z: 1.2,
       rotY: 0.5,
       danceMode: 'retro',
       msg: '토요일 밤의 열기! 3배 레버리지 하늘 찌르기! 🕺🔥',
       custom: { gender: 'M', hairStyle: 3, hairColor: '#00ffcc', outfitType: 'metal', outfitColor: '#111115', prop: 'beer', accessory: 'beret' }
     },
-    // 4. 🦘 댄스플로어 측면 우측: 방방 하이 점프
     {
       name: '3배 레버리지 야수',
-      x: 3.2, y: 0.02, z: 1.5,
+      x: 3.6, y: 0.08, z: 1.6,
       rotY: -0.6,
       danceMode: 'jump',
-      msg: '점프 점프! 오늘 밤 SOXL 500 천장 뚫자! 🦘🚀',
+      msg: '점프 점프! 황금금고 VIP룸부터 펜트하우스까지 다 돌아보세요! 🦘🚀',
       custom: { gender: 'M', hairStyle: 1, hairColor: '#8e969d', outfitType: 'suit', outfitColor: '#5e1f28', prop: 'beer', accessory: 'glasses' }
     },
-    // 5. 🍻 댄스플로어 측면 좌측: 비틀비틀 취중 댄스 & 맥주 파티
     {
       name: '반도체 총무',
-      x: -3.0, y: 0.02, z: -1.0,
+      x: -3.4, y: 0.08, z: -2.8,
       rotY: 0.8,
       danceMode: 'drunk',
-      msg: '맥주 들이키고 리듬 타니 천국이 따로 없네 🍺😆',
+      msg: '생맥주 들이키고 리듬 타니 여기가 바로 월스트리트 천국이네 🍺😆',
       custom: { gender: 'F', hairStyle: 1, hairColor: '#241a14', outfitType: 'suit', outfitColor: '#e8e0cf', prop: 'beer', accessory: 'none' }
     },
-    // 6. 🍸 1층 바 카운터 안쪽: 칵테일 제조 바텐더
+    // 6~7. 👑 [제1룸: SOXL $500 황금금고 VVIP 룸] (x: -25 ~ -13, z: -16 ~ -2)
+    {
+      name: '황금금고 대주주',
+      x: -16.8, y: 0.10, z: -11.5,
+      rotY: -0.4,
+      danceMode: 'vip',
+      msg: '1룸 대형 황금 금고문 돌아가는 거 보셨나요? 골드바 피라미드 기운 팍팍! 👑💰',
+      custom: { gender: 'M', hairStyle: 1, hairColor: '#1e1814', outfitType: 'glitter', outfitColor: '#eab85c', prop: 'whiskey', accessory: 'crown' }
+    },
+    {
+      name: '돔페리뇽 퀸',
+      x: -17.2, y: 0.10, z: -6.5,
+      rotY: -1.2,
+      danceMode: 'cheers',
+      msg: '1룸 벨벳 부스에서 돔 페리뇽 한 잔~ SOXL 100·200 액자도 여기 있네요 🥂✨',
+      custom: { gender: 'F', hairStyle: 5, hairColor: '#eab85c', outfitType: 'glitter', outfitColor: '#991b1b', prop: 'wine', accessory: 'none' }
+    },
+    // 8~10. 🥃 [제2룸: 월스트리트 위스키 & 시가 바 룸] (x: +13 ~ +25, z: -16 ~ -2)
     {
       name: '필라델피아 바텐더',
-      x: 7.8, y: 0, z: -0.8,
+      x: 23.4, y: 0.10, z: -9.25,
       rotY: -Math.PI / 2,
       danceMode: 'bartender',
-      msg: '주문하신 3배 복리 시원한 생맥주 나왔습니다! 🍺✨',
-      custom: { gender: 'M', hairStyle: 0, hairColor: '#141416', outfitType: 'suit', outfitColor: '#1e2f4d', prop: 'beer', accessory: 'glasses' }
+      msg: '2룸 위스키 바에 오신 걸 환영합니다! 뒤편 64병 양주 셀러에서 최고급 싱글몰트 내어드릴게요 🥃✨',
+      custom: { gender: 'M', hairStyle: 0, hairColor: '#141416', outfitType: 'suit', outfitColor: '#1e2f4d', prop: 'whiskey', accessory: 'glasses' }
     },
-    // 7. 🟢 1층 바 카운터 의자: 소주파 주주
     {
       name: '단타의 제왕',
-      x: 6.8, y: 0, z: 2.2,
-      rotY: -Math.PI / 2 - 0.2,
-      danceMode: 'cheers',
-      msg: '소주 한 잔 털어넣고 다음 불장 대기 중 🟢',
-      custom: { gender: 'M', hairStyle: 2, hairColor: '#382516', outfitType: 'casual', outfitColor: '#059669', prop: 'soju', accessory: 'none' }
-    },
-    // 8. 🍾 2층 VIP룸 소파석: 샴페인 터뜨리는 VVIP
-    {
-      name: 'SOXL 500 VVIP',
-      x: -2.8, y: 4.8, z: 10.5,
-      rotY: Math.PI - 0.3,
-      danceMode: 'vip',
-      msg: '2층 VIP룸에서 내려다보는 클럽 열기 예술이네요 🍾👑',
-      custom: { gender: 'M', hairStyle: 4, hairColor: '#ffd269', outfitType: 'metal', outfitColor: '#1a102f', prop: 'whiskey', accessory: 'crown' }
-    },
-    // 9. 🥂 2층 VIP룸 유리 난간 전망대: 와인 음미 주주
-    {
-      name: '실리콘밸리 엔젤',
-      x: 2.4, y: 4.8, z: 8.6,
-      rotY: Math.PI,
-      danceMode: 'cheers',
-      msg: '엔비디아·TSMC 랠리 축하! 오늘 파티 제대로 즐깁시다 🍷✨',
-      custom: { gender: 'F', hairStyle: 5, hairColor: '#2b1d0c', outfitType: 'glitter', outfitColor: '#991b1b', prop: 'wine', accessory: 'none' }
-    },
-    // 10. 🏊 야외 초대형 풀파티장 물속: 플라밍고 튜브 옆 시원한 수영 주주
-    {
-      name: '월가 청년 버핏',
-      x: -2.5, y: 0.12, z: 30.0,
-      rotY: 0.4,
-      danceMode: 'swim',
-      msg: '인피니티 풀에서 시원하게 맥주 마시니 힐링 그 자체! 🏊‍♂️🍺',
-      custom: { gender: 'M', hairStyle: 3, hairColor: '#00ffff', outfitType: 'casual', outfitColor: '#0284c7', prop: 'beer', accessory: 'none' }
-    },
-    // 11. 🍹 야외 풀장 데크 썬베드: 칵테일 힐링 주주
-    {
-      name: '나스닥 퀸',
-      x: 5.8, y: 0.35, z: 27.5,
-      rotY: -0.2,
-      danceMode: 'cheers',
-      msg: '야자수 아래서 밤바람 맞으며 칵테일 한 잔 🌴🍹',
-      custom: { gender: 'F', hairStyle: 5, hairColor: '#eab85c', outfitType: 'casual', outfitColor: '#f43f5e', prop: 'wine', accessory: 'glasses' }
-    },
-    // 12. 🌴 야외 풀사이드 카바나 라운지: 롱텀 투자자
-    {
-      name: '반도체 파수꾼',
-      x: -8.8, y: 0.35, z: 31.5,
+      x: 19.6, y: 0.10, z: -7.5,
       rotY: Math.PI / 2,
       danceMode: 'cheers',
-      msg: '인피니티 풀 야경 보면서 3X 레버리지 장기투자 다짐합니다 🌟',
-      custom: { gender: 'M', hairStyle: 0, hairColor: '#334155', outfitType: 'suit', outfitColor: '#1e293b', prop: 'beer', accessory: 'none' }
+      msg: '2룸 바 카운터 스툴에 앉아 양주랑 소주 마시니 분위기 끝내줍니다 🟢🥃',
+      custom: { gender: 'M', hairStyle: 2, hairColor: '#382516', outfitType: 'casual', outfitColor: '#059669', prop: 'soju', accessory: 'none' }
+    },
+    {
+      name: '월가 시가 마스터',
+      x: 16.5, y: 0.10, z: -13.2,
+      rotY: 0.2,
+      danceMode: 'vip',
+      msg: '숙성 오크통 옆에서 SOXL 400 액자 보며 온더락 한 잔! 🥃🔥',
+      custom: { gender: 'M', hairStyle: 1, hairColor: '#475569', outfitType: 'suit', outfitColor: '#143d2e', prop: 'whiskey', accessory: 'beret' }
+    },
+    // 11~12. 🎤 [제3룸: 3X 하이퍼 네온 가라오케 파티룸] (x: -25 ~ -13, z: +1.5 ~ +16)
+    {
+      name: '네온 가라오케 디바',
+      x: -19.25, y: 0.46, z: 13.5,
+      rotY: Math.PI,
+      danceMode: 'retro',
+      msg: '3룸 가라오케 스테이지에서 황금 마이크 잡고 레버리지 민족 찬가 열창 중! 🎤🎵',
+      custom: { gender: 'F', hairStyle: 4, hairColor: '#ff0055', outfitType: 'neon', outfitColor: '#00ffff', prop: 'beer', accessory: 'none' }
+    },
+    {
+      name: '사이버 탬버린왕',
+      x: -17.5, y: 0.10, z: 8.8,
+      rotY: -0.3,
+      danceMode: 'jump',
+      msg: '3룸 16채널 3D 이퀄라이저 벽면 번쩍이는 거 보세요! 노래방 텐션 최고!! 🪩🦘',
+      custom: { gender: 'M', hairStyle: 3, hairColor: '#00ffcc', outfitType: 'metal', outfitColor: '#111115', prop: 'soju', accessory: 'glasses' }
+    },
+    // 13. 🥂 [제4룸: 황금 샴페인 분수 라운지 룸] (x: +13 ~ +25, z: +1.5 ~ +16)
+    {
+      name: '샴페인 분수 호스트',
+      x: 16.6, y: 0.10, z: 8.75,
+      rotY: Math.PI / 2,
+      danceMode: 'cheers',
+      msg: '4룸 중앙 5단 황금 샴페인 분수 타워에서 복리가 철철 넘쳐흐릅니다! 🥂🍾',
+      custom: { gender: 'F', hairStyle: 2, hairColor: '#2b1d0c', outfitType: 'resort', outfitColor: '#f8fafc', prop: 'wine', accessory: 'crown' }
+    },
+    // 14~15. 🍾 [2층 VVIP 스카이 펜트하우스 & 자쿠지 룸] (y = 5.0m)
+    {
+      name: 'SOXL 500 VVIP',
+      x: -13.5, y: 5.0, z: 11.2,
+      rotY: Math.PI - 0.2,
+      danceMode: 'vip',
+      msg: '2층 황금 파빌리온 펜트하우스에서 내려다보는 1층 메가클럽 전경 예술입니다 🍾👑',
+      custom: { gender: 'M', hairStyle: 4, hairColor: '#ffd269', outfitType: 'metal', outfitColor: '#1a102f', prop: 'whiskey', accessory: 'crown' }
+    },
+    {
+      name: '루프탑 자쿠지 엔젤',
+      x: 7.2, y: 5.15, z: 13.2,
+      rotY: Math.PI,
+      danceMode: 'swim',
+      msg: '2층 루프탑 온수 스카이 자쿠지에서 와인 한 잔~ 여기가 지상낙원이네요 🛁🍷',
+      custom: { gender: 'F', hairStyle: 5, hairColor: '#2b1d0c', outfitType: 'swimwear', outfitColor: '#f43f5e', prop: 'wine', accessory: 'none' }
+    },
+    // 16~18. 🏊 [야외 인피니티 풀 & 3D 풀빌라 카바나 2동] (z: 22 ~ 46)
+    {
+      name: '월가 청년 버핏',
+      x: -3.2, y: 0.14, z: 33.5,
+      rotY: 0.4,
+      danceMode: 'swim',
+      msg: '인피니티 풀 황금 백조 튜브 옆에서 시원하게 맥주 마시니 힐링 그 자체! 🏊‍♂️🍺',
+      custom: { gender: 'M', hairStyle: 3, hairColor: '#00ffff', outfitType: 'swimwear', outfitColor: '#0284c7', prop: 'beer', accessory: 'none' }
+    },
+    {
+      name: '에메랄드 카바나 퀸',
+      x: -17.5, y: 0.42, z: 31.8,
+      rotY: Math.PI / 2,
+      danceMode: 'cheers',
+      msg: '야외 서쪽 3D 에메랄드 풀빌라 카바나 데이베드 너무 아늑하고 시원해요 🌴🍹',
+      custom: { gender: 'F', hairStyle: 5, hairColor: '#eab85c', outfitType: 'resort', outfitColor: '#f8fafc', prop: 'wine', accessory: 'glasses' }
+    },
+    {
+      name: '골든 카바나 파수꾼',
+      x: 17.5, y: 0.42, z: 31.8,
+      rotY: -Math.PI / 2,
+      danceMode: 'cheers',
+      msg: '동쪽 골든 카바나 빌라에서 야경 보며 SOXL $500 장기투자 축배를 듭니다 🌟🥃',
+      custom: { gender: 'M', hairStyle: 0, hairColor: '#334155', outfitType: 'hawaiian', outfitColor: '#0d9488', prop: 'whiskey', accessory: 'none' }
     }
   ];
 
@@ -3380,14 +4426,20 @@ function initNPCShareholders() {
     npc.initialRotY = cfg.rotY;
     npc.group.rotation.y = cfg.rotY;
     npc.danceMode = cfg.danceMode;
-    npc.animPhase = idx * 1.37;
+    npc.animPhase = idx * 1.27;
     npc.npcMsg = cfg.msg;
   });
 }
 
 // ============================================================================
-// 7. 소파 착석(1), 클럽 댄스(2), 네온 샷 점화(3), 비전 프레임 순례 이동 & 제스처
+// 7. 5대 3D 입체 룸 원터치 워프 & 소파/스툴 착석 & 제스처 시스템
 // ============================================================================
+function syncActiveRoomButton(roomKey) {
+  document.querySelectorAll('#frame-quick-strip .fq-btn[data-room], #bottom-dock .dock-btn[data-room]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.room === roomKey);
+  });
+}
+
 function syncDockPostureButtons() {
   if (!myAvatar) return;
   const isSitting = myAvatar.state === 'sitting' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'pew');
@@ -3396,7 +4448,7 @@ function syncDockPostureButtons() {
   const kneelBtn = document.getElementById('dock-kneel');
   if (sitBtn) {
     sitBtn.classList.toggle('active', isSitting);
-    document.getElementById('dock-sit-label').textContent = isSitting ? '일어나기' : '소파 착석';
+    document.getElementById('dock-sit-label').textContent = isSitting ? '일어나기' : '착석';
   }
   if (kneelBtn) {
     kneelBtn.classList.toggle('active', isKneeling);
@@ -3420,27 +4472,31 @@ function unseatAvatar(av) {
 
 function sitAvatarAtSeat(av, seat) {
   unseatAvatar(av);
+  av.isDancing = false;
+  // 다른 층(1층 <-> 2층) 좌석이면 층 높이를 먼저 맞춰 자연스럽게 이동
+  if (Math.abs(av.group.position.y - seat.pos.y) > 1.8) {
+    av.group.position.set(seat.pos.x, seat.pos.y, seat.pos.z + 0.8);
+  }
   av.targetPos.copy(seat.pos);
   av.seat = seat;
   seat.occupiedBy = av;
   av.state = 'walking_to_seat';
   if (av.isMe) {
     syncDockPostureButtons();
-    setWalkHint(seat.type === 'kneel'
-      ? `🧎 [${seat.label}]로 나아가 스테이지 중앙에서 폭풍 테크노 댄스를 춥니다!...`
-      : `🪑 [${seat.label}]로 걸어가 착석합니다...`);
+    setWalkHint(`🪑 [${seat.label}]로 걸어가 착석합니다...`);
     broadcastMyState();
   }
 }
 
-// [1] 소파 착석 토글
+// [1] 주변 룸 소파·바 스툴·카바나 데이베드 착석 토글
 function toggleMySit() {
   if (!myAvatar) return;
   if (myAvatar.state === 'sitting' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'pew')) {
+    const prevY = myAvatar.group.position.y;
     unseatAvatar(myAvatar);
-    myAvatar.targetPos.set(myAvatar.group.position.x, 0, myAvatar.group.position.z + 0.55);
-    setWalkHint('🚶 라운지 소파에서 일어났습니다. 클럽 바닥이나 비전 프레임 액자를 클릭해 보세요.');
-    showToast('🚶 라운지 소파에서 일어났습니다.');
+    myAvatar.targetPos.set(myAvatar.group.position.x, prevY, myAvatar.group.position.z + 0.55);
+    setWalkHint('🚶 자리에서 일어났습니다. 5대 3D VIP 룸이나 액자를 클릭해 이동해 보세요.');
+    showToast('🚶 좌석에서 일어났습니다.');
     broadcastMyState();
     return;
   }
@@ -3448,7 +4504,9 @@ function toggleMySit() {
   for (const s of seats) {
     if (s.type !== 'pew') continue;
     if (s.occupiedBy && s.occupiedBy !== myAvatar) continue;
-    const d = myAvatar.group.position.distanceTo(s.pos);
+    // 같은 층 좌석 우선 탐색
+    const floorPenalty = Math.abs(myAvatar.group.position.y - s.pos.y) > 2.0 ? 25.0 : 0;
+    const d = myAvatar.group.position.distanceTo(s.pos) + floorPenalty;
     if (d < minDist) { minDist = d; bestSeat = s; }
   }
   if (bestSeat) {
@@ -3457,114 +4515,56 @@ function toggleMySit() {
   }
 }
 
-// [2] 클럽 댄스 토글 (2층 VIP 펜트하우스 룸 또는 현재 자리에서 즉시 무릎 꿇기)
 function toggleMyKneel() {
-  if (!myAvatar) return;
-  if (myAvatar.state === 'kneeling' || (myAvatar.state === 'walking_to_seat' && myAvatar.seat && myAvatar.seat.type === 'kneel')) {
-    unseatAvatar(myAvatar);
-    setWalkHint('🚶 클럽 댄스를 마치고 자리에서 일어났습니다.');
-    showToast('🚶 클럽 댄스를 마치고 일어났습니다.');
-    broadcastMyState();
-    return;
-  }
-  let bestKneel = null, minDist = Infinity;
-  for (const s of seats) {
-    if (s.type !== 'kneel') continue;
-    if (s.occupiedBy && s.occupiedBy !== myAvatar) continue;
-    const d = myAvatar.group.position.distanceTo(s.pos);
-    if (d < minDist) { minDist = d; bestKneel = s; }
-  }
-  if (bestKneel && minDist <= 8.5) {
-    sitAvatarAtSeat(myAvatar, bestKneel);
-    showToast(`🧎 [${bestKneel.label}]로 나아가 두 무릎을 꿇고 응원 토크합니다.`);
-  } else {
-    if (myAvatar.seat) {
-      myAvatar.group.position.z += 0.45;
-      myAvatar.targetPos.copy(myAvatar.group.position);
-    }
-    unseatAvatar(myAvatar);
-    myAvatar.state = 'kneeling';
-    myAvatar.group.rotation.y = 0;
-    sitStartTime = Date.now();
-    syncDockPostureButtons();
-    playBellChime();
-    showAvatarBubble(myAvatar, '🧎 강단 향해 무릎 꿇고 SOXL 상승을 응원 토크합니다!');
-    setWalkHint('🍾 샴페인 잔을 높이 들고 SOXL 500 DJ 메인 부스를 향해 건배를 외칩니다!');
-    broadcastMyState('kneel', '🧎 무릎 꿇고 SOXL 상승을 응원 토크합니다!');
-  }
+  triggerClubDance();
 }
 
-// 상단 퀵버튼: 2층 VIP룸으로 즉시 이동
 function walkToKneelAltar() {
-  let bestKneel = null, minDist = Infinity;
-  for (const s of seats) {
-    if (s.type !== 'kneel') continue;
-    if (s.occupiedBy && s.occupiedBy !== myAvatar) continue;
-    const d = Math.abs(s.pos.x);
-    if (d < minDist) { minDist = d; bestKneel = s; }
-  }
-  if (bestKneel) {
-    camYaw = 0;
-    camPitch = 0.22;
-    camDist = 5.4;
-    sitAvatarAtSeat(myAvatar, bestKneel);
-    showToast(`🧎 강단 앞 [${bestKneel.label}]로 이동하여 클럽 댄스를 올립니다.`);
-  }
+  walkToVIPRoom();
 }
 
-// 상단 퀵버튼: 야외 웨이퍼 치유 연못으로 이동
+// 상단 퀵버튼: 야외 3X 황금 웨이퍼 치유 연못으로 이동
 function walkToGardenPond() {
+  syncActiveRoomButton('pool');
   const pondBench = seats.find(s => s.id.startsWith('garden_bench_') && (!s.occupiedBy || s.occupiedBy === myAvatar));
   if (pondBench) {
-    camYaw = -Math.PI / 2;
+    myAvatar.group.position.set(-14.5, 0, 22.0);
+    camYaw = Math.PI / 2;
     camPitch = 0.28;
     camDist = 6.5;
     sitAvatarAtSeat(myAvatar, pondBench);
-    showToast('⛲ 야외 3X 황금 웨이퍼 치유 연못 벤치로 이동합니다.');
+    showToast('⛲ 야외 3X 황금 웨이퍼 분수 연못 치유 벤치로 이동합니다.');
   } else {
     unseatAvatar(myAvatar);
-    myAvatar.targetPos.set(-4.5, 0, 19.2);
-    myAvatar.state = 'walking';
-    showToast('⛲ 야외 3X 황금 웨이퍼 치유 연못으로 이동합니다.');
+    myAvatar.group.position.set(-15.2, 0, 22.0);
+    myAvatar.targetPos.set(-15.2, 0, 22.0);
+    myAvatar.state = 'standing';
+    showToast('⛲ 야외 3X 황금 웨이퍼 분수 연못으로 이동합니다.');
   }
 }
 
-// 특정 SOXL 100~500 VIP 갤러리 앞으로 걸어가기 & 카메라 포커싱
+// 특정 SOXL 100~500 3D 갤러리 니치 앞으로 이동 & 카메라 포커싱
 function walkToFrame(frameIdx) {
   const f = SOXL_FRAMES[frameIdx];
   if (!f) return;
   currentDocentIdx = frameIdx;
 
-  document.querySelectorAll('#frame-quick-strip .fq-btn').forEach((btn, idx) => {
-    btn.classList.toggle('active', idx === frameIdx + 1);
-  });
-
-  // 해당 비전 프레임와 가장 가까운 라운지 소파 찾기
-  let targetSeat = null, minDist = Infinity;
-  const targetPt = new THREE.Vector3(f.seatTarget.x, 0, f.seatTarget.z);
-  seats.forEach(s => {
-    if (s.type === 'pew' && (!s.occupiedBy || s.occupiedBy === myAvatar)) {
-      const d = s.pos.distanceTo(targetPt);
-      if (d < minDist) { minDist = d; targetSeat = s; }
-    }
-  });
-
-  if (targetSeat) {
-    sitAvatarAtSeat(myAvatar, targetSeat);
-  } else {
-    unseatAvatar(myAvatar);
-    myAvatar.targetPos.copy(targetPt);
-    myAvatar.state = 'walking';
-  }
+  unseatAvatar(myAvatar);
+  myAvatar.isDancing = false;
+  const ty = f.seatTarget.y || 0;
+  myAvatar.group.position.set(f.seatTarget.x, ty, f.seatTarget.z);
+  myAvatar.targetPos.set(f.seatTarget.x, ty, f.seatTarget.z);
+  myAvatar.group.rotation.y = f.seatTarget.lookAngle || 0;
+  myAvatar.state = 'standing';
 
   if (f.rotY === 0) camYaw = 0;
   else if (f.rotY > 0) camYaw = Math.PI / 2;
   else camYaw = -Math.PI / 2;
 
-  camPitch = 0.22;
-  camDist = 5.8;
+  camPitch = 0.24;
+  camDist = 6.2;
 
-  showToast(`🖼️ [${f.code}] VIP 아트월 앞 좌석으로 이동합니다.`);
+  showToast(`🖼️ [${f.code}] 3D 갤러리 아트월 앞으로 이동했습니다.`);
   selectDocentFrame(frameIdx);
 }
 
@@ -3573,12 +4573,11 @@ function walkToCurrentDocentFrame() {
   closeAllModals();
 }
 
-// 4대 클럽 제스처 액션
 const EMOTE_META = {
-  amen:   { dur: 3.2, msg: '🙏 제발 장대양봉 주소서! SOXL 500 성취 치얼스 🥂!', banner: '🙏 두 손을 가슴에 모으고 간절히 장대양봉을 응원 토크합니다.' },
+  amen:   { dur: 3.2, msg: '🙏 제발 장대양봉 주소서! SOXL 500 성취 치얼스 🥂!', banner: '🙏 두 손을 모으고 간절히 장대양봉을 응원 토크합니다.' },
   praise: { dur: 3.6, msg: '🙌 레버리지 민족 만세! SOXL 500 가즈아!', banner: '🙌 두 팔을 높이 들고 레버리지 민족 만세를 외칩니다!' },
   wave:   { dur: 3.0, msg: '📈 흔들리지 마세요! 끝까지 함께 성투합시다!', banner: '📈 함께 파티를 즐기는 주주들에게 성투 손인사를 건넵니다.' },
-  read:   { dur: 4.2, msg: '📖 공포에 분할매수하고 환희에 복리를 거둔다!', banner: '📖 황금 투자 원장을 두 손으로 펴 들고 야수의 심장 다짐을 외칩니다.' }
+  read:   { dur: 4.2, msg: '📖 공포에 분할매수하고 환희에 복리를 거둔다!', banner: '📖 야수의 심장 다짐을 외칩니다.' }
 };
 
 function triggerAvatarEmote(av, emoteKey, customMsg = null) {
@@ -3610,14 +4609,15 @@ function triggerMyEmote(emoteKey) {
   triggerAvatarEmote(myAvatar, emoteKey);
 }
 
-// 강단 VIP 샴페인 바 점화 시퀀스
 function startLightingCandleSequence(prayerText) {
   unseatAvatar(myAvatar);
-  const standPos = new THREE.Vector3(Math.random() < 0.5 ? -2.2 : 2.2, 0, -6.35);
-  myAvatar.targetPos.copy(standPos);
+  myAvatar.group.position.set(0, 0, -10.5);
+  myAvatar.targetPos.set(0, 0, -12.2);
   myAvatar.state = 'walking_to_candle';
   myAvatar.pendingPrayer = prayerText;
-  setWalkHint('🕯️ 강단 앞 황금 VIP 샴페인 바으로 걸어가 기원의 불꽃을 밝힙니다...');
+  camYaw = 0;
+  camPitch = 0.28;
+  setWalkHint('🕯️ 메인 DJ 스테이지 앞 황금 샴페인 제단으로 걸어가 기원의 불꽃을 밝힙니다...');
 }
 
 function setWalkHint(text) {
@@ -3628,8 +4628,9 @@ function setWalkHint(text) {
   clearTimeout(el._hintTimer);
   el._hintTimer = setTimeout(() => {
     el.classList.remove('visible-hint');
-  }, 2800);
+  }, 3200);
 }
+
 // ============================================================================
 // 8. 실시간 멀티플레이어 (MQTT + BroadcastChannel) & 실시간 클럽 채팅
 // ============================================================================
@@ -3796,9 +4797,39 @@ function sendChatMessage() {
   }
 }
 
+
 // ============================================================================
-// 9. 카메라 조작, 바닥/라운지 소파/VIP룸 클릭 이동, 비전 프레임 클릭 도슨트 오픈
+// 9. 카메라 조작, 5대 3D 룸/2층/풀장 클릭 이동, 포털 간판 & 액자 도슨트 클릭
 // ============================================================================
+function computeFloorElevation(x, z, currentY = 0) {
+  // 1) 좌·우 듀얼 3D 그랜드 네온 계단 구간 (x = -11.2 또는 +11.2 부근, z = -0.5 ~ 6.5)
+  if ((Math.abs(x - (-11.2)) < 1.35 || Math.abs(x - 11.2) < 1.35) && z >= -0.6 && z <= 6.6) {
+    const t = Math.max(0, Math.min(1, (z - (-0.3)) / 6.8));
+    return t * 5.0;
+  }
+  // 2) 2층 스카이 펜트하우스 슬래브 구간 (이미 2층 높이 부근이거나 계단 상단에 도달한 경우)
+  if (currentY > 2.6 && x >= -22.6 && x <= 22.6 && z >= 6.3 && z <= 19.6) {
+    return 5.0;
+  }
+  // 3) 야외 풀빌라 카바나 룸 데크 (x <= -17.0 또는 x >= 17.0, z: 29.0 ~ 39.0)
+  if (Math.abs(x) >= 16.8 && z >= 29.0 && z <= 39.0) {
+    return 0.40;
+  }
+  // 4) 야외 인피니티 풀 수면 및 데크
+  if (z >= 22.5) {
+    return 0.14;
+  }
+  // 5) 실내 1~4룸 단상 바닥
+  if (Math.abs(x) >= 13.0 && z >= -16.5 && z <= 16.0) {
+    return 0.10;
+  }
+  // 6) 중앙 댄스플로어
+  if (Math.abs(x) <= 7.2 && z >= -8.6 && z <= 5.6) {
+    return 0.08;
+  }
+  return 0;
+}
+
 function setupPointerAndKeyboardControls() {
   const dom = renderer.domElement;
   const raycaster = new THREE.Raycaster();
@@ -3824,7 +4855,7 @@ function setupPointerAndKeyboardControls() {
     const dy = e.clientY - prevMouse.y;
     const totalDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
     if (totalDist > 16) dragMoved = true;
-    camYaw -= dx * 0.014; /* 클럽 360도 시원한 시선 회전 */
+    camYaw -= dx * 0.014;
     camPitch = Math.max(0.08, Math.min(1.15, camPitch + dy * 0.005));
     prevMouse.x = e.clientX;
     prevMouse.y = e.clientY;
@@ -3835,7 +4866,6 @@ function setupPointerAndKeyboardControls() {
     isDragging = false;
     const totalDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
     const pressDuration = Date.now() - pointerDownTime;
-    // 350ms 이하이거나 총 이동 거리가 18px 이하이면 무조건 탭(클릭)으로 인정!
     const isTap = (!dragMoved) || (totalDist < 18) || (pressDuration < 350 && totalDist < 25);
     if (!isTap) return;
 
@@ -3843,7 +4873,7 @@ function setupPointerAndKeyboardControls() {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
 
-    // 1순위: 클럽 벽면 SOXL 100~500 VIP 갤러리 액자 클릭 확인
+    // 1순위: 3D 갤러리 액자 클릭 확인 -> 도슨트 오픈 및 해당 액자 앞 이동
     const hitFrames = raycaster.intersectObjects(frameMeshes, false);
     if (hitFrames.length > 0) {
       const fIdx = hitFrames[0].object.userData.frameIdx;
@@ -3853,36 +4883,30 @@ function setupPointerAndKeyboardControls() {
       return;
     }
 
-    // 2순위: 클럽 메인 마룻바닥, 댄스플로어, 풀장 데크, 수면, 야외 정원, 2층 VIP룸 바닥 클릭 이동
-    const floorTargets = [];
-    if (floorMesh) floorTargets.push(floorMesh);
-    if (gardenMesh) floorTargets.push(gardenMesh);
-    if (pathMesh) floorTargets.push(pathMesh);
-    if (typeof danceTiles !== 'undefined' && danceTiles && danceTiles.length > 0) {
-      floorTargets.push(...danceTiles);
-    }
-    if (typeof poolWaterMesh !== 'undefined' && poolWaterMesh) floorTargets.push(poolWaterMesh);
-    if (typeof poolDeck !== 'undefined' && poolDeck) floorTargets.push(poolDeck);
-    if (typeof vipFloorMesh !== 'undefined' && vipFloorMesh) floorTargets.push(vipFloorMesh);
-    if (typeof worldGroup !== 'undefined' && worldGroup) {
-      worldGroup.traverse(child => {
-        if (child.isMesh && (child.geometry instanceof THREE.PlaneGeometry || child.geometry instanceof THREE.BoxGeometry)) {
-          if (!floorTargets.includes(child)) floorTargets.push(child);
-        }
-      });
+    // 2순위: 각 룸 입구 3D 아치 포털 간판 클릭 확인 -> 해당 룸 안으로 즉시 이동!
+    if (clickablePortalMeshes.length > 0) {
+      const hitPortals = raycaster.intersectObjects(clickablePortalMeshes, false);
+      if (hitPortals.length > 0 && hitPortals[0].object.userData.roomKey) {
+        walkToRoom(hitPortals[0].object.userData.roomKey);
+        return;
+      }
     }
 
-    const hits = raycaster.intersectObjects(floorTargets, true);
+    // 3순위: 바닥, 5대 룸 내부, 계단, 2층 펜트하우스, 야외 풀장 & 카바나 클릭 이동
+    const hits = raycaster.intersectObjects(walkableFloorMeshes, true);
     if (hits.length > 0) {
       const pt = hits[0].point;
-      let cx = Math.max(-22.0, Math.min(22.0, pt.x));
-      let cz = Math.max(-15.0, Math.min(48.0, pt.z)); // 36m 풀장 끝까지 전면 개방!
-      let cy = pt.y > 2.5 ? 4.8 : (cz > 22.0 ? 0.12 : 0); // 높이 자동 적응
+      let cx = Math.max(-24.8, Math.min(24.8, pt.x));
+      let cz = Math.max(-19.5, Math.min(50.0, pt.z));
+      let cy = pt.y > 2.6 ? 5.0 : computeFloorElevation(cx, cz, pt.y);
 
-      // 클릭 지점 근처(0.95m 이내)에 빈 라운지 소파가 있으면 즉시 착석!
+      // 클릭 지점 근처(1.25m 이내)에 빈 소파/바 스툴/데이베드가 있으면 즉시 착석!
       for (const s of seats) {
-        if ((!s.occupiedBy || s.occupiedBy === myAvatar) && s.pos.distanceTo(new THREE.Vector3(cx, cy, cz)) < 0.95) {
+        if ((!s.occupiedBy || s.occupiedBy === myAvatar) &&
+            Math.abs(s.pos.y - cy) < 1.2 &&
+            Math.hypot(s.pos.x - cx, s.pos.z - cz) < 1.25) {
           sitAvatarAtSeat(myAvatar, s);
+          showToast(`🪑 [${s.label}]에 착석합니다.`);
           return;
         }
       }
@@ -3890,12 +4914,16 @@ function setupPointerAndKeyboardControls() {
       unseatAvatar(myAvatar);
       if (myAvatar) {
         myAvatar.isDancing = false;
+        // 층간(1층 <-> 2층) 직접 클릭 시 계단을 거치지 않고도 부드럽게 층 높이 동기화
+        if (Math.abs(myAvatar.group.position.y - cy) > 2.2) {
+          myAvatar.group.position.y = cy;
+        }
         myAvatar.targetPos.set(cx, cy, cz);
         myAvatar.state = 'walking';
       }
 
       if (targetRing) {
-        targetRing.position.set(cx, cy + 0.03, cz);
+        targetRing.position.set(cx, cy + 0.04, cz);
         rippleAge = 0;
       }
     }
@@ -3913,7 +4941,7 @@ function setupPointerAndKeyboardControls() {
       advanceMantraWheel(2);
     } else if (e.target === dom) {
       e.preventDefault();
-      camDist = Math.max(1.8, Math.min(24.0, camDist + e.deltaY * 0.005));
+      camDist = Math.max(1.8, Math.min(28.0, camDist + e.deltaY * 0.006));
     }
   }, { passive: false });
 
@@ -3940,11 +4968,11 @@ function setupPointerAndKeyboardControls() {
       }
       return;
     }
-    if (e.key === '1' || e.key.toLowerCase() === 's') drinkAlcohol('soju');
-    if (e.key === '2' || e.key.toLowerCase() === 'b') drinkAlcohol('beer');
-    if (e.key === '3' || e.key.toLowerCase() === 'w') drinkAlcohol('whiskey');
+    if (e.key === '1') drinkAlcohol('soju');
+    if (e.key === '2') drinkAlcohol('beer');
+    if (e.key === '3') drinkAlcohol('whiskey');
     if (e.key === '4') drinkAlcohol('wine');
-    if (e.key === '5' || e.key.toLowerCase() === 'd') triggerClubDance();
+    if (e.key === '5') triggerClubDance();
     if (e.key.toLowerCase() === 't') triggerDanceMode('techno');
     if (e.key.toLowerCase() === 'r') triggerDanceMode('retro');
     if (e.key.toLowerCase() === 'j' || e.code === 'Space') triggerDanceMode('jump');
@@ -4531,8 +5559,9 @@ document.getElementById('btn-change-nick').addEventListener('click', () => {
   togglePanel('avatar');
 });
 
+
 // ============================================================================
-// 13. 다관절 아바타 포즈 엔진 & 메인 애니메이션 루프
+// 13. 다관절 아바타 포즈 엔진 & 메인 애니메이션 루프 (3D 프라이빗 룸 & 복층 연동)
 // ============================================================================
 function updateAvatarPose(av, dt, elapsed, isMoving) {
   const rig = av.rig;
@@ -4692,7 +5721,7 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.1);
   const elapsed = clock.getElapsedTime();
 
-  // 야외 풀파티 수영장 물결 출렁임 & 튜브 회전
+  // 야외 풀파티 수영장 물결 출렁임 & 튜브 3종 회전
   if (poolWaterMesh) {
     poolWaterMesh.position.y = 0.12 + Math.sin(elapsed * 2.8) * 0.035;
   }
@@ -4704,84 +5733,77 @@ function animate() {
     donutFloat.position.y = 0.18 + Math.cos(elapsed * 2.2) * 0.04;
     donutFloat.rotation.y = elapsed * 0.35;
   }
-
-  // 클럽 거대 미러볼 360도 회전
-  if (mirrorBallGroup) {
-    mirrorBallGroup.rotation.y = elapsed * 0.45;
+  if (goldenSwanFloat) {
+    goldenSwanFloat.position.y = 0.18 + Math.sin(elapsed * 2.0 + 1.1) * 0.042;
+    goldenSwanFloat.rotation.y = Math.cos(elapsed * 0.65) * 0.32;
   }
-  // ⚡ [공식 요청] 초고속 와리가리 무빙 레이저 4조 (속도 대폭 가속 & 파파파팟 사이키!)
-  if (movingLasers && movingLasers.length > 0) {
-    movingLasers.forEach((ml, idx) => {
-      const speed = 16.5; // 와리가리 초고속 스위핑
-      const t = elapsed * speed + ml.phase;
-      // 8자 및 지그재그로 칼날처럼 휙휙 스위핑
-      const lx = Math.sin(t * 1.5) * 11.0;
-      const lz = Math.cos(t * 2.2) * 12.0;
-      ml.spot.target.position.set(lx, 0.05, lz);
-      // 파파파팟 초고속 스트로브 펄스 (초당 14회 점멸)
-      const strobe = Math.sin(elapsed * 45.0 + idx * 1.57) > 0.1 ? 4.5 : 0.3;
-      ml.spot.intensity = strobe;
+
+  // 제1룸: 황금금고 VVIP룸 8-스포크 금고 핸들 회전
+  if (vaultWheelMesh) {
+    vaultWheelMesh.rotation.z = elapsed * 0.65;
+  }
+
+  // 제3룸: 가라오케 파티룸 3D 이퀄라이저 바 & 핑크 미러볼 애니메이션
+  if (karaokeMirrorBall) {
+    karaokeMirrorBall.rotation.y = elapsed * 0.9;
+  }
+  if (karaokeEqBars && karaokeEqBars.length > 0) {
+    karaokeEqBars.forEach(item => {
+      const hScale = 0.3 + Math.abs(Math.sin(elapsed * 9.5 + item.phase)) * 1.45 + Math.abs(Math.cos(elapsed * 5.2 - item.phase)) * 0.55;
+      item.mesh.scale.y = hScale;
+      item.mesh.position.y = 0.9 + (hScale * 1.2) * 0.5;
     });
   }
 
-  // ⚡ [공식 요청] LED 댄스플로어 타일 초고속 파파파팟 점멸 (체커보드 네온 사이키)
+  // 제4룸: 황금 샴페인 분수 회전 물줄기 링 애니메이션
+  if (champagneFountainRings && champagneFountainRings.length > 0) {
+    champagneFountainRings.forEach((ring, idx) => {
+      ring.rotation.y = elapsed * (1.2 + idx * 0.35) * (idx % 2 === 0 ? 1 : -1);
+      const s = 0.96 + Math.sin(elapsed * 6.0 + idx) * 0.05;
+      ring.scale.set(s, s, 1);
+    });
+  }
+
+  // 클럽 메인 거대 미러볼 & 서브 미러볼 360도 회전
+  if (mirrorBallGroup) {
+    mirrorBallGroup.rotation.y = elapsed * 0.48;
+  }
+  if (subMirrorBalls && subMirrorBalls.length > 0) {
+    subMirrorBalls.forEach((mb, i) => {
+      mb.rotation.y = elapsed * (i % 2 === 0 ? 0.68 : -0.68);
+    });
+  }
+
+  // 초고속 무빙 레이저 6조 & 3D 볼류메트릭 레이저 콘 스위핑
+  if (movingLasers && movingLasers.length > 0) {
+    movingLasers.forEach((ml, idx) => {
+      const speed = 12.5;
+      const t = elapsed * speed + ml.phase;
+      const lx = Math.sin(t * 1.35) * 10.5;
+      const lz = Math.cos(t * 1.85) * 10.5;
+      ml.spot.target.position.set(lx, 0.05, lz);
+      const strobe = Math.sin(elapsed * 36.0 + idx * 1.3) > 0.05 ? 4.8 : 0.4;
+      ml.spot.intensity = strobe;
+      if (ml.cone) {
+        ml.cone.rotation.z = Math.sin(t * 0.85) * 0.42;
+        ml.cone.rotation.x = Math.cos(t * 1.1) * 0.42;
+        ml.cone.material.opacity = strobe > 1.0 ? 0.15 : 0.03;
+      }
+    });
+  }
+
+  // LED 댄스플로어 타일 초고속 체커보드 네온 점멸
   if (danceTiles && danceTiles.length > 0) {
-    const strobeBeat = Math.floor(elapsed * 12.0); // 0.08초 단위 파파파팟 점멸
+    const strobeBeat = Math.floor(elapsed * 10.0);
     const colors = [0xff007f, 0x00ffff, 0x2ee59d, 0xffd269, 0xa855f7];
     danceTiles.forEach((tile, idx) => {
       if ((idx + strobeBeat) % 2 === 0) {
-        tile.material.emissiveIntensity = 1.4;
+        tile.material.emissiveIntensity = 1.35;
         tile.material.emissive.setHex(colors[(idx + strobeBeat) % colors.length]);
       } else {
-        tile.material.emissiveIntensity = 0.15;
+        tile.material.emissiveIntensity = 0.16;
       }
     });
-  }
-
-  // 🕺 [공식 요청] 다채로운 댄스 액션: 테크노, 복고댄스, 점프, 취중댄스!
-  if (myAvatar && myAvatar.isDancing) {
-    const baseY = (myAvatar.group.position.y > 2.5 ? 4.8 : 0);
-    const dMode = myAvatar.danceMode || 'techno';
-
-    if (dMode === 'techno') {
-      // ⚡ 테크노 댄스: 양팔 칼각 스냅 & 상체 초고속 바운스!
-      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 18)) * 0.16;
-      myAvatar.group.rotation.y += Math.sin(elapsed * 14) * 0.18;
-      if (myAvatar.rig && myAvatar.rig.leftArm && myAvatar.rig.rightArm) {
-        myAvatar.rig.leftArm.arm.rotation.x = Math.sin(elapsed * 18) * 0.8 - 0.5;
-        myAvatar.rig.rightArm.arm.rotation.x = -Math.sin(elapsed * 18) * 0.8 - 0.5;
-        myAvatar.rig.leftArm.arm.rotation.z = 0.5;
-        myAvatar.rig.rightArm.arm.rotation.z = -0.5;
-      }
-    } else if (dMode === 'retro') {
-      // 🕺 복고 디스코 댄스: 존 트라볼타 토요일 밤의 열기 하늘 찌르기 & 골반 롤링!
-      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8)) * 0.08;
-      myAvatar.group.rotation.y += Math.sin(elapsed * 6) * 0.25;
-      if (myAvatar.rig && myAvatar.rig.rightArm) {
-        // 오른손 대각선 하늘 찌르기!
-        myAvatar.rig.rightArm.arm.rotation.x = -2.2 + Math.sin(elapsed * 8) * 0.4;
-        myAvatar.rig.rightArm.arm.rotation.z = -0.8;
-      }
-      if (myAvatar.rig && myAvatar.rig.leftArm) {
-        // 왼손 허리춤
-        myAvatar.rig.leftArm.arm.rotation.x = 0.2;
-        myAvatar.rig.leftArm.arm.rotation.z = 0.6;
-      }
-    } else if (dMode === 'jump') {
-      // 🦘 하이 점프 댄스: 붕붕 날아오르는 신나는 점프 & 양팔 만세!
-      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 9)) * 0.72; // 0.72m 점프!
-      if (myAvatar.rig && myAvatar.rig.leftArm && myAvatar.rig.rightArm) {
-        myAvatar.rig.leftArm.arm.rotation.x = -2.6;
-        myAvatar.rig.rightArm.arm.rotation.x = -2.6;
-        myAvatar.rig.leftArm.arm.rotation.z = 0.6;
-        myAvatar.rig.rightArm.arm.rotation.z = -0.6;
-      }
-    } else if (dMode === 'drunk') {
-      // 🍻 취중 댄스: 술기운에 좌우로 비틀비틀 스윙!
-      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 5)) * 0.06;
-      myAvatar.group.rotation.z = Math.sin(elapsed * 4) * 0.25;
-      myAvatar.group.rotation.y += Math.sin(elapsed * 3) * 0.15;
-    }
   }
 
   // 강단 웨이퍼 후광 & 야외 연못 3X 웨이퍼 코어 회전
@@ -4795,8 +5817,8 @@ function animate() {
   if (particleSystem) {
     const pos = particleSystem.geometry.attributes.position;
     for (let i = 0; i < pos.count; i++) {
-      let y = pos.getY(i) + dt * 0.45;
-      if (y > 7.5) y = 0.6;
+      let y = pos.getY(i) + dt * 0.48;
+      if (y > 9.8) y = 0.6;
       pos.setY(i, y);
     }
     pos.needsUpdate = true;
@@ -4820,7 +5842,7 @@ function animate() {
     targetRing.material.opacity = Math.max(0, (1 - rippleAge) * 0.75);
   }
 
-  // WASD / 방향키 이동 처리
+  // WASD / 방향키 이동 처리 (전 구역 52m x 74m 자유 이동 + 1층/계단/2층 자동 고도 추적)
   let kx = 0, kz = 0;
   if (keysPressed['KeyW'] || keysPressed['ArrowUp']) kz -= 1;
   if (keysPressed['KeyS'] || keysPressed['ArrowDown']) kz += 1;
@@ -4833,88 +5855,37 @@ function animate() {
     myKeyMoving = true;
     const len = Math.hypot(kx, kz);
     kx /= len; kz /= len;
-    const speed = 3.6 * dt;
+    const speed = 4.4 * dt;
     const forward = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
     const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
     myAvatar.group.position.addScaledVector(forward, kz * speed);
     myAvatar.group.position.addScaledVector(right, kx * speed);
-    myAvatar.isDancing = false; // 이동 시 댄스 즉시 해제
-    myAvatar.group.position.x = Math.max(-22.0, Math.min(22.0, myAvatar.group.position.x));
-    myAvatar.group.position.z = Math.max(-15.0, Math.min(48.0, myAvatar.group.position.z));
+    myAvatar.isDancing = false;
+    myAvatar.group.position.x = Math.max(-24.8, Math.min(24.8, myAvatar.group.position.x));
+    myAvatar.group.position.z = Math.max(-19.5, Math.min(51.5, myAvatar.group.position.z));
+    myAvatar.group.position.y = computeFloorElevation(
+      myAvatar.group.position.x,
+      myAvatar.group.position.z,
+      myAvatar.group.position.y
+    );
     myAvatar.targetPos.copy(myAvatar.group.position);
     myAvatar.group.rotation.y = Math.atan2(-kx, -kz) + camYaw;
   }
 
-    // 🕺 [공식 스펙] 12명 NPC 클럽·풀파티 전구역 각자 고유 댄스 & 모션 가동!
-  avatars.forEach(av => {
-    if (!av.id.startsWith('npc_')) return;
-    const mode = av.danceMode || 'techno';
-    const baseY = av.initialY ?? av.group.position.y;
-    const phase = av.animPhase || 0;
-
-    if (mode === 'dj') {
-      // 🎧 DJ 턴테이블 비트 바운스 & 헤드뱅잉
-      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 12 + phase)) * 0.08;
-      if (av.rig && av.rig.leftArm && av.rig.rightArm) {
-        av.rig.leftArm.arm.rotation.x = -1.2 + Math.sin(elapsed * 12) * 0.4;
-        av.rig.leftArm.arm.rotation.z = 0.4;
-        av.rig.rightArm.arm.rotation.x = -1.2 - Math.sin(elapsed * 12) * 0.4;
-        av.rig.rightArm.arm.rotation.z = -0.4;
-      }
-    } else if (mode === 'techno') {
-      // ⚡ 칼각 테크노 댄스
-      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 16 + phase)) * 0.14;
-      av.group.rotation.y = (av.initialRotY || 0) + Math.sin(elapsed * 12 + phase) * 0.2;
-      if (av.rig && av.rig.leftArm && av.rig.rightArm) {
-        av.rig.leftArm.arm.rotation.x = Math.sin(elapsed * 16 + phase) * 0.7 - 0.4;
-        av.rig.rightArm.arm.rotation.x = -Math.sin(elapsed * 16 + phase) * 0.7 - 0.4;
-      }
-    } else if (mode === 'retro') {
-      // 🕺 토요일 밤의 열기 하늘 찌르기
-      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8 + phase)) * 0.07;
-      av.group.rotation.y = (av.initialRotY || 0) + Math.sin(elapsed * 6 + phase) * 0.25;
-      if (av.rig && av.rig.rightArm) {
-        av.rig.rightArm.arm.rotation.x = -2.2 + Math.sin(elapsed * 8 + phase) * 0.35;
-        av.rig.rightArm.arm.rotation.z = -0.8;
-      }
-    } else if (mode === 'jump') {
-      // 🦘 붕붕 하이 점프
-      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8.5 + phase)) * 0.48;
-      if (av.rig && av.rig.leftArm && av.rig.rightArm) {
-        av.rig.leftArm.arm.rotation.x = -2.4;
-        av.rig.rightArm.arm.rotation.x = -2.4;
-      }
-    } else if (mode === 'drunk') {
-      // 🍻 취중 비틀비틀 스윙
-      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 4.5 + phase)) * 0.05;
-      av.group.rotation.z = Math.sin(elapsed * 3.5 + phase) * 0.22;
-    } else if (mode === 'swim') {
-      // 🏊 풀장 물놀이 출렁임
-      av.group.position.y = baseY + Math.sin(elapsed * 2.8 + phase) * 0.04;
-      if (av.rig && av.rig.rightArm) {
-        av.rig.rightArm.arm.rotation.x = -1.1 + Math.sin(elapsed * 4) * 0.3;
-      }
-    } else {
-      // 🥂 건배 & 리듬 타기 (VIP룸, 바 카운터, 썬베드)
-      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 5 + phase)) * 0.04;
-      if (av.rig && av.rig.rightArm) {
-        av.rig.rightArm.arm.rotation.x = -1.1 + Math.sin(elapsed * 5 + phase) * 0.25;
-        av.rig.rightArm.arm.rotation.z = -0.3;
-      }
-    }
-  });
-
-  // 모든 아바타 이동 & 다관절 포즈 업데이트
+  // 모든 아바타 이동 & 기본 다관절 포즈 업데이트
   avatars.forEach((av, idx) => {
     let isMoving = (av === myAvatar && myKeyMoving);
 
     if (av.state === 'walking' || av.state === 'walking_to_seat' || av.state === 'walking_to_candle') {
       const diff = new THREE.Vector3().subVectors(av.targetPos, av.group.position);
-      diff.y = 0;
-      const dist = diff.length();
-      if (dist > 0.08) {
-        diff.normalize();
-        av.group.position.addScaledVector(diff, Math.min(dist, 3.2 * dt));
+      const horizDist = Math.hypot(diff.x, diff.z);
+      if (horizDist > 0.1) {
+        const step = Math.min(horizDist, 4.6 * dt);
+        av.group.position.x += (diff.x / horizDist) * step;
+        av.group.position.z += (diff.z / horizDist) * step;
+        // 계단이나 단차를 오르내릴 때 부드럽게 고도 보간
+        const floorY = computeFloorElevation(av.group.position.x, av.group.position.z, av.targetPos.y);
+        av.group.position.y += (floorY - av.group.position.y) * Math.min(1, dt * 10);
         av.group.rotation.y = Math.atan2(-diff.x, -diff.z);
         isMoving = true;
       } else {
@@ -4926,9 +5897,7 @@ function animate() {
             sitStartTime = Date.now();
             syncDockPostureButtons();
             playBellChime();
-            setWalkHint(av.state === 'kneeling'
-              ? `🧎 [${av.seat.label}]에서 두 무릎을 꿇고 SOXL 불마켓 상승을 간절히 응원 토크합니다.`
-              : `🪑 [${av.seat.label}]에 앉아 비전 프레임를 바라보며 멘탈을 치유하고 있습니다.`);
+            setWalkHint(`🪑 [${av.seat.label}]에 착석하여 3D 프라이빗 룸과 클럽을 감상하고 있습니다.`);
             broadcastMyState();
           }
         } else if (av.state === 'walking_to_candle') {
@@ -4963,16 +5932,93 @@ function animate() {
 
     // NPC 주기적 말풍선 표시
     if (av.id.startsWith('npc_') && showNPCs && av.npcMsg) {
-      const cycle = (elapsed + idx * 3.7) % 18;
-      if (cycle < 0.05 && !av.labelEl.querySelector('.avatar-bubble')) {
-        showAvatarBubble(av, av.npcMsg, 4800);
+      const cycle = (elapsed + idx * 3.3) % 19;
+      if (cycle < 0.045 && !av.labelEl.querySelector('.avatar-bubble')) {
+        showAvatarBubble(av, av.npcMsg, 4600);
       }
     }
 
     updateAvatarPose(av, dt, elapsed, isMoving);
   });
 
-  // 착석 / 클럽댄스 경과 시간: 화면을 가리지 않고 하단 독 버튼에 깔끔히 표시
+  // 🕺 내 아바타 댄스 액션 오버라이드 (updateAvatarPose 이후 적용하여 팔다리 모션이 실제로 작동!)
+  if (myAvatar && myAvatar.isDancing && myAvatar.rig) {
+    const baseY = computeFloorElevation(myAvatar.group.position.x, myAvatar.group.position.z, myAvatar.group.position.y);
+    const dMode = myAvatar.danceMode || 'techno';
+    const rig = myAvatar.rig;
+
+    if (dMode === 'techno') {
+      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 16)) * 0.16;
+      myAvatar.group.rotation.y += Math.sin(elapsed * 12) * 0.08;
+      rig.armL.rotation.set(Math.sin(elapsed * 16) * 0.85 + 1.4, 0, -0.35);
+      rig.forearmL.rotation.set(0.55, 0, 0);
+      rig.armR.rotation.set(-Math.sin(elapsed * 16) * 0.85 + 1.4, 0, 0.35);
+      rig.forearmR.rotation.set(0.55, 0, 0);
+    } else if (dMode === 'retro') {
+      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8)) * 0.09;
+      myAvatar.group.rotation.y += Math.sin(elapsed * 6) * 0.06;
+      rig.armR.rotation.set(2.55 + Math.sin(elapsed * 8) * 0.35, 0, 0.45);
+      rig.forearmR.rotation.set(0.2, 0, 0);
+      rig.armL.rotation.set(0.45, 0.2, -0.5);
+      rig.forearmL.rotation.set(1.1, 0, 0);
+    } else if (dMode === 'jump') {
+      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 9)) * 0.65;
+      rig.armL.rotation.set(2.65, 0, -0.45);
+      rig.forearmL.rotation.set(0.25, 0, 0);
+      rig.armR.rotation.set(2.65, 0, 0.45);
+      rig.forearmR.rotation.set(0.25, 0, 0);
+    } else if (dMode === 'drunk') {
+      myAvatar.group.position.y = baseY + Math.abs(Math.sin(elapsed * 5)) * 0.06;
+      myAvatar.group.rotation.z = Math.sin(elapsed * 4) * 0.22;
+      myAvatar.group.rotation.y += Math.sin(elapsed * 3) * 0.05;
+      rig.armR.rotation.set(1.55 + Math.sin(elapsed * 6) * 0.3, 0, 0.25);
+      rig.forearmR.rotation.set(0.65, 0, 0);
+    }
+  }
+
+  // 🕺 18명 NPC 클럽·3D 프라이빗 룸·2층 VIP·풀파티 고유 모션 (updateAvatarPose 이후 적용)
+  avatars.forEach(av => {
+    if (!av.id.startsWith('npc_') || !av.rig) return;
+    const mode = av.danceMode || 'techno';
+    const baseY = av.initialY ?? av.group.position.y;
+    const phase = av.animPhase || 0;
+    const rig = av.rig;
+
+    if (mode === 'dj') {
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 12 + phase)) * 0.08;
+      rig.armL.rotation.set(1.35 + Math.sin(elapsed * 12) * 0.4, 0, -0.3);
+      rig.forearmL.rotation.set(0.6, 0, 0);
+      rig.armR.rotation.set(1.35 - Math.sin(elapsed * 12) * 0.4, 0, 0.3);
+      rig.forearmR.rotation.set(0.6, 0, 0);
+    } else if (mode === 'techno') {
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 15 + phase)) * 0.13;
+      av.group.rotation.y = (av.initialRotY || 0) + Math.sin(elapsed * 10 + phase) * 0.22;
+      rig.armL.rotation.set(1.4 + Math.sin(elapsed * 15 + phase) * 0.75, 0, -0.3);
+      rig.armR.rotation.set(1.4 - Math.sin(elapsed * 15 + phase) * 0.75, 0, 0.3);
+    } else if (mode === 'retro') {
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8 + phase)) * 0.07;
+      av.group.rotation.y = (av.initialRotY || 0) + Math.sin(elapsed * 6 + phase) * 0.25;
+      rig.armR.rotation.set(2.45 + Math.sin(elapsed * 8 + phase) * 0.35, 0, 0.45);
+      rig.armL.rotation.set(0.45, 0, -0.45);
+    } else if (mode === 'jump') {
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 8.5 + phase)) * 0.45;
+      rig.armL.rotation.set(2.55, 0, -0.4);
+      rig.armR.rotation.set(2.55, 0, 0.4);
+    } else if (mode === 'drunk') {
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 4.5 + phase)) * 0.05;
+      av.group.rotation.z = Math.sin(elapsed * 3.5 + phase) * 0.2;
+      rig.armR.rotation.set(1.45 + Math.sin(elapsed * 5 + phase) * 0.3, 0, 0.25);
+    } else if (mode === 'swim') {
+      av.group.position.y = baseY + Math.sin(elapsed * 2.8 + phase) * 0.045;
+      rig.armR.rotation.set(1.25 + Math.sin(elapsed * 4 + phase) * 0.35, 0, 0.3);
+      rig.armL.rotation.set(1.25 - Math.sin(elapsed * 4 + phase) * 0.35, 0, -0.3);
+    } else {
+      av.group.position.y = baseY + Math.abs(Math.sin(elapsed * 5 + phase)) * 0.04;
+      rig.armR.rotation.set(1.35 + Math.sin(elapsed * 5 + phase) * 0.25, 0, 0.25);
+    }
+  });
+
+  // 착석 / 클럽댄스 경과 시간 표시
   if (myAvatar && (myAvatar.state === 'sitting' || myAvatar.state === 'kneeling') && sitStartTime) {
     const sec = Math.floor((Date.now() - sitStartTime) / 1000);
     const mm = String(Math.floor(sec / 60)).padStart(2, '0');
@@ -4998,18 +6044,22 @@ function animate() {
       lookTarget.y + Math.sin(camPitch) * camDist,
       lookTarget.z + Math.cos(camYaw) * Math.cos(camPitch) * camDist
     );
-    camera.position.lerp(desiredCamPos, 0.1);
+    camera.position.lerp(desiredCamPos, 0.12);
     camera.lookAt(lookTarget);
   }
 
-  // 3D 아바타 머리 위 2D 이름표 투영
+  // 3D 아바타 머리 위 2D 이름표 투영 (2층/단상 av.group.position.y 정확 반영!)
   avatars.forEach(av => {
     if (!av.group.visible) {
       av.labelEl.style.display = 'none';
       return;
     }
     const labelY = av.state === 'kneeling' ? 1.22 : (av.state === 'sitting' ? 1.38 : 1.62);
-    const headWorld = new THREE.Vector3(av.group.position.x, labelY, av.group.position.z);
+    const headWorld = new THREE.Vector3(
+      av.group.position.x,
+      av.group.position.y + labelY,
+      av.group.position.z
+    );
     headWorld.project(camera);
     if (headWorld.z > 1) {
       av.labelEl.style.display = 'none';
@@ -5082,14 +6132,14 @@ function enterSanctuary(withMusic) {
   startAudioEngine(withMusic);
   initMultiplayerSync();
   showToast(withMusic
-    ? `🪩 [${myCustom.name}] 님, SOXL 멘탈케어 클럽 메인홀에 입장하셨습니다! (레버리지 민족 음악 재생 중)`
-    : `🪩 [${myCustom.name}] 님, 조용한 무음 모드로 SOXL 멘탈케어 클럽에 입장하셨습니다.`);
+    ? `🪩 [${myCustom.name}] 님, SOXL 멘탈케어 3D 메가 클럽 & 프라이빗 VVIP 룸에 입장하셨습니다!`
+    : `🪩 [${myCustom.name}] 님, 조용한 무음 모드로 SOXL 멘탈케어 3D 메가 클럽에 입장하셨습니다.`);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   try {
     if (isMobileViewport()) {
-      camDist = 8.2;
+      camDist = 8.4;
       camPitch = 0.34;
     }
   } catch(e) { console.warn(e); }
@@ -5109,7 +6159,7 @@ window.addEventListener('DOMContentLoaded', () => {
   try { syncCustomizerUI(); } catch(e) { console.warn(e); }
   try { selectDocentFrame(0); } catch(e) { console.warn(e); }
 
-  // 🚀 [원터치 다이렉트 직행] 팝업 없이 0.05초 만에 3D 클럽 씬으로 즉시 진입!
+  // 팝업 없이 0.05초 만에 3D 클럽 씬으로 즉시 진입
   setTimeout(() => {
     try {
       enterSanctuary(true);
@@ -5120,7 +6170,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }, 50);
 
-  // 모바일/데스크톱 첫 터치 시 사운드 자동 언락 (단, BGM ON 상태일 때만 재생)
+  // 모바일/데스크톱 첫 터치 시 사운드 자동 언락
   const unlockAudio = () => {
     try {
       if (window.audioCtx && window.audioCtx.state === 'suspended') {
@@ -5145,9 +6195,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================================
-// 5. 클럽 주류 4총사 (소주·맥주·양주·와인) 인터랙션 & 2층 VIP룸 워프 시스템
+// 15. 클럽 주류 4총사 & 3D 프라이빗 룸 워프 시스템 (제1룸~제4룸 + 2층 VIP + 야외 풀파티)
 // ============================================================================
-
 function playGlassCheersSound() {
   try {
     const actx = window.audioCtx || (window.audioCtx = new (window.AudioContext || window.webkitAudioContext)());
@@ -5226,18 +6275,11 @@ function triggerDanceMode(mode) {
   setTimeout(() => {
     if (myAvatar && myAvatar.danceMode === mode) {
       myAvatar.isDancing = false;
-      // 팔 각도 원상복구
-      if (myAvatar.rig && myAvatar.rig.leftArm && myAvatar.rig.rightArm) {
-        myAvatar.rig.leftArm.arm.rotation.set(0,0,0);
-        myAvatar.rig.rightArm.arm.rotation.set(0,0,0);
-        myAvatar.group.rotation.z = 0;
-      }
+      myAvatar.group.rotation.z = 0;
     }
   }, 6000);
 }
 
-
-// 💇 [스타일 체인지] 모히칸, 빨간머리 메탈, 긴머리, 가죽자켓, 글리터 수트 즉각 변신!
 let currentStyleIdx = 0;
 const CLUB_STYLES = [
   { name: '💥 네온 모히칸 & 가죽 라이더', hairStyle: 3, hairColor: '#00ffcc', outfitType: 'metal', outfitColor: '#111115', msg: '💥 네온 펑크 모히칸 & 스터드 가죽 라이더 장착!' },
@@ -5272,57 +6314,133 @@ function triggerClubDance() {
 function triggerAvatarDance() {
   if (!myAvatar) return;
   myAvatar.isDancing = true;
-  setTimeout(() => { if (myAvatar) myAvatar.isDancing = false; }, 4000);
+  setTimeout(() => {
+    if (myAvatar) {
+      myAvatar.isDancing = false;
+      myAvatar.group.rotation.z = 0;
+    }
+  }, 4000);
+}
+
+// 🚪 3D 프라이빗 룸 & 주요 구역 원클릭 워프 함수
+function walkToRoom(roomKey) {
+  if (!myAvatar) return;
+  unseatAvatar(myAvatar);
+  myAvatar.isDancing = false;
+  myAvatar.group.rotation.z = 0;
+  syncActiveRoomButton(roomKey);
+
+  if (roomKey === 'vault') {
+    myAvatar.group.position.set(-16.2, 0.2, -9.2);
+    myAvatar.targetPos.copy(myAvatar.group.position);
+    myAvatar.group.rotation.y = 0;
+    myAvatar.state = 'standing';
+    camYaw = -0.32;
+    camPitch = 0.28;
+    camDist = 6.6;
+    playBellChime();
+    showAvatarBubble(myAvatar, '👑 제1룸: SOXL $500 황금금고 VVIP 룸 입성! 거대 은행 금고문과 골드바 피라미드 영접!');
+    setWalkHint('👑 [제1룸: 황금금고 VVIP룸] 거대 3D 원형 은행 금고문, 28개 순금 골드바 피라미드, 돔페리뇽 타워와 벨벳 소파 부스가 마련되어 있습니다.');
+    showToastNotification('👑 [제1룸: 황금금고 VVIP룸] $500 골드 볼트 프라이빗 룸으로 입장했습니다!');
+  } else if (roomKey === 'whiskey') {
+    myAvatar.group.position.set(15.2, 0.2, -9.2);
+    myAvatar.targetPos.copy(myAvatar.group.position);
+    myAvatar.group.rotation.y = -Math.PI / 2;
+    myAvatar.state = 'standing';
+    camYaw = -1.25;
+    camPitch = 0.28;
+    camDist = 6.6;
+    playGlassCheersSound();
+    showAvatarBubble(myAvatar, '🥃 제2룸: 월스트리트 위스키 & 시가 바 룸 도착! 바텐더님, 맥캘란 온더락 한 잔!');
+    setWalkHint('🥃 [제2룸: 월스트리트 위스키 & 시가 바 룸] 4.6m 백라이트 양주 셀러 월, 9.6m 마호가니 바 카운터, 오크통 피라미드와 가죽 부스를 즐기세요.');
+    showToastNotification('🥃 [제2룸: 월스트리트 위스키 바 룸] 럭셔리 위스키 & 시가 라운지에 도착했습니다!');
+  } else if (roomKey === 'karaoke') {
+    myAvatar.group.position.set(-16.2, 0.2, 7.2);
+    myAvatar.targetPos.copy(myAvatar.group.position);
+    myAvatar.group.rotation.y = Math.PI;
+    myAvatar.state = 'standing';
+    camYaw = 2.65;
+    camPitch = 0.28;
+    camDist = 6.6;
+    playBellChime();
+    showAvatarBubble(myAvatar, '🎤 제3룸: 3X 하이퍼 네온 가라오케 파티룸 입성! 황금 마이크 잡고 열창 가즈아!');
+    setWalkHint('🎤 [제3룸: 하이퍼 네온 가라오케 룸] 라이브 미니 스테이지, 황금 스탠드 마이크 2대, 16채널 3D 이퀄라이저 월, 레트로 주크박스가 가동 중입니다.');
+    showToastNotification('🎤 [제3룸: 하이퍼 네온 가라오케 룸] 네온 노래방 파티룸에 입장했습니다!');
+  } else if (roomKey === 'fountain') {
+    myAvatar.group.position.set(16.2, 0.2, 8.8);
+    myAvatar.targetPos.copy(myAvatar.group.position);
+    myAvatar.group.rotation.y = -Math.PI / 2;
+    myAvatar.state = 'standing';
+    camYaw = -1.35;
+    camPitch = 0.30;
+    camDist = 6.8;
+    playGlassCheersSound();
+    showAvatarBubble(myAvatar, '🥂 제4룸: 황금 샴페인 분수 & 테라스 룸 도착! 5단 골드 분수가 콸콸 쏟아지네!');
+    setWalkHint('🥂 [제4룸: 황금 샴페인 분수 룸] 3.4m 높이 5단 황금 샴페인 분수 타워와 100→500 로드맵 갤러리 부스에서 우아하게 건배하세요.');
+    showToastNotification('🥂 [제4룸: 황금 샴페인 분수 룸] 골든 파운틴 라운지에 도착했습니다!');
+  } else if (roomKey === 'vip2f') {
+    walkToVIPRoom();
+  } else if (roomKey === 'pool') {
+    walkToPoolParty();
+  } else {
+    walkToDanceFloor();
+  }
+  broadcastMyState();
 }
 
 function walkToVIPRoom() {
   if (!myAvatar) return;
   unseatAvatar(myAvatar);
-  myAvatar.group.position.set(0, 4.8, 10.5);
+  myAvatar.isDancing = false;
+  syncActiveRoomButton('vip2f');
+  myAvatar.group.position.set(0, 5.0, 11.2);
   myAvatar.targetPos.copy(myAvatar.group.position);
-  camPitch = 0.35;
-  camDist = 4.8;
-  camYaw = 0; // 1층 메인홀 클럽을 시원하게 내려다보는 조망 각도!
-  showAvatarBubble(myAvatar, '🍾 2층 VIP 펜트하우스 룸 입성! 1층 클럽이 한눈에 보이네!');
-  showToastNotification('🍾 [2층 VIP 룸] 스카이 라운지에 도착했습니다! 1층이 한눈에 내려다보입니다.');
+  myAvatar.group.rotation.y = 0;
+  myAvatar.state = 'standing';
+  camPitch = 0.34;
+  camDist = 6.2;
+  camYaw = 0.22;
+  playGlassCheersSound();
+  showAvatarBubble(myAvatar, '🍾 2층 VVIP 스카이 펜트하우스 & 루프탑 자쿠지 입성! 1층 메가 클럽이 한눈에 내려다보이네!');
+  setWalkHint('🍾 [2층: VVIP 스카이 펜트하우스 & 루프탑 자쿠지] 골든 퍼골라 부스 3동과 스카이 자쿠지 스파 풀에서 1층 메인홀을 한눈에 조망하세요.');
+  showToastNotification('🍾 [2층 VVIP 펜트하우스] 스카이 라운지 & 루프탑 자쿠지에 도착했습니다!');
 }
 
 function walkToDanceFloor() {
   if (!myAvatar) return;
   unseatAvatar(myAvatar);
-  myAvatar.group.position.set(0, 0, 0);
+  syncActiveRoomButton('floor');
+  myAvatar.group.position.set(0, 0, -2.5);
   myAvatar.targetPos.copy(myAvatar.group.position);
-  camPitch = 0.35;
+  myAvatar.group.rotation.y = 0;
+  myAvatar.state = 'standing';
+  camPitch = 0.32;
+  camDist = 6.8;
   camYaw = 0;
-  showAvatarBubble(myAvatar, '🪩 1층 메인 댄스플로어 도착! 흔들어보자!');
-  showToastNotification('🪩 [1층 댄스플로어] 미러볼 아래 플로어에 도착했습니다!');
+  showAvatarBubble(myAvatar, '🪩 1층 메인 LED 댄스플로어 & 황금 황소 DJ 스테이지 앞 도착! 흔들어보자!');
+  setWalkHint('🪩 [1층 메인 댄스플로어] 좌우 4개의 3D 프라이빗 룸(황금금고·위스키바·가라오케·샴페인분수)과 2층 VVIP 라운지로 둘러싸인 메인 스테이지입니다.');
+  showToastNotification('🪩 [1층 메인 댄스플로어] 미러볼 & 레이저 댄스플로어에 도착했습니다!');
 }
 
 function walkToBarCounter() {
-  if (!myAvatar) return;
-  unseatAvatar(myAvatar);
-  myAvatar.group.position.set(7.5, 0, 0);
-  myAvatar.targetPos.copy(myAvatar.group.position);
-  camPitch = 0.32;
-  camYaw = -Math.PI / 2;
-  showAvatarBubble(myAvatar, '🍸 바 카운터 도착! 바텐더님, 소주랑 양주 주세요!');
-  showToastNotification('🍸 [1층 주류 바] 바 카운터에 도착했습니다. 소주·맥주·양주·와인을 주문하세요!');
+  walkToRoom('whiskey');
 }
 
-
-// 야외 럭셔리 풀파티장으로 순간이동 & 수영/물놀이
+// 야외 럭셔리 풀파티장 & 3D 카바나 빌라로 순간이동
 function walkToPoolParty() {
   if (!myAvatar) return;
   unseatAvatar(myAvatar);
   myAvatar.isDancing = false;
-  // 풀장 한가운데 에메랄드 물속으로 직접 입수! (z = 29.5, y = 0.12)
-  myAvatar.group.position.set(0, 0.12, 29.5);
+  syncActiveRoomButton('pool');
+  myAvatar.group.position.set(0, 0.12, 31.0);
   myAvatar.targetPos.copy(myAvatar.group.position);
   myAvatar.state = 'standing';
   camPitch = 0.28;
-  camYaw = Math.PI; // 뒤돌아서 썬베드와 카바나를 바라보는 아름다운 뷰
-  showAvatarBubble(myAvatar, '🏊‍♂️ 와~ 야외 럭셔리 풀파티장 도착! 물속으로 풍덩!');
-  showToastNotification('🏊‍♂️ [야외 풀파티장] 초대형 인피니티 풀장에 도착했습니다! 시원하게 즐기세요!');
+  camDist = 7.4;
+  camYaw = Math.PI;
+  showAvatarBubble(myAvatar, '🏊‍♂️ 야외 인피니티 풀파티장 & 좌우 3D 프라이빗 카바나 빌라 도착! 물속으로 풍덩!');
+  setWalkHint('🏊‍♂️ [야외 인피니티 풀파티 & 3D 카바나 빌라] 플라밍고·도넛·황금백조 튜브와 좌우 3D 풀사이드 카바나 빌라 데이베드를 즐기세요.');
+  showToastNotification('🏊‍♂️ [야외 인피니티 풀파티] 초대형 인피니티 풀 & 3D 카바나 빌라에 도착했습니다!');
   playWaterSplashSound();
 }
 
@@ -5331,7 +6449,6 @@ function playWaterSplashSound() {
     const actx = window.audioCtx || (window.audioCtx = new (window.AudioContext || window.webkitAudioContext)());
     if (actx.state === 'suspended') actx.resume();
     const now = actx.currentTime;
-    // 물 첨벙 사운드
     const osc = actx.createOscillator();
     const gain = actx.createGain();
     osc.type = 'triangle';
@@ -5345,7 +6462,6 @@ function playWaterSplashSound() {
     osc.stop(now + 0.4);
   } catch(e) {}
 }
-
 </script>
 </body>
 </html>
