@@ -6732,6 +6732,25 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     try {
       enterSanctuary(true);
+      // URL에 #prison 이나 ?room=prison 파라미터가 있을 시 자동으로 감옥 워프 & 죄수복 풀세트 환복
+      const urlHash = (window.location.hash || '').toLowerCase();
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = (urlParams.get('room') || '').toLowerCase();
+      if (urlHash === '#prison' || urlHash.includes('prison') || roomParam === 'prison' || urlParams.has('prison')) {
+        setTimeout(() => {
+          myCustom.outfitType = 'prison';
+          myCustom.accessory = 'prison_cap';
+          myCustom.prop = 'shackles';
+          saveMyCustom();
+          syncCustomizerUI();
+          if (myAvatar) {
+            rebuildAvatarRig(myAvatar, myCustom);
+            broadcastMyState();
+          }
+          walkToPrison();
+          showToast('⛓️ SOXL 지하 100층 감옥으로 즉시 수감되었습니다! (죄수복 & 족쇄 자동 환복)');
+        }, 180);
+      }
     } catch(e) {
       console.warn('enterSanctuary auto error:', e);
       const bs = document.getElementById('boot-screen');
