@@ -985,6 +985,7 @@ body.left-panel-open #virtual-dpad {
   <button type="button" class="fq-btn" data-room="whiskey" onclick="walkToRoom('whiskey')" style="border-color:#f59e0b;color:#fde68a;font-weight:800;">🥃 2룸: 월스트리트 위스키&amp;시가바</button>
   <button type="button" class="fq-btn" data-room="karaoke" onclick="walkToRoom('karaoke')" style="border-color:#ff007f;color:#ff9ebb;font-weight:800;">🎤 3룸: 하이퍼 네온 노래방</button>
   <button type="button" class="fq-btn" data-room="fountain" onclick="walkToRoom('fountain')" style="border-color:#eab85c;color:#fef08a;font-weight:800;">🥂 4룸: 황금 샴페인 분수</button>
+  <button type="button" class="fq-btn" data-room="prison" onclick="walkToRoom('prison')" style="border-color:#64748b;color:#e2e8f0;font-weight:800;background:rgba(30,41,59,0.55);">⛓️ 5룸: SOXL 지하 100층 감옥</button>
   <button type="button" class="fq-btn" data-room="vip2f" onclick="walkToRoom('vip2f')" style="border-color:#a855f7;color:#e9d5ff;font-weight:800;">🍾 2층: VVIP 펜트하우스&amp;자쿠지</button>
   <button type="button" class="fq-btn" data-room="pool" onclick="walkToRoom('pool')" style="border-color:#06b6d4;color:#67e8f9;font-weight:800;">🏊 야외 풀파티&amp;3D 카바나</button>
   <button type="button" class="fq-btn" data-room="floor" onclick="walkToRoom('floor')" style="border-color:#2ee59d;color:#9effd6;">🪩 1층 메인 플로어</button>
@@ -1122,8 +1123,9 @@ body.left-panel-open #virtual-dpad {
     </div>
   </div>
   <div class="cust-row">
-    <span class="cust-label">🧥 클럽 & 풀파티 의상 (8대 스타일)</span>
+    <span class="cust-label">🧥 클럽 & 풀파티 의상 (9대 스타일)</span>
     <div class="cust-chips" id="cust-outfit">
+      <button type="button" class="cust-chip" data-val="prison" onclick="updateCustom('outfitType','prison')">⛓️ SOXL 줄무늬 죄수복</button>
       <button type="button" class="cust-chip" data-val="swimwear" onclick="updateCustom('outfitType','swimwear')">🩳 풀파티 비치웨어</button>
       <button type="button" class="cust-chip" data-val="resort" onclick="updateCustom('outfitType','resort')">🩱 럭셔리 리조트룩</button>
       <button type="button" class="cust-chip" data-val="hawaiian" onclick="updateCustom('outfitType','hawaiian')">🌺 하와이안 셔츠</button>
@@ -1154,6 +1156,9 @@ body.left-panel-open #virtual-dpad {
       <button type="button" class="cust-chip" data-val="soju" onclick="updateCustom('prop','soju')">🟢 초록 소주병</button>
       <button type="button" class="cust-chip" data-val="whiskey" onclick="updateCustom('prop','whiskey')">🥃 양주 위스키</button>
       <button type="button" class="cust-chip" data-val="wine" onclick="updateCustom('prop','wine')">🍷 와인 글라스</button>
+      <button type="button" class="cust-chip" data-val="shackles" onclick="updateCustom('prop','shackles')">⛓️ 쇠사슬 족쇄</button>
+      <button type="button" class="cust-chip" data-val="spoon" onclick="updateCustom('prop','spoon')">🥄 탈옥용 숟가락</button>
+      <button type="button" class="cust-chip" data-val="bowl" onclick="updateCustom('prop','bowl')">🥣 눈물의 콩밥 식판</button>
       <button type="button" class="cust-chip" data-val="none" onclick="updateCustom('prop','none')">빈손</button>
     </div>
   </div>
@@ -1161,6 +1166,7 @@ body.left-panel-open #virtual-dpad {
     <span class="cust-label">👑 머리/얼굴 장식</span>
     <div class="cust-chips" id="cust-acc">
       <button type="button" class="cust-chip" data-val="none" onclick="updateCustom('accessory','none')">없음</button>
+      <button type="button" class="cust-chip" data-val="prison_cap" onclick="updateCustom('accessory','prison_cap')">🧢 줄무늬 죄수모</button>
       <button type="button" class="cust-chip" data-val="glasses" onclick="updateCustom('accessory','glasses')">👓 퀀트 금테안경</button>
       <button type="button" class="cust-chip" data-val="beret" onclick="updateCustom('accessory','beret')">🧢 트레이더 베레모</button>
       <button type="button" class="cust-chip" data-val="crown" onclick="updateCustom('accessory','crown')">👑 SOXL 500 금관</button>
@@ -1298,6 +1304,9 @@ body.left-panel-open #virtual-dpad {
       </button>
       <button type="button" class="dock-btn" data-room="fountain" id="dock-room4" onclick="walkToRoom('fountain')" title="제4룸: 황금 샴페인 분수 라운지로 이동!" style="border-color:#eab85c; color:#fef08a; font-weight:800; background:rgba(234,184,92,0.16);">
         <span>🥂</span><span class="label-txt">4룸:분수</span>
+      </button>
+      <button type="button" class="dock-btn highlight-prison" data-room="prison" id="dock-prison" onclick="walkToRoom('prison')" title="제5룸: SOXL 지하 100층 존버 감옥으로 수감! (단축키 J)" style="border-color:#64748b; color:#cbd5e1; font-weight:800; background:rgba(30,41,59,0.45);">
+        <span>⛓️</span><span class="label-txt">5룸:감옥</span><span class="key-badge">J</span>
       </button>
       <button type="button" class="dock-btn highlight-vip" data-room="vip2f" id="dock-vip" onclick="walkToRoom('vip2f')" title="2층 VVIP 스카이 펜트하우스 & 루프탑 자쿠지로 이동!" style="border-color:#a855f7; color:#e9d5ff; font-weight:800;">
         <span>🍾</span><span class="label-txt">2층VIP</span><span class="key-badge">6</span>
@@ -1568,6 +1577,7 @@ let poolWaterMesh = null;
 let flamingoFloat = null;
 let donutFloat = null;
 let goldenSwanFloat = null;
+let prisonSirenGroup = null;
 let underwaterLights = [];
 let lightModeIdx = 0;
 
@@ -1686,6 +1696,105 @@ function createNeonGridFloorTexture(accentHex = '#ec4899') {
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(4, 4);
   return tex;
+}
+
+// ⛓️ [SOXL 감옥] 줄무늬 죄수복 · 번호표 · 콘크리트 슬레이트 바닥 · 탈옥 낙서 텍스처
+let cachedPrisonStripeTex = null;
+function getPrisonStripeTexture() {
+  if (cachedPrisonStripeTex) return cachedPrisonStripeTex;
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.fillStyle = '#1e293b'; // 감옥 가로 줄무늬
+  for (let y = 0; y < 128; y += 32) {
+    ctx.fillRect(0, y, 128, 16);
+  }
+  cachedPrisonStripeTex = new THREE.CanvasTexture(canvas);
+  cachedPrisonStripeTex.wrapS = THREE.RepeatWrapping;
+  cachedPrisonStripeTex.wrapT = THREE.RepeatWrapping;
+  cachedPrisonStripeTex.repeat.set(1, 4);
+  return cachedPrisonStripeTex;
+}
+
+let cachedPrisonBadgeTex = null;
+function getPrisonBadgeTexture() {
+  if (cachedPrisonBadgeTex) return cachedPrisonBadgeTex;
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 128, 64);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#0f172a';
+  ctx.strokeRect(2, 2, 124, 60);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 20px monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('SOXL-3X', 64, 22);
+  ctx.font = 'bold 24px monospace';
+  ctx.fillText('#0720', 64, 46);
+  cachedPrisonBadgeTex = new THREE.CanvasTexture(canvas);
+  return cachedPrisonBadgeTex;
+}
+
+function createPrisonFloorTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#181e26'; // 짙은 감옥 콘크리트 슬레이트
+  ctx.fillRect(0, 0, 256, 256);
+  ctx.strokeStyle = '#0d1217';
+  ctx.lineWidth = 3;
+  for (let x = 0; x <= 256; x += 64) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 256); ctx.stroke();
+  }
+  for (let y = 0; y <= 256; y += 64) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y); ctx.stroke();
+  }
+  for (let i = 0; i < 350; i++) {
+    const nx = Math.random() * 256;
+    const ny = Math.random() * 256;
+    ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.15)';
+    ctx.fillRect(nx, ny, 3, 3);
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(6, 5);
+  return tex;
+}
+
+function createPrisonGraffitiTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#141820';
+  ctx.fillRect(0, 0, 512, 256);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = 'bold 22px monospace';
+  ctx.fillText('SOXL $75... 탈출 희망을 버리지 마라', 20, 42);
+  ctx.fillStyle = '#ef4444';
+  ctx.font = 'bold 26px sans-serif';
+  ctx.fillText('⚠️ 물타기 500일차: 잔고 -78% ⚠️', 20, 92);
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 3;
+  let ox = 25;
+  for (let k = 0; k < 6; k++) {
+    const x = ox + k * 45;
+    const y = 135;
+    ctx.beginPath();
+    ctx.moveTo(x, y); ctx.lineTo(x + 30, y);
+    ctx.moveTo(x + 15, y); ctx.lineTo(x + 15, y + 40);
+    ctx.moveTo(x + 15, y + 20); ctx.lineTo(x + 30, y + 20);
+    ctx.moveTo(x, y + 20); ctx.lineTo(x, y + 40);
+    ctx.moveTo(x, y + 40); ctx.lineTo(x + 30, y + 40);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = 'italic 18px sans-serif';
+  ctx.fillText('"손절은 없다... 승리하거나 상장폐지되거나"', 20, 215);
+  return new THREE.CanvasTexture(canvas);
 }
 
 function create3DNeonSignBoard({
@@ -2688,12 +2797,22 @@ function buildSanctuaryArchitecture() {
   // 4. 천장 3D 콘서트 메가 트러스 돔 & 트리플 회전 미러볼 & 볼류메트릭 3D 레이저 콘
   buildOverhead3DTrussAndLasers();
 
-  // 5. [핵심 요청] 2D가 아닌 진짜 3D 입체 건축 룸 4개 동 (1층) + 2층 스카이 펜트하우스 룸!
+  // 5. [핵심 요청] 진짜 3D 입체 건축 룸 5개 동 (1층 4룸 + B1 SOXL 감옥) + 2층 스카이 펜트하우스 룸!
   buildRoom1GoldenVaultVIP();
   buildRoom2WhiskeyCigarBar();
   buildRoom3HyperNeonKaraoke();
   buildRoom4ChampagneFountainLounge();
   buildSecondFloorVIPSuite();
+  buildRoom5UndergroundPrison(); // ⛓️ [신규] SOXL 지하 100층 존버 감옥 룸 구축!
+
+  // 1층 메인 홀 -> B1 지하 감옥 수감 3D 아치웨이 포털
+  build3DArchwayPortal({
+    x: -9.5, z: -14.2, rotY: 0, width: 3.8, height: 4.8, colorHex: 0x64748b,
+    badge: 'B1 MAXIMUM SECURITY ENTRANCE',
+    title: '⛓️ B1: SOXL 지하 100층 감옥 입구',
+    sub: '3X 물림 수용소 · 가석방 불가 · 콩밥 식판 제공 (터치 시 즉시 수감)',
+    roomKey: 'prison'
+  });
 }
 
 function buildOverhead3DTrussAndLasers() {
@@ -3476,6 +3595,286 @@ function buildSecondFloorVIPSuite() {
 }
 
 // ============================================================================
+// ⛓️ [제5룸 · 지하 1층] 『SOXL 지하 100층 존버 감옥 (Sub-Level 100 Prison & Dungeon)』
+// 위치: 지하 Y = -6.5, x: -16.0 ~ +16.0, z: -18.5 ~ +5.5
+// ============================================================================
+function buildRoom5UndergroundPrison() {
+  const pGroup = new THREE.Group();
+  pGroup.position.set(0, -6.5, -6.5); // Y = -6.5 지하 1층
+
+  const prisonFloorTex = createPrisonFloorTexture();
+  const floorMat = new THREE.MeshStandardMaterial({
+    map: prisonFloorTex,
+    roughness: 0.85,
+    metalness: 0.15
+  });
+
+  // 1) 지하 감옥 플로어 (가로 32m x 세로 24m)
+  const pFloor = new THREE.Mesh(new THREE.BoxGeometry(32.0, 0.20, 24.0), floorMat);
+  pFloor.position.set(0, 0, 0);
+  pFloor.receiveShadow = true;
+  pGroup.add(pFloor);
+  walkableFloorMeshes.push(pFloor);
+
+  // 2) 감옥 외벽 4면 (두께 0.7m, 높이 5.4m)
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x141820, roughness: 0.92 });
+  const steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.85, roughness: 0.3 });
+
+  // 북쪽 벽
+  const wallN = new THREE.Mesh(new THREE.BoxGeometry(32.0, 5.4, 0.7), wallMat);
+  wallN.position.set(0, 2.7, -11.65);
+  // 남쪽 벽
+  const wallS = new THREE.Mesh(new THREE.BoxGeometry(32.0, 5.4, 0.7), wallMat);
+  wallS.position.set(0, 2.7, 11.65);
+  // 서쪽 벽
+  const wallW = new THREE.Mesh(new THREE.BoxGeometry(0.7, 5.4, 24.0), wallMat);
+  wallW.position.set(-15.65, 2.7, 0);
+  // 동쪽 벽
+  const wallE = new THREE.Mesh(new THREE.BoxGeometry(0.7, 5.4, 24.0), wallMat);
+  wallE.position.set(15.65, 2.7, 0);
+  pGroup.add(wallN, wallS, wallW, wallE);
+
+  // 천장 철제 빔 트러스
+  for (let bx = -12; bx <= 12; bx += 6) {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 23.5), steelMat);
+    beam.position.set(bx, 5.2, 0);
+    pGroup.add(beam);
+  }
+
+  // 3) 쇠창살(Iron Bars) 생성 헬퍼
+  function makeBars(x1, z1, x2, z2, h = 4.8, spacing = 0.32) {
+    const grp = new THREE.Group();
+    const dx = x2 - x1;
+    const dz = z2 - z1;
+    const len = Math.hypot(dx, dz);
+    const count = Math.max(1, Math.floor(len / spacing));
+    const ang = Math.atan2(dx, dz);
+
+    const topB = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, len), steelMat);
+    topB.position.set((x1 + x2) / 2, h - 0.08, (z1 + z2) / 2);
+    topB.rotation.y = ang;
+    const botB = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, len), steelMat);
+    botB.position.set((x1 + x2) / 2, 0.08, (z1 + z2) / 2);
+    botB.rotation.y = ang;
+    grp.add(topB, botB);
+
+    for (let i = 0; i <= count; i++) {
+      const t = i / count;
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, h, 10), steelMat);
+      bar.position.set(x1 + dx * t, h / 2, z1 + dz * t);
+      grp.add(bar);
+    }
+    return grp;
+  }
+
+  // 4) 제1독방 (VIP 70층 무기수 독방) — 영역: x: -15.2 ~ -4.5, z: -11.2 ~ -2.0
+  pGroup.add(makeBars(-15.2, -2.0, -7.5, -2.0));
+  pGroup.add(makeBars(-4.5, -11.2, -4.5, -2.0));
+  const cellDoor1 = makeBars(-7.5, -2.0, -5.2, -0.6);
+  pGroup.add(cellDoor1);
+
+  const doorSign1 = create3DNeonSignBoard({
+    width: 2.8, height: 0.65, depth: 0.15,
+    badge: 'MAXIMUM SECURITY',
+    title: '⛓️ 제1독방: 70층 무기수',
+    sub: '평단 $72 · 2년째 복역 중',
+    bg1: '#1e293b', bg2: '#0f172a', borderColor: '#ef4444', glowColor: 0xef4444
+  });
+  doorSign1.position.set(-6.3, 3.4, -2.0);
+  pGroup.add(doorSign1);
+
+  // 독방 철제 침대 (착석 가능)
+  const bedGroup1 = new THREE.Group();
+  bedGroup1.position.set(-12.5, 0.1, -8.0);
+  const bedFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.5, 1.2), steelMat);
+  bedFrame.position.y = 0.25;
+  const mattress = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.15, 1.1), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 }));
+  mattress.position.y = 0.55;
+  const pillow = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.12, 0.8), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 }));
+  pillow.position.set(-0.85, 0.66, 0);
+  bedGroup1.add(bedFrame, mattress, pillow);
+  pGroup.add(bedGroup1);
+
+  seats.push({
+    id: 'prison_bed_solo',
+    label: '70층 무기수 철침대',
+    pos: new THREE.Vector3(-12.5, -5.9, -14.5),
+    type: 'pew',
+    lookAngle: 0,
+    occupiedBy: null,
+    room: 'prison'
+  });
+
+  // 독방 세라믹 변기
+  const toilet = new THREE.Group();
+  toilet.position.set(-14.2, 0.1, -3.2);
+  const toiletBase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.7), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 }));
+  toiletBase.position.y = 0.225;
+  const toiletTank = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.3), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 }));
+  toiletTank.position.set(0, 0.65, -0.2);
+  toilet.add(toiletBase, toiletTank);
+  pGroup.add(toilet);
+
+  // 독방 벽 낙서 보드 (正 正 正, SOXL $75)
+  const grafMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 2.4), new THREE.MeshBasicMaterial({ map: createPrisonGraffitiTexture() }));
+  grafMesh.position.set(-9.8, 2.4, -11.25);
+  pGroup.add(grafMesh);
+
+  // 5) 제2합동수감실 (물타기 상습범 수용실) — 영역: x: 4.5 ~ 15.2, z: -11.2 ~ -2.0
+  pGroup.add(makeBars(7.5, -2.0, 15.2, -2.0));
+  pGroup.add(makeBars(4.5, -11.2, 4.5, -2.0));
+  const cellDoor2 = makeBars(5.2, -0.6, 7.5, -2.0);
+  pGroup.add(cellDoor2);
+
+  const doorSign2 = create3DNeonSignBoard({
+    width: 2.8, height: 0.65, depth: 0.15,
+    badge: 'GENERAL POPULATION',
+    title: '⛓️ 제2수감실: 물타기 구치소',
+    sub: '마이너스 60% 물타기 상습범',
+    bg1: '#1e293b', bg2: '#0f172a', borderColor: '#f59e0b', glowColor: 0xf59e0b
+  });
+  doorSign2.position.set(6.3, 3.4, -2.0);
+  pGroup.add(doorSign2);
+
+  // 2층 철제 침대 (착석 가능)
+  const bunkBed = new THREE.Group();
+  bunkBed.position.set(12.5, 0.1, -8.0);
+  const bunkLower = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 1.2), steelMat);
+  bunkLower.position.y = 0.225;
+  const bunkUpper = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.15, 1.2), steelMat);
+  bunkUpper.position.y = 1.85;
+  for (const [px, pz] of [[-1.1, -0.5], [1.1, -0.5], [-1.1, 0.5], [1.1, 0.5]]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 8), steelMat);
+    leg.position.set(px, 1.1, pz);
+    bunkBed.add(leg);
+  }
+  bunkBed.add(bunkLower, bunkUpper);
+  pGroup.add(bunkBed);
+
+  seats.push({
+    id: 'prison_bed_bunk',
+    label: '물타기 2층 침대',
+    pos: new THREE.Vector3(12.5, -5.9, -14.5),
+    type: 'pew',
+    lookAngle: Math.PI,
+    occupiedBy: null,
+    room: 'prison'
+  });
+
+  // 존버 평상 (좌식 착석 가능)
+  const benchMat = new THREE.MeshStandardMaterial({ color: 0x3f2e1e, roughness: 0.8 });
+  const bench = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.35, 1.6), benchMat);
+  bench.position.set(8.5, 0.18, -4.5);
+  pGroup.add(bench);
+
+  seats.push({
+    id: 'prison_bench_mat',
+    label: '존버 평상',
+    pos: new THREE.Vector3(8.5, -6.1, -11.0),
+    type: 'kneel',
+    lookAngle: Math.PI / 2,
+    occupiedBy: null,
+    room: 'prison'
+  });
+
+  // 6) 중앙 감시 초소 (Watchtower Desk) & 회전 사이렌 경광등
+  const towerGroup = new THREE.Group();
+  towerGroup.position.set(0, 0.1, -8.0);
+  const deskPlatform = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.6, 2.4), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 }));
+  deskPlatform.position.y = 0.3;
+  const desk = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.75, 0.9), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 }));
+  desk.position.set(0, 0.95, -0.4);
+  towerGroup.add(deskPlatform, desk);
+
+  // 상단 회전 사이렌 경광등 (Rotating Red Emergency Light)
+  prisonSirenGroup = new THREE.Group();
+  prisonSirenGroup.position.set(0, 2.1, -0.4);
+  const sirenBase = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.15, 16), steelMat);
+  const sirenDome = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.20, 0.22, 0.32, 16),
+    new THREE.MeshStandardMaterial({ color: 0xef4444, transparent: true, opacity: 0.75, roughness: 0.1 })
+  );
+  sirenDome.position.y = 0.22;
+  const reflector = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.22, 0.16), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+  reflector.position.y = 0.22;
+  prisonSirenGroup.add(sirenBase, sirenDome, reflector);
+
+  const sirenSpot = new THREE.SpotLight(0xff0000, 2.5, 18, Math.PI / 4, 0.4);
+  sirenSpot.position.set(0, 0.22, 0);
+  sirenSpot.target.position.set(8, 0.22, 0);
+  prisonSirenGroup.add(sirenSpot);
+  prisonSirenGroup.add(sirenSpot.target);
+
+  towerGroup.add(prisonSirenGroup);
+  pGroup.add(towerGroup);
+
+  // 7) SOXL 콩밥 배식대 (Prison Canteen Counter)
+  const canteen = new THREE.Group();
+  canteen.position.set(-7.5, 0.1, 4.5);
+  const counter = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.85, 1.2), steelMat);
+  counter.position.y = 0.425;
+  const cauldron = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.4, 0.6, 16), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 }));
+  cauldron.position.set(-1.2, 1.15, 0);
+  for (let t = 0; t < 4; t++) {
+    const trayD = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.04, 0.32), steelMat);
+    trayD.position.set(0.6, 0.88 + t * 0.05, 0);
+    canteen.add(trayD);
+  }
+  canteen.add(counter, cauldron);
+
+  const canteenSign = create3DNeonSignBoard({
+    width: 3.6, height: 0.65, depth: 0.15,
+    badge: 'PRISON CANTEEN',
+    title: '🥣 SOXL 콩밥 배식구',
+    sub: '1인 1식판 · 결식 및 반찬투정 금지',
+    bg1: '#1e293b', bg2: '#0f172a', borderColor: '#38bdf8', glowColor: 0x38bdf8
+  });
+  canteenSign.position.set(-7.5, 2.2, 4.5);
+  pGroup.add(canteen);
+  pGroup.add(canteenSign);
+
+  // 8) 북쪽 벽면 대형 메인 네온 간판
+  const prisonMainSign = create3DNeonSignBoard({
+    width: 13.5, height: 1.35, depth: 0.32,
+    badge: 'SUB-LEVEL 100 MAXIMUM SECURITY FACILITY',
+    title: '⛓️ SOXL 지하 100층 존버 교도소 🚨',
+    sub: '원금 회복 및 $100 돌파 전까지 절대 가석방 불가 · 손절자 출입 금지 구역',
+    bg1: '#090d14', bg2: '#1e1b2e', borderColor: '#ef4444', glowColor: 0xef4444
+  });
+  prisonMainSign.position.set(0, 4.3, -11.25);
+  pGroup.add(prisonMainSign);
+
+  // 9) 동남쪽 비밀 탈옥 땅굴 & 1층 복귀 포털
+  const escapeArea = new THREE.Group();
+  escapeArea.position.set(11.0, 0.1, 4.5);
+  const hole = new THREE.Mesh(new THREE.RingGeometry(0.7, 1.4, 16), new THREE.MeshStandardMaterial({ color: 0x0a0a0f, roughness: 0.9 }));
+  hole.position.set(0, 1.2, 6.7);
+  for (let k = 0; k < 6; k++) {
+    const brick = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.14), new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.9 }));
+    brick.position.set(-0.6 + Math.random() * 1.2, 0.06, 5.8 + Math.random() * 0.8);
+    brick.rotation.y = Math.random() * 2;
+    escapeArea.add(brick);
+  }
+  escapeArea.add(hole);
+
+  build3DArchwayPortal({
+    x: 11.0, z: -1.0, rotY: Math.PI, width: 3.8, height: 4.6, colorHex: 0x2ee59d,
+    badge: 'ESCAPE TO 1F DANCE FLOOR',
+    title: '🚨 SOXL 가석방 & 탈옥 게이트',
+    sub: '터치 시 1층 메가 댄스플로어로 즉시 탈옥 복귀!',
+    roomKey: 'floor'
+  });
+  pGroup.add(escapeArea);
+
+  // 10) 감옥 침침한 블루그레이 형광등 조명
+  const prisonAmbient = new THREE.PointLight(0x64748b, 1.2, 24);
+  prisonAmbient.position.set(0, 4.2, 0);
+  pGroup.add(prisonAmbient);
+
+  worldGroup.add(pGroup);
+}
+
+// ============================================================================
 // 4-C. 북쪽 메인 DJ 슈퍼 스테이지 & 황금 돌진 황소 동상 한 쌍 & 3D 멀티비전 월
 // ============================================================================
 function buildAltarAndBullSpire() {
@@ -3765,6 +4164,38 @@ function createPropMesh(propType) {
     );
     clasp.position.y = -0.05;
     pGroup.add(bagBody, handle, clasp);
+  } else if (propType === 'shackles') {
+    // ⛓️ [SOXL 감옥] 쇠사슬 족쇄 소품
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.88, roughness: 0.25 });
+    const ringL = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.014, 8, 16), ironMat);
+    ringL.position.set(-0.045, 0, 0);
+    const ringR = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.014, 8, 16), ironMat);
+    ringR.position.set(0.045, 0, 0);
+    for (let c = 0; c < 3; c++) {
+      const link = new THREE.Mesh(new THREE.TorusGeometry(0.028, 0.008, 6, 12), ironMat);
+      link.position.set(-0.025 + c * 0.025, -0.04 - (c % 2) * 0.01, 0);
+      link.rotation.y = (c % 2) * Math.PI / 2;
+      pGroup.add(link);
+    }
+    pGroup.add(ringL, ringR);
+  } else if (propType === 'spoon') {
+    // 🥄 [SOXL 감옥] 탈옥용 숟가락 소품
+    const spoonMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.92, roughness: 0.18 });
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.18, 0.008), spoonMat);
+    handle.position.y = 0.05;
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), spoonMat);
+    bowl.position.set(0, 0.14, 0.01);
+    bowl.scale.set(0.8, 1.25, 0.4);
+    pGroup.add(handle, bowl);
+  } else if (propType === 'bowl') {
+    // 🥣 [SOXL 감옥] 눈물의 콩밥 식판 소품
+    const trayMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.3 });
+    const tray = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.025, 0.14), trayMat);
+    const rice = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.025, 0.10), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 }));
+    rice.position.set(-0.04, 0.02, 0);
+    const pickle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.015, 8), new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 }));
+    pickle.position.set(0.05, 0.02, -0.025);
+    pGroup.add(tray, rice, pickle);
   }
   return pGroup;
 }
@@ -3781,9 +4212,15 @@ function buildHumanRig(cfg, isMe) {
   const skinMat = new THREE.MeshStandardMaterial({ color: 0xf5d8be, roughness: 0.62 });
   const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.78 });
   const mainClothMat = new THREE.MeshStandardMaterial({ color: outfitColor, roughness: 0.7 });
-  // 클럽 & 풀파티 신규 복장 매질 (8대 스타일)
+  // 클럽 & 풀파티 & SOXL 감옥 신규 복장 매질 (9대 스타일)
   const isSwim = (outfitType === 'swimwear' || outfitType === 'resort');
-  if (outfitType === 'metal') {
+  if (outfitType === 'prison') {
+    // ⛓️ [SOXL 감옥] 흑백 가로 줄무늬 죄수복
+    const pTex = getPrisonStripeTexture();
+    mainClothMat.map = pTex;
+    mainClothMat.color.setHex(0xffffff);
+    mainClothMat.roughness = 0.85;
+  } else if (outfitType === 'metal') {
     mainClothMat.color.setHex(0x111115);
     mainClothMat.roughness = 0.25;
     mainClothMat.metalness = 0.55; // 락스타 가죽 라이더 자켓 광택
@@ -3808,12 +4245,14 @@ function buildHumanRig(cfg, isMe) {
   }
 
   const pantsMat = new THREE.MeshStandardMaterial({
-    color: outfitType === 'metal' ? 0x09090c :
+    map: outfitType === 'prison' ? getPrisonStripeTexture() : null,
+    color: outfitType === 'prison' ? 0xffffff :
+           (outfitType === 'metal' ? 0x09090c :
            (outfitType === 'swimwear' ? 0x0284c7 :
            (outfitType === 'resort' ? 0xf8fafc :
            (outfitType === 'hawaiian' ? 0xd97706 :
-           (outfitType === 'suit' ? (gender === 'M' ? 0x1c2220 : outfitColor) : 0x1a212d)))),
-    roughness: outfitType === 'metal' ? 0.35 : 0.78,
+           (outfitType === 'suit' ? (gender === 'M' ? 0x1c2220 : outfitColor) : 0x1a212d))))),
+    roughness: outfitType === 'metal' ? 0.35 : (outfitType === 'prison' ? 0.85 : 0.78),
     metalness: outfitType === 'metal' ? 0.45 : (outfitType === 'glitter' ? 0.7 : 0.1)
   });
   const shoeMat = new THREE.MeshStandardMaterial({ color: gender === 'F' ? 0x362217 : 0x181412, roughness: 0.5 });
@@ -3910,6 +4349,15 @@ function buildHumanRig(cfg, isMe) {
   chest.scale.z = 0.78;
   chest.castShadow = true;
   torso.add(chest);
+
+  if (outfitType === 'prison') {
+    // ⛓️ [SOXL 감옥] 가슴 죄수 번호표 패치 (#SOXL-3X #0720)
+    const patchMat = new THREE.MeshBasicMaterial({ map: getPrisonBadgeTexture() });
+    const patch = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.08), patchMat);
+    patch.position.set(0, 0.28, -0.156);
+    patch.rotation.y = Math.PI;
+    torso.add(patch);
+  }
 
   if (outfitType === 'suit') {
     const shirtV = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.16, 0.04), whiteShirtMat);
@@ -4163,6 +4611,14 @@ function buildHumanRig(cfg, isMe) {
     wreath.rotation.x = Math.PI / 2 - 0.12;
     wreath.position.set(0, 0.35, 0);
     headGroup.add(wreath);
+  } else if (accType === 'prison_cap') {
+    // 🧢 [SOXL 감옥] 줄무늬 죄수 모자 (Prison Pillbox Cap)
+    const capTex = getPrisonStripeTexture();
+    const pCapMat = new THREE.MeshStandardMaterial({ map: capTex, color: 0xffffff, roughness: 0.8 });
+    const pCap = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.19, 0.10, 16), pCapMat);
+    pCap.position.set(0, 0.41, 0.02);
+    pCap.rotation.x = 0.08;
+    headGroup.add(pCap);
   }
 
   return {
@@ -4409,6 +4865,47 @@ function initNPCShareholders() {
       danceMode: 'cheers',
       msg: '동쪽 골든 카바나 빌라에서 야경 보며 SOXL $500 장기투자 축배를 듭니다 🌟🥃',
       custom: { gender: 'M', hairStyle: 0, hairColor: '#334155', outfitType: 'hawaiian', outfitColor: '#0d9488', prop: 'whiskey', accessory: 'none' }
+    },
+    // 19~23. ⛓️ [제5룸: SOXL 지하 100층 존버 감옥 수감자들] (y = -6.4m)
+    {
+      name: 'SOXL 70층 무기수',
+      x: -8.5, y: -6.4, z: -8.5,
+      rotY: 0.3,
+      danceMode: 'kneel',
+      msg: 'SOXL 72불에 풀매수하고 2년째 복역 중입니다... 원금 회복되면 출소합니다 😭⛓️',
+      custom: { gender: 'M', hairStyle: 0, hairColor: '#1e1814', outfitType: 'prison', outfitColor: '#ffffff', prop: 'shackles', accessory: 'prison_cap' }
+    },
+    {
+      name: '물타기 상습범',
+      x: 8.5, y: -6.4, z: -8.5,
+      rotY: -0.4,
+      danceMode: 'kneel',
+      msg: '-60%에 물타다 또 물려서 여기까지 잡혀왔습니다... 오늘도 콩밥이나 먹어야지 🥣',
+      custom: { gender: 'M', hairStyle: 2, hairColor: '#334155', outfitType: 'prison', outfitColor: '#ffffff', prop: 'bowl', accessory: 'none' }
+    },
+    {
+      name: '쇼생크 탈옥수',
+      x: 11.5, y: -6.4, z: -3.5,
+      rotY: -Math.PI / 2,
+      danceMode: 'jump',
+      msg: '이 숟가락으로 감옥 벽 파서 엔비디아 실적 발표날 탈옥할 겁니다! 🥄🔥',
+      custom: { gender: 'M', hairStyle: 3, hairColor: '#64748b', outfitType: 'prison', outfitColor: '#ffffff', prop: 'spoon', accessory: 'none' }
+    },
+    {
+      name: '존버 묵언수행자',
+      x: -12.5, y: -6.4, z: -4.5,
+      rotY: Math.PI,
+      danceMode: 'kneel',
+      msg: '계좌 삭제하고 마음을 비웠습니다... 10년 뒤에 깨워주십시오 🧘‍♂️',
+      custom: { gender: 'F', hairStyle: 1, hairColor: '#0f172a', outfitType: 'prison', outfitColor: '#ffffff', prop: 'none', accessory: 'prison_cap' }
+    },
+    {
+      name: 'SOXL 엄격한 교도관',
+      x: 0, y: -6.4, z: -6.5,
+      rotY: 0,
+      danceMode: 'bartender',
+      msg: '수감자 전원 정숙! SOXL $100 돌파 전까지 가석방은 일체 불허한다! 👮‍♂️🚨',
+      custom: { gender: 'M', hairStyle: 0, hairColor: '#0f172a', outfitType: 'suit', outfitColor: '#0f172a', prop: 'none', accessory: 'beret' }
     }
   ];
 
@@ -4802,6 +5299,10 @@ function sendChatMessage() {
 // 9. 카메라 조작, 5대 3D 룸/2층/풀장 클릭 이동, 포털 간판 & 액자 도슨트 클릭
 // ============================================================================
 function computeFloorElevation(x, z, currentY = 0) {
+  // 0) 지하 1층 SOXL 감옥 룸 구간
+  if (currentY < -3.0 || (myAvatar && myAvatar.group.position.y < -3.0)) {
+    return -6.4;
+  }
   // 1) 좌·우 듀얼 3D 그랜드 네온 계단 구간 (x = -11.2 또는 +11.2 부근, z = -0.5 ~ 6.5)
   if ((Math.abs(x - (-11.2)) < 1.35 || Math.abs(x - 11.2) < 1.35) && z >= -0.6 && z <= 6.6) {
     const t = Math.max(0, Math.min(1, (z - (-0.3)) / 6.8));
@@ -4896,9 +5397,16 @@ function setupPointerAndKeyboardControls() {
     const hits = raycaster.intersectObjects(walkableFloorMeshes, true);
     if (hits.length > 0) {
       const pt = hits[0].point;
-      let cx = Math.max(-24.8, Math.min(24.8, pt.x));
-      let cz = Math.max(-19.5, Math.min(50.0, pt.z));
-      let cy = pt.y > 2.6 ? 5.0 : computeFloorElevation(cx, cz, pt.y);
+      let cx, cz, cy;
+      if (pt.y < -3.0) {
+        cx = Math.max(-15.0, Math.min(15.0, pt.x));
+        cz = Math.max(-17.5, Math.min(4.5, pt.z));
+        cy = -6.4;
+      } else {
+        cx = Math.max(-24.8, Math.min(24.8, pt.x));
+        cz = Math.max(-19.5, Math.min(50.0, pt.z));
+        cy = pt.y > 2.6 ? 5.0 : computeFloorElevation(cx, cz, pt.y);
+      }
 
       // 클릭 지점 근처(1.25m 이내)에 빈 소파/바 스툴/데이베드가 있으면 즉시 착석!
       for (const s of seats) {
@@ -4975,7 +5483,8 @@ function setupPointerAndKeyboardControls() {
     if (e.key === '5') triggerClubDance();
     if (e.key.toLowerCase() === 't') triggerDanceMode('techno');
     if (e.key.toLowerCase() === 'r') triggerDanceMode('retro');
-    if (e.key.toLowerCase() === 'j' || e.code === 'Space') triggerDanceMode('jump');
+    if (e.key.toLowerCase() === 'j') walkToRoom('prison');
+    if (e.code === 'Space') triggerDanceMode('jump');
     if (e.key.toLowerCase() === 'p') walkToPoolParty();
     if (e.key === '6' || e.key.toLowerCase() === 'v') walkToVIPRoom();
     if (e.key === '7') walkToDanceFloor();
@@ -5490,6 +5999,55 @@ function updateVolumes() {
   if (padGain) padGain.gain.value = isBgmPlaying ? (vPad * 0.12) : 0;
 }
 
+// ⛓️ [SOXL 감옥] 무거운 강철 철창 문 쾅! 닫히는 소리 & 쇠사슬 짤랑임 웹오디오 사운드
+function playPrisonDoorClang() {
+  if (!audioCtx) return;
+  try {
+    const t = audioCtx.currentTime;
+    // 1. 강철 철창 타격음 (금속 쇳소리)
+    const osc1 = audioCtx.createOscillator();
+    const g1 = audioCtx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(320, t);
+    osc1.frequency.exponentialRampToValueAtTime(75, t + 0.35);
+    g1.gain.setValueAtTime(0.35, t);
+    g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+    osc1.connect(g1);
+    g1.connect(audioCtx.destination);
+    osc1.start(t);
+    osc1.stop(t + 0.85);
+
+    // 2. 묵직한 감옥 문 쾅! 저음 임팩트
+    const osc2 = audioCtx.createOscillator();
+    const g2 = audioCtx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(110, t);
+    osc2.frequency.exponentialRampToValueAtTime(38, t + 0.5);
+    g2.gain.setValueAtTime(0.45, t);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+    osc2.connect(g2);
+    g2.connect(audioCtx.destination);
+    osc2.start(t);
+    osc2.stop(t + 1.25);
+
+    // 3. 쇠사슬 짤랑거림 (고음 메탈 잔향)
+    for (let i = 0; i < 3; i++) {
+      const delay = t + 0.08 + i * 0.11;
+      const oscC = audioCtx.createOscillator();
+      const gC = audioCtx.createGain();
+      oscC.type = 'triangle';
+      oscC.frequency.setValueAtTime(1400 + i * 350, delay);
+      oscC.frequency.exponentialRampToValueAtTime(800, delay + 0.15);
+      gC.gain.setValueAtTime(0.08, delay);
+      gC.gain.exponentialRampToValueAtTime(0.0001, delay + 0.25);
+      oscC.connect(gC);
+      gC.connect(audioCtx.destination);
+      oscC.start(delay);
+      oscC.stop(delay + 0.26);
+    }
+  } catch (e) {}
+}
+
 function playBellChime() {
   if (!audioCtx) return;
   try {
@@ -5743,6 +6301,11 @@ function animate() {
     vaultWheelMesh.rotation.z = elapsed * 0.65;
   }
 
+  // ⛓️ 제5룸: SOXL 지하 100층 감옥 중앙 감시탑 적색 회전 사이렌 경광등
+  if (prisonSirenGroup) {
+    prisonSirenGroup.rotation.y = elapsed * 4.8;
+  }
+
   // 제3룸: 가라오케 파티룸 3D 이퀄라이저 바 & 핑크 미러볼 애니메이션
   if (karaokeMirrorBall) {
     karaokeMirrorBall.rotation.y = elapsed * 0.9;
@@ -5861,13 +6424,19 @@ function animate() {
     myAvatar.group.position.addScaledVector(forward, kz * speed);
     myAvatar.group.position.addScaledVector(right, kx * speed);
     myAvatar.isDancing = false;
-    myAvatar.group.position.x = Math.max(-24.8, Math.min(24.8, myAvatar.group.position.x));
-    myAvatar.group.position.z = Math.max(-19.5, Math.min(51.5, myAvatar.group.position.z));
-    myAvatar.group.position.y = computeFloorElevation(
-      myAvatar.group.position.x,
-      myAvatar.group.position.z,
-      myAvatar.group.position.y
-    );
+    if (myAvatar.group.position.y < -3.0) {
+      myAvatar.group.position.x = Math.max(-15.0, Math.min(15.0, myAvatar.group.position.x));
+      myAvatar.group.position.z = Math.max(-17.5, Math.min(4.5, myAvatar.group.position.z));
+      myAvatar.group.position.y = -6.4;
+    } else {
+      myAvatar.group.position.x = Math.max(-24.8, Math.min(24.8, myAvatar.group.position.x));
+      myAvatar.group.position.z = Math.max(-19.5, Math.min(51.5, myAvatar.group.position.z));
+      myAvatar.group.position.y = computeFloorElevation(
+        myAvatar.group.position.x,
+        myAvatar.group.position.z,
+        myAvatar.group.position.y
+      );
+    }
     myAvatar.targetPos.copy(myAvatar.group.position);
     myAvatar.group.rotation.y = Math.atan2(-kx, -kz) + camYaw;
   }
@@ -6378,6 +6947,8 @@ function walkToRoom(roomKey) {
     showAvatarBubble(myAvatar, '🥂 제4룸: 황금 샴페인 분수 & 테라스 룸 도착! 5단 골드 분수가 콸콸 쏟아지네!');
     setWalkHint('🥂 [제4룸: 황금 샴페인 분수 룸] 3.4m 높이 5단 황금 샴페인 분수 타워와 100→500 로드맵 갤러리 부스에서 우아하게 건배하세요.');
     showToastNotification('🥂 [제4룸: 황금 샴페인 분수 룸] 골든 파운틴 라운지에 도착했습니다!');
+  } else if (roomKey === 'prison') {
+    walkToPrison();
   } else if (roomKey === 'vip2f') {
     walkToVIPRoom();
   } else if (roomKey === 'pool') {
@@ -6385,6 +6956,25 @@ function walkToRoom(roomKey) {
   } else {
     walkToDanceFloor();
   }
+  broadcastMyState();
+}
+
+function walkToPrison() {
+  if (!myAvatar) return;
+  unseatAvatar(myAvatar);
+  myAvatar.isDancing = false;
+  syncActiveRoomButton('prison');
+  myAvatar.group.position.set(0, -6.4, -4.5);
+  myAvatar.targetPos.copy(myAvatar.group.position);
+  myAvatar.group.rotation.y = 0;
+  myAvatar.state = 'standing';
+  camPitch = 0.26;
+  camDist = 6.4;
+  camYaw = 0;
+  playPrisonDoorClang();
+  showAvatarBubble(myAvatar, '⛓️ 5룸: SOXL 지하 100층 존버 감옥 수감! 평단 $100 회복 전까지 절대 못 나간다...!');
+  setWalkHint('⛓️ [제5룸: SOXL 지하 100층 존버 감옥] 3X 레버리지 물림 수용소입니다. 70층 무기수 독방, 물타기 상습범 수감실, 사이렌 감시탑, 콩밥 배식대와 탈옥 땅굴이 있습니다. (단축키 J)');
+  showToastNotification('⛓️ [제5룸: SOXL 지하 감옥] 3X 레버리지 존버 수용소에 수감되었습니다!');
   broadcastMyState();
 }
 
