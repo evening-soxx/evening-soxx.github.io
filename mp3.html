@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B110E" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="어쩐지 뉴스라디오" />
+  <title>📻 어쩐지 뉴스 라디오 (현수 아나운서 MP3)</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <style>
+    :root {
+      --bg-main: #0b110e;
+      --bg-card: #121c17;
+      --bg-card-active: #182720;
+      --border-soft: #24352c;
+      --border-gold: #c89d42;
+      --gold: #eab85c;
+      --mint: #2ee59d;
+      --text-main: #f5f7f6;
+      --text-sub: #b5c2bc;
+      --text-muted: #6e7e77;
+    }
+
+    body.oled-black {
+      --bg-main: #000000;
+      --bg-card: #050505;
+      --bg-card-active: #0c0c0c;
+      --border-soft: #1a1a1a;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .radio-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 12px 14px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #55665e;
+      flex-shrink: 0;
+    }
+
+    .live-dot.on {
+      background: var(--mint);
+      box-shadow: 0 0 10px var(--mint);
+      animation: pulseDot 1.8s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.88); }
+    }
+
+    .brand-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0;
+      color: var(--gold);
+    }
+
+    .brand-sub {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      margin: 2px 0 0;
+    }
+
+    .clock-box {
+      text-align: right;
+    }
+
+    .clock-time {
+      font-size: 1.32rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-main);
+    }
+
+    .mini-badge {
+      display: inline-block;
+      font-size: 0.67rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(46, 229, 157, 0.14);
+      color: var(--mint);
+      margin-top: 2px;
+    }
+
+    .hero-power-btn {
+      width: 100%;
+      padding: 18px 16px;
+      border-radius: 16px;
+      border: 2px solid var(--gold);
+      background: linear-gradient(135deg, #1b2d24 0%, #111c16 100%);
+      color: var(--text-main);
+      font-size: 1.22rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .hero-power-btn.playing {
+      background: linear-gradient(135deg, #0f3828 0%, #092218 100%);
+      border-color: var(--mint);
+      color: var(--mint);
+    }
+
+    .now-playing-board {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-gold);
+      border-radius: 18px;
+      padding: 18px 16px;
+      min-height: 185px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .np-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .np-cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(234, 184, 92, 0.16);
+      border: 1px solid rgba(234, 184, 92, 0.45);
+      color: var(--gold);
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .np-meta {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .np-headline {
+      font-size: 1.44rem;
+      font-weight: 900;
+      line-height: 1.38;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin: 4px 0;
+      word-break: keep-all;
+    }
+
+    .np-summary {
+      font-size: 1.0rem;
+      line-height: 1.5;
+      color: var(--text-sub);
+      margin: 0;
+      word-break: keep-all;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold), var(--mint));
+      transition: width 0.25s linear;
+    }
+
+    .np-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 6px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .ctrl-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      color: var(--text-main);
+      padding: 12px 6px;
+      border-radius: 12px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .ctrl-btn:active {
+      background: var(--bg-card-active);
+    }
+
+    .ctrl-btn .ic {
+      font-size: 1.15rem;
+    }
+
+    .quote-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .q-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+
+    .q-sym {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .q-val {
+      font-size: 0.86rem;
+      font-weight: 900;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .up { color: #ff5c5c; }
+    .dn { color: #4da3ff; }
+
+    .section-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .queue-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-height: 440px;
+      overflow-y: auto;
+    }
+
+    .q-news-row {
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .q-news-row.current {
+      border-color: var(--gold);
+      background: rgba(234, 184, 92, 0.14);
+    }
+
+    .qn-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.71rem;
+      color: var(--text-muted);
+    }
+
+    .qn-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.38;
+      word-break: keep-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="radio-wrap">
+    <header class="top-bar">
+      <div class="brand-box">
+        <div class="live-dot" id="liveDot"></div>
+        <div>
+          <h1 class="brand-title">📻 어쩐지 뉴스 라디오 (현수 앵커 MP3)</h1>
+          <p class="brand-sub" id="syncStatusTxt">통짜 MP3 연속 재생 · 버벅임 0% · 화면 꺼도 재생</p>
+        </div>
+      </div>
+      <div class="clock-box">
+        <div class="clock-time" id="clockTime">00:00:00</div>
+        <span class="mini-badge" id="editionBadge">최신판 로드 중</span>
+      </div>
+    </header>
+
+    <button type="button" class="hero-power-btn" id="btnPower">
+      <span id="powerIcon">▶️</span>
+      <span id="powerText">터치하여 현수 아나운서 뉴스 라디오 켜기</span>
+    </button>
+
+    <!-- 실제 단일 MP3 오디오 엘리먼트 (화면 잠금/백그라운드에서도 끊김 없이 연속 재생) -->
+    <audio id="radioAudio" preload="auto" loop playsinline></audio>
+
+    <section class="now-playing-board" aria-live="polite">
+      <div>
+        <div class="np-top-row">
+          <span class="np-cat-pill" id="npCategory">📻 현수 아나운서 브리핑</span>
+          <span class="np-meta" id="npSourceTime">통짜 MP3 방식 · 버벅임 제로</span>
+        </div>
+        <h2 class="np-headline" id="npHeadline">위 재생 버튼을 누르시면 미증시 방송과 동일한 현수 아나운서 목소리로 연속 재생됩니다.</h2>
+        <p class="np-summary" id="npSummary">단일 MP3 음성파일을 통째로 재생하므로 폰 화면을 꺼놓아도(잠금화면에서도) 여자 기계음이나 버벅거림 없이 라디오처럼 계속 들으실 수 있습니다.</p>
+      </div>
+      <div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <div class="np-footer">
+          <span id="npTrackInfo">대기 중</span>
+          <span id="npTimeInfo">00:00 / 00:00</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="control-grid">
+      <button type="button" class="ctrl-btn" id="btnPrev">
+        <span class="ic">⏮</span>
+        <span>이전 뉴스</span>
+      </button>
+      <button type="button" class="ctrl-btn" id="btnNext">
+        <span class="ic">⏭</span>
+        <span>다음 뉴스</span>
+      </button>
+      <button type="button" class="ctrl-btn" id="btnSpeed">
+        <span class="ic">🗣</span>
+        <span id="speedLabel">속도 1.0x</span>
+      </button>
+      <button type="button" class="ctrl-btn" id="btnOled">
+        <span class="ic">🌙</span>
+        <span>절전 블랙</span>
+      </button>
+    </div>
+
+    <div class="quote-strip">
+      <div class="q-item">
+        <div class="q-sym">QQQ (나스닥24시)</div>
+        <div class="q-val" id="qQqq">--</div>
+      </div>
+      <div class="q-item">
+        <div class="q-sym">SOXL (반도체3X)</div>
+        <div class="q-val" id="qSoxl">--</div>
+      </div>
+      <div class="q-item">
+        <div class="q-sym">NVDA (엔비디아)</div>
+        <div class="q-val" id="qNvda">--</div>
+      </div>
+      <div class="q-item">
+        <div class="q-sym">USDT (테더환율)</div>
+        <div class="q-val" id="qUsdt">--</div>
+      </div>
+    </div>
+
+    <section class="section-box">
+      <div class="section-label">
+        <span>📋 이번 시간 수록 뉴스 트랙 (터치하면 해당 뉴스로 즉시 이동)</span>
+        <button type="button" id="btnReloadMeta" style="background:none;border:none;color:var(--gold);font-size:0.75rem;font-weight:800;cursor:pointer;">↻ 최신 음성파일 확인</button>
+      </div>
+      <div class="queue-list" id="trackList">
+        <div style="padding:20px;text-align:center;color:var(--text-muted);">뉴스 라디오 목록을 불러오는 중...</div>
+      </div>
+    </section>
+
+    <div style="text-align:center;margin-top:4px;">
+      <a href="./index.html" style="color:var(--text-muted);font-size:0.8rem;text-decoration:none;font-weight:700;">← 『어쩐지저녁의 SOXX』 메인 보드로 이동</a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const audio = document.getElementById("radioAudio");
+      const speeds = [0.95, 1.0, 1.08, 1.18];
+      let speedIdx = 1;
+      let cues = [];
+      let currentCueIdx = -1;
+      let loadedUpdatedAt = "";
+      let oledBlack = localStorage.getItem("evening_radio_oled") === "1";
+
+      if (oledBlack) document.body.classList.add("oled-black");
+
+      function fmtSec(sec) {
+        if (!sec || isNaN(sec) || sec < 0) return "00:00";
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      }
+
+      function updateMediaSession(cue) {
+        if ("mediaSession" in navigator && cue) {
+          try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: cue.title || "어쩐지 뉴스 라디오",
+              artist: `${cue.category || "실시간 뉴스"} · ${cue.source || "현수 아나운서"}`,
+              album: "어쩐지의 미국 증시 라이브",
+            });
+            navigator.mediaSession.setActionHandler("play", () => audio.play());
+            navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+            navigator.mediaSession.setActionHandler("nexttrack", () => jumpToCue(currentCueIdx + 1));
+            navigator.mediaSession.setActionHandler("previoustrack", () => jumpToCue(currentCueIdx - 1));
+          } catch (_) {}
+        }
+      }
+
+      let currentBlobUrl = null;
+
+      async function loadRadioPackage(forceReloadAudio = false) {
+        try {
+          const ts = Date.now();
+          const r = await fetch(`./latest_news_radio.json?t=${ts}`, { cache: "no-store" });
+          if (!r.ok) return;
+          const data = await r.json();
+          if (!data || !Array.isArray(data.cues)) return;
+
+          const isNewEdition = loadedUpdatedAt !== data.updated_at;
+          loadedUpdatedAt = data.updated_at || "";
+          cues = data.cues;
+
+          document.getElementById("editionBadge").textContent = `${data.updated_hm || "최신"} 제작판 (${data.track_count || cues.length}트랙)`;
+          document.getElementById("syncStatusTxt").textContent =
+            `음성파일 버퍼링 중... (${data.updated_at})`;
+
+          if (isNewEdition || forceReloadAudio || !audio.src) {
+            const wasPlaying = !audio.paused;
+            const mp3Resp = await fetch(`./latest_news_radio.mp3?v=${encodeURIComponent(loadedUpdatedAt || ts)}`, { cache: "no-store" });
+            if (mp3Resp.ok) {
+              const blob = await mp3Resp.blob();
+              if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+              currentBlobUrl = URL.createObjectURL(blob);
+              audio.src = currentBlobUrl;
+              audio.playbackRate = speeds[speedIdx];
+              document.getElementById("syncStatusTxt").textContent =
+                `✅ 폰 메모리에 통째로 다운로드 완료 (${data.updated_hm} 제작판 · 끊김 0%)`;
+              if (wasPlaying) {
+                audio.play().catch(() => {});
+              }
+            }
+          }
+
+          renderTrackList();
+          if (currentCueIdx < 0 && cues.length > 0) {
+            applyCueToUI(0);
+          }
+        } catch (_) {}
+      }
+
+      function applyCueToUI(idx) {
+        if (!cues.length) return;
+        const safeIdx = Math.max(0, Math.min(cues.length - 1, idx));
+        currentCueIdx = safeIdx;
+        const c = cues[safeIdx];
+        document.getElementById("npCategory").textContent = c.category || "📻 뉴스 브리핑";
+        document.getElementById("npSourceTime").textContent = c.source || "현수 아나운서";
+        document.getElementById("npHeadline").textContent = c.title || "";
+        document.getElementById("npSummary").textContent = c.summary || "";
+        document.getElementById("npTrackInfo").textContent = `트랙 ${safeIdx + 1} / ${cues.length}`;
+        updateMediaSession(c);
+
+        document.querySelectorAll("#trackList .q-news-row").forEach((el, i) => {
+          el.classList.toggle("current", i === safeIdx);
+        });
+      }
+
+      function jumpToCue(idx) {
+        if (!cues.length) return;
+        const target = (idx + cues.length) % cues.length;
+        const cue = cues[target];
+        if (!cue) return;
+        audio.currentTime = Math.max(0, cue.start);
+        applyCueToUI(target);
+        if (audio.paused) {
+          audio.play().catch(() => {});
+        }
+      }
+
+      function renderTrackList() {
+        const el = document.getElementById("trackList");
+        if (!cues.length) return;
+        el.innerHTML = cues
+          .map(
+            (c, i) => `
+            <div class="q-news-row ${i === currentCueIdx ? "current" : ""}" data-idx="${i}">
+              <div class="qn-meta">
+                <span>#${i + 1} · ${c.category || ""} · ${c.source || ""}</span>
+                <span>${fmtSec(c.start)} ~ ${fmtSec(c.end)}</span>
+              </div>
+              <div class="qn-title">${c.title}</div>
+            </div>
+          `
+          )
+          .join("");
+
+        el.querySelectorAll(".q-news-row").forEach((row) => {
+          row.addEventListener("click", () => {
+            const idx = parseInt(row.getAttribute("data-idx") || "0", 10);
+            jumpToCue(idx);
+          });
+        });
+      }
+
+      function syncPowerUI() {
+        const btn = document.getElementById("btnPower");
+        const ic = document.getElementById("powerIcon");
+        const txt = document.getElementById("powerText");
+        const dot = document.getElementById("liveDot");
+        if (!audio.paused) {
+          btn.classList.add("playing");
+          ic.textContent = "⏸";
+          txt.textContent = "현수 아나운서 뉴스 라디오 재생 중 (터치 시 일시정지)";
+          dot.classList.add("on");
+        } else {
+          btn.classList.remove("playing");
+          ic.textContent = "▶️";
+          txt.textContent = "터치하여 현수 아나운서 뉴스 라디오 켜기";
+          dot.classList.remove("on");
+        }
+      }
+
+      audio.addEventListener("play", syncPowerUI);
+      audio.addEventListener("pause", syncPowerUI);
+      audio.addEventListener("timeupdate", () => {
+        const cur = audio.currentTime || 0;
+        const dur = audio.duration || 1;
+        document.getElementById("progressBarFill").style.width = `${Math.min(100, (cur / dur) * 100).toFixed(1)}%`;
+        document.getElementById("npTimeInfo").textContent = `${fmtSec(cur)} / ${fmtSec(dur)}`;
+
+        for (let i = 0; i < cues.length; i++) {
+          if (cur >= cues[i].start && cur <= cues[i].end + 0.6) {
+            if (currentCueIdx !== i) {
+              applyCueToUI(i);
+            }
+            break;
+          }
+        }
+      });
+
+      document.getElementById("btnPower").addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
+      });
+
+      document.getElementById("btnPrev").addEventListener("click", () => jumpToCue(currentCueIdx - 1));
+      document.getElementById("btnNext").addEventListener("click", () => jumpToCue(currentCueIdx + 1));
+
+      document.getElementById("btnSpeed").addEventListener("click", () => {
+        speedIdx = (speedIdx + 1) % speeds.length;
+        audio.playbackRate = speeds[speedIdx];
+        document.getElementById("speedLabel").textContent = `속도 ${speeds[speedIdx]}x`;
+      });
+
+      document.getElementById("btnOled").addEventListener("click", () => {
+        oledBlack = !oledBlack;
+        localStorage.setItem("evening_radio_oled", oledBlack ? "1" : "0");
+        document.body.classList.toggle("oled-black", oledBlack);
+      });
+
+      document.getElementById("btnReloadMeta").addEventListener("click", () => {
+        loadRadioPackage(true);
+      });
+
+      async function refreshLiveQuotes() {
+        try {
+          const [bnResp, ubResp] = await Promise.all([
+            fetch("https://fapi.binance.com/fapi/v1/ticker/24hr", { cache: "no-store" }).catch(() => null),
+            fetch("https://api.upbit.com/v1/ticker?markets=KRW-USDT", { cache: "no-store" }).catch(() => null),
+          ]);
+          if (bnResp && bnResp.ok) {
+            const rows = await bnResp.json();
+            const map = {};
+            rows.forEach((r) => { map[r.symbol] = r; });
+            const setQ = (id, sym) => {
+              const o = map[sym];
+              const el = document.getElementById(id);
+              if (!o || !el) return;
+              const p = parseFloat(o.lastPrice);
+              const pct = parseFloat(o.priceChangePercent);
+              el.textContent = `$${p.toFixed(2)} (${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%)`;
+              el.className = "q-val " + (pct >= 0 ? "up" : "dn");
+            };
+            setQ("qQqq", "QQQUSDT");
+            setQ("qSoxl", "SOXLUSDT");
+            setQ("qNvda", "NVDAUSDT");
+          }
+          if (ubResp && ubResp.ok) {
+            const u = await ubResp.json();
+            if (u[0]?.trade_price) {
+              document.getElementById("qUsdt").textContent = `${Math.round(u[0].trade_price).toLocaleString()}원`;
+            }
+          }
+        } catch (_) {}
+      }
+
+      setInterval(() => {
+        const d = new Date();
+        document.getElementById("clockTime").textContent =
+          `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+      }, 1000);
+
+      loadRadioPackage(true);
+      refreshLiveQuotes();
+      // 3분마다 새 MP3 버전이 올라왔는지 자동 확인
+      setInterval(() => loadRadioPackage(false), 180 * 1000);
+      setInterval(refreshLiveQuotes, 30 * 1000);
+    })();
+  </script>
+</body>
+</html>

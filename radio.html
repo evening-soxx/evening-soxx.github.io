@@ -486,6 +486,8 @@
         }
       }
 
+      let currentBlobUrl = null;
+
       async function loadRadioPackage(forceReloadAudio = false) {
         try {
           const ts = Date.now();
@@ -500,14 +502,22 @@
 
           document.getElementById("editionBadge").textContent = `${data.updated_hm || "최신"} 제작판 (${data.track_count || cues.length}트랙)`;
           document.getElementById("syncStatusTxt").textContent =
-            `최근 음성파일 업데이트: ${data.updated_at} · 현수 아나운서 통짜 MP3`;
+            `음성파일 버퍼링 중... (${data.updated_at})`;
 
           if (isNewEdition || forceReloadAudio || !audio.src) {
             const wasPlaying = !audio.paused;
-            audio.src = `./latest_news_radio.mp3?v=${encodeURIComponent(loadedUpdatedAt || ts)}`;
-            audio.playbackRate = speeds[speedIdx];
-            if (wasPlaying) {
-              audio.play().catch(() => {});
+            const mp3Resp = await fetch(`./latest_news_radio.mp3?v=${encodeURIComponent(loadedUpdatedAt || ts)}`, { cache: "no-store" });
+            if (mp3Resp.ok) {
+              const blob = await mp3Resp.blob();
+              if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+              currentBlobUrl = URL.createObjectURL(blob);
+              audio.src = currentBlobUrl;
+              audio.playbackRate = speeds[speedIdx];
+              document.getElementById("syncStatusTxt").textContent =
+                `✅ 폰 메모리에 통째로 다운로드 완료 (${data.updated_hm} 제작판 · 끊김 0%)`;
+              if (wasPlaying) {
+                audio.play().catch(() => {});
+              }
             }
           }
 
