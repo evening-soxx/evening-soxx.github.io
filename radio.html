@@ -8,7 +8,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="어쩐지 뉴스라디오" />
-  <title>📻 어쩐지 24시 실시간 뉴스 라디오 (초경량 부폰 전용)</title>
+  <title>📻 어쩐지 뉴스 라디오 (현수 아나운서 MP3)</title>
   <link rel="icon" type="image/svg+xml" href="./icon.svg" />
   <style>
     :root {
@@ -18,9 +18,7 @@
       --border-soft: #24352c;
       --border-gold: #c89d42;
       --gold: #eab85c;
-      --gold-bright: #ffe600;
       --mint: #2ee59d;
-      --crimson: #ff5c5c;
       --text-main: #f5f7f6;
       --text-sub: #b5c2bc;
       --text-muted: #6e7e77;
@@ -49,7 +47,7 @@
     }
 
     .radio-wrap {
-      max-width: 760px;
+      max-width: 720px;
       margin: 0 auto;
       padding: 12px 14px 48px;
       display: flex;
@@ -57,7 +55,6 @@
       gap: 12px;
     }
 
-    /* 상단 헤더 & 시계 */
     .top-bar {
       display: flex;
       align-items: center;
@@ -103,7 +100,7 @@
     }
 
     .brand-sub {
-      font-size: 0.72rem;
+      font-size: 0.73rem;
       color: var(--text-muted);
       margin: 2px 0 0;
     }
@@ -113,35 +110,23 @@
     }
 
     .clock-time {
-      font-size: 1.35rem;
+      font-size: 1.32rem;
       font-weight: 900;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.02em;
       color: var(--text-main);
     }
 
-    .status-badges {
-      display: flex;
-      gap: 5px;
-      justify-content: flex-end;
+    .mini-badge {
+      display: inline-block;
+      font-size: 0.67rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(46, 229, 157, 0.14);
+      color: var(--mint);
       margin-top: 2px;
     }
 
-    .mini-badge {
-      font-size: 0.66rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text-sub);
-    }
-
-    .mini-badge.ok {
-      background: rgba(46, 229, 157, 0.14);
-      color: var(--mint);
-    }
-
-    /* 초대형 라디오 ON/OFF 메인 버튼 */
     .hero-power-btn {
       width: 100%;
       padding: 18px 16px;
@@ -149,7 +134,7 @@
       border: 2px solid var(--gold);
       background: linear-gradient(135deg, #1b2d24 0%, #111c16 100%);
       color: var(--text-main);
-      font-size: 1.25rem;
+      font-size: 1.22rem;
       font-weight: 900;
       cursor: pointer;
       display: flex;
@@ -157,11 +142,6 @@
       justify-content: center;
       gap: 10px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-      transition: transform 0.1s ease;
-    }
-
-    .hero-power-btn:active {
-      transform: scale(0.985);
     }
 
     .hero-power-btn.playing {
@@ -170,13 +150,12 @@
       color: var(--mint);
     }
 
-    /* 현재 읽고 있는 뉴스 전광판 */
     .now-playing-board {
       background: var(--bg-card);
       border: 1.5px solid var(--border-gold);
       border-radius: 18px;
       padding: 18px 16px;
-      min-height: 195px;
+      min-height: 185px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -211,21 +190,37 @@
     }
 
     .np-headline {
-      font-size: 1.48rem;
+      font-size: 1.44rem;
       font-weight: 900;
       line-height: 1.38;
       letter-spacing: -0.02em;
       color: #ffffff;
-      margin: 2px 0;
+      margin: 4px 0;
       word-break: keep-all;
     }
 
     .np-summary {
-      font-size: 1.02rem;
-      line-height: 1.52;
+      font-size: 1.0rem;
+      line-height: 1.5;
       color: var(--text-sub);
       margin: 0;
       word-break: keep-all;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold), var(--mint));
+      transition: width 0.25s linear;
     }
 
     .np-footer {
@@ -233,19 +228,12 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--border-soft);
+      padding-top: 6px;
       font-size: 0.76rem;
       color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
     }
 
-    .np-link {
-      color: var(--gold);
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    /* 플레이어 컨트롤 바 */
     .control-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -258,7 +246,7 @@
       color: var(--text-main);
       padding: 12px 6px;
       border-radius: 12px;
-      font-size: 0.86rem;
+      font-size: 0.84rem;
       font-weight: 800;
       cursor: pointer;
       display: flex;
@@ -276,7 +264,36 @@
       font-size: 1.15rem;
     }
 
-    /* 채널 선택 탭 */
+    .quote-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .q-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+
+    .q-sym {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .q-val {
+      font-size: 0.86rem;
+      font-weight: 900;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .up { color: #ff5c5c; }
+    .dn { color: #4da3ff; }
+
     .section-box {
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
@@ -294,96 +311,6 @@
       justify-content: space-between;
     }
 
-    .channel-pills {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 7px;
-    }
-
-    .ch-btn {
-      padding: 11px 10px;
-      border-radius: 10px;
-      border: 1px solid var(--border-soft);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-sub);
-      font-size: 0.85rem;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .ch-btn.full-span {
-      grid-column: 1 / -1;
-    }
-
-    .ch-btn.active {
-      background: rgba(234, 184, 92, 0.18);
-      border-color: var(--gold);
-      color: #ffffff;
-    }
-
-    /* 설정 옵션 줄 (속도, 모드, 시세 포함, 절전) */
-    .options-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-top: 8px;
-    }
-
-    .opt-chip {
-      flex: 1 1 auto;
-      padding: 9px 10px;
-      border-radius: 9px;
-      border: 1px solid var(--border-soft);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-sub);
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .opt-chip.active {
-      border-color: var(--mint);
-      color: var(--mint);
-      background: rgba(46, 229, 157, 0.1);
-    }
-
-    /* 실시간 핵심 시세 미니 바 */
-    .quote-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
-
-    .q-item {
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      border-radius: 10px;
-      padding: 8px 6px;
-      text-align: center;
-    }
-
-    .q-sym {
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: var(--text-muted);
-    }
-
-    .q-val {
-      font-size: 0.88rem;
-      font-weight: 900;
-      margin-top: 2px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .up { color: #ff5c5c; }
-    .dn { color: #4da3ff; }
-
-    /* 뉴스 큐 리스트 */
     .queue-list {
       display: flex;
       flex-direction: column;
@@ -405,11 +332,7 @@
 
     .q-news-row.current {
       border-color: var(--gold);
-      background: rgba(234, 184, 92, 0.12);
-    }
-
-    .q-news-row.read-done {
-      opacity: 0.52;
+      background: rgba(234, 184, 92, 0.14);
     }
 
     .qn-meta {
@@ -420,15 +343,6 @@
       color: var(--text-muted);
     }
 
-    .qn-badge-new {
-      background: rgba(46, 229, 157, 0.18);
-      color: var(--mint);
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-weight: 800;
-      font-size: 0.66rem;
-    }
-
     .qn-title {
       font-size: 0.92rem;
       font-weight: 700;
@@ -436,84 +350,52 @@
       line-height: 1.38;
       word-break: keep-all;
     }
-
-    /* 키워드 맞춤 필터 */
-    .kw-bar {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .kw-input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--border-soft);
-      border-radius: 9px;
-      padding: 9px 11px;
-      color: var(--text-main);
-      font-size: 0.84rem;
-    }
-
-    .kw-btn {
-      background: var(--gold);
-      color: #0b110e;
-      border: none;
-      border-radius: 9px;
-      padding: 0 14px;
-      font-size: 0.82rem;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    @media (max-width: 480px) {
-      .np-headline { font-size: 1.32rem; }
-      .np-summary { font-size: 0.95rem; }
-    }
   </style>
 </head>
 <body>
   <div class="radio-wrap">
-    <!-- 상단 바 -->
     <header class="top-bar">
       <div class="brand-box">
         <div class="live-dot" id="liveDot"></div>
         <div>
-          <h1 class="brand-title">📻 어쩐지 24시 뉴스 라디오</h1>
-          <p class="brand-sub" id="syncStatusTxt">초경량 무부하 · 90초마다 실시간 속보 자동 수집</p>
+          <h1 class="brand-title">📻 어쩐지 뉴스 라디오 (현수 앵커 MP3)</h1>
+          <p class="brand-sub" id="syncStatusTxt">통짜 MP3 연속 재생 · 버벅임 0% · 화면 꺼도 재생</p>
         </div>
       </div>
       <div class="clock-box">
         <div class="clock-time" id="clockTime">00:00:00</div>
-        <div class="status-badges">
-          <span class="mini-badge" id="wakeBadge">화면유지 대기</span>
-          <span class="mini-badge" id="queueCountBadge">대기 0건</span>
-        </div>
+        <span class="mini-badge" id="editionBadge">최신판 로드 중</span>
       </div>
     </header>
 
-    <!-- 메인 전원 버튼 -->
     <button type="button" class="hero-power-btn" id="btnPower">
       <span id="powerIcon">▶️</span>
-      <span id="powerText">터치하여 실시간 뉴스 라디오 켜기</span>
+      <span id="powerText">터치하여 현수 아나운서 뉴스 라디오 켜기</span>
     </button>
 
-    <!-- 현재 읽고 있는 뉴스 전광판 -->
+    <!-- 실제 단일 MP3 오디오 엘리먼트 (화면 잠금/백그라운드에서도 끊김 없이 연속 재생) -->
+    <audio id="radioAudio" preload="auto" loop playsinline></audio>
+
     <section class="now-playing-board" aria-live="polite">
       <div>
         <div class="np-top-row">
-          <span class="np-cat-pill" id="npCategory">📻 라디오 대기 중</span>
-          <span class="np-meta" id="npSourceTime">위 버튼을 누르면 즉시 낭독을 시작합니다</span>
+          <span class="np-cat-pill" id="npCategory">📻 현수 아나운서 브리핑</span>
+          <span class="np-meta" id="npSourceTime">통짜 MP3 방식 · 버벅임 제로</span>
         </div>
-        <h2 class="np-headline" id="npHeadline">안 쓰는 부폰을 24시간 실시간 뉴스 라디오로 사용하세요.</h2>
-        <p class="np-summary" id="npSummary">컴퓨터를 완전히 꺼두어도 이 화면 하나만 열어두면 90초마다 새로 올라오는 최신 뉴스를 자동으로 감지해 아나운서 목소리로 계속 읽어줍니다.</p>
+        <h2 class="np-headline" id="npHeadline">위 재생 버튼을 누르시면 미증시 방송과 동일한 현수 아나운서 목소리로 연속 재생됩니다.</h2>
+        <p class="np-summary" id="npSummary">단일 MP3 음성파일을 통째로 재생하므로 폰 화면을 꺼놓아도(잠금화면에서도) 여자 기계음이나 버벅거림 없이 라디오처럼 계속 들으실 수 있습니다.</p>
       </div>
-      <div class="np-footer">
-        <span id="npProgressTxt">CPU 점유율 1% 미만 초경량 모드</span>
-        <a href="#" target="_blank" rel="noopener noreferrer" class="np-link" id="npOriginLink" hidden>원문 보기 ↗</a>
+      <div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <div class="np-footer">
+          <span id="npTrackInfo">대기 중</span>
+          <span id="npTimeInfo">00:00 / 00:00</span>
+        </div>
       </div>
     </section>
 
-    <!-- 컨트롤 버튼 4개 -->
     <div class="control-grid">
       <button type="button" class="ctrl-btn" id="btnPrev">
         <span class="ic">⏮</span>
@@ -523,18 +405,17 @@
         <span class="ic">⏭</span>
         <span>다음 뉴스</span>
       </button>
-      <button type="button" class="ctrl-btn" id="btnMarketBrief">
-        <span class="ic">📊</span>
-        <span>지금 시세듣기</span>
+      <button type="button" class="ctrl-btn" id="btnSpeed">
+        <span class="ic">🗣</span>
+        <span id="speedLabel">속도 1.0x</span>
       </button>
-      <button type="button" class="ctrl-btn" id="btnFetchNow">
-        <span class="ic">🔄</span>
-        <span>즉시 새로수집</span>
+      <button type="button" class="ctrl-btn" id="btnOled">
+        <span class="ic">🌙</span>
+        <span>절전 블랙</span>
       </button>
     </div>
 
-    <!-- 실시간 24시 핵심 시세 미니 전광판 -->
-    <div class="quote-strip" id="quoteStrip">
+    <div class="quote-strip">
       <div class="q-item">
         <div class="q-sym">QQQ (나스닥24시)</div>
         <div class="q-val" id="qQqq">--</div>
@@ -553,43 +434,13 @@
       </div>
     </div>
 
-    <!-- 채널 선택 & 라디오 옵션 -->
     <section class="section-box">
       <div class="section-label">
-        <span>📡 실시간 뉴스 채널 선택 (터치 즉시 변경)</span>
-        <span id="activeChannelLabel" style="color:var(--gold);">전체 통합</span>
+        <span>📋 이번 시간 수록 뉴스 트랙 (터치하면 해당 뉴스로 즉시 이동)</span>
+        <button type="button" id="btnReloadMeta" style="background:none;border:none;color:var(--gold);font-size:0.75rem;font-weight:800;cursor:pointer;">↻ 최신 음성파일 확인</button>
       </div>
-      <div class="channel-pills" id="channelPills">
-        <button type="button" class="ch-btn full-span active" data-ch="ALL">🌐 1+2번 전체 통합 (미증시·반도체 + 국내외 주요속보)</button>
-        <button type="button" class="ch-btn" data-ch="US_SEMI">🇺🇸 미증시 · 반도체 · AI</button>
-        <button type="button" class="ch-btn" data-ch="KR_ECON">📈 국내외 경제 · 산업</button>
-        <button type="button" class="ch-btn" data-ch="KR_BREAKING">⚡ 대한민국 종합 속보</button>
-        <button type="button" class="ch-btn" data-ch="GLOBAL_GEO">🌍 세계 · 지정학 · 유가</button>
-      </div>
-
-      <!-- 특별 키워드 지정 -->
-      <div class="kw-bar">
-        <input type="search" id="customKwInput" class="kw-input" placeholder="특정 키워드만 집중 청취 (예: 엔비디아, 삼성전자, 속보)" />
-        <button type="button" id="btnApplyKw" class="kw-btn">적용</button>
-      </div>
-
-      <!-- 세부 설정 칩 -->
-      <div class="options-row">
-        <button type="button" class="opt-chip active" id="btnModeToggle" title="새 속보 다 읽은 후 동작 방식">🔁 연속 순환 라디오</button>
-        <button type="button" class="opt-chip" id="btnSpeedToggle" title="낭독 속도 조절">🗣 속도 1.08x</button>
-        <button type="button" class="opt-chip active" id="btnIncludeQuote" title="뉴스 5건마다 실시간 시세 브리핑 삽입">📊 시세브리핑 포함</button>
-        <button type="button" class="opt-chip" id="btnOledMode" title="밤새 켜둘 때 번인·발열 방지 순수 블랙 모드">🌙 절전 블랙</button>
-      </div>
-    </section>
-
-    <!-- 수집된 실시간 뉴스 대기열 -->
-    <section class="section-box">
-      <div class="section-label">
-        <span>📋 실시간 수집 뉴스 목록 (터치하면 해당 뉴스부터 낭독)</span>
-        <button type="button" id="btnResetRead" style="background:none;border:none;color:var(--gold);font-size:0.74rem;font-weight:700;cursor:pointer;">읽음표시 초기화</button>
-      </div>
-      <div class="queue-list" id="newsQueueList">
-        <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.86rem;">실시간 뉴스를 불러오는 중입니다...</div>
+      <div class="queue-list" id="trackList">
+        <div style="padding:20px;text-align:center;color:var(--text-muted);">뉴스 라디오 목록을 불러오는 중...</div>
       </div>
     </section>
 
@@ -602,1050 +453,230 @@
     (function () {
       "use strict";
 
-      // ====================================================================
-      // 1. 상태 관리
-      // ====================================================================
-      const READ_STORAGE_KEY = "evening_radio_read_ids_v1";
-      let savedReadIds = [];
-      try {
-        savedReadIds = JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || "[]");
-      } catch (_) {
-        savedReadIds = [];
-      }
-      const readSet = new Set(savedReadIds);
+      const audio = document.getElementById("radioAudio");
+      const speeds = [0.95, 1.0, 1.08, 1.18];
+      let speedIdx = 1;
+      let cues = [];
+      let currentCueIdx = -1;
+      let loadedUpdatedAt = "";
+      let oledBlack = localStorage.getItem("evening_radio_oled") === "1";
 
-      const state = {
-        playing: false,
-        channel: localStorage.getItem("evening_radio_ch") || "ALL",
-        customKeyword: "",
-        continuousMode: localStorage.getItem("evening_radio_cont") !== "0", // true: 연속 순환, false: 새 속보 대기
-        speedIdx: 1,
-        speeds: [0.95, 1.0, 1.1, 1.25],
-        includeMarketBrief: localStorage.getItem("evening_radio_mkt") !== "0",
-        oledBlack: localStorage.getItem("evening_radio_oled") === "1",
-        newsList: [],
-        currentIdx: 0,
-        spokenSinceBrief: 0,
-        quotes: {
-          qqq: null, qqqPct: null,
-          soxl: null, soxlPct: null,
-          nvda: null, nvdaPct: null,
-          btc: null, btcPct: null,
-          wti: null, gold: null,
-          usdtKrw: null,
-        },
-        ttsEndpoint: "https://trust-modeling-introducing-believe.trycloudflare.com",
-        audioPlayer: new Audio(),
-        preloadAudio: new Audio(),
-        wakeLock: null,
-        audioCtx: null,
-        keepAliveOsc: null,
-        utterance: null,
-        watchdogTimer: null,
-        fetchTimer: null,
-        isSpeakingMarket: false,
-      };
+      if (oledBlack) document.body.classList.add("oled-black");
 
-      // ====================================================================
-      // 2. 채널별 검색 쿼리 & RSS 소스 정의 (0.4초 초고속 응답 보장 구성)
-      // ====================================================================
-      const CHANNEL_CONFIG = {
-        ALL: {
-          label: "전체 통합 (미증시+국내외속보)",
-          bingQueries: [
-            { q: "뉴욕증시 나스닥 엔비디아 반도체", cat: "🇺🇸 미증시·반도체" },
-            { q: "삼성전자 SK하이닉스 환율 금리", cat: "📈 경제·산업" },
-          ],
-          rssFeeds: [
-            { name: "연합뉴스 속보", url: "https://www.yna.co.kr/rss/news.xml", cat: "⚡ 연합속보" },
-            { name: "한국경제", url: "https://www.hankyung.com/feed/all-news", cat: "📈 한국경제" },
-            { name: "매일경제", url: "https://www.mk.co.kr/rss/40300001/", cat: "📈 매일경제" },
-          ],
-        },
-        US_SEMI: {
-          label: "미증시 · 반도체 · AI",
-          bingQueries: [
-            { q: "뉴욕증시 나스닥 S&P500 월가", cat: "🇺🇸 뉴욕증시" },
-            { q: "엔비디아 TSMC 브로드컴 AMD 마이크론", cat: "🔬 AI·반도체" },
-            { q: "테슬라 애플 마이크로소프트 연준 금리", cat: "🏛 빅테크·연준" },
-          ],
-          rssFeeds: [
-            { name: "한국경제 국제", url: "https://www.hankyung.com/feed/international", cat: "🇺🇸 월가속보" },
-            { name: "매일경제 국제", url: "https://www.mk.co.kr/rss/30300018/", cat: "🇺🇸 국제경제" },
-          ],
-        },
-        KR_ECON: {
-          label: "국내외 경제 · 산업",
-          bingQueries: [
-            { q: "삼성전자 SK하이닉스 HBM 반도체", cat: "🔬 한국반도체" },
-            { q: "코스피 환율 금리 한국은행 수출", cat: "📈 금융·거시" },
-          ],
-          rssFeeds: [
-            { name: "연합뉴스 경제", url: "https://www.yna.co.kr/rss/economy.xml", cat: "📈 연합경제" },
-            { name: "한국경제 증권", url: "https://www.hankyung.com/feed/finance", cat: "📈 한경증권" },
-            { name: "매일경제 경제", url: "https://www.mk.co.kr/rss/30100041/", cat: "📈 매경경제" },
-          ],
-        },
-        KR_BREAKING: {
-          label: "대한민국 종합 속보",
-          bingQueries: [
-            { q: "속보 연합뉴스 오늘 주요뉴스", cat: "⚡ 실시간속보" },
-          ],
-          rssFeeds: [
-            { name: "연합뉴스 전체속보", url: "https://www.yna.co.kr/rss/news.xml", cat: "⚡ 연합속보" },
-            { name: "연합뉴스 정치", url: "https://www.yna.co.kr/rss/politics.xml", cat: "🏛 정치속보" },
-            { name: "연합뉴스 사회", url: "https://www.yna.co.kr/rss/society.xml", cat: "📰 사회속보" },
-            { name: "한국경제 전체", url: "https://www.hankyung.com/feed/all-news", cat: "📰 주요뉴스" },
-          ],
-        },
-        GLOBAL_GEO: {
-          label: "세계 · 지정학 · 유가",
-          bingQueries: [
-            { q: "미국 중국 트럼프 관세 백악관", cat: "🌍 미중·관세" },
-            { q: "중동 이란 국제유가 전쟁 외교", cat: "🛢 중동·유가" },
-          ],
-          rssFeeds: [
-            { name: "연합뉴스 세계", url: "https://www.yna.co.kr/rss/international.xml", cat: "🌍 연합세계" },
-            { name: "한국경제 국제", url: "https://www.hankyung.com/feed/international", cat: "🌍 한경국제" },
-            { name: "매일경제 국제", url: "https://www.mk.co.kr/rss/30300018/", cat: "🌍 매경국제" },
-          ],
-        },
-      };
-
-      // ====================================================================
-      // 3. 유틸리티 & 한국어 아나운서 발음 변환기
-      // ====================================================================
-      function saveReadId(id) {
-        if (!id) return;
-        readSet.add(id);
-        const arr = Array.from(readSet).slice(-500);
-        try {
-          localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(arr));
-        } catch (_) {}
+      function fmtSec(sec) {
+        if (!sec || isNaN(sec) || sec < 0) return "00:00";
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
       }
 
-      function fetchWithTimeout(url, timeoutMs = 2800) {
-        const ctrl = new AbortController();
-        const tid = setTimeout(() => ctrl.abort(), timeoutMs);
-        return fetch(url, { cache: "no-store", signal: ctrl.signal }).finally(() => clearTimeout(tid));
-      }
-
-      function cleanTitle(raw) {
-        let s = String(raw || "")
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;|&apos;/g, "'")
-          .replace(/&amp;/g, "&")
-          .replace(/&lt;/g, "<")
-          .replace(/&gt;/g, ">")
-          .replace(/\s+/g, " ")
-          .trim();
-        // 언론사 꼬리표 제거
-        const dashIdx = s.lastIndexOf(" - ");
-        if (dashIdx > 8 && s.length - dashIdx <= 24) {
-          s = s.slice(0, dashIdx).trim();
-        }
-        return s;
-      }
-
-      function toSpokenKorean(text) {
-        let s = String(text || "");
-        const rules = [
-          [/\[속보\]/gi, "속보입니다. "],
-          [/\[단독\]/gi, "단독 보도입니다. "],
-          [/\[특파원[^\]]*\]/gi, ""],
-          [/\[[^\]]{1,16}\]/g, " "],
-          [/美/g, "미국 "], [/中/g, "중국 "], [/日/g, "일본 "], [/韓/g, "한국 "], [/歐/g, "유럽 "],
-          [/\bSOXL\b/gi, "에스오엑스엘"], [/\bSOXX\b/gi, "에스오엑스엑스"],
-          [/\bSMH\b/gi, "에스엠에이치"], [/\bQQQ\b/gi, "큐큐큐"], [/\bTQQQ\b/gi, "티큐큐큐"],
-          [/\bSPY\b/gi, "에스피와이"], [/\bS&P\s*500\b/gi, "에스앤피 오백"],
-          [/\bNVDA\b/gi, "엔비디아"], [/\bNVIDIA\b/gi, "엔비디아"],
-          [/\bTSLA\b/gi, "테슬라"], [/\bAAPL\b/gi, "애플"], [/\bMSFT\b/gi, "마이크로소프트"],
-          [/\bAMZN\b/gi, "아마존"], [/\bGOOGL\b/gi, "구글"], [/\bMETA\b/gi, "메타"],
-          [/\bAVGO\b/gi, "브로드컴"], [/\bMU\b/gi, "마이크론"], [/\bAMD\b/gi, "에이엠디"],
-          [/\bTSMC\b/gi, "티에스엠씨"], [/\bASML\b/gi, "에이에스엠엘"],
-          [/\bSK하이닉스\b/gi, "에스케이 하이닉스"], [/\bLG\b/gi, "엘지"],
-          [/\bHBM\d*[A-Z]?\b/gi, "에이치비엠"], [/\bDRAM\b/gi, "디램"],
-          [/\bAI\b/gi, "에이아이"], [/\bCEO\b/gi, "씨이오"], [/\bIPO\b/gi, "아이피오"],
-          [/\bFOMC\b/gi, "에프오엠씨"], [/\bFed\b/gi, "미 연준"],
-          [/\bCPI\b/gi, "소비자물가지수"], [/\bPPI\b/gi, "생산자물가지수"],
-          [/\bPCE\b/gi, "개인소비지출"], [/\bGDP\b/gi, "지디피"],
-          [/\bWTI\b/gi, "더블유티아이"], [/\bVIX\b/gi, "빅스"], [/\bIMF\b/gi, "아이엠에프"],
-          [/\+(\d)/g, "플러스 $1"], [/-(\d)/g, "마이너스 $1"],
-          [/%p\b/gi, "퍼센트포인트"], [/%/g, " 퍼센트"], [/\$/g, " 달러 "],
-          [/…|\.\.\.|ㆍ/g, ", "],
-          [/[“”"‘’'<>《》〈〉]/g, " "],
-          [/\s+/g, " "],
-        ];
-        for (const [pat, rep] of rules) {
-          s = s.replace(pat, rep);
-        }
-        return s.trim();
-      }
-
-      function makeItemId(title) {
-        const norm = String(title || "")
-          .replace(/\[[^\]]*\]/g, "")
-          .replace(/[^가-힣a-zA-Z0-9]/g, "")
-          .slice(0, 22)
-          .toLowerCase();
-        return norm || String(Date.now());
-      }
-
-      // ====================================================================
-      // 4. 3중 무중단 실시간 뉴스 크롤러 (Daum Jina + Bing RSS + 국내 주요언론 RSS)
-      // ====================================================================
-      async function fetchDaumViaJina(query, category, limit = 8) {
-        try {
-          const u = `https://r.jina.ai/https://search.daum.net/search?w=news&sort=recency&q=${encodeURIComponent(query)}`;
-          const r = await fetchWithTimeout(u, 2800);
-          if (!r.ok) return [];
-          const txt = await r.text();
-          const blocks = txt.split("\n*   ");
-          const out = [];
-          for (let i = 1; i < blocks.length; i++) {
-            const b = blocks[i];
-            const mPress = b.match(/\*\*([^*]+)\*\*\]\(https?:\/\/v\.daum\.net\/channel/);
-            const press = mPress ? mPress[1].trim() : "실시간 뉴스";
-            const mTitle = b.match(/\*\*\[([\s\S]+?)\]\((https?:\/\/v\.daum\.net\/v\/(\d{14})\d*)\)\*\*/);
-            if (!mTitle) continue;
-            const title = cleanTitle(mTitle[1].replace(/\*\*/g, ""));
-            if (title.length < 7) continue;
-            const link = mTitle[2];
-            const dt14 = mTitle[3];
-            const rest = b.slice(b.indexOf(mTitle[0]) + mTitle[0].length);
-            const mSum = rest.match(/\[([\s\S]+?)\]\(https?:\/\/v\.daum\.net\/v\/\d+\)/);
-            const summary = mSum
-              ? cleanTitle(mSum[1].replace(/\*\*/g, "")).slice(0, 180)
-              : "";
-
-            const yyyy = parseInt(dt14.slice(0, 4), 10);
-            const mm = parseInt(dt14.slice(4, 6), 10) - 1;
-            const dd = parseInt(dt14.slice(6, 8), 10);
-            const hh = parseInt(dt14.slice(8, 10), 10);
-            const mi = parseInt(dt14.slice(10, 12), 10);
-            const ss = parseInt(dt14.slice(12, 14), 10);
-            const ts = Math.floor((Date.UTC(yyyy, mm, dd, hh, mi, ss) - 9 * 3600 * 1000) / 1000);
-            const timeStr = `${dt14.slice(8, 10)}:${dt14.slice(10, 12)}`;
-
-            out.push({
-              id: makeItemId(title),
-              title,
-              summary,
-              source: press,
-              category,
-              timeStr,
-              timestamp: ts,
-              link,
+      function updateMediaSession(cue) {
+        if ("mediaSession" in navigator && cue) {
+          try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: cue.title || "어쩐지 뉴스 라디오",
+              artist: `${cue.category || "실시간 뉴스"} · ${cue.source || "현수 아나운서"}`,
+              album: "어쩐지의 미국 증시 라이브",
             });
-            if (out.length >= limit) break;
-          }
-          return out;
-        } catch (_) {
-          return [];
+            navigator.mediaSession.setActionHandler("play", () => audio.play());
+            navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+            navigator.mediaSession.setActionHandler("nexttrack", () => jumpToCue(currentCueIdx + 1));
+            navigator.mediaSession.setActionHandler("previoustrack", () => jumpToCue(currentCueIdx - 1));
+          } catch (_) {}
         }
       }
 
-      async function fetchBingViaRss2Json(query, category, limit = 8) {
+      async function loadRadioPackage(forceReloadAudio = false) {
         try {
-          const rssUrl = `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&setlang=ko&cc=KR&sortby=date&format=rss`;
-          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-          const r = await fetchWithTimeout(apiUrl, 2800);
-          if (!r.ok) return [];
+          const ts = Date.now();
+          const r = await fetch(`./latest_news_radio.json?t=${ts}`, { cache: "no-store" });
+          if (!r.ok) return;
           const data = await r.json();
-          const out = [];
-          (data.items || []).forEach((it) => {
-            let rawT = String(it.title || "").trim();
-            if (!rawT) return;
-            let src = "주요언론";
-            const dIdx = rawT.lastIndexOf(" - ");
-            if (dIdx > 6 && rawT.length - dIdx < 24) {
-              src = rawT.slice(dIdx + 3).trim();
-              rawT = rawT.slice(0, dIdx).trim();
-            }
-            const title = cleanTitle(rawT);
-            if (title.length < 7) return;
-            const summary = cleanTitle(String(it.description || "").replace(/<[^>]*>/g, " ")).slice(0, 170);
-            const pubRaw = String(it.pubDate || "").trim();
-            let dtMs = Date.parse(pubRaw.includes("T") ? pubRaw : pubRaw.replace(" ", "T") + "Z");
-            if (isNaN(dtMs)) dtMs = Date.now();
-            const ts = Math.floor(dtMs / 1000);
-            const kst = new Date((ts + 9 * 3600) * 1000);
-            const timeStr = `${String(kst.getUTCHours()).padStart(2, "0")}:${String(kst.getUTCMinutes()).padStart(2, "0")}`;
-            out.push({
-              id: makeItemId(title),
-              title,
-              summary,
-              source: src,
-              category,
-              timeStr,
-              timestamp: ts,
-              link: it.link || "#",
-            });
-          });
-          return out.slice(0, limit);
-        } catch (_) {
-          return [];
-        }
-      }
+          if (!data || !Array.isArray(data.cues)) return;
 
-      async function fetchDirectRssFeed(feedObj, limit = 10) {
-        try {
-          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedObj.url)}`;
-          const r = await fetchWithTimeout(apiUrl, 2600);
-          if (!r.ok) return [];
-          const data = await r.json();
-          const out = [];
-          (data.items || []).slice(0, limit).forEach((it) => {
-            const title = cleanTitle(it.title || "");
-            if (title.length < 7) return;
-            // 부고/인사/동정/포토 등 라디오 불필요 단신 제외
-            if (/^(\[부고\]|\[인사\]|\[동정\]|\[포토\]|\[화보\]|\[오늘의 운세\])/.test(title)) return;
-            const summary = cleanTitle(String(it.description || "").replace(/<[^>]*>/g, " ")).slice(0, 170);
-            const pubRaw = String(it.pubDate || "").trim();
-            let dtMs = Date.parse(pubRaw.includes("T") ? pubRaw : pubRaw.replace(" ", "T") + "Z");
-            if (isNaN(dtMs)) dtMs = Date.now();
-            if (dtMs > Date.now() + 1800 * 1000) dtMs -= 9 * 3600 * 1000;
-            const ts = Math.floor(dtMs / 1000);
-            const kst = new Date((ts + 9 * 3600) * 1000);
-            const timeStr = `${String(kst.getUTCHours()).padStart(2, "0")}:${String(kst.getUTCMinutes()).padStart(2, "0")}`;
-            out.push({
-              id: makeItemId(title),
-              title,
-              summary,
-              source: feedObj.name,
-              category: feedObj.cat,
-              timeStr,
-              timestamp: ts,
-              link: it.link || "#",
-            });
-          });
-          return out;
-        } catch (_) {
-          return [];
-        }
-      }
+          const isNewEdition = loadedUpdatedAt !== data.updated_at;
+          loadedUpdatedAt = data.updated_at || "";
+          cues = data.cues;
 
-      async function fetchLocalOrGithubFallback() {
-        try {
-          const r = await fetchWithTimeout("./api/state", 1200).catch(() => null);
-          if (r && r.ok) {
-            const st = await r.json();
-            if (Array.isArray(st.news)) {
-              return st.news.map((n) => ({
-                id: makeItemId(n.title),
-                title: n.title,
-                summary: n.ai_impact || "",
-                source: n.source || "실시간 속보",
-                category: n.category || "🇺🇸 미국증시",
-                timeStr: n.time_hm || "",
-                timestamp: n.ts || Math.floor(Date.now() / 1000),
-                link: "#",
-              }));
+          document.getElementById("editionBadge").textContent = `${data.updated_hm || "최신"} 제작판 (${data.track_count || cues.length}트랙)`;
+          document.getElementById("syncStatusTxt").textContent =
+            `최근 음성파일 업데이트: ${data.updated_at} · 현수 아나운서 통짜 MP3`;
+
+          if (isNewEdition || forceReloadAudio || !audio.src) {
+            const wasPlaying = !audio.paused;
+            audio.src = `./latest_news_radio.mp3?v=${encodeURIComponent(loadedUpdatedAt || ts)}`;
+            audio.playbackRate = speeds[speedIdx];
+            if (wasPlaying) {
+              audio.play().catch(() => {});
             }
           }
+
+          renderTrackList();
+          if (currentCueIdx < 0 && cues.length > 0) {
+            applyCueToUI(0);
+          }
         } catch (_) {}
-        return [];
       }
 
-      function sleepMs(ms) {
-        return new Promise((r) => setTimeout(r, ms));
+      function applyCueToUI(idx) {
+        if (!cues.length) return;
+        const safeIdx = Math.max(0, Math.min(cues.length - 1, idx));
+        currentCueIdx = safeIdx;
+        const c = cues[safeIdx];
+        document.getElementById("npCategory").textContent = c.category || "📻 뉴스 브리핑";
+        document.getElementById("npSourceTime").textContent = c.source || "현수 아나운서";
+        document.getElementById("npHeadline").textContent = c.title || "";
+        document.getElementById("npSummary").textContent = c.summary || "";
+        document.getElementById("npTrackInfo").textContent = `트랙 ${safeIdx + 1} / ${cues.length}`;
+        updateMediaSession(c);
+
+        document.querySelectorAll("#trackList .q-news-row").forEach((el, i) => {
+          el.classList.toggle("current", i === safeIdx);
+        });
       }
 
-      async function refreshAllNews(isManual = false) {
-        const statusEl = document.getElementById("syncStatusTxt");
-        if (statusEl && isManual) {
-          statusEl.textContent = "실시간 최신 속보를 긁어오는 중...";
+      function jumpToCue(idx) {
+        if (!cues.length) return;
+        const target = (idx + cues.length) % cues.length;
+        const cue = cues[target];
+        if (!cue) return;
+        audio.currentTime = Math.max(0, cue.start);
+        applyCueToUI(target);
+        if (audio.paused) {
+          audio.play().catch(() => {});
         }
+      }
 
-        const cfg = CHANNEL_CONFIG[state.channel] || CHANNEL_CONFIG.ALL;
-        const flat = [];
+      function renderTrackList() {
+        const el = document.getElementById("trackList");
+        if (!cues.length) return;
+        el.innerHTML = cues
+          .map(
+            (c, i) => `
+            <div class="q-news-row ${i === currentCueIdx ? "current" : ""}" data-idx="${i}">
+              <div class="qn-meta">
+                <span>#${i + 1} · ${c.category || ""} · ${c.source || ""}</span>
+                <span>${fmtSec(c.start)} ~ ${fmtSec(c.end)}</span>
+              </div>
+              <div class="qn-title">${c.title}</div>
+            </div>
+          `
+          )
+          .join("");
 
-        if (state.customKeyword) {
-          const kw = state.customKeyword;
-          const bItems = await fetchBingViaRss2Json(kw, `🔍 ${kw}`, 12);
-          flat.push(...bItems);
-          await sleepMs(200);
-          const dItems = await fetchDaumViaJina(kw, `🔍 ${kw}`, 10);
-          flat.push(...dItems);
+        el.querySelectorAll(".q-news-row").forEach((row) => {
+          row.addEventListener("click", () => {
+            const idx = parseInt(row.getAttribute("data-idx") || "0", 10);
+            jumpToCue(idx);
+          });
+        });
+      }
+
+      function syncPowerUI() {
+        const btn = document.getElementById("btnPower");
+        const ic = document.getElementById("powerIcon");
+        const txt = document.getElementById("powerText");
+        const dot = document.getElementById("liveDot");
+        if (!audio.paused) {
+          btn.classList.add("playing");
+          ic.textContent = "⏸";
+          txt.textContent = "현수 아나운서 뉴스 라디오 재생 중 (터치 시 일시정지)";
+          dot.classList.add("on");
         } else {
-          // 1) 로컬/오사카 서버 스냅샷(있을 경우 즉시 반영)
-          const localItems = await fetchLocalOrGithubFallback();
-          flat.push(...localItems);
-
-          // 2) rss2json 기반 Bing & 주요언론 공식 RSS 순차 호출 (200ms 간격으로 429 제한 100% 방지)
-          for (const qObj of (cfg.bingQueries || [])) {
-            const items = await fetchBingViaRss2Json(qObj.q, qObj.cat, 10);
-            flat.push(...items);
-            await sleepMs(180);
-          }
-          for (const fObj of (cfg.rssFeeds || [])) {
-            const items = await fetchDirectRssFeed(fObj, 10);
-            flat.push(...items);
-            await sleepMs(180);
-          }
+          btn.classList.remove("playing");
+          ic.textContent = "▶️";
+          txt.textContent = "터치하여 현수 아나운서 뉴스 라디오 켜기";
+          dot.classList.remove("on");
         }
-
-        if (flat.length > 0) {
-          const merged = [...flat, ...state.newsList];
-          const seen = new Set();
-          const deduped = [];
-          for (const item of merged) {
-            if (!item || !item.id || seen.has(item.id)) continue;
-            seen.add(item.id);
-            deduped.push(item);
-          }
-          deduped.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-          const prevTopId = state.newsList[0]?.id;
-          state.newsList = deduped.slice(0, 60);
-
-          // 새 속보 전용 대기 모드에서 조용히 대기 중일 때 새 속보가 들어왔으면 즉시 낭독 재개
-          const hasUnread = state.newsList.some((n) => !readSet.has(n.id));
-          const isIdle = (!window.speechSynthesis || !window.speechSynthesis.speaking) && state.audioPlayer.paused;
-          if (state.playing && isIdle && hasUnread) {
-            if (prevTopId && state.newsList[0]?.id !== prevTopId) {
-              playSoftChime();
-            }
-            speakNextItem();
-          }
-        }
-
-        const now = new Date();
-        const hm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-        const unreadCnt = state.newsList.filter((n) => !readSet.has(n.id)).length;
-        if (statusEl) {
-          statusEl.textContent = `최근 수집 ${hm} · 총 ${state.newsList.length}건 (새 속보 ${unreadCnt}건)`;
-        }
-        const qBadge = document.getElementById("queueCountBadge");
-        if (qBadge) {
-          qBadge.textContent = `새 속보 ${unreadCnt}건`;
-          qBadge.classList.toggle("ok", unreadCnt > 0);
-        }
-
-        renderQueueList();
       }
 
-      // ====================================================================
-      // 5. 실시간 24시 시세 수집 (Binance 24h & Upbit 공개 API — CORS 100% 허용)
-      // ====================================================================
+      audio.addEventListener("play", syncPowerUI);
+      audio.addEventListener("pause", syncPowerUI);
+      audio.addEventListener("timeupdate", () => {
+        const cur = audio.currentTime || 0;
+        const dur = audio.duration || 1;
+        document.getElementById("progressBarFill").style.width = `${Math.min(100, (cur / dur) * 100).toFixed(1)}%`;
+        document.getElementById("npTimeInfo").textContent = `${fmtSec(cur)} / ${fmtSec(dur)}`;
+
+        for (let i = 0; i < cues.length; i++) {
+          if (cur >= cues[i].start && cur <= cues[i].end + 0.6) {
+            if (currentCueIdx !== i) {
+              applyCueToUI(i);
+            }
+            break;
+          }
+        }
+      });
+
+      document.getElementById("btnPower").addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
+      });
+
+      document.getElementById("btnPrev").addEventListener("click", () => jumpToCue(currentCueIdx - 1));
+      document.getElementById("btnNext").addEventListener("click", () => jumpToCue(currentCueIdx + 1));
+
+      document.getElementById("btnSpeed").addEventListener("click", () => {
+        speedIdx = (speedIdx + 1) % speeds.length;
+        audio.playbackRate = speeds[speedIdx];
+        document.getElementById("speedLabel").textContent = `속도 ${speeds[speedIdx]}x`;
+      });
+
+      document.getElementById("btnOled").addEventListener("click", () => {
+        oledBlack = !oledBlack;
+        localStorage.setItem("evening_radio_oled", oledBlack ? "1" : "0");
+        document.body.classList.toggle("oled-black", oledBlack);
+      });
+
+      document.getElementById("btnReloadMeta").addEventListener("click", () => {
+        loadRadioPackage(true);
+      });
+
       async function refreshLiveQuotes() {
         try {
           const [bnResp, ubResp] = await Promise.all([
-            fetchWithTimeout("https://fapi.binance.com/fapi/v1/ticker/24hr", 2500).catch(() => null),
-            fetchWithTimeout("https://api.upbit.com/v1/ticker?markets=KRW-USDT,KRW-BTC", 2200).catch(() => null),
+            fetch("https://fapi.binance.com/fapi/v1/ticker/24hr", { cache: "no-store" }).catch(() => null),
+            fetch("https://api.upbit.com/v1/ticker?markets=KRW-USDT", { cache: "no-store" }).catch(() => null),
           ]);
-
           if (bnResp && bnResp.ok) {
             const rows = await bnResp.json();
             const map = {};
             rows.forEach((r) => { map[r.symbol] = r; });
-            const pick = (sym) => {
-              const obj = map[sym];
-              if (!obj) return [null, null];
-              return [parseFloat(obj.lastPrice), parseFloat(obj.priceChangePercent)];
+            const setQ = (id, sym) => {
+              const o = map[sym];
+              const el = document.getElementById(id);
+              if (!o || !el) return;
+              const p = parseFloat(o.lastPrice);
+              const pct = parseFloat(o.priceChangePercent);
+              el.textContent = `$${p.toFixed(2)} (${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%)`;
+              el.className = "q-val " + (pct >= 0 ? "up" : "dn");
             };
-            [state.quotes.qqq, state.quotes.qqqPct] = pick("QQQUSDT");
-            [state.quotes.soxl, state.quotes.soxlPct] = pick("SOXLUSDT");
-            [state.quotes.nvda, state.quotes.nvdaPct] = pick("NVDAUSDT");
-            [state.quotes.btc, state.quotes.btcPct] = pick("BTCUSDT");
-            [state.quotes.wti] = pick("CLUSDT");
-            [state.quotes.gold] = pick("XAUUSDT");
+            setQ("qQqq", "QQQUSDT");
+            setQ("qSoxl", "SOXLUSDT");
+            setQ("qNvda", "NVDAUSDT");
           }
-
           if (ubResp && ubResp.ok) {
-            const uRows = await ubResp.json();
-            uRows.forEach((u) => {
-              if (u.market === "KRW-USDT") state.quotes.usdtKrw = u.trade_price;
-            });
-          }
-
-          renderQuoteStrip();
-        } catch (_) {}
-      }
-
-      function renderQuoteStrip() {
-        const fmt = (elId, p, pct, isKrw = false) => {
-          const el = document.getElementById(elId);
-          if (!el || p === null || isNaN(p)) return;
-          if (isKrw) {
-            el.textContent = `${Math.round(p).toLocaleString()}원`;
-            el.className = "q-val";
-            return;
-          }
-          const sign = pct >= 0 ? "+" : "";
-          el.textContent = `$${p.toFixed(2)} (${sign}${(pct || 0).toFixed(1)}%)`;
-          el.className = "q-val " + (pct >= 0 ? "up" : "dn");
-        };
-        fmt("qQqq", state.quotes.qqq, state.quotes.qqqPct);
-        fmt("qSoxl", state.quotes.soxl, state.quotes.soxlPct);
-        fmt("qNvda", state.quotes.nvda, state.quotes.nvdaPct);
-        fmt("qUsdt", state.quotes.usdtKrw, 0, true);
-      }
-
-      function buildMarketBriefScript() {
-        const now = new Date();
-        const hh = now.getHours();
-        const mm = now.getMinutes();
-        const ampm = hh < 12 ? "오전" : "오후";
-        const h12 = hh % 12 || 12;
-        const parts = [`현재 시각 ${ampm} ${h12}시 ${mm}분 실시간 24시 시세 브리핑입니다.`];
-
-        if (state.quotes.qqq) {
-          const dir = (state.quotes.qqqPct || 0) >= 0 ? "상승" : "하락";
-          parts.push(`나스닥 백 큐큐큐 24시 시세는 ${state.quotes.qqq.toFixed(1)}달러로 ${Math.abs(state.quotes.qqqPct || 0).toFixed(2)}퍼센트 ${dir} 중입니다.`);
-        }
-        if (state.quotes.soxl) {
-          const dir = (state.quotes.soxlPct || 0) >= 0 ? "상승" : "하락";
-          parts.push(`반도체 3배 에스오엑스엘은 ${state.quotes.soxl.toFixed(2)}달러로 ${Math.abs(state.quotes.soxlPct || 0).toFixed(2)}퍼센트 ${dir} 중이며,`);
-        }
-        if (state.quotes.nvda) {
-          const dir = (state.quotes.nvdaPct || 0) >= 0 ? "오른" : "내린";
-          parts.push(`엔비디아는 ${Math.abs(state.quotes.nvdaPct || 0).toFixed(2)}퍼센트 ${dir} ${state.quotes.nvda.toFixed(2)}달러를 기록하고 있습니다.`);
-        }
-        if (state.quotes.btc) {
-          parts.push(`비트코인은 ${Math.round(state.quotes.btc).toLocaleString()}달러,`);
-        }
-        if (state.quotes.usdtKrw) {
-          parts.push(`업비트 테더 환율은 ${Math.round(state.quotes.usdtKrw).toLocaleString()}원입니다.`);
-        }
-        return parts.join(" ");
-      }
-
-      // ====================================================================
-      // 6. 화면 꺼짐 방지(WakeLock) & 오디오 절전 방지(WebAudio Keep-Alive)
-      // ====================================================================
-      async function enableWakeLock() {
-        const badge = document.getElementById("wakeBadge");
-        if ("wakeLock" in navigator) {
-          try {
-            state.wakeLock = await navigator.wakeLock.request("screen");
-            if (badge) {
-              badge.textContent = "화면꺼짐 방지 ON";
-              badge.classList.add("ok");
+            const u = await ubResp.json();
+            if (u[0]?.trade_price) {
+              document.getElementById("qUsdt").textContent = `${Math.round(u[0].trade_price).toLocaleString()}원`;
             }
-            state.wakeLock.addEventListener("release", () => {
-              if (badge) badge.classList.remove("ok");
-            });
-          } catch (_) {}
-        }
-      }
-
-      function enableAudioKeepAlive() {
-        try {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContext) return;
-          if (!state.audioCtx) {
-            state.audioCtx = new AudioContext();
-          }
-          if (state.audioCtx.state === "suspended") {
-            state.audioCtx.resume();
-          }
-          if (!state.keepAliveOsc) {
-            const osc = state.audioCtx.createOscillator();
-            const gain = state.audioCtx.createGain();
-            osc.type = "sine";
-            osc.frequency.value = 60;
-            gain.gain.value = 0.00005; // 귀에는 전혀 안 들리지만 스마트폰 오디오 세션을 깨워둠
-            osc.connect(gain);
-            gain.connect(state.audioCtx.destination);
-            osc.start();
-            state.keepAliveOsc = osc;
           }
         } catch (_) {}
       }
 
-      function playSoftChime() {
-        try {
-          if (!state.audioCtx) return;
-          const now = state.audioCtx.currentTime;
-          const osc = state.audioCtx.createOscillator();
-          const gain = state.audioCtx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(587.33, now); // D5
-          osc.frequency.setValueAtTime(880.0, now + 0.14); // A5
-          gain.gain.setValueAtTime(0.06, now);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
-          osc.connect(gain);
-          gain.connect(state.audioCtx.destination);
-          osc.start(now);
-          osc.stop(now + 0.56);
-        } catch (_) {}
-      }
+      setInterval(() => {
+        const d = new Date();
+        document.getElementById("clockTime").textContent =
+          `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+      }, 1000);
 
-      // ====================================================================
-      // 7. 미증시 낭독 아나운서(현수 ko-KR-HyunsuMultilingualNeural) <audio> 스트리밍 엔진
-      //    - 스마트폰 화면을 꺼놔도(잠금화면에서도) 라디오 앱처럼 백그라운드 연속 재생 지원!
-      // ====================================================================
-      function pickKoreanVoice() {
-        const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-        const koVoices = voices.filter((v) => /ko[-_]?KR|Korean|한국어/i.test(v.lang + " " + v.name));
-        if (!koVoices.length) return null;
-        return (
-          koVoices.find((v) => /Natural|Siri|Premium|Enhanced|Google/i.test(v.name)) ||
-          koVoices.find((v) => /Yuna|유나|Heami|SunHi|Hyunsu/i.test(v.name)) ||
-          koVoices[0]
-        );
-      }
-
-      function buildItemSpokenScript(item) {
-        if (!item) return "";
-        const spokenSource = toSpokenKorean(item.source || "실시간");
-        const spokenTitle = toSpokenKorean(item.title);
-        const spokenSum = item.summary ? toSpokenKorean(item.summary) : "";
-        return spokenSum
-          ? `${spokenSource} 소식입니다. ${spokenTitle}. ${spokenSum}`
-          : `${spokenSource} 속보입니다. ${spokenTitle}.`;
-      }
-
-      function buildHyunsuTtsUrl(scriptText) {
-        const clean = String(scriptText || "").trim().slice(0, 650);
-        return `${state.ttsEndpoint}/tts?preset=hyunsu&text=${encodeURIComponent(clean)}`;
-      }
-
-      function preloadNextItemAudio() {
-        if (!state.newsList.length) return;
-        let nextIdx = state.newsList.findIndex((n) => !readSet.has(n.id));
-        if (nextIdx === -1) {
-          nextIdx = state.currentIdx % state.newsList.length;
-        }
-        const nextItem = state.newsList[nextIdx];
-        if (!nextItem) return;
-        const nextScript = buildItemSpokenScript(nextItem);
-        if (nextScript && state.ttsEndpoint) {
-          state.preloadAudio.src = buildHyunsuTtsUrl(nextScript);
-          state.preloadAudio.load();
-        }
-      }
-
-      function updateMediaSessionMetadata(title, artist) {
-        if ("mediaSession" in navigator) {
-          try {
-            navigator.mediaSession.metadata = new MediaMetadata({
-              title: title || "어쩐지 24시 실시간 뉴스 라디오",
-              artist: artist || "현수 아나운서 (미증시 라이브 보이스)",
-              album: "어쩐지의 미국 증시 라이브",
-            });
-            navigator.mediaSession.setActionHandler("play", () => startRadio());
-            navigator.mediaSession.setActionHandler("pause", () => stopRadio());
-            navigator.mediaSession.setActionHandler("nexttrack", () => speakNextItem());
-            navigator.mediaSession.setActionHandler("previoustrack", () => {
-              state.currentIdx = Math.max(0, state.currentIdx - 1);
-              speakNextItem();
-            });
-          } catch (_) {}
-        }
-      }
-
-      function updateNowPlayingUI(cat, meta, headline, summary, link) {
-        document.getElementById("npCategory").textContent = cat || "📻 실시간 속보";
-        document.getElementById("npSourceTime").textContent = meta || "";
-        document.getElementById("npHeadline").textContent = headline || "";
-        document.getElementById("npSummary").textContent = summary || "추가 요약 본문이 없는 단신 속보입니다.";
-        const linkEl = document.getElementById("npOriginLink");
-        if (link && link !== "#") {
-          linkEl.href = link;
-          linkEl.hidden = false;
-        } else {
-          linkEl.hidden = true;
-        }
-        updateMediaSessionMetadata(headline, `${cat || "뉴스"} · ${meta || "현수 앵커"}`);
-      }
-
-      function speakFallbackBrowserTts(rawText, onDone) {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(rawText);
-        u.lang = "ko-KR";
-        u.rate = state.speeds[state.speedIdx] || 1.0;
-        const v = pickKoreanVoice();
-        if (v) u.voice = v;
-        let finished = false;
-        const done = () => {
-          if (finished) return;
-          finished = true;
-          if (state.playing && typeof onDone === "function") setTimeout(onDone, 400);
-        };
-        u.onend = done;
-        u.onerror = done;
-        window.speechSynthesis.speak(u);
-      }
-
-      function speakText(rawText, onDone) {
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-        if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
-
-        const player = state.audioPlayer;
-        player.pause();
-
-        let finished = false;
-        const finishOnce = () => {
-          if (finished) return;
-          finished = true;
-          if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
-          if (state.playing && typeof onDone === "function") {
-            setTimeout(onDone, 320);
-          }
-        };
-
-        // 1순위: 오사카 클라우드 현수 아나운서(ko-KR-HyunsuMultilingualNeural) MP3 스트리밍
-        if (state.ttsEndpoint) {
-          const ttsUrl = buildHyunsuTtsUrl(rawText);
-          player.src = ttsUrl;
-          player.playbackRate = state.speeds[state.speedIdx] || 1.0;
-          player.onended = finishOnce;
-          player.onerror = () => {
-            if (finished) return;
-            finished = true;
-            if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
-            speakFallbackBrowserTts(rawText, onDone);
-          };
-
-          state.watchdogTimer = setTimeout(() => {
-            player.pause();
-            finishOnce();
-          }, 48000);
-
-          const playPromise = player.play();
-          if (playPromise && typeof playPromise.catch === "function") {
-            playPromise.catch(() => {
-              if (!finished) {
-                finished = true;
-                if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
-                speakFallbackBrowserTts(rawText, onDone);
-              }
-            });
-          }
-          // 현재 뉴스가 재생되는 동안 다음 뉴스 오디오를 미리 준비(Preload)하여 대기시간 0초 구현
-          setTimeout(preloadNextItemAudio, 500);
-          return;
-        }
-
-        speakFallbackBrowserTts(rawText, onDone);
-      }
-
-      function speakMarketBriefNow(andContinue = true) {
-        state.isSpeakingMarket = true;
-        const script = buildMarketBriefScript();
-        updateNowPlayingUI(
-          "📊 실시간 24시 시세 브리핑",
-          "Binance 24H · Upbit 실시간 데이터",
-          "나스닥(QQQ) · 반도체(SOXL) · 엔비디아 · 환율 실시간 시황",
-          script,
-          "#"
-        );
-        speakText(script, () => {
-          state.isSpeakingMarket = false;
-          if (andContinue && state.playing) {
-            speakNextItem();
-          }
-        });
-      }
-
-      function speakNextItem() {
-        if (!state.playing) return;
-        if (!state.newsList.length) {
-          updateNowPlayingUI("⏳ 뉴스 수집 중", "잠시만 기다려 주세요", "실시간 뉴스를 불러오고 있습니다...", "", "#");
-          return;
-        }
-
-        // 5건 읽을 때마다 실시간 시세 브리핑 1회 자동 삽입
-        if (state.includeMarketBrief && state.spokenSinceBrief >= 5 && state.quotes.qqq) {
-          state.spokenSinceBrief = 0;
-          speakMarketBriefNow(true);
-          return;
-        }
-
-        // 1순위: 아직 안 읽은 새 속보(NEW) 중 가장 최신 기사 찾기
-        let targetIdx = state.newsList.findIndex((n) => !readSet.has(n.id));
-
-        if (targetIdx === -1) {
-          // 모든 뉴스를 다 읽었을 때
-          if (!state.continuousMode) {
-            // [새 속보 전용 대기 모드]일 때는 조용히 대기
-            updateNowPlayingUI(
-              "🔔 새 속보 대기 중",
-              "90초마다 자동 감시 중",
-              "현재 올라온 모든 새 뉴스를 다 읽었습니다.",
-              "새로운 뉴스가 올라오면 알림음과 함께 즉시 읽어드립니다.",
-              "#"
-            );
-            document.getElementById("npProgressTxt").textContent = "새 속보 감지 대기 중 (화면 켜짐 유지)";
-            return;
-          }
-          // [연속 순환 라디오 모드]일 때는 순서대로 순환 브리핑
-          if (state.currentIdx >= state.newsList.length) {
-            state.currentIdx = 0;
-          }
-          targetIdx = state.currentIdx;
-          state.currentIdx = (state.currentIdx + 1) % state.newsList.length;
-        } else {
-          state.currentIdx = targetIdx;
-        }
-
-        const item = state.newsList[targetIdx];
-        if (!item) return;
-
-        saveReadId(item.id);
-        state.spokenSinceBrief += 1;
-        renderQueueList();
-
-        updateNowPlayingUI(
-          item.category || "📻 실시간 뉴스",
-          `${item.source || "주요언론"} · ${item.timeStr || "방금"}`,
-          item.title,
-          item.summary || "",
-          item.link
-        );
-        document.getElementById("npProgressTxt").textContent =
-          `전체 ${state.newsList.length}건 중 ${targetIdx + 1}번째 소식 낭독 중`;
-
-        const spokenSource = toSpokenKorean(item.source || "실시간");
-        const spokenTitle = toSpokenKorean(item.title);
-        const spokenSum = item.summary ? toSpokenKorean(item.summary) : "";
-        const fullScript = spokenSum
-          ? `${spokenSource} 소식입니다. ${spokenTitle}. ${spokenSum}`
-          : `${spokenSource} 속보입니다. ${spokenTitle}.`;
-
-        speakText(fullScript, () => {
-          speakNextItem();
-        });
-      }
-
-      // ====================================================================
-      // 8. UI 렌더링 & 버튼 이벤트 바인딩
-      // ====================================================================
-      function renderQueueList() {
-        const listEl = document.getElementById("newsQueueList");
-        if (!listEl) return;
-        if (!state.newsList.length) {
-          listEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-muted);">수집된 뉴스가 없습니다. [즉시 새로수집]을 눌러보세요.</div>`;
-          return;
-        }
-
-        listEl.innerHTML = state.newsList
-          .map((n, idx) => {
-            const isCur = state.playing && idx === state.currentIdx && !state.isSpeakingMarket;
-            const isRead = readSet.has(n.id);
-            return `
-              <div class="q-news-row ${isCur ? "current" : ""} ${isRead && !isCur ? "read-done" : ""}" data-idx="${idx}">
-                <div class="qn-meta">
-                  <span>${n.category || "뉴스"} · ${n.source || ""} · ${n.timeStr || ""}</span>
-                  ${!isRead ? '<span class="qn-badge-new">NEW</span>' : '<span>읽음</span>'}
-                </div>
-                <div class="qn-title">${n.title}</div>
-              </div>
-            `;
-          })
-          .join("");
-
-        listEl.querySelectorAll(".q-news-row").forEach((row) => {
-          row.addEventListener("click", () => {
-            const idx = parseInt(row.getAttribute("data-idx") || "0", 10);
-            const item = state.newsList[idx];
-            if (!item) return;
-            readSet.delete(item.id);
-            state.currentIdx = idx;
-            if (!state.playing) {
-              startRadio();
-            } else {
-              speakNextItem();
-            }
-          });
-        });
-      }
-
-      function updateControlStates() {
-        const btnPower = document.getElementById("btnPower");
-        const powerIcon = document.getElementById("powerIcon");
-        const powerText = document.getElementById("powerText");
-        const liveDot = document.getElementById("liveDot");
-
-        if (state.playing) {
-          btnPower.classList.add("playing");
-          powerIcon.textContent = "⏸";
-          powerText.textContent = "실시간 뉴스 라디오 방송 중 (터치 시 일시정지)";
-          liveDot.classList.add("on");
-        } else {
-          btnPower.classList.remove("playing");
-          powerIcon.textContent = "▶️";
-          powerText.textContent = "터치하여 실시간 뉴스 라디오 켜기";
-          liveDot.classList.remove("on");
-        }
-
-        const btnMode = document.getElementById("btnModeToggle");
-        btnMode.textContent = state.continuousMode ? "🔁 연속 순환 라디오" : "🔔 새 속보만 읽기(대기)";
-        btnMode.classList.toggle("active", state.continuousMode);
-
-        const btnSpeed = document.getElementById("btnSpeedToggle");
-        btnSpeed.textContent = `🗣 속도 ${state.speeds[state.speedIdx]}x`;
-
-        const btnQuote = document.getElementById("btnIncludeQuote");
-        btnQuote.classList.toggle("active", state.includeMarketBrief);
-
-        const btnOled = document.getElementById("btnOledMode");
-        btnOled.classList.toggle("active", state.oledBlack);
-        document.body.classList.toggle("oled-black", state.oledBlack);
-
-        document.querySelectorAll("#channelPills .ch-btn").forEach((b) => {
-          b.classList.toggle("active", b.getAttribute("data-ch") === state.channel);
-        });
-        const cfg = CHANNEL_CONFIG[state.channel] || CHANNEL_CONFIG.ALL;
-        document.getElementById("activeChannelLabel").textContent = state.customKeyword
-          ? `🔍 '${state.customKeyword}' 집중`
-          : cfg.label;
-      }
-
-      function startRadio() {
-        state.playing = true;
-        enableWakeLock();
-        enableAudioKeepAlive();
-        updateControlStates();
-        speakNextItem();
-      }
-
-      function stopRadio() {
-        state.playing = false;
-        if (state.audioPlayer) state.audioPlayer.pause();
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-        if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
-        updateControlStates();
-        document.getElementById("npProgressTxt").textContent = "라디오 일시정지됨";
-      }
-
-      function initEvents() {
-        document.getElementById("btnPower").addEventListener("click", () => {
-          if (state.playing) stopRadio();
-          else startRadio();
-        });
-
-        document.getElementById("btnNext").addEventListener("click", () => {
-          if (!state.playing) startRadio();
-          else speakNextItem();
-        });
-
-        document.getElementById("btnPrev").addEventListener("click", () => {
-          if (!state.newsList.length) return;
-          state.currentIdx = Math.max(0, state.currentIdx - 1);
-          const item = state.newsList[state.currentIdx];
-          if (item) readSet.delete(item.id);
-          if (!state.playing) startRadio();
-          else speakNextItem();
-        });
-
-        document.getElementById("btnMarketBrief").addEventListener("click", () => {
-          if (!state.playing) {
-            state.playing = true;
-            enableWakeLock();
-            enableAudioKeepAlive();
-            updateControlStates();
-          }
-          speakMarketBriefNow(true);
-        });
-
-        document.getElementById("btnFetchNow").addEventListener("click", () => {
-          refreshAllNews(true);
-          refreshLiveQuotes();
-        });
-
-        document.querySelectorAll("#channelPills .ch-btn").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            state.channel = btn.getAttribute("data-ch") || "ALL";
-            state.customKeyword = "";
-            document.getElementById("customKwInput").value = "";
-            localStorage.setItem("evening_radio_ch", state.channel);
-            state.newsList = [];
-            state.currentIdx = 0;
-            updateControlStates();
-            await refreshAllNews(true);
-            if (state.playing) speakNextItem();
-          });
-        });
-
-        document.getElementById("btnApplyKw").addEventListener("click", async () => {
-          const val = document.getElementById("customKwInput").value.trim();
-          state.customKeyword = val;
-          state.newsList = [];
-          state.currentIdx = 0;
-          updateControlStates();
-          await refreshAllNews(true);
-          if (state.playing) speakNextItem();
-        });
-
-        document.getElementById("customKwInput").addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            document.getElementById("btnApplyKw").click();
-          }
-        });
-
-        document.getElementById("btnModeToggle").addEventListener("click", () => {
-          state.continuousMode = !state.continuousMode;
-          localStorage.setItem("evening_radio_cont", state.continuousMode ? "1" : "0");
-          updateControlStates();
-          if (state.playing && !window.speechSynthesis.speaking) {
-            speakNextItem();
-          }
-        });
-
-        document.getElementById("btnSpeedToggle").addEventListener("click", () => {
-          state.speedIdx = (state.speedIdx + 1) % state.speeds.length;
-          updateControlStates();
-        });
-
-        document.getElementById("btnIncludeQuote").addEventListener("click", () => {
-          state.includeMarketBrief = !state.includeMarketBrief;
-          localStorage.setItem("evening_radio_mkt", state.includeMarketBrief ? "1" : "0");
-          updateControlStates();
-        });
-
-        document.getElementById("btnOledMode").addEventListener("click", () => {
-          state.oledBlack = !state.oledBlack;
-          localStorage.setItem("evening_radio_oled", state.oledBlack ? "1" : "0");
-          updateControlStates();
-        });
-
-        document.getElementById("btnResetRead").addEventListener("click", () => {
-          readSet.clear();
-          localStorage.removeItem(READ_STORAGE_KEY);
-          state.currentIdx = 0;
-          renderQueueList();
-          if (state.playing) speakNextItem();
-        });
-
-        // 화면 다시 보일 때 WakeLock 자동 복구
-        document.addEventListener("visibilitychange", () => {
-          if (document.visibilityState === "visible" && state.playing) {
-            enableWakeLock();
-          }
-        });
-      }
-
-      // 시계 루프
-      function startClock() {
-        const el = document.getElementById("clockTime");
-        const tick = () => {
-          const d = new Date();
-          el.textContent =
-            `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
-        };
-        tick();
-        setInterval(tick, 1000);
-      }
-
-      // 초기화
-      if (window.speechSynthesis) {
-        window.speechSynthesis.getVoices();
-        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-      }
-      startClock();
-      updateControlStates();
-      initEvents();
-      refreshAllNews(true);
+      loadRadioPackage(true);
       refreshLiveQuotes();
-
-      // 90초마다 새 속보 자동 수집 (초경량 텍스트 패치)
-      setInterval(() => refreshAllNews(false), 90 * 1000);
-      // 30초마다 시세 미니바 갱신
+      // 3분마다 새 MP3 버전이 올라왔는지 자동 확인
+      setInterval(() => loadRadioPackage(false), 180 * 1000);
       setInterval(refreshLiveQuotes, 30 * 1000);
     })();
   </script>
