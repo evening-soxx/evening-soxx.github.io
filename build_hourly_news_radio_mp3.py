@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-『2026년 MM월 DD일 주요 뉴스』 — 아침 종합 생성 & 1~2시간 주기 신규 뉴스 자동 추가 빌더
-- 군더더기 안내 멘트(AI 음성 고지, 1시간 연속 안내 등) 100% 제거
-- "YYYY년 M월 D일 주요 뉴스입니다."로 담백하게 시작
-- 당일 세그먼트 캐시(_daily_radio_cache/YYYYMMDD/)를 유지하여,
-  아침 첫 생성 이후 1~2시간마다 실행할 때는 새로 들어온 뉴스만 빠르게 합성해 앞단에 추가·누적합니다.
+『YYYY년 M월 D일 주요 뉴스』 — 약 1시간 분량 연속 뉴스 라디오 MP3 빌더
+- 1부~5부 코너 나눔·중간 안내 멘트 없이 처음부터 끝까지 자연스럽게 쭉 이어서 낭독
+- 당일 세그먼트 캐시를 유지하여 2시간마다 새로 들어온 뉴스만 빠르게 추가·갱신
 """
 
 import asyncio
@@ -152,7 +150,7 @@ def fetch_market_brief_text(now: datetime.datetime) -> tuple[str, str]:
     return " ".join(parts), " · ".join(summary_ui)
 
 
-def fetch_bing_rss_items(query: str, cat: str, max_cnt: int = 12, seen: set = None) -> list[dict]:
+def fetch_bing_rss_items(query: str, cat: str, max_cnt: int = 16, seen: set = None) -> list[dict]:
     if seen is None:
         seen = set()
     out = []
@@ -196,7 +194,7 @@ def fetch_bing_rss_items(query: str, cat: str, max_cnt: int = 12, seen: set = No
     return out
 
 
-def fetch_standard_rss_items(url: str, cat: str, default_src: str, max_cnt: int = 14, seen: set = None) -> list[dict]:
+def fetch_standard_rss_items(url: str, cat: str, default_src: str, max_cnt: int = 20, seen: set = None) -> list[dict]:
     if seen is None:
         seen = set()
     out = []
@@ -239,92 +237,94 @@ def fetch_standard_rss_items(url: str, cat: str, default_src: str, max_cnt: int 
     return out
 
 
-def collect_news_by_sections() -> dict[str, list[dict]]:
+def collect_flat_news(target_count: int = 185) -> list[dict]:
+    """약 55~60분 분량을 맞추기 위해 중복 없이 다양한 매체에서 185건 내외 수집"""
     seen = set()
-    res = {}
+    items = []
 
-    s1 = []
-    s1.extend(fetch_bing_rss_items("뉴욕증시 나스닥 S&P500 월가 마감", "🇺🇸 1부 · 미국증시", 10, seen))
-    s1.extend(fetch_bing_rss_items("미국 연준 파월 금리 국채 물가", "🇺🇸 1부 · 연준·금리", 8, seen))
-    q_us = urllib.parse.quote("(뉴욕증시 OR 나스닥 OR S&P500 OR 월가 OR 미 국채금리) when:1d")
-    s1.extend(fetch_standard_rss_items(f"https://news.google.com/rss/search?q={q_us}&hl=ko&gl=KR&ceid=KR:ko", "🇺🇸 1부 · 월가속보", "주요언론", 8, seen))
-    res["sec1"] = s1[:22]
+    sources = [
+        ("bing", "뉴욕증시 나스닥 S&P500 월가", "🇺🇸 미국증시", 15),
+        ("bing", "엔비디아 TSMC 브로드컴 AMD 마이크론", "🔬 AI·반도체", 15),
+        ("bing", "삼성전자 SK하이닉스 HBM D램", "🔬 메모리·HBM", 15),
+        ("bing", "미국 연준 파월 금리 국채 물가", "🏛 금리·매크로", 12),
+        ("bing", "테슬라 애플 마이크로소프트 구글 오픈AI", "💡 빅테크", 14),
+        ("rss", "https://www.yna.co.kr/rss/economy.xml", "📈 한국경제", "연합뉴스", 20),
+        ("rss", "https://www.hankyung.com/feed/finance", "📈 증권·금융", "한국경제", 18),
+        ("rss", "https://www.mk.co.kr/rss/30100041/", "📈 경제·산업", "매일경제", 18),
+        ("rss", "https://www.yna.co.kr/rss/news.xml", "⚡ 주요속보", "연합뉴스", 20),
+        ("rss", "https://www.yna.co.kr/rss/politics.xml", "🏛 정치·정책", "연합뉴스", 14),
+        ("rss", "https://www.yna.co.kr/rss/society.xml", "📰 사회뉴스", "연합뉴스", 14),
+        ("rss", "https://www.hankyung.com/feed/it", "💻 IT·테크", "한국경제", 14),
+        ("rss", "https://www.hankyung.com/feed/all-news", "📰 종합뉴스", "한국경제", 15),
+        ("rss", "https://www.yna.co.kr/rss/international.xml", "🌍 국제뉴스", "연합뉴스", 16),
+        ("rss", "https://www.mk.co.kr/rss/30300018/", "🌍 국제경제", "매일경제", 14),
+        ("bing", "국제유가 중동 미국 중국 관세", "🌍 지정학·유가", 12),
+    ]
 
-    s2 = []
-    s2.extend(fetch_bing_rss_items("엔비디아 TSMC 브로드컴 AMD 마이크론 반도체", "🔬 2부 · AI반도체", 10, seen))
-    s2.extend(fetch_bing_rss_items("삼성전자 SK하이닉스 HBM D램 파운드리", "🔬 2부 · 메모리·HBM", 10, seen))
-    s2.extend(fetch_bing_rss_items("테슬라 애플 마이크로소프트 오픈AI 구글", "🔬 2부 · 빅테크", 8, seen))
-    res["sec2"] = s2[:22]
+    for s in sources:
+        if len(items) >= target_count:
+            break
+        if s[0] == "bing":
+            _, q, cat, lim = s
+            items.extend(fetch_bing_rss_items(q, cat, lim, seen))
+        else:
+            _, url, cat, src_name, lim = s
+            items.extend(fetch_standard_rss_items(url, cat, src_name, lim, seen))
 
-    s3 = []
-    s3.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/economy.xml", "📈 3부 · 한국경제", "연합뉴스", 12, seen))
-    s3.extend(fetch_standard_rss_items("https://www.hankyung.com/feed/finance", "📈 3부 · 증권·금융", "한국경제", 10, seen))
-    s3.extend(fetch_standard_rss_items("https://www.mk.co.kr/rss/30100041/", "📈 3부 · 경제·산업", "매일경제", 10, seen))
-    res["sec3"] = s3[:22]
+    # 부족할 경우 구글 뉴스 검색으로 보충
+    if len(items) < target_count:
+        q_extra = urllib.parse.quote("(경제 OR 증시 OR 반도체 OR 기업 OR 속보) when:1d")
+        items.extend(
+            fetch_standard_rss_items(
+                f"https://news.google.com/rss/search?q={q_extra}&hl=ko&gl=KR&ceid=KR:ko",
+                "📰 주요뉴스",
+                "주요언론",
+                target_count - len(items),
+                seen,
+            )
+        )
 
-    s4 = []
-    s4.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/news.xml", "⚡ 4부 · 종합속보", "연합뉴스", 12, seen))
-    s4.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/politics.xml", "🏛 4부 · 정치·정책", "연합뉴스", 8, seen))
-    s4.extend(fetch_standard_rss_items("https://www.hankyung.com/feed/all-news", "📰 4부 · 주요뉴스", "한국경제", 8, seen))
-    res["sec4"] = s4[:20]
-
-    s5 = []
-    s5.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/international.xml", "🌍 5부 · 세계속보", "연합뉴스", 10, seen))
-    s5.extend(fetch_standard_rss_items("https://www.mk.co.kr/rss/30300018/", "🌍 5부 · 국제경제", "매일경제", 8, seen))
-    s5.extend(fetch_bing_rss_items("국제유가 중동 미국 중국 관세 정상회담", "🌍 5부 · 지정학·유가", 8, seen))
-    res["sec5"] = s5[:18]
-
-    return res
+    return items[:target_count]
 
 
-def merge_with_daily_archive(day_dir: str, fetched: dict[str, list[dict]]) -> dict[str, list[dict]]:
-    """
-    아침에 수집된 기사 목록에 1~2시간마다 새로 들어온 기사를 각 부(1~5부)의 맨 앞에 누적 추가합니다.
-    """
-    archive_path = os.path.join(day_dir, "daily_sections.json")
-    old_data = {}
+def merge_with_daily_archive(day_dir: str, new_items: list[dict], max_keep: int = 195) -> list[dict]:
+    archive_path = os.path.join(day_dir, "daily_flat_news.json")
+    old_items = []
     if os.path.exists(archive_path):
         try:
             with open(archive_path, "r", encoding="utf-8") as f:
-                old_data = json.load(f)
+                old_items = json.load(f)
         except Exception:
-            old_data = {}
+            old_items = []
 
-    merged = {}
-    global_seen = set()
+    old_keys = {it.get("key") for it in old_items if it.get("key")}
+    seen = set()
+    combined = []
     added_count = 0
 
-    for sec_key in ("sec1", "sec2", "sec3", "sec4", "sec5"):
-        new_items = fetched.get(sec_key, [])
-        old_items = old_data.get(sec_key, [])
-        old_keys = {it.get("key") for it in old_items if it.get("key")}
+    for it in new_items:
+        k = it.get("key") or norm_key(it.get("title", ""))
+        if not k or k in seen:
+            continue
+        if old_items and k not in old_keys:
+            added_count += 1
+        seen.add(k)
+        combined.append(it)
 
-        combined = []
-        # 새로 들어온 기사를 각 부 맨 앞에 배치
-        for it in new_items:
-            k = it.get("key") or norm_key(it.get("title", ""))
-            if not k or k in global_seen:
-                continue
-            if old_items and k not in old_keys:
-                added_count += 1
-            global_seen.add(k)
-            combined.append(it)
+    for it in old_items:
+        k = it.get("key") or norm_key(it.get("title", ""))
+        if not k or k in seen:
+            continue
+        seen.add(k)
+        combined.append(it)
 
-        for it in old_items:
-            k = it.get("key") or norm_key(it.get("title", ""))
-            if not k or k in global_seen:
-                continue
-            global_seen.add(k)
-            combined.append(it)
-
-        merged[sec_key] = combined[:28]
-
+    final_list = combined[:max_keep]
     with open(archive_path, "w", encoding="utf-8") as f:
-        json.dump(merged, f, ensure_ascii=False, indent=2)
+        json.dump(final_list, f, ensure_ascii=False, indent=2)
 
-    if old_data:
+    if old_items:
         print(f" -> 기존 아침 뉴스에 신규 추가된 뉴스: {added_count}건")
-    return merged
+    return final_list
 
 
 async def synth_cached_segments(segments: list[dict], audio_cache_dir: str) -> list[str]:
@@ -373,27 +373,30 @@ def get_duration(path: str) -> float:
         return 0.0
 
 
+def is_us_market_night_window(now: datetime.datetime) -> bool:
+    """한국 시각 23:25 ~ 05:50 (미증시 정규장 야간 시간대)에는 30분짜리 속보판으로 자동 전환"""
+    hm = now.hour * 60 + now.minute
+    return (hm >= 23 * 60 + 25) or (hm <= 5 * 60 + 50)
+
+
 def build_radio_package():
     now = datetime.datetime.now(KST)
+    night_mode = is_us_market_night_window(now)
+    target_cnt = 92 if night_mode else 185
+    max_keep = 95 if night_mode else 195
+    mode_label = "야간 미증시 30분 속보판" if night_mode else "주간 1시간 종합판"
+
     day_str = now.strftime("%Y%m%d")
     day_dir = os.path.join(CACHE_ROOT, day_str)
     audio_cache_dir = os.path.join(day_dir, "mp3_segs")
     os.makedirs(audio_cache_dir, exist_ok=True)
 
     date_title = f"{now.year}년 {now.month}월 {now.day}일 주요 뉴스"
-    print(f"[{now.strftime('%H:%M:%S')}] '{date_title}' 수집 및 누적 병합 중...")
+    print(f"[{now.strftime('%H:%M:%S')}] '{date_title}' ({mode_label}) 수집 중...")
 
     opening_spoken, quote_summary_ui = fetch_market_brief_text(now)
-    fetched = collect_news_by_sections()
-    merged = merge_with_daily_archive(day_dir, fetched)
-
-    section_defs = [
-        ("sec1", "🇺🇸 1부 · 미국 증시 & 월가", "1부 미국 증시와 월가 주요 뉴스입니다."),
-        ("sec2", "🔬 2부 · AI & 반도체", "2부 에이아이와 반도체 주요 뉴스입니다."),
-        ("sec3", "📈 3부 · 한국 경제 & 산업", "3부 한국 경제와 산업 주요 뉴스입니다."),
-        ("sec4", "⚡ 4부 · 대한민국 주요 뉴스", "4부 대한민국 종합 주요 뉴스입니다."),
-        ("sec5", "🌍 5부 · 세계 & 지정학 뉴스", "5부 세계와 지정학 주요 뉴스입니다."),
-    ]
+    new_items = collect_flat_news(target_count=target_cnt)
+    merged_items = merge_with_daily_archive(day_dir, new_items, max_keep=max_keep)
 
     segments = [
         {
@@ -405,32 +408,21 @@ def build_radio_package():
         }
     ]
 
-    for sec_key, sec_label, sec_intro in section_defs:
-        sec_items = merged.get(sec_key, [])
-        if not sec_items:
-            continue
+    for n in merged_items:
+        sp_title = to_spoken_korean(n["title"])
+        sp_sum = to_spoken_korean(n["summary"]) if n.get("summary") else ""
+        sp_src = to_spoken_korean(n["source"])
+        if sp_sum:
+            spoken = f"{sp_src} 보도입니다. {sp_title}. {sp_sum}"
+        else:
+            spoken = f"{sp_src} 소식입니다. {sp_title}."
         segments.append({
-            "category": sec_label,
-            "source": date_title,
-            "title": sec_label,
-            "summary": sec_intro,
-            "spoken": sec_intro,
+            "category": n["category"],
+            "source": n["source"],
+            "title": n["title"],
+            "summary": n["summary"] or f"{n['source']} 주요 보도입니다.",
+            "spoken": spoken,
         })
-        for n in sec_items:
-            sp_title = to_spoken_korean(n["title"])
-            sp_sum = to_spoken_korean(n["summary"]) if n.get("summary") else ""
-            sp_src = to_spoken_korean(n["source"])
-            if sp_sum:
-                spoken = f"{sp_src} 보도입니다. {sp_title}. {sp_sum}"
-            else:
-                spoken = f"{sp_src} 소식입니다. {sp_title}."
-            segments.append({
-                "category": n["category"],
-                "source": n["source"],
-                "title": n["title"],
-                "summary": n["summary"] or f"{n['source']} 주요 보도입니다.",
-                "spoken": spoken,
-            })
 
     seg_files = asyncio.run(synth_cached_segments(segments, audio_cache_dir))
 
