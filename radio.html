@@ -382,8 +382,8 @@
       <div class="brand-box">
         <div class="live-dot" id="liveDot"></div>
         <div>
-          <h1 class="brand-title">📻 어쩐지 5부작 장시간 뉴스 라디오</h1>
-          <p class="brand-sub" id="syncStatusTxt">111트랙(약 40분) 통짜 MP3 연속 재생 · 끊김 0%</p>
+          <h1 class="brand-title" id="mainDateTitle">📻 오늘의 주요 뉴스 라디오</h1>
+          <p class="brand-sub" id="syncStatusTxt">아침 종합 수집 · 1~2시간 주기 새 뉴스 자동 추가</p>
         </div>
       </div>
       <div class="clock-box">
@@ -532,9 +532,12 @@
           cues = data.cues;
 
           const mins = Math.round((data.duration || 0) / 60);
-          document.getElementById("editionBadge").textContent = `${data.updated_hm || "최신"}판 (${cues.length}트랙·${mins}분)`;
+          if (data.date_title) {
+            document.getElementById("mainDateTitle").textContent = `📻 ${data.date_title}`;
+          }
+          document.getElementById("editionBadge").textContent = `${data.updated_hm || "최신"} 업데이트 (${cues.length}트랙·${mins}분)`;
           document.getElementById("syncStatusTxt").textContent =
-            `최근 업데이트: ${data.updated_at} · 총 ${mins}분 분량 (${cues.length}개 트랙) 연속 재생`;
+            `최근 업데이트: ${data.updated_at} · 총 ${mins}분 분량 (${cues.length}개 트랙)`;
 
           if (isNewEdition || forceReloadAudio || !audio.src) {
             const wasPlaying = !audio.paused;

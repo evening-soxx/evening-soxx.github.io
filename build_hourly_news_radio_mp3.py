@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-『어쩐지의 미국 증시 라이브』 — 약 1시간 분량(5부작 85~100트랙) 통짜 뉴스 라디오 MP3 마스터 생성기
-- 1부: 실시간 24시 시세 브리핑 & 미국 증시·월가 핵심 뉴스
-- 2부: AI · 반도체 · 빅테크 집중 뉴스 (엔비디아·TSMC·삼성전자·SK하이닉스·마이크론 등)
-- 3부: 한국 경제 · 금융 · 산업 · 기업 실적 뉴스
-- 4부: 대한민국 정치 · 정책 · 사회 주요 종합 뉴스
-- 5부: 글로벌 지정학 · 미중 관계 · 국제 유가 · 세계 뉴스
-- asyncio.Semaphore(8) 병렬 합성으로 약 15~20초 만에 50~60분 분량 통짜 MP3 생성
+『2026년 MM월 DD일 주요 뉴스』 — 아침 종합 생성 & 1~2시간 주기 신규 뉴스 자동 추가 빌더
+- 군더더기 안내 멘트(AI 음성 고지, 1시간 연속 안내 등) 100% 제거
+- "YYYY년 M월 D일 주요 뉴스입니다."로 담백하게 시작
+- 당일 세그먼트 캐시(_daily_radio_cache/YYYYMMDD/)를 유지하여,
+  아침 첫 생성 이후 1~2시간마다 실행할 때는 새로 들어온 뉴스만 빠르게 합성해 앞단에 추가·누적합니다.
 """
 
 import asyncio
 import datetime
+import hashlib
 import html
 import json
 import os
 import re
+import shutil
 import subprocess
-import tempfile
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -27,9 +26,9 @@ VOICE = "ko-KR-HyunsuMultilingualNeural"
 RATE = "+14%"
 PITCH = "-2Hz"
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_WEB_DIR = "/Users/hanbeomsu/Desktop/어쩐지저녁/02_어쩐지저녁의_SOXX_웹및쇼츠"
 BASE_LIVE_DIR = "/Users/hanbeomsu/Desktop/어쩐지저녁/01_24시간_미증시_라이브스튜디오"
+CACHE_ROOT = "/Users/hanbeomsu/Desktop/어쩐지저녁/01_24시간_미증시_라이브스튜디오/_daily_radio_cache"
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
@@ -91,12 +90,13 @@ def to_spoken_korean(text: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
-def fetch_market_brief_text() -> tuple[str, str]:
-    now = datetime.datetime.now(KST)
-    ampm = "오전" if now.hour < 12 else "오후"
-    h12 = now.hour % 12 or 12
+def norm_key(title: str) -> str:
+    return re.sub(r"[^가-힣a-zA-Z0-9]", "", str(title or ""))[:16].lower()
+
+
+def fetch_market_brief_text(now: datetime.datetime) -> tuple[str, str]:
     parts = [
-        f"어쩐지의 미국 증시 라이브, {now.month}월 {now.day}일 {ampm} {h12}시 기준 1시간 연속 뉴스 라디오 종합 브리핑을 시작합니다. 이 방송은 에이아이 합성 음성으로 진행되며 투자 권유가 아닙니다."
+        f"{now.year}년 {now.month}월 {now.day}일 주요 뉴스입니다."
     ]
     summary_ui = []
     try:
@@ -113,34 +113,33 @@ def fetch_market_brief_text() -> tuple[str, str]:
             p = float(qqq["lastPrice"])
             pct = float(qqq["priceChangePercent"])
             d_str = "상승" if pct >= 0 else "하락"
-            parts.append(f"먼저 해외 24시간 실시간 시세입니다. 나스닥 백을 추종하는 큐큐큐는 {p:.1f}달러로 {abs(pct):.2f}퍼센트 {d_str} 중입니다.")
+            parts.append(f"현재 나스닥 백 큐큐큐는 {p:.1f}달러로 {abs(pct):.2f}퍼센트 {d_str} 중입니다.")
             summary_ui.append(f"QQQ ${p:.2f} ({pct:+.2f}%)")
         if soxl:
             p = float(soxl["lastPrice"])
             pct = float(soxl["priceChangePercent"])
             d_str = "상승" if pct >= 0 else "하락"
-            parts.append(f"반도체 3배 레버리지 에스오엑스엘은 {p:.2f}달러로 {abs(pct):.2f}퍼센트 {d_str} 중이며,")
+            parts.append(f"반도체 3배 에스오엑스엘은 {p:.2f}달러로 {abs(pct):.2f}퍼센트 {d_str} 중이며,")
             summary_ui.append(f"SOXL ${p:.2f} ({pct:+.2f}%)")
         if nvda:
             p = float(nvda["lastPrice"])
             pct = float(nvda["priceChangePercent"])
             d_str = "오른" if pct >= 0 else "내린"
-            parts.append(f"엔비디아는 {abs(pct):.2f}퍼센트 {d_str} {p:.2f}달러에 거래되고 있습니다.")
+            parts.append(f"엔비디아는 {abs(pct):.2f}퍼센트 {d_str} {p:.2f}달러입니다.")
             summary_ui.append(f"NVDA ${p:.2f} ({pct:+.2f}%)")
         if tsla:
             p = float(tsla["lastPrice"])
             pct = float(tsla["priceChangePercent"])
             d_str = "오른" if pct >= 0 else "내린"
-            parts.append(f"테슬라는 {abs(pct):.2f}퍼센트 {d_str} {p:.2f}달러를 기록 중입니다.")
+            parts.append(f"테슬라는 {abs(pct):.2f}퍼센트 {d_str} {p:.2f}달러입니다.")
         if wti and gold:
-            parts.append(f"국제 유가 더블유티아이는 배럴당 {float(wti['lastPrice']):.2f}달러, 국제 금 시세는 온스당 {float(gold['lastPrice']):.1f}달러,")
+            parts.append(f"국제 유가 더블유티아이는 {float(wti['lastPrice']):.2f}달러, 국제 금은 {float(gold['lastPrice']):.1f}달러,")
         if btc:
             p = float(btc["lastPrice"])
             parts.append(f"비트코인은 {int(round(p)):,}달러입니다.")
     except Exception:
         pass
 
-    parts.append("지금부터 1부 미국 증시와 월가 소식, 2부 에이아이와 반도체, 3부 한국 경제와 산업, 4부 국내 주요 속보, 5부 세계와 지정학 소식 순서로 약 한 시간 동안 연속 전해 드립니다.")
     return " ".join(parts), " · ".join(summary_ui)
 
 
@@ -163,10 +162,10 @@ def fetch_bing_rss_items(query: str, cat: str, max_cnt: int = 12, seen: set = No
             title = clean_text(raw_t)
             if len(title) < 8 or any(b in title for b in bad_words):
                 continue
-            norm = re.sub(r"[^가-힣a-zA-Z0-9]", "", title)[:15].lower()
-            if norm in seen:
+            nk = norm_key(title)
+            if not nk or nk in seen:
                 continue
-            seen.add(norm)
+            seen.add(nk)
 
             desc = clean_text(it.findtext("description") or "")
             if desc and (title[:14] in desc and len(desc) < len(title) + 15):
@@ -175,6 +174,7 @@ def fetch_bing_rss_items(query: str, cat: str, max_cnt: int = 12, seen: set = No
                 desc = desc[:218].rsplit(" ", 1)[0] + "."
 
             out.append({
+                "key": nk,
                 "category": cat,
                 "source": src,
                 "title": title,
@@ -205,10 +205,10 @@ def fetch_standard_rss_items(url: str, cat: str, default_src: str, max_cnt: int 
             title = clean_text(raw_t)
             if len(title) < 8 or any(b in title for b in bad_words):
                 continue
-            norm = re.sub(r"[^가-힣a-zA-Z0-9]", "", title)[:15].lower()
-            if norm in seen:
+            nk = norm_key(title)
+            if not nk or nk in seen:
                 continue
-            seen.add(norm)
+            seen.add(nk)
 
             desc = clean_text(it.findtext("description") or "")
             if desc and (title[:14] in desc or "<a " in desc or len(desc) < 15):
@@ -217,6 +217,7 @@ def fetch_standard_rss_items(url: str, cat: str, default_src: str, max_cnt: int 
                 desc = desc[:218].rsplit(" ", 1)[0] + "."
 
             out.append({
+                "key": nk,
                 "category": cat,
                 "source": src,
                 "title": title,
@@ -229,86 +230,126 @@ def fetch_standard_rss_items(url: str, cat: str, default_src: str, max_cnt: int 
     return out
 
 
-def collect_1hour_news_sections() -> list[tuple[str, str, list[dict]]]:
+def collect_news_by_sections() -> dict[str, list[dict]]:
     seen = set()
-    sections = []
+    res = {}
 
-    # 1부: 미국 증시 & 월가 거시경제
     s1 = []
     s1.extend(fetch_bing_rss_items("뉴욕증시 나스닥 S&P500 월가 마감", "🇺🇸 1부 · 미국증시", 10, seen))
     s1.extend(fetch_bing_rss_items("미국 연준 파월 금리 국채 물가", "🇺🇸 1부 · 연준·금리", 8, seen))
     q_us = urllib.parse.quote("(뉴욕증시 OR 나스닥 OR S&P500 OR 월가 OR 미 국채금리) when:1d")
     s1.extend(fetch_standard_rss_items(f"https://news.google.com/rss/search?q={q_us}&hl=ko&gl=KR&ceid=KR:ko", "🇺🇸 1부 · 월가속보", "주요언론", 8, seen))
-    sections.append((
-        "📻 1부 · 미국 증시 & 월가 브리핑",
-        "1부 순서입니다. 뉴욕 증시 흐름과 미국 연준, 국채 금리 관련 주요 소식을 전해 드립니다.",
-        s1[:22],
-    ))
+    res["sec1"] = s1[:22]
 
-    # 2부: AI · 반도체 · 빅테크 집중 브리핑
     s2 = []
     s2.extend(fetch_bing_rss_items("엔비디아 TSMC 브로드컴 AMD 마이크론 반도체", "🔬 2부 · AI반도체", 10, seen))
     s2.extend(fetch_bing_rss_items("삼성전자 SK하이닉스 HBM D램 파운드리", "🔬 2부 · 메모리·HBM", 10, seen))
     s2.extend(fetch_bing_rss_items("테슬라 애플 마이크로소프트 오픈AI 구글", "🔬 2부 · 빅테크", 8, seen))
-    sections.append((
-        "🔬 2부 · AI · 반도체 · 빅테크 집중 브리핑",
-        "이어서 2부 순서입니다. 엔비디아와 티에스엠씨, 삼성전자와 에스케이하이닉스 등 글로벌 반도체와 빅테크 핵심 소식을 전해 드립니다.",
-        s2[:22],
-    ))
+    res["sec2"] = s2[:22]
 
-    # 3부: 한국 경제 · 금융 · 산업 · 기업
     s3 = []
     s3.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/economy.xml", "📈 3부 · 한국경제", "연합뉴스", 12, seen))
     s3.extend(fetch_standard_rss_items("https://www.hankyung.com/feed/finance", "📈 3부 · 증권·금융", "한국경제", 10, seen))
     s3.extend(fetch_standard_rss_items("https://www.mk.co.kr/rss/30100041/", "📈 3부 · 경제·산업", "매일경제", 10, seen))
-    sections.append((
-        "📈 3부 · 한국 경제 & 산업 브리핑",
-        "계속해서 3부 순서입니다. 국내 경제와 금융 시장, 주요 기업과 산업계 소식을 전해 드립니다.",
-        s3[:22],
-    ))
+    res["sec3"] = s3[:22]
 
-    # 4부: 대한민국 주요 종합 속보 (정치·정책·사회)
     s4 = []
     s4.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/news.xml", "⚡ 4부 · 종합속보", "연합뉴스", 12, seen))
     s4.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/politics.xml", "🏛 4부 · 정치·정책", "연합뉴스", 8, seen))
     s4.extend(fetch_standard_rss_items("https://www.hankyung.com/feed/all-news", "📰 4부 · 주요뉴스", "한국경제", 8, seen))
-    sections.append((
-        "⚡ 4부 · 대한민국 종합 주요 뉴스",
-        "이어서 4부 순서입니다. 오늘 들어온 대한민국 주요 정책과 사회 종합 속보를 전해 드립니다.",
-        s4[:20],
-    ))
+    res["sec4"] = s4[:20]
 
-    # 5부: 세계 · 지정학 · 국제유가 · 환율
     s5 = []
     s5.extend(fetch_standard_rss_items("https://www.yna.co.kr/rss/international.xml", "🌍 5부 · 세계속보", "연합뉴스", 10, seen))
     s5.extend(fetch_standard_rss_items("https://www.mk.co.kr/rss/30300018/", "🌍 5부 · 국제경제", "매일경제", 8, seen))
     s5.extend(fetch_bing_rss_items("국제유가 중동 미국 중국 관세 정상회담", "🌍 5부 · 지정학·유가", 8, seen))
-    sections.append((
-        "🌍 5부 · 글로벌 지정학 & 세계 뉴스",
-        "마지막 5부 순서입니다. 미국과 중국, 중동 정세와 국제 유가 등 글로벌 주요 소식을 전해 드립니다.",
-        s5[:18],
-    ))
+    res["sec5"] = s5[:18]
 
-    return sections
+    return res
 
 
-async def synth_all_parallel(segments: list[dict], temp_dir: str) -> list[str]:
+def merge_with_daily_archive(day_dir: str, fetched: dict[str, list[dict]]) -> dict[str, list[dict]]:
+    """
+    아침에 수집된 기사 목록에 1~2시간마다 새로 들어온 기사를 각 부(1~5부)의 맨 앞에 누적 추가합니다.
+    """
+    archive_path = os.path.join(day_dir, "daily_sections.json")
+    old_data = {}
+    if os.path.exists(archive_path):
+        try:
+            with open(archive_path, "r", encoding="utf-8") as f:
+                old_data = json.load(f)
+        except Exception:
+            old_data = {}
+
+    merged = {}
+    global_seen = set()
+    added_count = 0
+
+    for sec_key in ("sec1", "sec2", "sec3", "sec4", "sec5"):
+        new_items = fetched.get(sec_key, [])
+        old_items = old_data.get(sec_key, [])
+        old_keys = {it.get("key") for it in old_items if it.get("key")}
+
+        combined = []
+        # 새로 들어온 기사를 각 부 맨 앞에 배치
+        for it in new_items:
+            k = it.get("key") or norm_key(it.get("title", ""))
+            if not k or k in global_seen:
+                continue
+            if old_items and k not in old_keys:
+                added_count += 1
+            global_seen.add(k)
+            combined.append(it)
+
+        for it in old_items:
+            k = it.get("key") or norm_key(it.get("title", ""))
+            if not k or k in global_seen:
+                continue
+            global_seen.add(k)
+            combined.append(it)
+
+        merged[sec_key] = combined[:28]
+
+    with open(archive_path, "w", encoding="utf-8") as f:
+        json.dump(merged, f, ensure_ascii=False, indent=2)
+
+    if old_data:
+        print(f" -> 기존 아침 뉴스에 신규 추가된 뉴스: {added_count}건")
+    return merged
+
+
+async def synth_cached_segments(segments: list[dict], audio_cache_dir: str) -> list[str]:
     sem = asyncio.Semaphore(8)
-    out_paths = [os.path.join(temp_dir, f"seg_{i:03d}.mp3") for i in range(len(segments))]
+    out_paths = []
+    tasks = []
 
-    async def _worker(idx: int, seg: dict):
-        out_p = out_paths[idx]
-        async with sem:
-            for attempt in range(3):
-                try:
-                    comm = edge_tts.Communicate(seg["spoken"], voice=VOICE, rate=RATE, pitch=PITCH)
-                    await comm.save(out_p)
-                    if os.path.exists(out_p) and os.path.getsize(out_p) > 300:
-                        return
-                except Exception:
-                    await asyncio.sleep(0.5 * (attempt + 1))
+    for seg in segments:
+        h = hashlib.sha256(f"{VOICE}|{RATE}|{PITCH}|{seg['spoken']}".encode("utf-8")).hexdigest()[:24]
+        mp3_p = os.path.join(audio_cache_dir, f"{h}.mp3")
+        out_paths.append(mp3_p)
 
-    await asyncio.gather(*[_worker(i, s) for i, s in enumerate(segments)])
+        if os.path.exists(mp3_p) and os.path.getsize(mp3_p) > 300:
+            continue
+
+        async def _worker(target_path: str, text: str):
+            async with sem:
+                for attempt in range(3):
+                    try:
+                        comm = edge_tts.Communicate(text, voice=VOICE, rate=RATE, pitch=PITCH)
+                        await comm.save(target_path)
+                        if os.path.exists(target_path) and os.path.getsize(target_path) > 300:
+                            return
+                    except Exception:
+                        await asyncio.sleep(0.5 * (attempt + 1))
+
+        tasks.append(_worker(mp3_p, seg["spoken"]))
+
+    if tasks:
+        print(f" -> 신규 음성 세그먼트 {len(tasks)}개 합성 중 (기존 세그먼트는 캐시 재사용)...")
+        await asyncio.gather(*tasks)
+    else:
+        print(" -> 모든 뉴스 세그먼트가 이미 캐시되어 있어 즉시 병합합니다.")
+
     return out_paths
 
 
@@ -325,33 +366,48 @@ def get_duration(path: str) -> float:
 
 def build_radio_package():
     now = datetime.datetime.now(KST)
-    print(f"[{now.strftime('%H:%M:%S')}] 1. 5부작(미증시·반도체·한국경제·종합속보·국제) 대량 뉴스 수집 중...")
-    opening_spoken, quote_summary_ui = fetch_market_brief_text()
-    sections = collect_1hour_news_sections()
+    day_str = now.strftime("%Y%m%d")
+    day_dir = os.path.join(CACHE_ROOT, day_str)
+    audio_cache_dir = os.path.join(day_dir, "mp3_segs")
+    os.makedirs(audio_cache_dir, exist_ok=True)
+
+    date_title = f"{now.year}년 {now.month}월 {now.day}일 주요 뉴스"
+    print(f"[{now.strftime('%H:%M:%S')}] '{date_title}' 수집 및 누적 병합 중...")
+
+    opening_spoken, quote_summary_ui = fetch_market_brief_text(now)
+    fetched = collect_news_by_sections()
+    merged = merge_with_daily_archive(day_dir, fetched)
+
+    section_defs = [
+        ("sec1", "🇺🇸 1부 · 미국 증시 & 월가", "1부 미국 증시와 월가 주요 뉴스입니다."),
+        ("sec2", "🔬 2부 · AI & 반도체", "2부 에이아이와 반도체 주요 뉴스입니다."),
+        ("sec3", "📈 3부 · 한국 경제 & 산업", "3부 한국 경제와 산업 주요 뉴스입니다."),
+        ("sec4", "⚡ 4부 · 대한민국 주요 뉴스", "4부 대한민국 종합 주요 뉴스입니다."),
+        ("sec5", "🌍 5부 · 세계 & 지정학 뉴스", "5부 세계와 지정학 주요 뉴스입니다."),
+    ]
 
     segments = [
         {
-            "category": "📊 오프닝 & 24시 실시간 시세",
-            "source": "현수 아나운서",
-            "title": f"{now.strftime('%m월 %d일 %H:%M')} 기준 5부작 장시간 뉴스 라디오 마스터",
-            "summary": quote_summary_ui or "나스닥 · 반도체 · 주요 종목 실시간 브리핑",
+            "category": f"📻 {date_title}",
+            "source": f"{now.strftime('%H:%M')} 업데이트",
+            "title": f"{date_title} 및 실시간 시세",
+            "summary": quote_summary_ui or "주요 시세 및 뉴스 브리핑",
             "spoken": opening_spoken,
         }
     ]
 
-    news_counter = 0
-    for sec_title, sec_intro, sec_items in sections:
+    for sec_key, sec_label, sec_intro in section_defs:
+        sec_items = merged.get(sec_key, [])
         if not sec_items:
             continue
         segments.append({
-            "category": sec_title,
-            "source": "코너 오프닝",
-            "title": sec_title,
+            "category": sec_label,
+            "source": date_title,
+            "title": sec_label,
             "summary": sec_intro,
             "spoken": sec_intro,
         })
         for n in sec_items:
-            news_counter += 1
             sp_title = to_spoken_korean(n["title"])
             sp_sum = to_spoken_korean(n["summary"]) if n.get("summary") else ""
             sp_src = to_spoken_korean(n["source"])
@@ -367,75 +423,66 @@ def build_radio_package():
                 "spoken": spoken,
             })
 
-    segments.append({
-        "category": "📻 클로징 안내",
-        "source": "어쩐지 뉴스라디오",
-        "title": "장시간 뉴스 라디오 종합 브리핑 마무리",
-        "summary": "목소리는 AI 합성 음성이며 투자 권유가 아닙니다. 처음부터 다시 연속 재생됩니다.",
-        "spoken": f"지금까지 총 {news_counter}건의 국내외 주요 뉴스와 시세 브리핑을 모두 전해 드렸습니다. 이 목소리는 에이아이 합성 음성이며 투자 권유가 아닙니다. 잠시 후 1부부터 다시 연속으로 전해 드립니다.",
-    })
+    seg_files = asyncio.run(synth_cached_segments(segments, audio_cache_dir))
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        print(f"[{now.strftime('%H:%M:%S')}] 2. 현수 아나운서({VOICE}) 8채널 초고속 병렬 합성 중 (총 {len(segments)}개 트랙)...")
-        seg_files = asyncio.run(synth_all_parallel(segments, tmpdir))
-
-        sil_path = os.path.join(tmpdir, "silence.mp3")
+    sil_path = os.path.join(day_dir, "silence_650ms.mp3")
+    if not os.path.exists(sil_path):
         subprocess.run(
             ["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", "0.65", "-b:a", "48k", sil_path],
             check=True,
         )
 
-        concat_txt = os.path.join(tmpdir, "concat.txt")
-        cues = []
-        cur_t = 0.0
-        with open(concat_txt, "w", encoding="utf-8") as f:
-            for seg, mp3_p in zip(segments, seg_files):
-                if not os.path.exists(mp3_p) or os.path.getsize(mp3_p) < 300:
-                    continue
-                dur = get_duration(mp3_p)
-                if dur <= 0.1:
-                    continue
-                cues.append({
-                    "start": round(cur_t, 2),
-                    "end": round(cur_t + dur, 2),
-                    "category": seg["category"],
-                    "source": seg["source"],
-                    "title": seg["title"],
-                    "summary": seg["summary"],
-                })
-                f.write(f"file '{mp3_p}'\n")
-                f.write(f"file '{sil_path}'\n")
-                cur_t += dur + 0.65
+    concat_txt = os.path.join(day_dir, "concat.txt")
+    cues = []
+    cur_t = 0.0
+    with open(concat_txt, "w", encoding="utf-8") as f:
+        for seg, mp3_p in zip(segments, seg_files):
+            if not os.path.exists(mp3_p) or os.path.getsize(mp3_p) < 300:
+                continue
+            dur = get_duration(mp3_p)
+            if dur <= 0.1:
+                continue
+            cues.append({
+                "start": round(cur_t, 2),
+                "end": round(cur_t + dur, 2),
+                "category": seg["category"],
+                "source": seg["source"],
+                "title": seg["title"],
+                "summary": seg["summary"],
+            })
+            f.write(f"file '{mp3_p}'\n")
+            f.write(f"file '{sil_path}'\n")
+            cur_t += dur + 0.65
 
-        out_mp3_web = os.path.join(BASE_WEB_DIR, "latest_news_radio.mp3")
-        out_json_web = os.path.join(BASE_WEB_DIR, "latest_news_radio.json")
+    out_mp3_web = os.path.join(BASE_WEB_DIR, "latest_news_radio.mp3")
+    out_json_web = os.path.join(BASE_WEB_DIR, "latest_news_radio.json")
 
-        # 48kbps 24kHz mono (라디오 음성 방송 표준 — 30~50분 분량도 10~15MB로 가볍고 선명함)
-        subprocess.run(
-            ["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", concat_txt, "-c:a", "libmp3lame", "-b:a", "48k", "-ar", "24000", "-ac", "1", out_mp3_web],
-            check=True,
-        )
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", concat_txt, "-c:a", "libmp3lame", "-b:a", "48k", "-ar", "24000", "-ac", "1", out_mp3_web],
+        check=True,
+    )
 
-        total_dur = get_duration(out_mp3_web)
-        meta = {
-            "updated_at": now.strftime("%Y-%m-%d %H:%M:%S"),
-            "updated_hm": now.strftime("%H:%M"),
-            "voice": VOICE,
-            "duration": round(total_dur, 2),
-            "track_count": len(cues),
-            "cues": cues,
-        }
-        with open(out_json_web, "w", encoding="utf-8") as f:
-            json.dump(meta, f, ensure_ascii=False, indent=2)
+    total_dur = get_duration(out_mp3_web)
+    meta = {
+        "date_title": date_title,
+        "updated_at": now.strftime("%Y-%m-%d %H:%M:%S"),
+        "updated_hm": now.strftime("%H:%M"),
+        "voice": VOICE,
+        "duration": round(total_dur, 2),
+        "track_count": len(cues),
+        "cues": cues,
+    }
+    with open(out_json_web, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
 
-        if os.path.exists(BASE_LIVE_DIR) and os.path.abspath(BASE_LIVE_DIR) != os.path.abspath(BASE_WEB_DIR):
-            subprocess.run(["cp", out_mp3_web, os.path.join(BASE_LIVE_DIR, "latest_news_radio.mp3")], check=False)
-            subprocess.run(["cp", out_json_web, os.path.join(BASE_LIVE_DIR, "latest_news_radio.json")], check=False)
+    if os.path.exists(BASE_LIVE_DIR) and os.path.abspath(BASE_LIVE_DIR) != os.path.abspath(BASE_WEB_DIR):
+        shutil.copy2(out_mp3_web, os.path.join(BASE_LIVE_DIR, "latest_news_radio.mp3"))
+        shutil.copy2(out_json_web, os.path.join(BASE_LIVE_DIR, "latest_news_radio.json"))
 
-        mins = int(total_dur // 60)
-        secs = int(total_dur % 60)
-        sz_mb = os.path.getsize(out_mp3_web) / (1024 * 1024)
-        print(f"[{now.strftime('%H:%M:%S')}] 완료! 총 길이: {mins}분 {secs}초 ({len(cues)}개 트랙, {sz_mb:.1f}MB) -> {out_mp3_web}")
+    mins = int(total_dur // 60)
+    secs = int(total_dur % 60)
+    sz_mb = os.path.getsize(out_mp3_web) / (1024 * 1024)
+    print(f"[{now.strftime('%H:%M:%S')}] 완료! '{date_title}' 총 길이: {mins}분 {secs}초 ({len(cues)}개 트랙, {sz_mb:.1f}MB)")
 
 
 if __name__ == "__main__":
