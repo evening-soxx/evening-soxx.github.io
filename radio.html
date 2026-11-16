@@ -8,7 +8,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="어쩐지 뉴스라디오" />
-  <title>📻 어쩐지 뉴스 라디오 (현수 아나운서 MP3)</title>
+  <title>📻 어쩐지 5부작 장시간 뉴스 라디오 (현수 아나운서 MP3)</title>
   <link rel="icon" type="image/svg+xml" href="./icon.svg" />
   <style>
     :root {
@@ -234,6 +234,30 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .part-jump-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .part-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      color: var(--text-sub);
+      padding: 9px 4px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .part-btn:active, .part-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(234, 184, 92, 0.14);
+    }
+
     .control-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -358,8 +382,8 @@
       <div class="brand-box">
         <div class="live-dot" id="liveDot"></div>
         <div>
-          <h1 class="brand-title">📻 어쩐지 뉴스 라디오 (현수 앵커 MP3)</h1>
-          <p class="brand-sub" id="syncStatusTxt">통짜 MP3 연속 재생 · 버벅임 0% · 화면 꺼도 재생</p>
+          <h1 class="brand-title">📻 어쩐지 5부작 장시간 뉴스 라디오</h1>
+          <p class="brand-sub" id="syncStatusTxt">111트랙(약 40분) 통짜 MP3 연속 재생 · 끊김 0%</p>
         </div>
       </div>
       <div class="clock-box">
@@ -373,17 +397,17 @@
       <span id="powerText">터치하여 현수 아나운서 뉴스 라디오 켜기</span>
     </button>
 
-    <!-- 실제 단일 MP3 오디오 엘리먼트 (화면 잠금/백그라운드에서도 끊김 없이 연속 재생) -->
+    <!-- 단일 대용량 MP3 오디오 엘리먼트 (화면 잠금/백그라운드에서도 끊김 없이 연속 반복 재생) -->
     <audio id="radioAudio" preload="auto" loop playsinline></audio>
 
     <section class="now-playing-board" aria-live="polite">
       <div>
         <div class="np-top-row">
-          <span class="np-cat-pill" id="npCategory">📻 현수 아나운서 브리핑</span>
+          <span class="np-cat-pill" id="npCategory">📻 현수 아나운서 5부작 브리핑</span>
           <span class="np-meta" id="npSourceTime">통짜 MP3 방식 · 버벅임 제로</span>
         </div>
-        <h2 class="np-headline" id="npHeadline">위 재생 버튼을 누르시면 미증시 방송과 동일한 현수 아나운서 목소리로 연속 재생됩니다.</h2>
-        <p class="np-summary" id="npSummary">단일 MP3 음성파일을 통째로 재생하므로 폰 화면을 꺼놓아도(잠금화면에서도) 여자 기계음이나 버벅거림 없이 라디오처럼 계속 들으실 수 있습니다.</p>
+        <h2 class="np-headline" id="npHeadline">위 재생 버튼을 누르시면 약 40분 분량(111개 트랙)의 5부작 뉴스 라디오가 연속 재생됩니다.</h2>
+        <p class="np-summary" id="npSummary">1부 미국증시 · 2부 AI/반도체 · 3부 한국경제 · 4부 국내 종합속보 · 5부 세계/지정학 뉴스가 하나의 MP3 파일에 모두 담겨 있어 화면을 꺼놓아도 끊기지 않습니다.</p>
       </div>
       <div>
         <div class="progress-bar-wrap">
@@ -395,6 +419,15 @@
         </div>
       </div>
     </section>
+
+    <!-- 5부작 코너 바로가기 버튼 -->
+    <div class="part-jump-grid" id="partJumpGrid">
+      <button type="button" class="part-btn" data-part="1부">🇺🇸 1부 미증시</button>
+      <button type="button" class="part-btn" data-part="2부">🔬 2부 반도체</button>
+      <button type="button" class="part-btn" data-part="3부">📈 3부 한국경제</button>
+      <button type="button" class="part-btn" data-part="4부">⚡ 4부 종합속보</button>
+      <button type="button" class="part-btn" data-part="5부">🌍 5부 세계뉴스</button>
+    </div>
 
     <div class="control-grid">
       <button type="button" class="ctrl-btn" id="btnPrev">
@@ -436,7 +469,7 @@
 
     <section class="section-box">
       <div class="section-label">
-        <span>📋 이번 시간 수록 뉴스 트랙 (터치하면 해당 뉴스로 즉시 이동)</span>
+        <span>📋 전체 111개 수록 뉴스 트랙 (터치 시 해당 뉴스로 즉시 이동)</span>
         <button type="button" id="btnReloadMeta" style="background:none;border:none;color:var(--gold);font-size:0.75rem;font-weight:800;cursor:pointer;">↻ 최신 음성파일 확인</button>
       </div>
       <div class="queue-list" id="trackList">
@@ -486,8 +519,6 @@
         }
       }
 
-      let currentBlobUrl = null;
-
       async function loadRadioPackage(forceReloadAudio = false) {
         try {
           const ts = Date.now();
@@ -500,24 +531,17 @@
           loadedUpdatedAt = data.updated_at || "";
           cues = data.cues;
 
-          document.getElementById("editionBadge").textContent = `${data.updated_hm || "최신"} 제작판 (${data.track_count || cues.length}트랙)`;
+          const mins = Math.round((data.duration || 0) / 60);
+          document.getElementById("editionBadge").textContent = `${data.updated_hm || "최신"}판 (${cues.length}트랙·${mins}분)`;
           document.getElementById("syncStatusTxt").textContent =
-            `음성파일 버퍼링 중... (${data.updated_at})`;
+            `최근 업데이트: ${data.updated_at} · 총 ${mins}분 분량 (${cues.length}개 트랙) 연속 재생`;
 
           if (isNewEdition || forceReloadAudio || !audio.src) {
             const wasPlaying = !audio.paused;
-            const mp3Resp = await fetch(`./latest_news_radio.mp3?v=${encodeURIComponent(loadedUpdatedAt || ts)}`, { cache: "no-store" });
-            if (mp3Resp.ok) {
-              const blob = await mp3Resp.blob();
-              if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-              currentBlobUrl = URL.createObjectURL(blob);
-              audio.src = currentBlobUrl;
-              audio.playbackRate = speeds[speedIdx];
-              document.getElementById("syncStatusTxt").textContent =
-                `✅ 폰 메모리에 통째로 다운로드 완료 (${data.updated_hm} 제작판 · 끊김 0%)`;
-              if (wasPlaying) {
-                audio.play().catch(() => {});
-              }
+            audio.src = `./latest_news_radio.mp3?v=${encodeURIComponent(loadedUpdatedAt || ts)}`;
+            audio.playbackRate = speeds[speedIdx];
+            if (wasPlaying) {
+              audio.play().catch(() => {});
             }
           }
 
@@ -542,6 +566,11 @@
 
         document.querySelectorAll("#trackList .q-news-row").forEach((el, i) => {
           el.classList.toggle("current", i === safeIdx);
+        });
+
+        document.querySelectorAll("#partJumpGrid .part-btn").forEach((btn) => {
+          const p = btn.getAttribute("data-part") || "";
+          btn.classList.toggle("active", Boolean(p && (c.category || "").includes(p)));
         });
       }
 
@@ -609,7 +638,7 @@
         document.getElementById("npTimeInfo").textContent = `${fmtSec(cur)} / ${fmtSec(dur)}`;
 
         for (let i = 0; i < cues.length; i++) {
-          if (cur >= cues[i].start && cur <= cues[i].end + 0.6) {
+          if (cur >= cues[i].start && cur <= cues[i].end + 0.65) {
             if (currentCueIdx !== i) {
               applyCueToUI(i);
             }
@@ -628,6 +657,16 @@
 
       document.getElementById("btnPrev").addEventListener("click", () => jumpToCue(currentCueIdx - 1));
       document.getElementById("btnNext").addEventListener("click", () => jumpToCue(currentCueIdx + 1));
+
+      document.querySelectorAll("#partJumpGrid .part-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const partKey = btn.getAttribute("data-part") || "";
+          const foundIdx = cues.findIndex((c) => (c.category || "").includes(partKey) || (c.title || "").includes(partKey));
+          if (foundIdx >= 0) {
+            jumpToCue(foundIdx);
+          }
+        });
+      });
 
       document.getElementById("btnSpeed").addEventListener("click", () => {
         speedIdx = (speedIdx + 1) % speeds.length;
@@ -685,7 +724,6 @@
 
       loadRadioPackage(true);
       refreshLiveQuotes();
-      // 3분마다 새 MP3 버전이 올라왔는지 자동 확인
       setInterval(() => loadRadioPackage(false), 180 * 1000);
       setInterval(refreshLiveQuotes, 30 * 1000);
     })();
