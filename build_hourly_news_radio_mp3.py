@@ -26,9 +26,18 @@ VOICE = "ko-KR-HyunsuMultilingualNeural"
 RATE = "+14%"
 PITCH = "-2Hz"
 
-BASE_WEB_DIR = "/Users/hanbeomsu/Desktop/어쩐지저녁/02_어쩐지저녁의_SOXX_웹및쇼츠"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_WEB_DIR = (
+    SCRIPT_DIR
+    if os.path.exists(os.path.join(SCRIPT_DIR, "radio.html"))
+    else "/Users/hanbeomsu/Desktop/어쩐지저녁/02_어쩐지저녁의_SOXX_웹및쇼츠"
+)
 BASE_LIVE_DIR = "/Users/hanbeomsu/Desktop/어쩐지저녁/01_24시간_미증시_라이브스튜디오"
-CACHE_ROOT = "/Users/hanbeomsu/Desktop/어쩐지저녁/01_24시간_미증시_라이브스튜디오/_daily_radio_cache"
+CACHE_ROOT = (
+    "/Users/hanbeomsu/Desktop/어쩐지저녁/01_24시간_미증시_라이브스튜디오/_daily_radio_cache"
+    if os.path.exists("/Users/hanbeomsu/Desktop/어쩐지저녁/01_24시간_미증시_라이브스튜디오")
+    else "/tmp/evening_daily_radio_cache"
+)
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
