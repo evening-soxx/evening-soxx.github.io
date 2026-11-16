@@ -620,7 +620,7 @@
         customKeyword: "",
         continuousMode: localStorage.getItem("evening_radio_cont") !== "0", // true: 연속 순환, false: 새 속보 대기
         speedIdx: 1,
-        speeds: [0.95, 1.08, 1.2, 1.35],
+        speeds: [0.95, 1.0, 1.1, 1.25],
         includeMarketBrief: localStorage.getItem("evening_radio_mkt") !== "0",
         oledBlack: localStorage.getItem("evening_radio_oled") === "1",
         newsList: [],
@@ -634,6 +634,9 @@
           wti: null, gold: null,
           usdtKrw: null,
         },
+        ttsEndpoint: "https://trust-modeling-introducing-believe.trycloudflare.com",
+        audioPlayer: new Audio(),
+        preloadAudio: new Audio(),
         wakeLock: null,
         audioCtx: null,
         keepAliveOsc: null,
@@ -998,7 +1001,8 @@
 
           // 새 속보 전용 대기 모드에서 조용히 대기 중일 때 새 속보가 들어왔으면 즉시 낭독 재개
           const hasUnread = state.newsList.some((n) => !readSet.has(n.id));
-          if (state.playing && !window.speechSynthesis.speaking && hasUnread) {
+          const isIdle = (!window.speechSynthesis || !window.speechSynthesis.speaking) && state.audioPlayer.paused;
+          if (state.playing && isIdle && hasUnread) {
             if (prevTopId && state.newsList[0]?.id !== prevTopId) {
               playSoftChime();
             }
@@ -1169,18 +1173,67 @@
       }
 
       // ====================================================================
-      // 7. TTS 연속 라디오 낭독 엔진 (한국어 음성 자동 선택 + 워치독 복구)
+      // 7. 미증시 낭독 아나운서(현수 ko-KR-HyunsuMultilingualNeural) <audio> 스트리밍 엔진
+      //    - 스마트폰 화면을 꺼놔도(잠금화면에서도) 라디오 앱처럼 백그라운드 연속 재생 지원!
       // ====================================================================
       function pickKoreanVoice() {
         const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
         const koVoices = voices.filter((v) => /ko[-_]?KR|Korean|한국어/i.test(v.lang + " " + v.name));
         if (!koVoices.length) return null;
-        // 고품질 내장 음성 우선 선택 (Siri, Yuna, Google 한국어 등)
         return (
           koVoices.find((v) => /Natural|Siri|Premium|Enhanced|Google/i.test(v.name)) ||
           koVoices.find((v) => /Yuna|유나|Heami|SunHi|Hyunsu/i.test(v.name)) ||
           koVoices[0]
         );
+      }
+
+      function buildItemSpokenScript(item) {
+        if (!item) return "";
+        const spokenSource = toSpokenKorean(item.source || "실시간");
+        const spokenTitle = toSpokenKorean(item.title);
+        const spokenSum = item.summary ? toSpokenKorean(item.summary) : "";
+        return spokenSum
+          ? `${spokenSource} 소식입니다. ${spokenTitle}. ${spokenSum}`
+          : `${spokenSource} 속보입니다. ${spokenTitle}.`;
+      }
+
+      function buildHyunsuTtsUrl(scriptText) {
+        const clean = String(scriptText || "").trim().slice(0, 650);
+        return `${state.ttsEndpoint}/tts?preset=hyunsu&text=${encodeURIComponent(clean)}`;
+      }
+
+      function preloadNextItemAudio() {
+        if (!state.newsList.length) return;
+        let nextIdx = state.newsList.findIndex((n) => !readSet.has(n.id));
+        if (nextIdx === -1) {
+          nextIdx = state.currentIdx % state.newsList.length;
+        }
+        const nextItem = state.newsList[nextIdx];
+        if (!nextItem) return;
+        const nextScript = buildItemSpokenScript(nextItem);
+        if (nextScript && state.ttsEndpoint) {
+          state.preloadAudio.src = buildHyunsuTtsUrl(nextScript);
+          state.preloadAudio.load();
+        }
+      }
+
+      function updateMediaSessionMetadata(title, artist) {
+        if ("mediaSession" in navigator) {
+          try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: title || "어쩐지 24시 실시간 뉴스 라디오",
+              artist: artist || "현수 아나운서 (미증시 라이브 보이스)",
+              album: "어쩐지의 미국 증시 라이브",
+            });
+            navigator.mediaSession.setActionHandler("play", () => startRadio());
+            navigator.mediaSession.setActionHandler("pause", () => stopRadio());
+            navigator.mediaSession.setActionHandler("nexttrack", () => speakNextItem());
+            navigator.mediaSession.setActionHandler("previoustrack", () => {
+              state.currentIdx = Math.max(0, state.currentIdx - 1);
+              speakNextItem();
+            });
+          } catch (_) {}
+        }
       }
 
       function updateNowPlayingUI(cat, meta, headline, summary, link) {
@@ -1195,22 +1248,34 @@
         } else {
           linkEl.hidden = true;
         }
+        updateMediaSessionMetadata(headline, `${cat || "뉴스"} · ${meta || "현수 앵커"}`);
+      }
+
+      function speakFallbackBrowserTts(rawText, onDone) {
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(rawText);
+        u.lang = "ko-KR";
+        u.rate = state.speeds[state.speedIdx] || 1.0;
+        const v = pickKoreanVoice();
+        if (v) u.voice = v;
+        let finished = false;
+        const done = () => {
+          if (finished) return;
+          finished = true;
+          if (state.playing && typeof onDone === "function") setTimeout(onDone, 400);
+        };
+        u.onend = done;
+        u.onerror = done;
+        window.speechSynthesis.speak(u);
       }
 
       function speakText(rawText, onDone) {
-        if (!window.speechSynthesis) {
-          alert("이 브라우저는 음성 읽기(TTS)를 지원하지 않습니다. 크롬이나 사파리를 사용해 주세요.");
-          return;
-        }
-        window.speechSynthesis.cancel();
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
         if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
 
-        const u = new SpeechSynthesisUtterance(rawText);
-        u.lang = "ko-KR";
-        u.rate = state.speeds[state.speedIdx] || 1.08;
-        u.pitch = 1.0;
-        const v = pickKoreanVoice();
-        if (v) u.voice = v;
+        const player = state.audioPlayer;
+        player.pause();
 
         let finished = false;
         const finishOnce = () => {
@@ -1218,21 +1283,44 @@
           finished = true;
           if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
           if (state.playing && typeof onDone === "function") {
-            setTimeout(onDone, 650);
+            setTimeout(onDone, 320);
           }
         };
 
-        u.onend = finishOnce;
-        u.onerror = finishOnce;
+        // 1순위: 오사카 클라우드 현수 아나운서(ko-KR-HyunsuMultilingualNeural) MP3 스트리밍
+        if (state.ttsEndpoint) {
+          const ttsUrl = buildHyunsuTtsUrl(rawText);
+          player.src = ttsUrl;
+          player.playbackRate = state.speeds[state.speedIdx] || 1.0;
+          player.onended = finishOnce;
+          player.onerror = () => {
+            if (finished) return;
+            finished = true;
+            if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
+            speakFallbackBrowserTts(rawText, onDone);
+          };
 
-        // 모바일 브라우저에서 긴 문장 낭독 중 멈추는 현상 방지 워치독 (최대 38초)
-        state.watchdogTimer = setTimeout(() => {
-          window.speechSynthesis.cancel();
-          finishOnce();
-        }, 38000);
+          state.watchdogTimer = setTimeout(() => {
+            player.pause();
+            finishOnce();
+          }, 48000);
 
-        state.utterance = u;
-        window.speechSynthesis.speak(u);
+          const playPromise = player.play();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => {
+              if (!finished) {
+                finished = true;
+                if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
+                speakFallbackBrowserTts(rawText, onDone);
+              }
+            });
+          }
+          // 현재 뉴스가 재생되는 동안 다음 뉴스 오디오를 미리 준비(Preload)하여 대기시간 0초 구현
+          setTimeout(preloadNextItemAudio, 500);
+          return;
+        }
+
+        speakFallbackBrowserTts(rawText, onDone);
       }
 
       function speakMarketBriefNow(andContinue = true) {
@@ -1417,6 +1505,7 @@
 
       function stopRadio() {
         state.playing = false;
+        if (state.audioPlayer) state.audioPlayer.pause();
         if (window.speechSynthesis) window.speechSynthesis.cancel();
         if (state.watchdogTimer) clearTimeout(state.watchdogTimer);
         updateControlStates();
